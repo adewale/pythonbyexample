@@ -150,7 +150,7 @@ def render_home() -> str:
     for example in list_examples():
         cards.append(
             _replace(
-                '<article class="card"><p class="eyebrow">__SECTION__</p><h2><a href="/examples/__SLUG__">__TITLE__</a></h2><p class="meta">__SUMMARY__</p></article>',
+                '<a class="card" href="/examples/__SLUG__"><p class="eyebrow">__SECTION__</p><h2>__TITLE__</h2><p class="meta">__SUMMARY__</p></a>',
                 {
                     "SECTION": html.escape(example["section"]),
                     "SLUG": html.escape(example["slug"]),
@@ -195,7 +195,7 @@ def render_example_page(example, output=None, code=None):
         else "<span></span>"
     )
     walkthrough_html = "".join(
-        f'<div class="lesson-step"><p>{step["prose"]}</p><pre><code>{step["code"]}</code></pre></div>'
+        f'<div class="lesson-step"><p>{step["prose"]}</p><pre><code class="language-python">{step["code"]}</code></pre></div>'
         for step in walkthrough
     )
     notes_html = "".join(f"<li>{note}</li>" for note in notes)

@@ -18,6 +18,8 @@ sys.path.insert(0, str(ROOT))
 from src.examples import EXAMPLES  # noqa: E402
 
 APP_SOURCE = (ROOT / "src" / "app.py").read_text()
+STYLE_SOURCE = (ROOT / "public" / "site.css").read_text()
+PROJECT_SURFACE = APP_SOURCE + "\n" + STYLE_SOURCE
 
 GOBYEXAMPLE_SAMPLE = ["hello-world", "values", "variables", "for", "if-else", "slices", "maps", "functions", "methods", "interfaces", "regular-expressions"]
 RUST_BY_EXAMPLE_SAMPLE = ["hello.html", "primitives.html", "variable_bindings.html", "flow_control.html", "fn.html", "mod.html"]
@@ -83,12 +85,12 @@ def score_python_example(example: dict) -> Score:
         literate -= 0.3
     literate = max(0, min(2, literate))
 
-    output = 1.0 if example.get("expected_output") is not None and "white-space: pre-wrap" in APP_SOURCE and "overflow-wrap: anywhere" in APP_SOURCE else 0.4
-    navigation = 1.0 if "rel=\"prev\"" in APP_SOURCE and "rel=\"next\"" in APP_SOURCE and "docs.python.org/3.13/" in example.get("doc_url", "") else 0.5
+    output = 1.0 if example.get("expected_output") is not None and "white-space: pre-wrap" in PROJECT_SURFACE and "overflow-wrap: anywhere" in PROJECT_SURFACE else 0.4
+    navigation = 1.0 if "rel=\"prev\"" in PROJECT_SURFACE and "rel=\"next\"" in PROJECT_SURFACE and "docs.python.org/3.13/" in example.get("doc_url", "") else 0.5
     layout = 1.0
-    if "class=\"pill\"" in APP_SOURCE or "corner" in APP_SOURCE or "border-radius: 999px; color: inherit" in APP_SOURCE:
+    if "class=\"pill\"" in PROJECT_SURFACE or "corner" in PROJECT_SURFACE or "border-radius: 999px; color: inherit" in PROJECT_SURFACE:
         layout -= 0.4
-    if "nav a { color: inherit; text-decoration: underline" not in APP_SOURCE:
+    if "nav a { color: inherit; text-decoration: underline" not in PROJECT_SURFACE:
         layout -= 0.2
     total = round(max(0, payoff + deterministic + idiom + literate + output + navigation + layout), 2)
     return Score(example["slug"], total, payoff, deterministic, idiom, literate, output, navigation, max(0, layout))

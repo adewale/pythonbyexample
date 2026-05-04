@@ -28,10 +28,10 @@
     .hero { overflow: hidden; border: 1px solid var(--hairline); border-radius: 1rem; padding: clamp(1.5rem, 5vw, 4rem); margin-bottom: 1.25rem; background: linear-gradient(135deg, var(--surface), var(--surface-3)); box-shadow: 0 1px 3px rgba(82, 16, 0, 0.04), 0 4px 12px rgba(82, 16, 0, 0.02); }
     .hero p { max-width: 66ch; color: var(--muted); font-size: 1.08rem; }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-3); }
-    .card { min-height: 10rem; border: 1px solid var(--hairline); border-radius: .75rem; padding: var(--space-3); background: var(--surface-2); box-shadow: 0 1px 3px rgba(82, 16, 0, 0.04), 0 4px 12px rgba(82, 16, 0, 0.02); transition-property: transform, background-color, border-color; transition-duration: 200ms; transition-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+    .card { display: block; min-height: 10rem; border: 1px solid var(--hairline); border-radius: .75rem; padding: var(--space-3); background: var(--surface-2); color: inherit; text-decoration: none; box-shadow: 0 1px 3px rgba(82, 16, 0, 0.04), 0 4px 12px rgba(82, 16, 0, 0.02); transition-property: transform, background-color, border-color; transition-duration: 200ms; transition-timing-function: cubic-bezier(0, 0, 0.2, 1); }
     .card:hover { transform: translateY(-2px); background: var(--surface-3); border-color: var(--accent); }
-    .card a { color: inherit; text-decoration: underline; text-decoration-color: var(--hairline); text-underline-offset: .18em; }
-    .card a:hover { text-decoration-color: var(--accent); }
+    .card h2 { text-decoration: underline; text-decoration-color: var(--hairline); text-underline-offset: .18em; }
+    .card:hover h2 { text-decoration-color: var(--accent); }
     .button { min-height: 40px; border: 1px solid var(--accent); border-radius: 9999px; padding: .72rem 1rem; background: var(--accent); color: white; cursor: pointer; font-weight: 650; box-shadow: 0 1px 3px rgba(82, 16, 0, 0.04), 0 4px 12px rgba(82, 16, 0, 0.02); transition-property: transform, opacity, border-style; transition-duration: 150ms; transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     .button:hover { opacity: .95; border-color: var(--accent-hover); }
     .meta { color: var(--muted); font-variant-numeric: tabular-nums; }
@@ -46,6 +46,7 @@
     .lesson-step p { margin: 0; color: var(--muted); max-width: 38ch; }
     .lesson-step pre { margin: 0; padding: 0 0 0 var(--space-3); border-left: 2px solid var(--accent); border-radius: 0; background: transparent; color: var(--text); box-shadow: none; }
     .lesson-step code { white-space: pre-wrap; }
+    .lesson-step .shiki-block { margin: 0; padding: 0 0 0 var(--space-3); border-left: 2px solid var(--accent); border-radius: 0; background: transparent !important; color: var(--text); box-shadow: none; white-space: pre-wrap; }
     .playground { margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--hairline); }
     .runner-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(18rem, .75fr); gap: var(--space-4); align-items: stretch; }
     .runner-panel { min-height: 18rem; display: flex; flex-direction: column; border: 1px dashed var(--hairline); border-radius: .75rem; padding: var(--space-3); background: var(--surface); }

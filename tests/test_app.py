@@ -141,7 +141,9 @@ class AppTests(unittest.TestCase):
         css = (ROOT / "public" / "site.css").read_text()
         self.assertIn('rel="icon" href="/favicon.svg"', html)
         self.assertIn('rel="stylesheet" href="/site.css"', html)
+        self.assertIn('type="module" src="/syntax-highlight.js"', html)
         self.assertIn('textarea { box-sizing: border-box; width: 100%; height: auto;', css)
+        self.assertIn('class="language-python"', html)
         self.assertIn('class="tok-builtin">print</span>', html)
         self.assertIn('class="tok-string">&quot;hello world&quot;</span>', html)
         self.assertIn("hello world", html)
@@ -176,7 +178,10 @@ class AppTests(unittest.TestCase):
         self.assertIn("border-left: 2px solid var(--accent)", css)
         self.assertIn("--space-6", css)
         self.assertIn("runner-grid", css)
-        self.assertIn('class="hero"', render_home())
+        home = render_home()
+        self.assertIn('class="hero"', home)
+        self.assertIn('<a class="card" href="/examples/hello-world">', home)
+        self.assertNotIn('<article class="card"', home)
         self.assertIn('class="example-shell"', html)
 
     def test_cf_workers_design_system_and_playground_lessons(self):
