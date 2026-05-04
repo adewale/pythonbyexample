@@ -1,0 +1,24 @@
+[project]
+name = "pythonbyexample"
+version = "0.1.0"
+description = "Python By Example on Cloudflare Python Workers"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "fastapi",
+    "jinja2",
+    "markupsafe",
+]
+
+[dependency-groups]
+workers = [
+    "workers-py",
+    "workers-runtime-sdk",
+]
+dev = [
+    "ruff>=0.8",
+]
+
+[tool.ruff]
+line-length = 100
+src = ["src"]
