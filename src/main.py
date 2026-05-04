@@ -2,14 +2,14 @@ import hashlib
 from urllib.parse import parse_qs
 
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from workers import WorkerEntrypoint, python_from_rpc
 
-from app import build_dynamic_worker_code, get_example, render_example_page, route
+from app import FAVICON_SVG, build_dynamic_worker_code, get_example, render_example_page, route
 from examples import PYTHON_VERSION
 
 try:
-    from js import Object, Request as JsRequest
+    from js import Object, Request as JsRequest, caches
     from pyodide.ffi import create_once_callable, jsnull, to_js
 except ImportError:  # Allows editor tooling outside Workers.
     Object = None
@@ -17,6 +17,7 @@ except ImportError:  # Allows editor tooling outside Workers.
     jsnull = None
     create_once_callable = None
     to_js = None
+    caches = None
 
 app = FastAPI(title="Python By Example")
 _CURRENT_WORKER_REQUEST = None
@@ -36,6 +37,11 @@ def _to_js_object(value):
 
 def _html(body, status=200):
     return HTMLResponse(body, status_code=status)
+
+
+@app.get("/favicon.svg")
+async def favicon():
+    return Response(FAVICON_SVG, media_type="image/svg+xml", headers={"Cache-Control": "public, max-age=31536000, immutable"})
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -109,4 +115,17 @@ class Default(WorkerEntrypoint):
 
         global _CURRENT_WORKER_REQUEST
         _CURRENT_WORKER_REQUEST = request
+
+        # Cache static GET responses at the Worker edge. Edited example runs are
+        # POST requests and are intentionally never cached.
+        if getattr(request, "method", None) == "GET" and caches is not None:
+            cached = await caches.default.match(request.js_object)
+            if cached:
+                return cached
+            response = await asgi.fetch(app, request.js_object, self.env)
+            if getattr(response, "status", 200) == 200:
+                response.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=86400")
+                await caches.default.put(request.js_object, response.clone())
+            return response
+
         return await asgi.fetch(app, request.js_object, self.env)

@@ -716,6 +716,115 @@ def _expected_output(code):
     return stdout.getvalue()
 
 
+
+_EXAMPLE_IMPROVEMENTS = {
+    "values": {
+        "code": "text = \"python\"\ncount = 3\nratio = 2.5\nready = True\nmissing = None\n\nprint(text.upper())\nprint(count + 4)\nprint(ratio * 2)\nprint(ready and count > 0)\nprint(missing is None)\n",
+        "notes": ["Values are objects; names point to them and operations usually create new values.", "Use `is None` for the absence marker, not `== None`.", "A small value tour should make later pages feel familiar, not replace the dedicated pages for numbers, strings, and booleans."],
+        "explanation": ["A Python program works by evaluating expressions into values. The most common first values are text, integers, floats, booleans, and `None`.", "Operators and method calls produce more values. `text.upper()` returns a new string, arithmetic returns numbers, and comparisons or logical operators return booleans.", "`None` is a real singleton value used to mean “no value here.” Checking it with `is None` introduces identity before the later equality and mutability examples."],
+        "walkthrough": [
+            {"prose": "Start with several built-in values. Python does not require declarations before binding these names.", "code": "text = \"python\"\ncount = 3\nratio = 2.5\nready = True\nmissing = None"},
+            {"prose": "Methods and operators evaluate to new values. The original `text`, `count`, and `ratio` bindings remain ordinary objects you can reuse.", "code": "print(text.upper())\nprint(count + 4)\nprint(ratio * 2)"},
+            {"prose": "Boolean expressions combine facts, and `None` is checked by identity because it is a singleton absence marker.", "code": "print(ready and count > 0)\nprint(missing is None)"},
+        ],
+    },
+    "strings": {
+        "code": "language = \"Python\"\nmessage = \"  Python by Example  \"\n\nprint(language[0])\nprint(language.lower())\nprint(message.strip())\nprint(f\"Hello, {language}!\")\nprint(\", \".join([\"lists\", \"dicts\", \"sets\"]))\n",
+        "notes": ["Strings are sequences of Unicode characters, so indexing and many sequence operations work.", "String methods return new strings because strings are immutable.", "Use `join()` when building text from many pieces; it makes the separator explicit."],
+        "explanation": ["Python strings are immutable Unicode text sequences. That means they behave like sequences for reading, but operations such as `lower()` and `strip()` create new strings instead of changing the original.", "Common string work is transformation and composition: normalize case, remove surrounding whitespace, interpolate values, and join pieces with a separator.", "Because strings are immutable, you can pass them around safely without worrying that another function will alter the object in place."],
+        "walkthrough": [
+            {"prose": "Strings store Unicode text and can be indexed like other sequences.", "code": "language = \"Python\"\nmessage = \"  Python by Example  \"\n\nprint(language[0])"},
+            {"prose": "Methods such as `lower()` and `strip()` return transformed strings. They do not mutate the original value.", "code": "print(language.lower())\nprint(message.strip())"},
+            {"prose": "Use f-strings for readable interpolation and `join()` when a separator belongs between several pieces.", "code": "print(f\"Hello, {language}!\")\nprint(\", \".join([\"lists\", \"dicts\", \"sets\"]))"},
+        ],
+    },
+    "match-statements": {
+        "code": "command = {\"action\": \"move\", \"x\": 3, \"y\": 4}\n\nmatch command:\n    case {\"action\": \"move\", \"x\": x, \"y\": y}:\n        print(f\"move to {x},{y}\")\n    case {\"action\": \"quit\"}:\n        print(\"quit\")\n    case {\"action\": action}:\n        print(f\"unknown action: {action}\")\n    case _:\n        print(\"invalid command\")\n",
+        "notes": ["`match` compares structure, not just equality.", "Patterns can bind names such as `x` and `y` while matching.", "Put the catch-all `_` case last, because cases are tried from top to bottom."],
+        "explanation": ["Structural pattern matching lets a program choose a branch based on the shape of data. It is especially useful when commands, messages, or parsed data have a few known forms.", "A `case` pattern can both check constants and bind names. The move case checks the action and extracts `x` and `y` in one readable step.", "Order matters because Python tries cases from top to bottom. Specific shapes should appear before broad fallback cases such as `_`."],
+        "walkthrough": [
+            {"prose": "Use `match` when the shape of a value is the decision. This command is a dictionary with an action and coordinates.", "code": "command = {\"action\": \"move\", \"x\": 3, \"y\": 4}"},
+            {"prose": "A mapping pattern can check required keys and bind values from them. Here `x` and `y` become ordinary local names in the block.", "code": "match command:\n    case {\"action\": \"move\", \"x\": x, \"y\": y}:\n        print(f\"move to {x},{y}\")"},
+            {"prose": "Other cases describe other valid shapes. A broader action case can report an unknown command while still extracting the action name.", "code": "    case {\"action\": \"quit\"}:\n        print(\"quit\")\n    case {\"action\": action}:\n        print(f\"unknown action: {action}\")"},
+            {"prose": "The `_` pattern is the catch-all. Keep it last so specific patterns have a chance to match first.", "code": "    case _:\n        print(\"invalid command\")"},
+        ],
+    },
+    "dicts": {
+        "code": "profile = {\"name\": \"Ada\", \"language\": \"Python\"}\nprofile[\"year\"] = 1843\n\nprint(profile[\"name\"])\nprint(profile.get(\"timezone\", \"UTC\"))\n\nfor key, value in profile.items():\n    print(f\"{key}: {value}\")\n",
+        "notes": ["Dictionaries preserve insertion order in modern Python.", "Use `get()` when a missing key has a reasonable default.", "Use direct indexing when a missing key should be treated as an error."],
+        "explanation": ["Dictionaries are Python's built-in mapping type. They connect keys to values and are the natural shape for records, lookup tables, and JSON-like data.", "Direct indexing communicates that a key must exist. `get()` communicates that absence is expected and supplies a default value.", "Iterating with `items()` gives each key and value together, which is clearer than looping over keys and indexing again."],
+        "walkthrough": [
+            {"prose": "Create a dictionary with literal key/value pairs, then add another key by assignment.", "code": "profile = {\"name\": \"Ada\", \"language\": \"Python\"}\nprofile[\"year\"] = 1843"},
+            {"prose": "Use `[]` for required keys and `get()` when a missing key can use a default.", "code": "print(profile[\"name\"])\nprint(profile.get(\"timezone\", \"UTC\"))"},
+            {"prose": "Use `items()` when the loop needs both the key and the value.", "code": "for key, value in profile.items():\n    print(f\"{key}: {value}\")"},
+        ],
+    },
+    "while-loops": {
+        "code": "remaining = 3\n\nwhile remaining > 0:\n    print(f\"launch in {remaining}\")\n    remaining -= 1\n\nprint(\"liftoff\")\n",
+        "notes": ["Use `while` when the stopping condition matters more than a fixed iterable.", "Update loop state inside the body so the condition can become false.", "Prefer `for` when you already have a collection or range to consume."],
+        "explanation": ["A `while` loop repeats as long as its condition remains true. It is useful when you are waiting for state to change rather than consuming an existing iterable.", "The loop body must make progress toward the stopping condition. Here decrementing `remaining` prevents an infinite loop.", "Many Python loops should be `for` loops, but `while` is the right tool for countdowns, sentinels, polling, and other condition-driven repetition."],
+        "walkthrough": [
+            {"prose": "Start with the state that controls the loop. The condition will be checked before every iteration.", "code": "remaining = 3"},
+            {"prose": "The body runs while the condition is true. Updating `remaining` moves the program toward stopping.", "code": "while remaining > 0:\n    print(f\"launch in {remaining}\")\n    remaining -= 1"},
+            {"prose": "Execution continues after the loop once the condition becomes false.", "code": "print(\"liftoff\")"},
+        ],
+    },
+    "lists": {
+        "code": "numbers = [3, 1, 4]\nnumbers.append(1)\n\nprint(numbers)\nprint(numbers[0])\nprint(numbers[-1])\nprint(sorted(numbers))\nprint(numbers)\n",
+        "notes": ["Lists are mutable sequences: methods such as `append()` change the list in place.", "Negative indexes count from the end.", "`sorted()` returns a new list; `list.sort()` sorts the existing list in place."],
+        "explanation": ["Lists are Python's general-purpose mutable sequence type. Use them when order matters and the collection may grow, shrink, or be rearranged.", "Indexing reads individual positions. `0` is the first item, and negative indexes count backward from the end.", "Mutation and copying matter: `append()` changes the list, while `sorted()` returns a new ordered list and leaves the original alone."],
+        "walkthrough": [
+            {"prose": "Create a list with square brackets. Because lists are mutable, `append()` changes this same list object.", "code": "numbers = [3, 1, 4]\nnumbers.append(1)\n\nprint(numbers)"},
+            {"prose": "Use indexes to read positions. Negative indexes are convenient for reading from the end.", "code": "print(numbers[0])\nprint(numbers[-1])"},
+            {"prose": "Use `sorted()` when you want an ordered copy and still need the original order afterward.", "code": "print(sorted(numbers))\nprint(numbers)"},
+        ],
+    },
+    "tuples": {
+        "code": "point = (3, 4)\nred = (255, 0, 0)\n\nx, y = point\nprint(x + y)\nprint(red)\nprint(point == (3, 4))\n",
+        "notes": ["Tuples are immutable sequences with fixed length.", "Use tuples for small records where position has meaning.", "Unpacking gives names to tuple positions at the point of use."],
+        "explanation": ["Tuples are ordered immutable sequences. They are useful for small fixed records such as coordinates, colors, or multiple return values.", "Unpacking turns positional data into named local variables. That makes tuple use readable when each position has a clear meaning.", "Because tuples are immutable, their length and item references cannot be changed in place after creation."],
+        "walkthrough": [
+            {"prose": "Use tuples for fixed-size groups where the positions are part of the meaning.", "code": "point = (3, 4)\nred = (255, 0, 0)"},
+            {"prose": "Unpacking gives useful names to tuple positions instead of leaving readers to remember indexes.", "code": "x, y = point\nprint(x + y)"},
+            {"prose": "Tuples compare by value and keep their fixed structure.", "code": "print(red)\nprint(point == (3, 4))"},
+        ],
+    },
+    "sets": {
+        "code": "languages = {\"python\", \"go\", \"python\"}\ncompiled = {\"go\", \"rust\"}\n\nprint(sorted(languages))\nprint(\"python\" in languages)\nprint(sorted(languages | compiled))\nprint(sorted(languages & compiled))\nprint(sorted(languages - compiled))\n",
+        "notes": ["Sets remove duplicates and support fast membership tests.", "Set algebra operators make union, intersection, and difference explicit.", "Sets are unordered, so sort them when examples need deterministic display."],
+        "explanation": ["Sets store unique hashable values. Use them when membership and de-duplication matter more than order.", "The `in` operator is the everyday membership test. Set algebra then expresses how groups relate to each other.", "Because sets are unordered, examples often wrap output in `sorted()` so the display is deterministic."],
+        "walkthrough": [
+            {"prose": "Creating a set automatically removes duplicates. The repeated `python` value appears only once.", "code": "languages = {\"python\", \"go\", \"python\"}\ncompiled = {\"go\", \"rust\"}\n\nprint(sorted(languages))"},
+            {"prose": "Membership checks are the most common set operation.", "code": "print(\"python\" in languages)"},
+            {"prose": "Union, intersection, and difference describe relationships between groups without manual loops.", "code": "print(sorted(languages | compiled))\nprint(sorted(languages & compiled))\nprint(sorted(languages - compiled))"},
+        ],
+    },
+    "slices": {
+        "code": "letters = [\"a\", \"b\", \"c\", \"d\", \"e\"]\n\nprint(letters[1:4])\nprint(letters[:2])\nprint(letters[2:])\nprint(letters[::2])\nprint(letters[::-1])\n",
+        "notes": ["Slice stop indexes are excluded, so adjacent ranges compose cleanly.", "Omitted bounds mean the beginning or end of the sequence.", "A negative step walks backward through the sequence."],
+        "explanation": ["Slicing reads a range from a sequence with `start:stop:step`. It is one of Python's most compact tools for working with ordered data.", "The stop index is excluded. This convention makes lengths and adjacent slices easier to reason about.", "Omitted bounds default to the beginning or end, and the optional step can skip items or reverse a sequence."],
+        "walkthrough": [
+            {"prose": "Start with an ordered sequence. Slices return selected ranges without changing the original list.", "code": "letters = [\"a\", \"b\", \"c\", \"d\", \"e\"]"},
+            {"prose": "The stop index is excluded. Omitting a bound means “from the beginning” or “through the end.”", "code": "print(letters[1:4])\nprint(letters[:2])\nprint(letters[2:])"},
+            {"prose": "The step controls how the slice moves. A step of `2` skips, and `-1` walks backward.", "code": "print(letters[::2])\nprint(letters[::-1])"},
+        ],
+    },
+    "classes": {
+        "code": "class Counter:\n    def __init__(self, start=0):\n        self.value = start\n\n    def increment(self, amount=1):\n        self.value += amount\n        return self.value\n\nfirst = Counter()\nsecond = Counter(10)\n\nprint(first.increment())\nprint(second.increment(5))\n",
+        "notes": ["`self` is the instance the method is operating on.", "`__init__` initializes each new object.", "Instance attributes belong to one object, not to the class as a whole."],
+        "explanation": ["Classes define new object types by bundling data with behavior. They are useful when several values and operations belong together.", "`__init__` initializes each instance, and methods receive the instance as `self`. Assigning `self.value` stores state on that particular object.", "Separate instances keep separate state. Mutating one `Counter` does not change another because each object has its own attributes."],
+        "walkthrough": [
+            {"prose": "Define a class when data and behavior should travel together. The initializer gives each object its starting state.", "code": "class Counter:\n    def __init__(self, start=0):\n        self.value = start"},
+            {"prose": "Methods are functions attached to the class. `self` is the particular object receiving the method call.", "code": "    def increment(self, amount=1):\n        self.value += amount\n        return self.value"},
+            {"prose": "Each instance has independent state, so these two counters can advance differently.", "code": "first = Counter()\nsecond = Counter(10)\n\nprint(first.increment())\nprint(second.increment(5))"},
+        ],
+    },
+}
+
+for example in EXAMPLES:
+    if example["slug"] in _EXAMPLE_IMPROVEMENTS:
+        example.update(_EXAMPLE_IMPROVEMENTS[example["slug"]])
+
 _EXAMPLE_ORDER = {slug: index for index, slug in enumerate(SLUG_ORDER)}
 EXAMPLES = sorted(EXAMPLES, key=lambda example: _EXAMPLE_ORDER.get(example["slug"], 999))
 for example in EXAMPLES:

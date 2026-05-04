@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Python By Example">
+  <rect width="64" height="64" rx="14" fill="#F5F1EB"/>
+  <path d="M14 22l13 10-13 10" fill="none" stroke="#FF4801" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="31" y="40" fill="#521000" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="800">py</text>
+</svg>

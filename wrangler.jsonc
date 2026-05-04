@@ -10,6 +10,9 @@
   "limits": {
     "cpu_ms": 60000
   },
+  "assets": {
+    "directory": "./public"
+  },
   "worker_loaders": [
     {
       "binding": "LOADER"

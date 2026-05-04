@@ -1,0 +1,59 @@
+<article class="example-shell">
+  <div class="example-top"><a class="text-link" href="/">← All examples</a><a class="text-link" href="__DOC_URL__">Python docs reference</a></div>
+  <section class="example-intro">
+    <p class="eyebrow">__SECTION__</p>
+    <h1>__TITLE__</h1>
+    <p class="meta">__SUMMARY__</p>
+  </section>
+  <section class="literate-program" aria-label="Annotated code walkthrough">__WALKTHROUGH__</section>
+  <h2>Notes</h2>
+  <ul>__NOTES__</ul>
+  <nav class="example-nav" aria-label="Example navigation">__PREVIOUS_LINK____NEXT_LINK__</nav>
+  <section class="playground" aria-label="Editable runnable example">
+    <h2>Run the complete example</h2>
+    <div class="runner-grid">
+      <form class="runner-panel runner-editor" method="post" action="/examples/__SLUG__">
+        <h2>Example code</h2>
+        <textarea name="code" id="code-editor" spellcheck="false" rows="__EDITOR_ROWS__">__EDITABLE_CODE__</textarea>
+        <div class="playground-toolbar">
+          <button class="button" type="submit">Run</button>
+          <button class="tool-button" type="button" data-reset onclick="resetCode()">Reset</button>
+        </div>
+      </form>
+      <section class="runner-panel output-panel" aria-live="polite"__OUTPUT_PLACEHOLDER__><h2>__OUTPUT_HEADING__</h2><pre><code>__SHOWN_OUTPUT__</code></pre></section>
+    </div>
+  </section>
+</article>
+<script>
+const originalCode = __ORIGINAL_CODE_JSON__;
+function editor() { return document.getElementById('code-editor'); }
+function resizeEditor() { const field = editor(); field.style.height = 'auto'; field.style.height = field.scrollHeight + 'px'; }
+function resetCode() { editor().value = originalCode; resizeEditor(); editor().focus(); }
+resizeEditor();
+editor().addEventListener('input', resizeEditor);
+const form = document.querySelector('form');
+const outputPanel = document.querySelector('.output-panel');
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  outputPanel.removeAttribute('data-output-placeholder');
+  outputPanel.querySelector('code').textContent = 'Running in a Dynamic Python Worker…';
+  try {
+    const response = await fetch(form.action, {
+      method: 'POST',
+      body: new URLSearchParams(new FormData(form)),
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+    });
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const html = await response.text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const nextOutput = doc.querySelector('.output-panel');
+    if (nextOutput) outputPanel.innerHTML = nextOutput.innerHTML;
+  } catch (error) {
+    outputPanel.querySelector('code').textContent = 'Run failed: ' + error.message;
+  }
+});
+const hash = new URL(window.location.href).hash;
+if (hash.startsWith('#code=')) {
+  try { editor().value = decodeURIComponent(escape(atob(hash.slice(6)))); } catch (error) {}
+}
+</script>
