@@ -18,6 +18,7 @@ Compared on: tightness of examples, prose/code proximity, runnable feedback, off
 | Dart language tour | https://dart.dev/language | Official and comprehensive; modern docs with many focused examples. | Reference/tutorial hybrid; longer pages, less immediate output orientation. |
 | Scala By Example | https://www.scala-lang.org/docu/files/ScalaByExample.pdf | Historically important example-driven Scala text. | PDF/book format; not interactive; older and less web-native. |
 | Learn X in Y Minutes | https://learnxinyminutes.com/ | Huge multi-language coverage; extremely compact code-first introductions. | Too compressed for most beginners; prose/code proximity is good, but depth, official links, and runnable output are limited. |
+| AMP documentation examples / former AMP By Example | https://amp.dev/documentation/examples/ | Excellent example catalog for a web platform: searchable examples, live previews, source-oriented learning, and strong connection to official documentation. It shows how example pages can double as practical reference material. | Platform/component examples rather than a programming-language tour; pages are more product-doc/task oriented and less literate than Go By Example. |
 
 Python-specific comparison sites remain relevant:
 

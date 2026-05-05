@@ -1,17 +1,16 @@
 from __future__ import annotations
 
-import builtins
+import contextlib
 import html
 import io
 import json
-import keyword
-import token
-import tokenize
 from pathlib import Path
 
 try:
+    from .asset_manifest import ASSET_PATHS
     from .examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
 except ImportError:  # Cloudflare Python Workers import sibling modules from main's directory.
+    from asset_manifest import ASSET_PATHS
     from examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
 
 
@@ -57,9 +56,9 @@ class Default(WorkerEntrypoint):
 '''
 
 
-_BUILTIN_NAMES = set(dir(builtins))
 _TEMPLATE_DIR = Path(__file__).with_name("templates")
 _TEMPLATE_CACHE = {}
+SITE_URL = "https://pythonbyexample.adewale-883.workers.dev"
 
 
 FAVICON_SVG = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Python By Example">
@@ -68,46 +67,6 @@ FAVICON_SVG = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" rol
   <text x="31" y="40" fill="#521000" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="800">py</text>
 </svg>'''
 
-
-def _span(class_name: str, value: str) -> str:
-    return f'<span class="{class_name}">{html.escape(value)}</span>'
-
-
-def highlight_python(code: str) -> str:
-    """Tiny Python syntax highlighter for read-only example fragments."""
-    result = []
-    last_line, last_col = 1, 0
-    try:
-        tokens = tokenize.generate_tokens(io.StringIO(code).readline)
-        for tok in tokens:
-            tok_type, tok_text, start, end, _line = tok
-            if tok_type in {tokenize.ENCODING, token.ENDMARKER}:
-                continue
-            start_line, start_col = start
-            end_line, end_col = end
-            if start_line > last_line:
-                result.append("\n" * (start_line - last_line))
-                last_col = 0
-            if start_col > last_col:
-                result.append(" " * (start_col - last_col))
-            if tok_type == token.NAME and keyword.iskeyword(tok_text):
-                result.append(_span("tok-keyword", tok_text))
-            elif tok_type == token.NAME and tok_text in _BUILTIN_NAMES:
-                result.append(_span("tok-builtin", tok_text))
-            elif tok_type == token.STRING:
-                result.append(_span("tok-string", tok_text))
-            elif tok_type == token.NUMBER:
-                result.append(_span("tok-number", tok_text))
-            elif tok_type == tokenize.COMMENT:
-                result.append(_span("tok-comment", tok_text))
-            elif tok_type == token.OP:
-                result.append(_span("tok-operator", tok_text))
-            else:
-                result.append(html.escape(tok_text))
-            last_line, last_col = end_line, end_col
-    except tokenize.TokenError:
-        return html.escape(code)
-    return "".join(result)
 
 
 def render_inline(text: str) -> str:
@@ -133,13 +92,32 @@ def _replace(template: str, values: dict[str, str]) -> str:
     return template
 
 
-def _layout(title: str, content: str) -> str:
+def _meta_description(text: str) -> str:
+    text = " ".join(text.split())
+    if len(text) <= 175:
+        return text
+    return text[:172].rsplit(" ", 1)[0] + "…"
+
+
+def _layout(title: str, content: str, description: str | None = None, path: str = "/", og_type: str = "website", include_editor: bool = False) -> str:
+    description = _meta_description(description or "Learn Python with concise, editable examples that run in isolated Cloudflare Dynamic Python Workers.")
+    canonical_url = f"{SITE_URL}{path}"
+    page_title = title if title == "Python By Example" else f"{title} · Python By Example"
+    editor_script = f'<script type="module" src="{html.escape(ASSET_PATHS["EDITOR_JS"])}"></script>' if include_editor else ""
     return _replace(
         _template("layout.html"),
         {
+            "PAGE_TITLE": html.escape(page_title),
             "TITLE": html.escape(title),
             "REFERENCE_URL": html.escape(REFERENCE_URL),
             "PYTHON_VERSION": html.escape(PYTHON_VERSION),
+            "META_DESCRIPTION": html.escape(description),
+            "CANONICAL_URL": html.escape(canonical_url),
+            "OG_TYPE": html.escape(og_type),
+            "SITE_CSS": html.escape(ASSET_PATHS["SITE_CSS"]),
+            "SYNTAX_JS": html.escape(ASSET_PATHS["SYNTAX_JS"]),
+            "EDITOR_JS": html.escape(ASSET_PATHS["EDITOR_JS"]),
+            "EDITOR_SCRIPT": editor_script,
             "CONTENT": content,
         },
     )
@@ -163,7 +141,13 @@ def render_home() -> str:
         _template("home.html"),
         {"PYTHON_VERSION": html.escape(PYTHON_VERSION), "CARDS": "".join(cards)},
     )
-    return _layout("Python By Example", content)
+    return _layout(
+        "Python By Example",
+        content,
+        description="Learn Python 3.13 with concise, editable examples, expected output, official documentation links, and Cloudflare Dynamic Worker execution.",
+        path="/",
+        og_type="website",
+    )
 
 
 def _example_neighbors(slug):
@@ -174,14 +158,132 @@ def _example_neighbors(slug):
     return previous_example, next_example
 
 
-def render_example_page(example, output=None, code=None):
-    notes = [render_inline(note) for note in example.get("notes", [])]
-    walkthrough = [
-        {"prose": render_inline(step["prose"]), "code": highlight_python(step["code"])}
-        for step in example.get("walkthrough", [])
+def render_mobile_run_first_option(example):
+    page = render_example_page(example)
+    page = page.replace(
+        '<article class="example-shell">',
+        '<article class="example-shell mobile-run-first">',
+        1,
+    )
+    page = page.replace(
+        '<div class="example-top">',
+        '<div class="example-top"><a class="text-link" href="/examples/values">← Current layout</a>',
+        1,
+    )
+    page = page.replace(
+        '<p class="eyebrow">Basics</p>',
+        '<p class="eyebrow">Layout option · mobile run-first</p>',
+        1,
+    )
+    return page
+
+
+def _walkthrough_cells(example):
+    stdout = io.StringIO()
+    namespace = {"__name__": "__main__"}
+    cells = []
+    pending_steps = []
+    last_output_length = 0
+    steps = example.get("walkthrough", [])
+    for index, step in enumerate(steps, 1):
+        pending_steps.append(step)
+        delta = ""
+        try:
+            with contextlib.redirect_stdout(stdout):
+                exec(step["code"], namespace)
+            current_output = stdout.getvalue()
+            delta = current_output[last_output_length:]
+            last_output_length = len(current_output)
+        except Exception as error:
+            delta = f"Execution reaches this point in the complete example. ({error.__class__.__name__})\n"
+        if delta or index == len(steps):
+            cells.append(
+                {
+                    "name": f"fragment-{len(cells) + 1}",
+                    "prose": [item["prose"] for item in pending_steps],
+                    "code": "\n\n".join(item["code"] for item in pending_steps),
+                    "output": delta.rstrip("\n") or "This fragment prepares state for the complete example.",
+                }
+            )
+            pending_steps = []
+    return cells
+
+
+def render_cell_output_flow_option(example):
+    notes = "".join(f"<li>{render_inline(note)}</li>" for note in example.get("notes", []))
+    fragments = [
+        {
+            "name": "make-values",
+            "prose": "Start by making visible values. The first fragment binds names, then prints the objects so the rest of the program has evidence to build on.",
+            "code": 'text = "python"\ncount = 3\nratio = 2.5\nready = True\nmissing = None\n\nprint(text)\nprint(count)\nprint(ratio)',
+            "output": ["python", "3", "2.5"],
+        },
+        {
+            "name": "transform-values",
+            "prose": "Methods and operators evaluate to new values. The original bindings remain ordinary objects you can reuse.",
+            "code": 'print(text.upper())\nprint(count + 4)\nprint(ratio * 2)',
+            "output": ["PYTHON", "7", "5.0"],
+        },
+        {
+            "name": "check-booleans",
+            "prose": "Boolean expressions combine facts, and `None` is checked by identity because it is a singleton absence marker.",
+            "code": 'print(ready and count > 0)\nprint(missing is None)',
+            "output": ["True", "True"],
+        },
     ]
+    woven_source = "\n\n".join(fragment["code"] for fragment in fragments)
+    cells = []
+    for index, fragment in enumerate(fragments, 1):
+        cells.append(
+            f'''
+<section class="lp-cell">
+  <p class="cell-label">Cell {index} · &lt;&lt;{html.escape(fragment["name"])}&gt;&gt;</p>
+  <div class="lp-prose"><p>{render_inline(fragment["prose"])}</p></div>
+  <div class="cell-source"><p class="cell-label">Source fragment</p><pre><code class="language-python">{html.escape(fragment["code"])}</code></pre></div>
+  <div class="cell-output"><p class="cell-label">Output</p><pre><code>{html.escape(chr(10).join(fragment["output"]))}</code></pre></div>
+</section>'''
+        )
+    content = f'''
+<article class="cell-flow-prototype">
+  <div class="example-top"><a class="text-link" href="/examples/{html.escape(example["slug"])}">← Current layout</a><a class="text-link" href="{html.escape(example["doc_url"])}">Python docs reference</a></div>
+  <section class="notebook-hero">
+    <p class="eyebrow">Layout option · literate cells</p>
+    <h1>{html.escape(example["title"])}</h1>
+    <p class="meta">{html.escape(example["summary"])}</p>
+  </section>
+  <section class="cell-run-summary">
+    <h2>Run the woven program</h2>
+    <p>The explanation is organized as named fragments. Each fragment has source and output; the complete program is woven from those fragments in order.</p>
+    <details>
+      <summary>Show complete editable source</summary>
+      <form class="runner-panel runner-editor" method="post" action="/examples/{html.escape(example["slug"])}">
+        <h2>Complete woven source</h2>
+        <textarea name="code" id="code-editor" spellcheck="false" rows="{max(14, woven_source.count(chr(10)) + 2)}">{html.escape(woven_source)}</textarea>
+        <div class="playground-toolbar"><button class="button" type="submit">Run all</button><button class="tool-button" type="button" data-reset onclick="resetCode()">Reset</button></div>
+      </form>
+    </details>
+  </section>
+  <section class="lp-cells" aria-label="Literate cells with output">{"".join(cells)}</section>
+  <section class="notebook-notes"><h2>Notes</h2><ul>{notes}</ul></section>
+</article>
+<script>
+const originalCode = {json.dumps(woven_source)};
+function editor() {{ return document.getElementById('code-editor'); }}
+function resizeEditor() {{ const field = editor(); if (!field) return; field.style.height = 'auto'; field.style.height = field.scrollHeight + 'px'; }}
+function resetCode() {{ editor().value = originalCode; resizeEditor(); editor().focus(); }}
+resizeEditor();
+const field = editor(); if (field) field.addEventListener('input', resizeEditor);
+</script>
+'''
+    return _layout(f'{example["title"]} literate cells option', content, description=f'Prototype layout for the {example["title"]} Python example.', path='/layout-options/cell-output-flow', include_editor=True)
+
+
+def render_example_page(example, output=None, code=None, execution_time_ms=None):
+    notes = [render_inline(note) for note in example.get("notes", [])]
+    walkthrough = _walkthrough_cells(example)
     shown_output = output if output is not None else example.get("expected_output", "Run this example to see output here.")
     output_heading = "Output" if output is not None else "Expected output"
+    execution_time = f"Executed in {execution_time_ms:.1f} ms" if execution_time_ms is not None else "Execution time appears here after you run the example."
     editable_code = example["code"] if code is None else code
     previous_example, next_example = _example_neighbors(example["slug"])
     previous_link = (
@@ -195,8 +297,8 @@ def render_example_page(example, output=None, code=None):
         else "<span></span>"
     )
     walkthrough_html = "".join(
-        f'<div class="lesson-step"><p>{step["prose"]}</p><pre><code class="language-python">{step["code"]}</code></pre></div>'
-        for step in walkthrough
+        f'<section class="lesson-step lp-cell"><div class="lp-prose">{"".join(f"<p>{render_inline(prose)}</p>" for prose in step["prose"])}</div><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">{html.escape(step["code"])}</code></pre></div><div class="cell-output"><p class="cell-label">Output</p><pre><code>{html.escape(step["output"])}</code></pre></div></section>'
+        for index, step in enumerate(walkthrough, 1)
     )
     notes_html = "".join(f"<li>{note}</li>" for note in notes)
     content = _replace(
@@ -216,10 +318,18 @@ def render_example_page(example, output=None, code=None):
             "OUTPUT_PLACEHOLDER": " data-output-placeholder" if output is None else "",
             "OUTPUT_HEADING": html.escape(output_heading),
             "SHOWN_OUTPUT": html.escape(shown_output),
+            "EXECUTION_TIME": html.escape(execution_time),
             "ORIGINAL_CODE_JSON": json.dumps(example["code"]),
         },
     )
-    return _layout(example["title"], content)
+    return _layout(
+        example["title"],
+        content,
+        description=f'{example["summary"]} Includes editable Python {PYTHON_VERSION} code, expected output, and links to the official Python documentation.',
+        path=f'/examples/{example["slug"]}',
+        og_type="article",
+        include_editor=True,
+    )
 
 
 def route(url: str, method: str = "GET") -> AppResponse:
@@ -230,6 +340,16 @@ def route(url: str, method: str = "GET") -> AppResponse:
         return AppResponse(FAVICON_SVG, headers={"Content-Type": "image/svg+xml; charset=utf-8"})
     if method == "GET" and path == "/":
         return AppResponse(render_home(), headers={"Content-Type": "text/html; charset=utf-8"})
+    if method == "GET" and path == "/layout-options/mobile-run-first":
+        return AppResponse(
+            render_mobile_run_first_option(get_example("values")),
+            headers={"Content-Type": "text/html; charset=utf-8"},
+        )
+    if method == "GET" and path == "/layout-options/cell-output-flow":
+        return AppResponse(
+            render_cell_output_flow_option(get_example("values")),
+            headers={"Content-Type": "text/html; charset=utf-8"},
+        )
     if path.startswith("/examples/"):
         slug = path.split("/", 2)[2]
         example = get_example(slug)

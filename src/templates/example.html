@@ -20,7 +20,7 @@
           <button class="tool-button" type="button" data-reset onclick="resetCode()">Reset</button>
         </div>
       </form>
-      <section class="runner-panel output-panel" aria-live="polite"__OUTPUT_PLACEHOLDER__><h2>__OUTPUT_HEADING__</h2><pre><code>__SHOWN_OUTPUT__</code></pre></section>
+      <section class="runner-panel output-panel" aria-live="polite"__OUTPUT_PLACEHOLDER__><h2>__OUTPUT_HEADING__</h2><pre><code>__SHOWN_OUTPUT__</code></pre><p class="execution-time">__EXECUTION_TIME__</p></section>
     </div>
   </section>
 </article>
@@ -28,7 +28,7 @@
 const originalCode = __ORIGINAL_CODE_JSON__;
 function editor() { return document.getElementById('code-editor'); }
 function resizeEditor() { const field = editor(); field.style.height = 'auto'; field.style.height = field.scrollHeight + 'px'; }
-function resetCode() { editor().value = originalCode; resizeEditor(); editor().focus(); }
+function resetCode() { editor().value = originalCode; if (window.pythonByExampleEditor) window.pythonByExampleEditor.setValue(originalCode); resizeEditor(); editor().focus(); }
 resizeEditor();
 editor().addEventListener('input', resizeEditor);
 const form = document.querySelector('form');
@@ -36,6 +36,7 @@ const outputPanel = document.querySelector('.output-panel');
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   outputPanel.removeAttribute('data-output-placeholder');
+  if (window.pythonByExampleEditor) window.pythonByExampleEditor.syncTextarea();
   outputPanel.querySelector('code').textContent = 'Running in a Dynamic Python Worker…';
   try {
     const response = await fetch(form.action, {

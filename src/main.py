@@ -1,11 +1,13 @@
 import hashlib
-from urllib.parse import parse_qs
+import time
+from urllib.parse import parse_qs, urlparse
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, Response
 from workers import WorkerEntrypoint, python_from_rpc
 
 from app import FAVICON_SVG, build_dynamic_worker_code, get_example, render_example_page, route
+from asset_manifest import HTML_CACHE_VERSION
 from examples import PYTHON_VERSION
 
 try:
@@ -39,6 +41,16 @@ def _html(body, status=200):
     return HTMLResponse(body, status_code=status)
 
 
+def should_cache_get_url(url: str) -> bool:
+    path = urlparse(url).path
+    return not path.startswith("/layout-options/")
+
+
+def html_cache_key_url(url: str) -> str:
+    separator = "&" if "?" in url else "?"
+    return f"{url}{separator}__html_v={HTML_CACHE_VERSION}"
+
+
 @app.get("/favicon.svg")
 async def favicon():
     return Response(FAVICON_SVG, media_type="image/svg+xml", headers={"Cache-Control": "public, max-age=31536000, immutable"})
@@ -63,8 +75,10 @@ async def run_example(slug: str, request: Request):
         return _html("<h1>Example not found</h1>", 404)
     body = (await request.body()).decode("utf-8")
     submitted = parse_qs(body).get("code", [example["code"]])[0]
+    started = time.perf_counter()
     output = await _run_example(request, example["slug"], submitted)
-    return _html(render_example_page(example, output=output, code=submitted))
+    elapsed_ms = (time.perf_counter() - started) * 1000
+    return _html(render_example_page(example, output=output, code=submitted, execution_time_ms=elapsed_ms))
 
 
 async def _run_example(request: Request, slug, code):
@@ -119,13 +133,18 @@ class Default(WorkerEntrypoint):
         # Cache static GET responses at the Worker edge. Edited example runs are
         # POST requests and are intentionally never cached.
         if getattr(request, "method", None) == "GET" and caches is not None:
-            cached = await caches.default.match(request.js_object)
-            if cached:
-                return cached
+            if should_cache_get_url(getattr(request, "url", "")):
+                cache_key = JsRequest.new(html_cache_key_url(getattr(request, "url", "")), _to_js_object({"method": "GET"}))
+                cached = await caches.default.match(cache_key)
+                if cached:
+                    return cached
+                response = await asgi.fetch(app, request.js_object, self.env)
+                if getattr(response, "status", 200) == 200:
+                    response.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=86400")
+                    await caches.default.put(cache_key, response.clone())
+                return response
             response = await asgi.fetch(app, request.js_object, self.env)
-            if getattr(response, "status", 200) == 200:
-                response.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=86400")
-                await caches.default.put(request.js_object, response.clone())
+            response.headers.set("Cache-Control", "no-store")
             return response
 
         return await asgi.fetch(app, request.js_object, self.env)

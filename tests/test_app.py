@@ -33,6 +33,15 @@ class AppTests(unittest.TestCase):
                 self.assertIn("expected_output", example)
                 self.assertIsInstance(example["expected_output"], str)
 
+    def test_every_example_renders_literate_cells_with_output(self):
+        for example in list_examples():
+            with self.subTest(slug=example["slug"]):
+                html = render_example_page(example)
+                self.assertIn('class="lesson-step lp-cell"', html)
+                self.assertIn('class="cell-source"', html)
+                self.assertIn('class="cell-output"', html)
+                self.assertNotIn('<div class="cell-output"><p class="cell-label">Output</p><pre><code></code></pre></div>', html)
+
     def test_iterating_over_iterables_walkthrough_matches_code_fragments(self):
         example = get_example("iterating-over-iterables")
         pairs = [(step["prose"], step["code"]) for step in example["walkthrough"]]
@@ -140,21 +149,27 @@ class AppTests(unittest.TestCase):
         self.assertIn("https://docs.python.org/", html)
         css = (ROOT / "public" / "site.css").read_text()
         self.assertIn('rel="icon" href="/favicon.svg"', html)
-        self.assertIn('rel="stylesheet" href="/site.css"', html)
-        self.assertIn('type="module" src="/syntax-highlight.js"', html)
+        self.assertRegex(html, r'rel="stylesheet" href="/site\.[0-9a-f]{12}\.css"')
+        self.assertRegex(html, r'type="module" src="/syntax-highlight\.[0-9a-f]{12}\.js"')
+        self.assertRegex(html, r'type="module" src="/editor\.[0-9a-f]{12}\.js"')
+        self.assertNotIn('href="/site.css"', html)
+        self.assertNotIn('src="/syntax-highlight.js"', html)
         self.assertIn('textarea { box-sizing: border-box; width: 100%; height: auto;', css)
         self.assertIn('class="language-python"', html)
-        self.assertIn('class="tok-builtin">print</span>', html)
-        self.assertIn('class="tok-string">&quot;hello world&quot;</span>', html)
+        self.assertIn('print(&quot;hello world&quot;)', html)
+        self.assertNotIn('class="tok-', html)
         self.assertIn("hello world", html)
         self.assertIn("Output", html)
+        self.assertIn("Executed in 12.3 ms", render_example_page(get_example("hello-world"), output="hello world\n", execution_time_ms=12.3))
+        self.assertIn("Execution time appears here after you run the example.", render_example_page(get_example("hello-world")))
         self.assertIn("Expected output", render_example_page(get_example("hello-world")))
         self.assertIn('rel="next" href="/examples/values"', html)
         self.assertIn('method="post"', html)
         self.assertIn('<textarea name="code"', html)
         self.assertNotIn('class="lesson-grid"', html)
         self.assertNotIn('class="lesson-copy"', html)
-        self.assertIn('class="lesson-step"', html)
+        self.assertIn('class="lesson-step lp-cell"', html)
+        self.assertIn('class="cell-output"', html)
         self.assertIn('class="literate-program"', html)
         self.assertIn('Annotated code walkthrough', html)
         self.assertIn('class="playground"', html)
@@ -208,6 +223,9 @@ class AppTests(unittest.TestCase):
         self.assertIn('overflow-wrap: anywhere', css)
         self.assertNotIn('max-height: 18rem', css)
         self.assertIn('data-output-placeholder', html)
+        self.assertIn('.execution-time', css)
+        self.assertIn('min-height: 1.5rem', css)
+        self.assertIn('.cm-editor', css)
         self.assertIn("function resetCode", html)
         self.assertIn('class="syntax-inline">print()</code>', html)
         self.assertNotIn("navigator.clipboard", html)
@@ -225,7 +243,7 @@ class AppTests(unittest.TestCase):
         self.assertIn("nested", " ".join(example["explanation"]).lower())
         html = render_example_page(example)
         self.assertIn('class="syntax-inline">if</code>', html)
-        self.assertIn('class="tok-keyword">elif</span>', html)
+        self.assertIn('elif', html)
         self.assertNotIn("Conditions use truthiness", html)
 
     def test_datetime_covers_date_time_delta_formatting_and_parsing(self):
@@ -274,6 +292,9 @@ class AppTests(unittest.TestCase):
         self.assertIn("caches.default.put", main_source)
         self.assertIn("Cache-Control", main_source)
         self.assertIn("POST requests and are intentionally never cached", main_source)
+        self.assertIn('def should_cache_get_url(url: str) -> bool:', main_source)
+        self.assertIn('return not path.startswith("/layout-options/")', main_source)
+        self.assertIn('response.headers.set("Cache-Control", "no-store")', main_source)
 
     def test_dynamic_worker_execution_uses_hash_keyed_get_cache(self):
         main_source = (ROOT / "src" / "main.py").read_text()
@@ -293,8 +314,8 @@ class AppTests(unittest.TestCase):
     def test_runtime_dependencies_include_fastapi_stack(self):
         pyproject = (ROOT / "pyproject.toml").read_text()
         self.assertIn('"fastapi', pyproject)
-        self.assertIn('"jinja2', pyproject)
-        self.assertIn('"markupsafe', pyproject)
+        self.assertNotIn('"jinja2', pyproject)
+        self.assertNotIn('"markupsafe', pyproject)
         self.assertIn('requires-python = ">=3.13,<3.14"', pyproject)
         wrangler = (ROOT / "wrangler.jsonc").read_text()
         self.assertIn('"assets"', wrangler)
