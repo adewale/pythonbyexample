@@ -7,6 +7,14 @@
     "python_workers",
     "python_dedicated_snapshot"
   ],
+  "workers_dev": true,
+  "preview_urls": true,
+  "routes": [
+    {
+      "pattern": "www.pythonbyexample.dev",
+      "custom_domain": true
+    }
+  ],
   "limits": {
     "cpu_ms": 60000
   },

@@ -55,6 +55,8 @@ def main() -> None:
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/syntax-highlight.*.js\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
+        "/editor.*.js\n"
+        "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/favicon.svg\n"
         "  Cache-Control: public, max-age=31536000, immutable\n"
     )

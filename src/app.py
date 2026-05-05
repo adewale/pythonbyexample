@@ -58,7 +58,7 @@ class Default(WorkerEntrypoint):
 
 _TEMPLATE_DIR = Path(__file__).with_name("templates")
 _TEMPLATE_CACHE = {}
-SITE_URL = "https://pythonbyexample.adewale-883.workers.dev"
+SITE_URL = "https://www.pythonbyexample.dev"
 
 
 FAVICON_SVG = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Python By Example">
