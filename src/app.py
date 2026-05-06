@@ -179,8 +179,6 @@ def render_mobile_run_first_option(example):
 
 
 def _walkthrough_cells(example):
-    if "cells" in example:
-        return example["cells"]
     stdout = io.StringIO()
     namespace = {"__name__": "__main__"}
     cells = []
@@ -192,7 +190,7 @@ def _walkthrough_cells(example):
         delta = ""
         try:
             with contextlib.redirect_stdout(stdout):
-                exec(compile(step["code"], "<walkthrough>", "exec", dont_inherit=True), namespace)
+                exec(step["code"], namespace)
             current_output = stdout.getvalue()
             delta = current_output[last_output_length:]
             last_output_length = len(current_output)
