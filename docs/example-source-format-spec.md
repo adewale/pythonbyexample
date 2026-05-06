@@ -30,14 +30,14 @@ Python By Example should copy the philosophy, not the exact format: one canonica
 ## File layout
 
 ```text
-examples/
+src/example_sources/
   manifest.toml
   hello-world.md
   values.md
   variables.md
 ```
 
-`manifest.toml` defines learning order, section grouping, and the active Python documentation/runtime target:
+The sources live under `src/example_sources/` so Cloudflare Python Workers tooling can package or embed them with the Worker. `manifest.toml` defines learning order, section grouping, and the active Python documentation/runtime target:
 
 ```toml
 python_version = "3.13"
@@ -208,6 +208,14 @@ There must be one canonical parser/loader, for example:
 src/example_loader.py
 ```
 
+Cloudflare's Python Worker bundle does not include arbitrary data directories as importable Python modules by default. Until the bundler supports these Markdown files directly, `scripts/embed_example_sources.py` generates:
+
+```text
+src/example_sources_data.py
+```
+
+The canonical loader should prefer live Markdown files when they exist and fall back to the embedded module inside the Worker bundle. Verification must fail if the embedded module is stale.
+
 Both the website and tooling must use it:
 
 ```text
@@ -258,11 +266,14 @@ Add tooling that mirrors Go By Example's build discipline:
 
 ```text
 scripts/verify_examples.py
+scripts/embed_example_sources.py
 ```
 
 Required checks:
 
+- Regenerate embedded source data before verification.
 - Parse every Markdown file through the canonical loader.
+- Verify `src/example_sources_data.py` matches the Markdown source files.
 - Verify manifest order, duplicate slugs, missing slugs, and filename/slug mismatch.
 - Verify required frontmatter fields.
 - Verify every page is language-tour content; reject unsupported metadata or off-tour sections.
@@ -282,7 +293,10 @@ Required checks:
 Suggested Makefile targets:
 
 ```make
-verify-examples:
+embed-examples:
+	uv run scripts/embed_example_sources.py
+
+verify-examples: embed-examples
 	uv run scripts/verify_examples.py
 
 format-examples:

@@ -179,6 +179,8 @@ def render_mobile_run_first_option(example):
 
 
 def _walkthrough_cells(example):
+    if "cells" in example:
+        return example["cells"]
     stdout = io.StringIO()
     namespace = {"__name__": "__main__"}
     cells = []
