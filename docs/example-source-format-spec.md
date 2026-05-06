@@ -44,6 +44,7 @@ What did not work well enough:
 
 - The golden source was removed too soon, which weakened parity checking after the app switch.
 - Some examples lost fine-grained literate cells because the conversion required executable cells and collapsed non-executable fragments.
+- Deriving editor code by joining cells coupled teaching structure to runnable program structure and created avoidable whitespace/parity problems.
 - The formatter was too shallow; it normalized whitespace but did not fully reserialize TOML/frontmatter.
 - The parity script became less useful once the old catalog disappeared from the tree.
 - Passing production smoke tests was not enough; teaching-structure parity must be a release blocker.
@@ -72,6 +73,7 @@ Investigation and verification tasks come first because they decide the implemen
 - [ ] Audit current walkthrough fragments and classify each example as fully executable cells, needs larger cells, or needs rewrite.
 - [ ] Rewrite or redesign `match-statements`, `recursion`, `classes`, `properties`, `special-methods`, and `type-hints` so they retain fine-grained literate cells without non-executable fragments.
 - [ ] Decide the final cell policy for non-executable explanatory fragments before writing conversion tooling.
+- [ ] Confirm the `:::program` plus executable restatement-cell model works for the six problematic examples before converting all examples.
 - [ ] Spike parser line-number tracking for frontmatter, cells, Python fences, output fences, and notes.
 - [ ] Spike formatter behavior on several hand-edited Markdown examples and confirm it preserves prose/code semantics.
 - [ ] Spike `uv run --python $(VERSION)` behavior for `verify-python-version` on locally available Python versions.
@@ -83,6 +85,7 @@ Investigation and verification tasks come first because they decide the implemen
 - [ ] Add a checked-in golden catalog fixture for parity; keep it until after the cleanup milestone.
 - [ ] Add `src/example_loader.py` with TOML frontmatter parsing, explicit cell parsing, line-number metadata, and generated `doc_url`.
 - [ ] Add verifier execution using `compile(..., dont_inherit=True)`.
+- [ ] Add support for exactly one `:::program` block per example and make the website editor source come from that block.
 - [ ] Add verifier checks for wrong output, missing fences, duplicate slugs, stale embedded data, hardcoded docs versions, incompatible `min_python`, and inherited future flags.
 - [ ] Add `scripts/format_examples.py` with `--check` mode.
 - [ ] Add `scripts/embed_example_sources.py` if the bundling spike keeps the embedded-data approach.
@@ -96,7 +99,8 @@ Investigation and verification tasks come first because they decide the implemen
 - [ ] Mechanically convert all current examples to Markdown without rewriting teaching content.
 - [ ] Run the formatter and commit canonical Markdown shape.
 - [ ] Run verifier across every Markdown example.
-- [ ] Run golden parity and classify code differences as identical, whitespace-only, semantic, and teaching-structure.
+- [ ] Run golden parity and require the program block to match old `code` byte-for-byte.
+- [ ] Run golden parity and classify walkthrough differences as identical or teaching-structure.
 - [ ] Fix every semantic difference; do not allowlist semantic differences for the app switch.
 - [ ] Fix every teaching-structure difference, including collapsed/lost cells.
 - [ ] Fix examples whose cells are not executable according to the final cell policy.
@@ -179,8 +183,9 @@ Each example file contains:
 
 1. TOML frontmatter delimited by `+++`.
 2. Introductory prose.
-3. One or more explicit `:::cell` blocks.
-4. Optional `:::note` blocks.
+3. Exactly one `:::program` block containing the full editable program.
+4. One or more explicit `:::cell` blocks for the literate walkthrough.
+5. Optional `:::note` blocks.
 
 TOML is preferred over YAML so the loader can use Python's standard-library `tomllib` locally and in the Worker bundle.
 
@@ -197,6 +202,22 @@ doc_path = "/library/stdtypes.html"
 
 Python programs are built from values. Strings, integers, floats, booleans,
 and `None` are basic values used throughout the language.
+
+:::program
+```python
+text = "python"
+count = 3
+ratio = 2.5
+ready = True
+missing = None
+
+print(text.upper())
+print(count + 4)
+print(ratio * 2)
+print(ready and count > 0)
+print(missing is None)
+```
+:::
 
 :::cell
 Strings have methods, and numbers work with arithmetic operators.
@@ -270,25 +291,33 @@ Rules:
 
 The failed migration showed that some current walkthrough fragments are not independently executable, such as method bodies without their class header. The spec resolves this by making executable cells the only renderable source/output unit. Non-executable excerpts may appear only as inline prose or future non-output annotations; they must not be rendered as source/output cells.
 
+Cells are allowed to restate earlier definitions when that makes the fragment independently executable and preserves teaching flow. For example, a class-method cell may repeat the class header and initializer, then add the method being taught. These restatement cells are verified as cells, but they are not concatenated to form the editor program.
+
 For production migration, fewer/larger cells are not acceptable if they reduce the current teaching structure. The parity gate must compare rendered cell counts and cell prose/source/output structure. Any collapsed cell is a teaching-structure difference that blocks the app switch until the example is rewritten into executable fine-grained cells.
 
 ## Full runnable code
 
-The website editor must use code derived from the same parsed model that tests use.
+The website editor must use the exact source from the `:::program` block, not source reconstructed by concatenating cells.
 
-Default rule:
+Program block shape:
 
+````markdown
+:::program
 ```python
-full_code = "\n\n".join(cell.source for cell in cells)
+print("hello world")
 ```
+:::
+````
 
-The full expected output is derived similarly:
+Rules:
 
-```python
-expected_output = "\n".join(cell.output for cell in cells)
-```
+- Each example must contain exactly one `:::program` block.
+- The program block must contain exactly one `python` fence.
+- The program block is the editable source shown in the runner.
+- `expected_output` is generated by executing the program block.
+- The parity script must require the program block to match the current `src/examples.py` code byte-for-byte during migration.
 
-The attempted migration showed this can introduce harmless extra blank lines compared with the current hand-authored source. The formatter must define the canonical join rule and the parity script must report whitespace-only differences separately from semantic differences. Byte-for-byte source parity is not required after the app switch, but the first migration must prove that any source differences are whitespace-only and that output is unchanged.
+The attempted migration showed that deriving editor code from `"\n\n".join(cell.source for cell in cells)` introduces whitespace drift and can force teaching cells to become the full program structure. The solution is to separate the full editable program from the literate cells while verifying both with the same loader.
 
 ## Output verification model
 
@@ -302,7 +331,7 @@ The verifier should execute cells in order in one Python process namespace:
 6. Compare only the new stdout to cell 2 `output` fence.
 7. Continue through the file.
 
-The full runnable code should also be executed separately, and its stdout should equal the concatenated cell outputs.
+The full runnable program should also be executed separately, and its stdout should equal the program's expected output. Cell outputs do not need to concatenate to the full program output because cells are teaching units and may restate earlier definitions.
 
 Verifier execution must use:
 
@@ -350,8 +379,8 @@ class Example:
     intro: str
     cells: list[Cell]
     notes: list[str]
-    code: str
-    expected_output: str
+    code: str  # from the :::program block
+    expected_output: str  # stdout from executing code
     min_python: str | None = None
     version_sensitive: bool = False
     version_notes: str | None = None
@@ -434,10 +463,11 @@ Required checks:
 - Verify manifest order, duplicate slugs, missing slugs, and filename/slug mismatch.
 - Verify required frontmatter fields.
 - Verify every page is language-tour content; reject unsupported metadata or off-tour sections.
+- Verify every example has exactly one program block with one Python fence.
 - Verify every cell has prose, one Python fence, and one output fence.
 - Execute every cell in order and compare stdout with the adjacent output fence.
-- Execute full generated code and compare stdout with generated expected output.
-- Parse full generated code with `ast.parse`.
+- Execute the program block and compare stdout with generated expected output.
+- Parse the program block with `ast.parse`.
 - Run formatting checks on generated code, or provide a formatter command that rewrites code fences consistently.
 - Enforce readable line lengths for code and prose, with exceptions for URLs.
 - Verify `python_version` and `docs_base_url` agree, for example `3.13` maps to `https://docs.python.org/3.13`.
@@ -534,7 +564,7 @@ Before the app switch milestone, verify these fourteen gates with red-green-refa
 1. **Cloudflare bundling behavior** — prove whether raw Markdown files are available in `pywrangler dev` and production; if not, prove embedded source data is present and fresh.
 2. **Golden parity script** — prove old `src/examples.py` and the Markdown loader agree on order, metadata, docs URLs, outputs, notes, and walkthrough content.
 3. **Cell model** — prove every rendered source/output cell is executable after previous cells and rejects non-executable fragments.
-4. **Generated full code** — prove joined cell source is the editor source and that differences from the old source are classified as identical, whitespace-only, or semantic.
+4. **Generated full code** — prove the `:::program` block is the editor source and matches the old source byte-for-byte during migration.
 5. **Verifier correctness** — prove the verifier catches wrong output, missing fences, duplicate slugs, stale embedded data, hardcoded docs versions, incompatible `min_python`, and inherited future flags.
 6. **Line-number reporting** — prove parser and verifier failures point to useful Markdown file lines before the app switch.
 7. **Formatter behavior** — prove formatting is deterministic, preserves prose/code semantics, normalizes frontmatter/fences, and has a `--check` mode.
