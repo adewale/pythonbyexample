@@ -28,6 +28,66 @@ Go By Example's `tools/` directory is intentionally small and strict. Useful les
 
 Python By Example should copy the philosophy, not the exact format: one canonical parser, one strict build pipeline, language-aware validation, line-length/layout constraints, generated-output diffing, and no separate hand-maintained website copy of example code.
 
+## Dependency-ordered task list
+
+Investigation and verification tasks come first because they decide the implementation shape.
+
+### Phase 0: spikes and investigations
+
+- [ ] Spike Cloudflare Worker bundling for raw Markdown files under `src/example_sources/` using `pywrangler dev`.
+- [ ] Spike production bundling, or document why local Worker bundling failure is enough to require embedded source data.
+- [ ] Decide whether to keep the default embedded-data approach or replace it with proven native file bundling.
+- [ ] Audit current walkthrough fragments and classify each example as fully executable cells, needs larger cells, or needs rewrite.
+- [ ] Decide the final cell policy for non-executable explanatory fragments before writing conversion tooling.
+- [ ] Spike parser line-number tracking for frontmatter, cells, Python fences, output fences, and notes.
+- [ ] Spike formatter behavior on several hand-edited Markdown examples and confirm it preserves prose/code semantics.
+- [ ] Spike `uv run --python $(VERSION)` behavior for `verify-python-version` on locally available Python versions.
+- [ ] Identify which examples should be marked `version_sensitive` before future Python runtime migrations.
+
+### Phase 1: tooling while the live app stays on `src/examples.py`
+
+- [ ] Add fixture Markdown examples for a small subset: `hello-world`, `values`, one multi-cell example, and one difficult class/method example.
+- [ ] Add `src/example_loader.py` with TOML frontmatter parsing, explicit cell parsing, line-number metadata, and generated `doc_url`.
+- [ ] Add verifier execution using `compile(..., dont_inherit=True)`.
+- [ ] Add verifier checks for wrong output, missing fences, duplicate slugs, stale embedded data, hardcoded docs versions, incompatible `min_python`, and inherited future flags.
+- [ ] Add `scripts/format_examples.py` with `--check` mode.
+- [ ] Add `scripts/embed_example_sources.py` if the bundling spike keeps the embedded-data approach.
+- [ ] Add `scripts/check_example_migration_parity.py` against the current `src/examples.py` golden source.
+- [ ] Add Make targets: `build`, `embed-examples`, `check-generated`, `verify-examples`, `format-examples`, and `verify-python-version`.
+- [ ] Update fingerprinting so Markdown source or embedded source data changes `HTML_CACHE_VERSION`.
+- [ ] Keep the website importing the current `src/examples.py` during this phase.
+
+### Phase 2: mechanical conversion and parity
+
+- [ ] Mechanically convert all current examples to Markdown without rewriting teaching content.
+- [ ] Run the formatter and commit canonical Markdown shape.
+- [ ] Run verifier across every Markdown example.
+- [ ] Run golden parity and classify code differences as identical, whitespace-only, or semantic.
+- [ ] Fix or explicitly review every semantic difference.
+- [ ] Fix examples whose cells are not executable according to the final cell policy.
+- [ ] Verify Markdown-only edits change generated embedded data and `HTML_CACHE_VERSION`.
+- [ ] Verify stale generated files fail `make check-generated`.
+
+### Phase 3: app switch
+
+- [ ] Switch `src/examples.py` to a thin compatibility layer over the Markdown loader.
+- [ ] Verify existing app tests still pass without weakening assertions.
+- [ ] Run `make build`, `make verify-examples`, `make test`, `make seo-cache-lint`, `make browser-layout-test`, `make lint`, and `git diff --check`.
+- [ ] Start local Worker with `pywrangler dev` and verify it does not fail on missing Markdown files.
+- [ ] Verify representative GET pages render from the Markdown loader.
+- [ ] Verify POST execution still runs edited code through Dynamic Workers.
+- [ ] Verify browser layout for Shiki, CodeMirror, literate cells, and output panels.
+
+### Phase 4: deploy and cleanup
+
+- [ ] Deploy only after local Worker startup and all verification pass.
+- [ ] Smoke-test `https://www.pythonbyexample.dev`.
+- [ ] Smoke-test `https://pythonbyexample.adewale-883.workers.dev`.
+- [ ] Verify production asset caching and HTML cache-busting after an example-only edit.
+- [ ] Remove old hand-authored example catalog only after one successful production deployment.
+- [ ] Remove temporary golden parity scaffolding after cleanup is complete.
+- [ ] Update README contributor instructions to point contributors at Markdown examples, `make build`, and `make verify-examples`.
+
 ## Implementation milestones
 
 This migration must not be implemented as one large switch-over.
