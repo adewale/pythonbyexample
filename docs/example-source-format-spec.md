@@ -428,6 +428,37 @@ Required behavior:
 
 This script is temporary migration scaffolding. It can be removed after the old catalog is deleted and one production deployment succeeds.
 
+## Fourteen prerequisite verification gates
+
+Before the app switch milestone, verify these fourteen gates with red-green-refactor TDD. For each gate, first add or run a failing check (**Red**), then implement the smallest code/tooling change that makes it pass (**Green**), then simplify without weakening the check (**Refactor**).
+
+1. **Cloudflare bundling behavior** — prove whether raw Markdown files are available in `pywrangler dev` and production; if not, prove embedded source data is present and fresh.
+2. **Golden parity script** — prove old `src/examples.py` and the Markdown loader agree on order, metadata, docs URLs, outputs, notes, and walkthrough content.
+3. **Cell model** — prove every rendered source/output cell is executable after previous cells and rejects non-executable fragments.
+4. **Generated full code** — prove joined cell source is the editor source and that differences from the old source are classified as identical, whitespace-only, or semantic.
+5. **Verifier correctness** — prove the verifier catches wrong output, missing fences, duplicate slugs, stale embedded data, hardcoded docs versions, incompatible `min_python`, and inherited future flags.
+6. **Line-number reporting** — prove parser and verifier failures point to useful Markdown file lines before the app switch.
+7. **Formatter behavior** — prove formatting is deterministic, preserves prose/code semantics, normalizes frontmatter/fences, and has a `--check` mode.
+8. **Build step** — prove `make build` regenerates all generated artifacts and `make check-generated` fails on stale generated files.
+9. **Cache busting** — prove editing only an example Markdown file changes `HTML_CACHE_VERSION` and therefore invalidates cached HTML.
+10. **Worker runtime startup** — prove `pywrangler dev` starts successfully with the Markdown loader and generated embedded data.
+11. **POST execution** — prove edited code still runs through the Dynamic Worker POST path and returns the edited output.
+12. **Browser layout** — prove Shiki, CodeMirror, literate cells, and output panels still render with browser tests.
+13. **Production smoke test** — prove both `https://www.pythonbyexample.dev` and the `workers.dev` hostname serve the migrated app after deploy.
+14. **Python version migration command** — prove `make verify-python-version VERSION=x.y` runs under the requested local runtime when available and is paired with Worker runtime verification.
+
+These gates are not optional acceptance notes. They are the checklist that blocks the app switch milestone.
+
+## Red-green-refactor order
+
+Use this order for each implementation milestone:
+
+1. **Red** — add a focused failing test, linter assertion, parity check, or smoke check for one gate. Do not change production code yet.
+2. **Green** — make the smallest source/tooling/spec change that satisfies that failing check.
+3. **Refactor** — simplify parser/build/test code while keeping the new check passing and preserving the old app behavior until the app switch milestone.
+
+Prefer many small red-green-refactor cycles over another large migration commit.
+
 ## Migration safety for implementing this spec
 
 Moving from `src/examples.py` to Markdown source files should be done as a compatibility-preserving migration.
