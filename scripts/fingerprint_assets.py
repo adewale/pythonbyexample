@@ -36,16 +36,7 @@ def html_version(paths: dict[str, str]) -> str:
     digest = hashlib.sha256()
     for value in sorted(paths.values()):
         digest.update(value.encode("utf-8"))
-    content_paths = [
-        ROOT / "src" / "app.py",
-        ROOT / "src" / "examples.py",
-        ROOT / "src" / "example_loader.py",
-        ROOT / "src" / "example_sources_data.py",
-        ROOT / "src" / "example_sources" / "manifest.toml",
-        *sorted((ROOT / "src" / "example_sources").glob("*.md")),
-        *sorted((ROOT / "src" / "templates").glob("*.html")),
-    ]
-    for path in content_paths:
+    for path in [ROOT / "src" / "app.py", ROOT / "src" / "examples.py", *sorted((ROOT / "src" / "templates").glob("*.html"))]:
         digest.update(path.relative_to(ROOT).as_posix().encode("utf-8"))
         digest.update(path.read_bytes())
     return digest.hexdigest()[:12]
