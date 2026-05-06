@@ -1,0 +1,39 @@
+name: Verify
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Install dependencies
+        run: uv sync --all-groups
+      - name: Start local Worker for browser checks
+        run: |
+          uv run --group workers pywrangler dev --port 9696 > /tmp/pythonbyexample-ci.log 2>&1 &
+          for i in $(seq 1 180); do
+            if grep -q 'Ready on http://localhost:9696' /tmp/pythonbyexample-ci.log; then
+              exit 0
+            fi
+            if grep -E 'failed to start|FileNotFoundError|Traceback|Address already' /tmp/pythonbyexample-ci.log; then
+              cat /tmp/pythonbyexample-ci.log
+              exit 1
+            fi
+            sleep 1
+          done
+          cat /tmp/pythonbyexample-ci.log
+          exit 1
+      - name: Verify
+        run: |
+          make verify
+          scripts/check_example_migration_parity.py
+          scripts/format_examples.py --check
+          make verify-python-version VERSION=3.13
+          git diff --check

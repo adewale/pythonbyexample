@@ -4,6 +4,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = ROOT / "docs" / "example-source-format-spec.md"
 INVESTIGATION = ROOT / "docs" / "markdown-cell-migration-investigation.md"
+README = ROOT / "README.md"
+CI = ROOT / ".github" / "workflows" / "verify.yml"
 
 
 class MarkdownMigrationPrereqTests(unittest.TestCase):
@@ -81,6 +83,26 @@ class MarkdownMigrationPrereqTests(unittest.TestCase):
         self.assertIn("rollback-rehearsed", spec)
         self.assertIn("revert the migration, deploy the rollback", spec)
         self.assertIn("re-apply the migration and repeat verification", spec)
+
+    def test_remaining_operational_lessons_are_documented_and_verified(self):
+        spec = SPEC.read_text()
+        readme = README.read_text()
+        workflow = CI.read_text()
+        for phrase in [
+            "Golden fixture policy",
+            "CI policy",
+            "Contributor documentation policy",
+            "Native Markdown bundling remains unproven",
+            "reserialize it deterministically",
+        ]:
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, spec)
+        for phrase in ["src/example_sources/", ":::program", ":::cell", "make build", "make verify-examples"]:
+            with self.subTest(readme=phrase):
+                self.assertIn(phrase, readme)
+        for phrase in ["make verify", "check_example_migration_parity.py", "format_examples.py --check", "verify-python-version"]:
+            with self.subTest(workflow=phrase):
+                self.assertIn(phrase, workflow)
 
 
 if __name__ == "__main__":
