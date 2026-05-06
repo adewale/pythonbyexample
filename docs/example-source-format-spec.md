@@ -28,16 +28,49 @@ Go By Example's `tools/` directory is intentionally small and strict. Useful les
 
 Python By Example should copy the philosophy, not the exact format: one canonical parser, one strict build pipeline, language-aware validation, line-length/layout constraints, generated-output diffing, and no separate hand-maintained website copy of example code.
 
+## Lessons from the full migration attempt
+
+The first full implementation was functional enough to pass tests, start locally, deploy, and serve production, but it was rolled back because it did not preserve teaching quality with 100% parity.
+
+What worked:
+
+- Markdown sources were pleasant to review and edit.
+- Embedded `src/example_sources_data.py` solved the Worker bundling failure.
+- `make build`, `make verify-examples`, `make check-generated`, and `verify-python-version` were useful workflow pieces.
+- `compile(..., dont_inherit=True)` was necessary and correct for output verification.
+- The deployed Worker could serve both the custom domain and `workers.dev` with Markdown-backed examples.
+
+What did not work well enough:
+
+- The golden source was removed too soon, which weakened parity checking after the app switch.
+- Some examples lost fine-grained literate cells because the conversion required executable cells and collapsed non-executable fragments.
+- The formatter was too shallow; it normalized whitespace but did not fully reserialize TOML/frontmatter.
+- The parity script became less useful once the old catalog disappeared from the tree.
+- Passing production smoke tests was not enough; teaching-structure parity must be a release blocker.
+
+Examples that lost fine-grained literate cells in the attempted conversion:
+
+- `match-statements`
+- `recursion`
+- `classes`
+- `properties`
+- `special-methods`
+- `type-hints`
+
+Those examples must be rewritten into executable cells before any future app switch. Collapsing them into one large cell is allowed only as a temporary tooling fixture, not as a production-equivalent migration.
+
 ## Dependency-ordered task list
 
 Investigation and verification tasks come first because they decide the implementation shape.
 
 ### Phase 0: spikes and investigations
 
+- [ ] Freeze a golden copy of the current catalog before conversion; do not rely on git history as the only golden source.
 - [ ] Spike Cloudflare Worker bundling for raw Markdown files under `src/example_sources/` using `pywrangler dev`.
 - [ ] Spike production bundling, or document why local Worker bundling failure is enough to require embedded source data.
 - [ ] Decide whether to keep the default embedded-data approach or replace it with proven native file bundling.
 - [ ] Audit current walkthrough fragments and classify each example as fully executable cells, needs larger cells, or needs rewrite.
+- [ ] Rewrite or redesign `match-statements`, `recursion`, `classes`, `properties`, `special-methods`, and `type-hints` so they retain fine-grained literate cells without non-executable fragments.
 - [ ] Decide the final cell policy for non-executable explanatory fragments before writing conversion tooling.
 - [ ] Spike parser line-number tracking for frontmatter, cells, Python fences, output fences, and notes.
 - [ ] Spike formatter behavior on several hand-edited Markdown examples and confirm it preserves prose/code semantics.
@@ -47,12 +80,13 @@ Investigation and verification tasks come first because they decide the implemen
 ### Phase 1: tooling while the live app stays on `src/examples.py`
 
 - [ ] Add fixture Markdown examples for a small subset: `hello-world`, `values`, one multi-cell example, and one difficult class/method example.
+- [ ] Add a checked-in golden catalog fixture for parity; keep it until after the cleanup milestone.
 - [ ] Add `src/example_loader.py` with TOML frontmatter parsing, explicit cell parsing, line-number metadata, and generated `doc_url`.
 - [ ] Add verifier execution using `compile(..., dont_inherit=True)`.
 - [ ] Add verifier checks for wrong output, missing fences, duplicate slugs, stale embedded data, hardcoded docs versions, incompatible `min_python`, and inherited future flags.
 - [ ] Add `scripts/format_examples.py` with `--check` mode.
 - [ ] Add `scripts/embed_example_sources.py` if the bundling spike keeps the embedded-data approach.
-- [ ] Add `scripts/check_example_migration_parity.py` against the current `src/examples.py` golden source.
+- [ ] Add `scripts/check_example_migration_parity.py` against the checked-in golden catalog fixture and the current `src/examples.py` golden source.
 - [ ] Add Make targets: `build`, `embed-examples`, `check-generated`, `verify-examples`, `format-examples`, and `verify-python-version`.
 - [ ] Update fingerprinting so Markdown source or embedded source data changes `HTML_CACHE_VERSION`.
 - [ ] Keep the website importing the current `src/examples.py` during this phase.
@@ -62,14 +96,16 @@ Investigation and verification tasks come first because they decide the implemen
 - [ ] Mechanically convert all current examples to Markdown without rewriting teaching content.
 - [ ] Run the formatter and commit canonical Markdown shape.
 - [ ] Run verifier across every Markdown example.
-- [ ] Run golden parity and classify code differences as identical, whitespace-only, or semantic.
-- [ ] Fix or explicitly review every semantic difference.
+- [ ] Run golden parity and classify code differences as identical, whitespace-only, semantic, and teaching-structure.
+- [ ] Fix every semantic difference; do not allowlist semantic differences for the app switch.
+- [ ] Fix every teaching-structure difference, including collapsed/lost cells.
 - [ ] Fix examples whose cells are not executable according to the final cell policy.
 - [ ] Verify Markdown-only edits change generated embedded data and `HTML_CACHE_VERSION`.
 - [ ] Verify stale generated files fail `make check-generated`.
 
 ### Phase 3: app switch
 
+- [ ] Block this phase unless golden parity reports 100% parity for metadata, code behavior, output, notes, walkthrough prose/source, rendered cell count, and cell source/output structure.
 - [ ] Switch `src/examples.py` to a thin compatibility layer over the Markdown loader.
 - [ ] Verify existing app tests still pass without weakening assertions.
 - [ ] Run `make build`, `make verify-examples`, `make test`, `make seo-cache-lint`, `make browser-layout-test`, `make lint`, and `git diff --check`.
@@ -80,6 +116,7 @@ Investigation and verification tasks come first because they decide the implemen
 
 ### Phase 4: deploy and cleanup
 
+- [ ] Do not deploy Markdown-backed examples unless Phase 3 has 100% parity and no collapsed/lost literate cells.
 - [ ] Deploy only after local Worker startup and all verification pass.
 - [ ] Smoke-test `https://www.pythonbyexample.dev`.
 - [ ] Smoke-test `https://pythonbyexample.adewale-883.workers.dev`.
@@ -94,8 +131,8 @@ This migration must not be implemented as one large switch-over.
 
 1. **Tooling-only milestone** — add Markdown sources, canonical loader, build scripts, verifier, formatter, and golden parity checks while the live app still imports `src/examples.py`.
 2. **Dual-read milestone** — allow tests to load both `src/examples.py` and Markdown examples; keep `src/examples.py` as the public catalog until parity is clean.
-3. **App switch milestone** — switch `src/examples.py` to a thin compatibility layer over the Markdown loader only after local Worker startup, golden parity, and browser layout checks pass.
-4. **Cleanup milestone** — remove the old hand-authored catalog only after one successful deploy and smoke test on both `www.pythonbyexample.dev` and the `workers.dev` hostname.
+3. **App switch milestone** — switch `src/examples.py` to a thin compatibility layer over the Markdown loader only after local Worker startup, browser layout checks, and 100% golden parity pass.
+4. **Cleanup milestone** — remove the old hand-authored catalog and golden fixture only after one successful deploy and smoke test on both `www.pythonbyexample.dev` and the `workers.dev` hostname.
 
 Each milestone should be independently reviewable and revertible.
 
@@ -233,7 +270,7 @@ Rules:
 
 The failed migration showed that some current walkthrough fragments are not independently executable, such as method bodies without their class header. The spec resolves this by making executable cells the only renderable source/output unit. Non-executable excerpts may appear only as inline prose or future non-output annotations; they must not be rendered as source/output cells.
 
-This means some examples will intentionally have fewer, larger cells until their teaching flow is rewritten into executable chunks. That is preferable to silently accepting fragments that the verifier cannot run.
+For production migration, fewer/larger cells are not acceptable if they reduce the current teaching structure. The parity gate must compare rendered cell counts and cell prose/source/output structure. Any collapsed cell is a teaching-structure difference that blocks the app switch until the example is rewritten into executable fine-grained cells.
 
 ## Full runnable code
 
@@ -477,16 +514,18 @@ scripts/check_example_migration_parity.py
 
 Required behavior:
 
-- Import the old `src/examples.py` catalog as the golden source.
+- Import the old `src/examples.py` catalog and a checked-in frozen golden fixture as the golden sources.
 - Load the Markdown catalog through `src/example_loader.py`.
 - Compare example count and order.
 - Compare `slug`, `title`, `section`, `summary`, generated `doc_url`, `expected_output`, notes, and walkthrough prose/source.
+- Render old and new walkthrough cells and compare cell count, prose grouping, source, output, and order.
 - Execute old and new full code and compare stdout.
 - Classify full-code differences as `identical`, `whitespace-only`, or `semantic`.
-- Fail on semantic differences unless explicitly allowlisted in the migration PR.
+- Classify walkthrough differences as `identical` or `teaching-structure`.
+- Fail on every semantic or teaching-structure difference. No allowlist is permitted for the app switch.
 - Print a short table of differences for review.
 
-This script is temporary migration scaffolding. It can be removed after the old catalog is deleted and one production deployment succeeds.
+This script is temporary migration scaffolding. It can be removed only after the old catalog is deleted, one production deployment succeeds, and the rollback window has passed.
 
 ## Fourteen prerequisite verification gates
 
@@ -537,7 +576,7 @@ Required safety checks before removing the old source:
 - Run all current tests, SEO/cache lint, browser layout tests, Ruff, and `git diff --check`.
 - Deploy only after both custom domain and workers.dev smoke tests pass.
 
-The first implementation milestone should add loader, build, verifier, and parity tests while the website still serves `src/examples.py`. The second milestone should switch the website to the new loader only after golden-model parity and Worker startup pass.
+The first implementation milestone should add loader, build, verifier, and parity tests while the website still serves `src/examples.py`. The second milestone should switch the website to the new loader only after 100% golden parity and Worker startup pass. If parity is below 100%, stop before deploy.
 
 ## Contributor workflow
 

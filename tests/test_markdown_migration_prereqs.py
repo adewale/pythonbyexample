@@ -36,6 +36,27 @@ class MarkdownMigrationPrereqTests(unittest.TestCase):
         self.assertLess(spec.index("Red"), spec.index("Green"))
         self.assertLess(spec.index("Green"), spec.index("Refactor"))
 
+    def test_spec_blocks_deploy_without_full_teaching_parity(self):
+        spec = SPEC.read_text()
+        self.assertIn("100% golden parity", spec)
+        self.assertIn("100% parity", spec)
+        self.assertIn("Do not deploy Markdown-backed examples unless Phase 3 has 100% parity", spec)
+        self.assertIn("No allowlist is permitted for the app switch", spec)
+        self.assertIn("teaching-structure difference", spec)
+
+    def test_spec_names_examples_that_lost_fine_grained_cells(self):
+        spec = SPEC.read_text()
+        for slug in [
+            "match-statements",
+            "recursion",
+            "classes",
+            "properties",
+            "special-methods",
+            "type-hints",
+        ]:
+            with self.subTest(slug=slug):
+                self.assertIn(slug, spec)
+
 
 if __name__ == "__main__":
     unittest.main()
