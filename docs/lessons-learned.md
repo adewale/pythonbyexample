@@ -34,6 +34,9 @@ This document records project lessons that should guide future changes to Python
 - Avoid decorative labels that do not teach. Labels such as `Cell 1 · <<fragment-1>>` add noise unless the fragment name is meaningful to the learner.
 - If a source fragment only prepares state and has no output, merge it with the next fragment that produces output. Every displayed cell should have evidence.
 - Keep the complete editable program visible because it is the thing that actually runs.
+- When storing examples as Markdown, keep the full editable program in `:::program` and teaching fragments in separate `:::cell` blocks. Do not concatenate cells to recreate the editor source.
+- Fine-grained cells can restate definitions to stay executable. This is better than collapsing class, property, recursion, match, or type-hint examples into one large cell.
+- Preserve a frozen golden catalog while migrating source formats. Full stdout parity is not enough; rendered teaching-cell structure must also match.
 
 ## Layout and mobile
 
@@ -47,15 +50,17 @@ This document records project lessons that should guide future changes to Python
 - Unit tests are good for catalog integrity, rendering contracts, Dynamic Worker code generation, and cache-policy source checks.
 - Browser tests are necessary for Shiki/CodeMirror layout behavior and visual regressions.
 - SEO and cache-busting deserve a dedicated linter because errors are easy to reintroduce when adding pages or assets.
-- Always run the full pre-push set before publishing:
+- Always run the full pre-push set before publishing. Start `pywrangler dev --port 9696`, then run:
 
 ```bash
-make fingerprint
-make test
-make seo-cache-lint
-make browser-layout-test
-make lint
+make verify
+scripts/check_example_migration_parity.py
+scripts/format_examples.py --check
+make verify-python-version VERSION=3.13
+git diff --check
 ```
+
+- `make check-generated` should fail if embedded example data, asset manifests, or cache headers are stale.
 
 ## Documentation and GitHub readiness
 

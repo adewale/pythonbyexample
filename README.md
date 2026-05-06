@@ -77,13 +77,20 @@ http://localhost:9696
 
 ## Verification
 
-Run the main checks before deploying or pushing:
+Run a local Worker before the full browser-backed verification:
+
+```bash
+uv run --group workers pywrangler dev --port 9696
+```
+
+Then run the main checks before deploying or pushing:
 
 ```bash
 make verify
 scripts/check_example_migration_parity.py
 scripts/format_examples.py --check
 make verify-python-version VERSION=3.13
+git diff --check
 ```
 
 `make seo-cache-lint` verifies that:
@@ -138,18 +145,13 @@ Prototype layout routes under `/layout-options/*` bypass the Worker Cache API an
 Run checks, then deploy:
 
 ```bash
-scripts/fingerprint_assets.py
-make test
-make seo-cache-lint
-make browser-layout-test
-uv run pywrangler deploy
-```
-
-or:
-
-```bash
+make verify
+scripts/check_example_migration_parity.py
+scripts/format_examples.py --check
 make deploy
 ```
+
+`make deploy` runs `make build` first, so embedded example data and cache fingerprints are regenerated before Wrangler deploys.
 
 ## Updating examples or Python version
 
@@ -169,6 +171,7 @@ make build
 make verify-examples
 scripts/format_examples.py --check
 scripts/check_example_migration_parity.py
+make check-generated
 ```
 
 `src/example_sources_data.py` is generated and committed so Cloudflare Workers can load examples in production. Do not edit it by hand.

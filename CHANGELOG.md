@@ -19,6 +19,9 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 - Versioned Worker Cache API keys for rendered HTML.
 - `README.md` architecture, verification, deployment, and cache-busting documentation.
 - `docs/lessons-learned.md`.
+- Markdown-backed example sources with `:::program` and `:::cell` blocks.
+- Example source verifier, formatter, embedded-source build step, and golden parity check.
+- GitHub Actions verification workflow.
 
 ### Changed
 
@@ -26,7 +29,8 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 - Read-only code highlighting is handled by Shiki; editable code highlighting is handled by CodeMirror.
 - Prototype routes under `/layout-options/*` bypass the Worker Cache API and return `Cache-Control: no-store`.
 - Static assets use immutable cache headers only on fingerprinted filenames.
-- Deployment flow now regenerates asset fingerprints first.
+- Deployment flow now regenerates embedded example data and asset fingerprints first.
+- `src/examples.py` is now a compatibility shim over Markdown example sources.
 - Output panels reserve space for execution timing to prevent layout shift after runs.
 
 ### Fixed

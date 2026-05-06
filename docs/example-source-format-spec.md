@@ -140,8 +140,8 @@ Investigation and verification tasks come first because they decide the implemen
 - [ ] Smoke-test `https://www.pythonbyexample.dev`.
 - [ ] Smoke-test `https://pythonbyexample.adewale-883.workers.dev`.
 - [ ] Verify production asset caching and HTML cache-busting after an example-only edit.
-- [ ] Remove old hand-authored example catalog only after one successful production deployment.
-- [ ] Remove temporary golden parity scaffolding after cleanup is complete.
+- [ ] Keep the frozen golden fixture through at least one stable production release cycle and rollback window.
+- [ ] Remove temporary golden parity scaffolding only in a dedicated cleanup PR after CI and production confidence are established.
 - [ ] Update README contributor instructions to point contributors at Markdown examples, `make build`, and `make verify-examples`.
 
 ## Implementation milestones
@@ -151,7 +151,7 @@ This migration must not be implemented as one large switch-over.
 1. **Tooling-only milestone** — add Markdown sources, canonical loader, build scripts, verifier, formatter, and golden parity checks while the live app still imports `src/examples.py`.
 2. **Dual-read milestone** — allow tests to load both `src/examples.py` and Markdown examples; keep `src/examples.py` as the public catalog until parity is clean.
 3. **App switch milestone** — switch `src/examples.py` to a thin compatibility layer over the Markdown loader only after local Worker startup, browser layout checks, and 100% golden parity pass.
-4. **Cleanup milestone** — remove the old hand-authored catalog and golden fixture only after one successful deploy and smoke test on both `www.pythonbyexample.dev` and the `workers.dev` hostname.
+4. **Cleanup milestone** — remove the old hand-authored catalog immediately after the app switch, but keep the golden fixture until a stable production release cycle, rollback window, and dedicated cleanup PR.
 
 Each milestone should be independently reviewable and revertible.
 

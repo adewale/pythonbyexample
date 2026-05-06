@@ -4,7 +4,9 @@ import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 
-const chromePath = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const chromePath = process.env.CHROME_PATH || (process.platform === 'darwin'
+  ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+  : '/usr/bin/google-chrome');
 const target = process.argv[2] || 'http://127.0.0.1:9696/layout-options/mobile-run-first';
 const url = `${target}${target.includes('?') ? '&' : '?'}browser_layout_check=${Date.now()}`;
 const port = 9333 + Math.floor(Math.random() * 1000);
