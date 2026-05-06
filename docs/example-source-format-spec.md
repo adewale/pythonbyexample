@@ -60,6 +60,21 @@ Examples that lost fine-grained literate cells in the attempted conversion:
 
 Those examples must be rewritten into executable cells before any future app switch. Collapsing them into one large cell is allowed only as a temporary tooling fixture, not as a production-equivalent migration.
 
+## Lessons from the successful parity migration
+
+The second implementation succeeded because it changed the migration standard from "working deployment" to "100% parity before deployment." The successful path used these concrete solutions:
+
+- Keep a checked-in frozen golden catalog fixture until after the rollback window.
+- Preserve the full editor source in a dedicated `:::program` block.
+- Preserve literate teaching structure in separate executable `:::cell` blocks.
+- Allow cells to restate definitions so class, property, special-method, recursion, match, and type-hint examples stay fine-grained and executable.
+- Compare old and new rendered cells, not just full-program stdout.
+- Block deploy unless the parity script prints `100% golden parity`.
+- Keep generated embedded source data committed and verified with `make check-generated`.
+- Verify the same migration locally, in `pywrangler dev`, through Dynamic Worker POST execution, in browser layout tests, and in production smoke tests.
+
+The migration should be rollback-rehearsed: after a successful implementation, revert the migration, deploy the rollback, smoke-test both hostnames, then re-apply the migration and repeat verification. This proves the project can safely recover if a future content-source migration causes a production issue.
+
 ## Dependency-ordered task list
 
 Investigation and verification tasks come first because they decide the implementation shape.

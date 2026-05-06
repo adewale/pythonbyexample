@@ -74,6 +74,14 @@ class MarkdownMigrationPrereqTests(unittest.TestCase):
             with self.subTest(slug=slug):
                 self.assertIn(f"`{slug}`", investigation)
 
+    def test_spec_captures_successful_migration_and_rollback_rehearsal(self):
+        spec = SPEC.read_text()
+        self.assertIn("Lessons from the successful parity migration", spec)
+        self.assertIn("100% golden parity", spec)
+        self.assertIn("rollback-rehearsed", spec)
+        self.assertIn("revert the migration, deploy the rollback", spec)
+        self.assertIn("re-apply the migration and repeat verification", spec)
+
 
 if __name__ == "__main__":
     unittest.main()
