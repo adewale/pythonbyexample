@@ -153,6 +153,10 @@ make deploy
 
 `make deploy` runs `make build` first, so embedded example data and cache fingerprints are regenerated before Wrangler deploys.
 
+## Contributing
+
+See `CONTRIBUTING.md` for pull request workflow, example editing rules, and verification commands.
+
 ## Updating examples or Python version
 
 Edit Markdown files under `src/example_sources/`.
