@@ -28,6 +28,17 @@ Go By Example's `tools/` directory is intentionally small and strict. Useful les
 
 Python By Example should copy the philosophy, not the exact format: one canonical parser, one strict build pipeline, language-aware validation, line-length/layout constraints, generated-output diffing, and no separate hand-maintained website copy of example code.
 
+## Implementation milestones
+
+This migration must not be implemented as one large switch-over.
+
+1. **Tooling-only milestone** — add Markdown sources, canonical loader, build scripts, verifier, formatter, and golden parity checks while the live app still imports `src/examples.py`.
+2. **Dual-read milestone** — allow tests to load both `src/examples.py` and Markdown examples; keep `src/examples.py` as the public catalog until parity is clean.
+3. **App switch milestone** — switch `src/examples.py` to a thin compatibility layer over the Markdown loader only after local Worker startup, golden parity, and browser layout checks pass.
+4. **Cleanup milestone** — remove the old hand-authored catalog only after one successful deploy and smoke test on both `www.pythonbyexample.dev` and the `workers.dev` hostname.
+
+Each milestone should be independently reviewable and revertible.
+
 ## File layout
 
 Preferred source layout:
@@ -47,6 +58,8 @@ src/example_sources_data.py
 ```
 
 The canonical loader should prefer live Markdown files during local development and fall back to `src/example_sources_data.py` inside the Worker bundle. Verification must fail if the embedded module is stale.
+
+`src/example_sources_data.py` is generated, committed, and treated like `src/asset_manifest.py`: it is not hand-edited, but it is included in commits so deploys are reproducible and Cloudflare has all required source data.
 
 `manifest.toml` defines learning order, section grouping, and the active Python documentation/runtime target:
 
@@ -154,16 +167,13 @@ Rules:
 - A cell must contain exactly one `python` code fence.
 - A cell must contain exactly one `output` fence.
 - Cell prose is required.
-- The output fence must match the output produced by that cell according to the verifier.
+- Cell source must be executable when run after previous cells in the same namespace.
+- The output fence must match the new stdout produced by that cell according to the verifier.
 - Cell labels or numeric IDs may exist for tooling later, but must not render as noisy UI labels.
 
-Some language-tour examples contain source fragments that are not independently executable, such as method bodies without their class header. The failed migration showed that forcing every visual fragment to be an independently executable cell can collapse useful explanations into one large cell. The format therefore needs one of these explicit strategies before implementation:
+The failed migration showed that some current walkthrough fragments are not independently executable, such as method bodies without their class header. The spec resolves this by making executable cells the only renderable source/output unit. Non-executable excerpts may appear only as inline prose or future non-output annotations; they must not be rendered as source/output cells.
 
-- require cells to contain independently executable source, accepting fewer/larger cells where necessary;
-- add an explicit continuation/setup mechanism that contributes to execution without noisy UI labels;
-- or keep separate display fragments and executable cells, with tooling proving that they map to the same full program.
-
-Do not infer non-executable fragments silently.
+This means some examples will intentionally have fewer, larger cells until their teaching flow is rewritten into executable chunks. That is preferable to silently accepting fragments that the verifier cannot run.
 
 ## Full runnable code
 
@@ -181,7 +191,7 @@ The full expected output is derived similarly:
 expected_output = "\n".join(cell.output for cell in cells)
 ```
 
-The attempted migration showed this can introduce harmless extra blank lines compared with the current hand-authored source. That is acceptable only if the verifier treats it as intentional and full output remains unchanged. If byte-for-byte source parity matters, the format needs an explicit full-source block or source-span metadata instead of naive cell joining.
+The attempted migration showed this can introduce harmless extra blank lines compared with the current hand-authored source. The formatter must define the canonical join rule and the parity script must report whitespace-only differences separately from semantic differences. Byte-for-byte source parity is not required after the app switch, but the first migration must prove that any source differences are whitespace-only and that output is unchanged.
 
 ## Output verification model
 
@@ -260,9 +270,9 @@ The website, verifier, build step, and Dynamic Worker cache-key logic should rea
 
 ## Build step
 
-A required build step should turn canonical Markdown sources into generated deploy artifacts.
+A required build step turns canonical Markdown sources into generated deploy artifacts. It should be deterministic and safe to run repeatedly.
 
-Suggested targets:
+Required targets:
 
 ```make
 build: embed-examples fingerprint
@@ -279,6 +289,12 @@ check-generated: build
 verify-examples: build
 	uv run scripts/verify_examples.py
 
+format-examples:
+	uv run scripts/format_examples.py
+
+verify-python-version: build
+	uv run --python $(VERSION) scripts/verify_examples.py --python-version $(VERSION)
+
 verify: build test seo-cache-lint verify-examples browser-layout-test lint check-generated
 
 deploy: build
@@ -292,6 +308,25 @@ Build requirements:
 - Include Markdown source content or embedded source data in `HTML_CACHE_VERSION` so example-only edits bust cached HTML.
 - Fail CI or local verification if generated files are stale.
 - Keep deploy dependent on build.
+- Keep generated files committed until Cloudflare Python Workers reliably bundles Markdown data files directly.
+
+`check-generated` must be part of CI. It catches contributors who edit Markdown but forget to run the build.
+
+## Formatter
+
+`format_examples.py` should make Markdown examples stable without rewriting author voice.
+
+Required behavior:
+
+- Preserve prose text, except for trimming trailing whitespace and normalizing blank lines.
+- Sort frontmatter keys in this order: `slug`, `title`, `section`, `summary`, `doc_path`, then optional version fields.
+- Normalize frontmatter to TOML with quoted strings.
+- Normalize code fences to exactly `````python` and `````output`.
+- Ensure each file ends with one newline.
+- Leave Python code semantics unchanged; do not run Black over snippets unless the command can prove output is unchanged.
+- Provide `--check` mode for CI.
+
+Formatting and verification are separate: formatting rewrites shape, verification executes code and checks output.
 
 ## Strict tooling
 
@@ -314,7 +349,14 @@ Required checks:
 - Verify `min_python` is compatible with the manifest `python_version`.
 - List every `version_sensitive` example in verifier output during a version migration.
 - Verify summaries are non-empty and titles are unique.
-- Report errors with source filenames and line numbers where possible.
+- Report errors with source filenames and line numbers.
+
+Line-number requirement:
+
+- The parser should keep source offsets for frontmatter, each cell, each Python fence, each output fence, and each note block.
+- Verification errors should point to the Markdown file and the start line of the failing cell or field, for example `src/example_sources/values.md:17: output mismatch`.
+- Parser errors should include the nearest construct name: frontmatter, cell, python fence, output fence, or note.
+- If exact line numbers are unavailable during the first tooling-only milestone, the verifier may ship temporarily with file-level errors, but app switch is blocked until line numbers are implemented.
 
 ## Python version migrations
 
@@ -322,11 +364,18 @@ Migration checklist:
 
 1. Confirm Cloudflare Python Workers supports the new Python runtime.
 2. Update `python_version` and `docs_base_url` in `src/example_sources/manifest.toml`.
-3. Ensure website runtime constants and Dynamic Worker cache keys are derived from the catalog model.
-4. Run `make verify-python-version VERSION=3.14` under the target runtime when available.
-5. Review every example reported as `version_sensitive`.
-6. Update outputs only by rerunning examples through the verifier/update tool, not by hand-editing guesses.
-7. Run full project verification before deployment.
+3. Update `pyproject.toml` only after the Worker runtime supports the new version.
+4. Ensure website runtime constants and Dynamic Worker cache keys are derived from the catalog model.
+5. Run local verifier under the target CPython when available:
+
+   ```bash
+   make verify-python-version VERSION=3.14
+   ```
+
+6. Run Worker runtime verification with `pywrangler dev`, because CPython and Cloudflare's Pyodide runtime may differ.
+7. Review every example reported as `version_sensitive`.
+8. Update outputs only by rerunning examples through the verifier/update tool, not by hand-editing guesses.
+9. Run full project verification before deployment.
 
 The command should fail if:
 
@@ -336,6 +385,48 @@ The command should fail if:
 - cell output changes under the new runtime;
 - full generated output changes under the new runtime;
 - site copy, SEO metadata, or Dynamic Worker cache-key version still points at the old version.
+
+`verify-python-version` is only meaningful when `uv` can run the requested Python version. Until Cloudflare exposes the same runtime locally, the migration also requires a Worker smoke test for representative examples and at least one POST execution through Dynamic Workers.
+
+## Worker bundling policy
+
+Default policy:
+
+- Keep Markdown sources in `src/example_sources/`.
+- Generate `src/example_sources_data.py` during `make build`.
+- Load live Markdown files when present; fall back to embedded data in the Worker bundle.
+- Verify embedded data is fresh before tests, deploys, and CI.
+
+Do not replace this with a native Wrangler data-file approach unless a spike proves all of the following:
+
+- `pywrangler dev` can read the files locally;
+- `pywrangler deploy` includes the files in production;
+- imports work under Cloudflare's Python Worker module layout;
+- cache fingerprinting sees example-only edits;
+- tests fail if files are missing from the bundle.
+
+The attempted migration failed at Worker startup because Markdown files were not present under `/session/metadata/`. That failure mode must remain covered by a local Worker startup check.
+
+## Golden parity script
+
+Add a dedicated migration script before switching the app:
+
+```text
+scripts/check_example_migration_parity.py
+```
+
+Required behavior:
+
+- Import the old `src/examples.py` catalog as the golden source.
+- Load the Markdown catalog through `src/example_loader.py`.
+- Compare example count and order.
+- Compare `slug`, `title`, `section`, `summary`, generated `doc_url`, `expected_output`, notes, and walkthrough prose/source.
+- Execute old and new full code and compare stdout.
+- Classify full-code differences as `identical`, `whitespace-only`, or `semantic`.
+- Fail on semantic differences unless explicitly allowlisted in the migration PR.
+- Print a short table of differences for review.
+
+This script is temporary migration scaffolding. It can be removed after the old catalog is deleted and one production deployment succeeds.
 
 ## Migration safety for implementing this spec
 
@@ -372,7 +463,7 @@ For one page:
 uv run scripts/verify_examples.py values
 ```
 
-The command should report errors against the Markdown source file and line numbers where possible.
+The command must report errors against the Markdown source file and line numbers before the app switch milestone.
 
 ## Non-goals
 
