@@ -6,6 +6,8 @@ import unittest
 from pathlib import Path
 
 from src.app import build_dynamic_worker_code, get_example, list_examples, render_example_page, render_home, route
+from src.example_loader import EXAMPLES_DIR, load_manifest, verify_example_output
+from src.example_sources_data import EXAMPLE_SOURCE_FILES
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -321,6 +323,17 @@ class AppTests(unittest.TestCase):
         self.assertIn('"assets"', wrangler)
         self.assertIn('"directory": "./public"', wrangler)
         self.assertTrue((ROOT / "public" / "favicon.svg").exists())
+
+    def test_markdown_sources_drive_catalog_and_verifier(self):
+        catalog = load_manifest()
+        self.assertEqual(catalog.python_version, "3.13")
+        self.assertEqual(catalog.docs_base_url, "https://docs.python.org/3.13")
+        self.assertEqual(catalog.order[0], "hello-world")
+        values_source = (EXAMPLES_DIR / "values.md").read_text()
+        self.assertIn('doc_path = "/library/stdtypes.html"', values_source)
+        self.assertNotIn("docs.python.org/3.13", values_source)
+        self.assertEqual(EXAMPLE_SOURCE_FILES["values.md"], values_source)
+        self.assertEqual(verify_example_output(get_example("values")), [])
 
     def test_dynamic_worker_code_wraps_user_example(self):
         code = build_dynamic_worker_code('print("ok")\n')
