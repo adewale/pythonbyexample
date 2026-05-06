@@ -8,42 +8,66 @@ doc_path = "/reference/simple_stmts.html#assignment-statements"
 
 Python variables are names bound to objects. Assignment creates or rebinds a name; it does not require a declaration and it does not permanently attach a type to the name.
 
-Augmented assignment such as += is the idiomatic way to update counters and accumulators. It reads the current binding, computes a new value or mutates in place when appropriate, and stores the result.
+Rebinding changes which object a name refers to. Augmented assignment such as `+=` is the idiomatic way to update counters and accumulators.
 
-Python variables are names bound to objects, not boxes with fixed types. Augmented assignment like += rebinding is common for counters.
+Use clear names for values that matter later. Python's flexibility makes naming more important, not less.
 
 :::program
 ```python
 message = "hi"
+print(message)
+
+message = "hello"
+print(message)
+
 count = 3
 count += 1
-
-print(message)
 print(count)
 ```
 :::
 
 :::cell
-Python variables are names bound to objects. Assignment creates or rebinds a name; it does not require a declaration and it does not permanently attach a type to the name.
-
-Augmented assignment such as += is the idiomatic way to update counters and accumulators. It reads the current binding, computes a new value or mutates in place when appropriate, and stores the result.
+Assignment binds a name to a value. Once bound, the name can be used anywhere that value is needed.
 
 ```python
 message = "hi"
-count = 3
-count += 1
-
 print(message)
-print(count)
 ```
 
 ```output
 hi
+```
+:::
+
+:::cell
+Assignment can rebind the same name to a different value. The name is not permanently attached to the first object.
+
+```python
+message = "hello"
+print(message)
+```
+
+```output
+hello
+```
+:::
+
+:::cell
+Augmented assignment reads the current binding, computes an updated value, and stores the result back under the same name.
+
+```python
+count = 3
+count += 1
+print(count)
+```
+
+```output
 4
 ```
 :::
 
 :::note
 - Python variables are names bound to objects, not boxes with fixed types.
-- Augmented assignment like += rebinding is common for counters.
+- Rebinding a name is normal.
+- Use augmented assignment for counters and accumulators.
 :::

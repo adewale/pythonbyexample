@@ -20,19 +20,15 @@ def make_multiplier(factor):
     return multiply
 
 double = make_multiplier(2)
-triple = make_multiplier(3)
-
 print(double(5))
+
+triple = make_multiplier(3)
 print(triple(5))
 ```
 :::
 
 :::cell
-Define a function inside another function when the inner behavior needs to remember some setup value.
-
-Each call creates a new closure. `double` remembers `factor == 2`, while `triple` remembers `factor == 3`.
-
-Calling the returned function later still has access to the captured value.
+Define a function inside another function when the inner behavior needs to remember setup from the outer call. The returned function keeps access to `factor`.
 
 ```python
 def make_multiplier(factor):
@@ -41,19 +37,29 @@ def make_multiplier(factor):
     return multiply
 
 double = make_multiplier(2)
-triple = make_multiplier(3)
-
 print(double(5))
-print(triple(5))
 ```
 
 ```output
 10
+```
+:::
+
+:::cell
+Calling the outer function again creates a separate closure. `triple` uses the same inner code, but remembers a different `factor`.
+
+```python
+triple = make_multiplier(3)
+print(triple(5))
+```
+
+```output
 15
 ```
 :::
 
 :::note
 - A closure keeps access to names from the scope where the inner function was created.
+- Each call to the outer function can create a separate remembered environment.
 - Closures are useful for callbacks, small factories, and decorators.
 :::

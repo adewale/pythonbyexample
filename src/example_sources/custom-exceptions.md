@@ -17,10 +17,15 @@ Catch custom exceptions at the boundary where recovery makes sense, such as retu
 class EmptyCartError(Exception):
     pass
 
+print(EmptyCartError.__name__)
+
+
 def checkout(items):
     if not items:
         raise EmptyCartError("cart is empty")
     return "paid"
+
+print(checkout(["book"]))
 
 try:
     checkout([])
@@ -32,19 +37,39 @@ except EmptyCartError as error:
 :::cell
 Create a custom exception when a failure has a name in your problem domain. The class can be empty at first.
 
-Raise the custom exception where the invalid state is detected. The message explains this particular occurrence.
-
-Callers can catch the precise error type without accidentally catching unrelated failures.
-
 ```python
 class EmptyCartError(Exception):
     pass
 
+print(EmptyCartError.__name__)
+```
+
+```output
+EmptyCartError
+```
+:::
+
+:::cell
+Raise the custom exception where the invalid state is detected. Normal inputs still follow the ordinary success path.
+
+```python
 def checkout(items):
     if not items:
         raise EmptyCartError("cart is empty")
     return "paid"
 
+print(checkout(["book"]))
+```
+
+```output
+paid
+```
+:::
+
+:::cell
+Callers can catch the precise error type without accidentally catching unrelated failures.
+
+```python
 try:
     checkout([])
 except EmptyCartError as error:
@@ -59,4 +84,5 @@ cart is empty
 :::note
 - Subclass `Exception` for errors callers are expected to catch.
 - A custom exception name can be clearer than reusing a generic `ValueError` everywhere.
+- Catch custom exceptions at a boundary that can recover or report clearly.
 :::

@@ -2,42 +2,74 @@
 slug = "comprehensions"
 title = "Comprehensions"
 section = "Collections"
-summary = "Comprehensions build collections from iterables concisely."
+summary = "Comprehensions build collections by mapping and filtering iterables."
 doc_path = "/tutorial/datastructures.html#list-comprehensions"
 +++
 
-Comprehensions build lists, dictionaries, and sets from iterables in a compact form. They combine mapping and optional filtering in one expression.
+Comprehensions are expression forms for building collections from iterables. Read them from left to right: produce this value, for each item, optionally only when a condition is true.
 
-Use comprehensions for straightforward transformations. If the expression becomes hard to read, an explicit loop is often the better teaching and maintenance choice.
+They are best for direct transformations where the expression is still easy to scan. When the work needs several statements or names, an explicit loop is usually clearer.
 
-Comprehensions combine mapping and filtering. Keep complex comprehensions readable.
+Comprehensions can build lists, dictionaries, and sets. Prefer them when the output shape is obvious from the expression.
 
 :::program
 ```python
-squares = [n * n for n in range(6)]
-even_squares = {n: n * n for n in range(6) if n % 2 == 0}
-print(squares)
-print(even_squares)
+names = ["ada", "guido", "grace"]
+titled = [name.title() for name in names]
+print(titled)
+
+scores = {"Ada": 10, "Guido": 8, "Grace": 10}
+high_scores = {name: score for name, score in scores.items() if score >= 10}
+print(high_scores)
+
+unique_scores = {score for score in scores.values()}
+print(unique_scores)
 ```
 :::
 
 :::cell
-Comprehensions build lists, dictionaries, and sets from iterables in a compact form. They combine mapping and optional filtering in one expression.
+A list comprehension maps each input item to one output item. This one calls `title()` for every name and collects the results in a new list.
 
 ```python
-squares = [n * n for n in range(6)]
-even_squares = {n: n * n for n in range(6) if n % 2 == 0}
-print(squares)
-print(even_squares)
+names = ["ada", "guido", "grace"]
+titled = [name.title() for name in names]
+print(titled)
 ```
 
 ```output
-[0, 1, 4, 9, 16, 25]
-{0: 0, 2: 4, 4: 16}
+['Ada', 'Guido', 'Grace']
+```
+:::
+
+:::cell
+Add an `if` clause when only some items should appear. A dictionary comprehension can transform key/value pairs while preserving the dictionary shape.
+
+```python
+scores = {"Ada": 10, "Guido": 8, "Grace": 10}
+high_scores = {name: score for name, score in scores.items() if score >= 10}
+print(high_scores)
+```
+
+```output
+{'Ada': 10, 'Grace': 10}
+```
+:::
+
+:::cell
+A set comprehension keeps only unique results. Here two people have the same score, so the resulting set has two values.
+
+```python
+unique_scores = {score for score in scores.values()}
+print(unique_scores)
+```
+
+```output
+{8, 10}
 ```
 :::
 
 :::note
-- Comprehensions combine mapping and filtering.
-- Keep complex comprehensions readable.
+- The left side says what to produce; the `for` clause says where values come from.
+- Use an `if` clause for simple filters.
+- Switch to a loop when the transformation needs multiple steps or explanations.
 :::

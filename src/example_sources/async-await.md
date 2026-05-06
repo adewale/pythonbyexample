@@ -2,51 +2,88 @@
 slug = "async-await"
 title = "Async Await"
 section = "Async"
-summary = "async def defines coroutines that can be awaited."
+summary = "async def creates coroutines, and await pauses until awaitable work completes."
 doc_path = "/library/asyncio-task.html"
 +++
 
-async def creates a coroutine function, and await pauses that coroutine until another awaitable completes. This lets one worker handle other tasks while waiting for I/O.
+`async def` creates a coroutine function. Calling it creates a coroutine object; the body runs when an event loop awaits or schedules it.
 
-Cloudflare Workers handlers are asynchronous, so understanding await is practical for fetch calls, bindings, and service interactions even when a small example only sleeps briefly.
+`await` pauses the current coroutine until another awaitable completes. This lets one event loop make progress on other work while a task waits for I/O.
 
-await yields control until an awaitable completes. Cloudflare Workers handlers are async functions.
+Cloudflare Workers handlers are asynchronous, so understanding `await` is practical for fetch calls, bindings, and service interactions even when a small example uses `asyncio.sleep(0)` as a stand-in.
 
 :::program
 ```python
 import asyncio
 
-async def answer():
+async def fetch_title(slug):
     await asyncio.sleep(0)
-    return 42
+    return slug.replace("-", " ").title()
 
-print(asyncio.run(answer()))
+async def main():
+    title = await fetch_title("async-await")
+    print(title)
+    titles = await asyncio.gather(fetch_title("json"), fetch_title("datetime"))
+    print(titles)
+
+asyncio.run(main())
 ```
 :::
 
 :::cell
-async def creates a coroutine function, and await pauses that coroutine until another awaitable completes. This lets one worker handle other tasks while waiting for I/O.
-
-Cloudflare Workers handlers are asynchronous, so understanding await is practical for fetch calls, bindings, and service interactions even when a small example only sleeps briefly.
-
-await yields control until an awaitable completes. Cloudflare Workers handlers are async functions.
+An `async def` function returns a coroutine object when called. The function body has not produced its final result yet.
 
 ```python
 import asyncio
 
-async def answer():
+async def fetch_title(slug):
     await asyncio.sleep(0)
-    return 42
+    return slug.replace("-", " ").title()
 
-print(asyncio.run(answer()))
+coroutine = fetch_title("async-await")
+print(coroutine.__class__.__name__)
+coroutine.close()
 ```
 
 ```output
-42
+coroutine
+```
+:::
+
+:::cell
+Use `await` inside another coroutine to get the eventual result. `asyncio.run()` starts an event loop for the top-level coroutine.
+
+```python
+async def main():
+    title = await fetch_title("async-await")
+    print(title)
+
+asyncio.run(main())
+```
+
+```output
+Async Await
+```
+:::
+
+:::cell
+`asyncio.gather()` awaits several awaitables and returns their results in order. This is the shape used when independent I/O operations can progress together.
+
+```python
+async def main():
+    titles = await asyncio.gather(fetch_title("json"), fetch_title("datetime"))
+    print(titles)
+
+asyncio.run(main())
+```
+
+```output
+['Json', 'Datetime']
 ```
 :::
 
 :::note
-- await yields control until an awaitable completes.
-- Cloudflare Workers handlers are async functions.
+- Calling an async function creates a coroutine object.
+- `await` yields control until an awaitable completes.
+- Workers request handlers are async, so this pattern appears around fetches and bindings.
 :::

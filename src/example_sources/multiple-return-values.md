@@ -19,16 +19,17 @@ def divide_with_remainder(total, size):
     remainder = total % size
     return quotient, remainder
 
-boxes, leftover = divide_with_remainder(17, 5)
+result = divide_with_remainder(17, 5)
+print(result)
+
+boxes, leftover = result
 print(boxes)
 print(leftover)
 ```
 :::
 
 :::cell
-Python functions can appear to return multiple values. The mechanism is simple: `return quotient, remainder` returns a tuple.
-
-Callers usually unpack the tuple immediately. The names at the call site document what each position means.
+Returning values separated by commas returns one tuple. The tuple is visible if the caller stores the result directly.
 
 ```python
 def divide_with_remainder(total, size):
@@ -36,7 +37,20 @@ def divide_with_remainder(total, size):
     remainder = total % size
     return quotient, remainder
 
-boxes, leftover = divide_with_remainder(17, 5)
+result = divide_with_remainder(17, 5)
+print(result)
+```
+
+```output
+(3, 2)
+```
+:::
+
+:::cell
+Callers usually unpack the tuple immediately or soon after. The names at the call site document what each position means.
+
+```python
+boxes, leftover = result
 print(boxes)
 print(leftover)
 ```
@@ -50,4 +64,5 @@ print(leftover)
 :::note
 - A comma creates a tuple; `return a, b` returns one tuple containing two values.
 - Unpacking at the call site gives each returned position a meaningful name.
+- Use a class-like record when the result has many fields.
 :::

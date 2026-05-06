@@ -2,39 +2,76 @@
 slug = "lambdas"
 title = "Lambdas"
 section = "Functions"
-summary = "lambda creates small anonymous functions."
+summary = "lambda creates small anonymous function expressions."
 doc_path = "/tutorial/controlflow.html#lambda-expressions"
 +++
 
-lambda creates a small anonymous function expression. It is most useful when a function is needed briefly, such as a sort key or callback.
+`lambda` creates a small anonymous function expression. It is most useful when Python asks for a function and the behavior is short enough to read inline.
 
-Because lambdas are limited to one expression, they should stay simple. Use def when the behavior needs a name, statements, or explanation.
+A lambda can only contain one expression. Use `def` when the behavior deserves a name, needs statements, or would be easier to test separately.
 
-Lambdas are expressions, not statements. They are often passed as key functions.
+Lambdas often appear as key functions, callbacks, and tiny adapters. Keep them simple enough that the call site remains clearer than a named helper.
 
 :::program
 ```python
-pairs = [("b", 2), ("a", 3), ("c", 1)]
-by_number = sorted(pairs, key=lambda item: item[1])
-print(by_number)
+add_tax = lambda price: round(price * 1.08, 2)
+print(add_tax(10))
+
+items = [("notebook", 5), ("pen", 2), ("bag", 20)]
+by_price = sorted(items, key=lambda item: item[1])
+print(by_price)
+
+def price(item):
+    return item[1]
+
+print(sorted(items, key=price))
 ```
 :::
 
 :::cell
-lambda creates a small anonymous function expression. It is most useful when a function is needed briefly, such as a sort key or callback.
+A lambda is a function expression. Assigning one to a name works, although `def` is usually clearer for reusable behavior.
 
 ```python
-pairs = [("b", 2), ("a", 3), ("c", 1)]
-by_number = sorted(pairs, key=lambda item: item[1])
-print(by_number)
+add_tax = lambda price: round(price * 1.08, 2)
+print(add_tax(10))
 ```
 
 ```output
-[('c', 1), ('b', 2), ('a', 3)]
+10.8
+```
+:::
+
+:::cell
+Lambdas are most idiomatic when passed directly to another function. `sorted()` calls this key function once for each item.
+
+```python
+items = [("notebook", 5), ("pen", 2), ("bag", 20)]
+by_price = sorted(items, key=lambda item: item[1])
+print(by_price)
+```
+
+```output
+[('pen', 2), ('notebook', 5), ('bag', 20)]
+```
+:::
+
+:::cell
+A named function is better when the behavior should be reused or explained. It produces the same sort key, but gives the operation a name.
+
+```python
+def price(item):
+    return item[1]
+
+print(sorted(items, key=price))
+```
+
+```output
+[('pen', 2), ('notebook', 5), ('bag', 20)]
 ```
 :::
 
 :::note
 - Lambdas are expressions, not statements.
-- They are often passed as key functions.
+- Prefer `def` for multi-step or reused behavior.
+- Lambdas are common as `key=` functions because the behavior is local to one call.
 :::
