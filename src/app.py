@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import contextlib
+import difflib
 import html
 import io
 import json
@@ -27,6 +28,36 @@ def list_examples():
 
 def get_example(slug):
     return EXAMPLES_BY_SLUG.get(slug)
+
+
+def _example_index(slug):
+    for index, example in enumerate(EXAMPLES):
+        if example["slug"] == slug:
+            return index
+    return -1
+
+
+def _see_also_label(source_slug, target_slug):
+    explicit = SEE_ALSO_EDGE_LABELS.get((source_slug, target_slug))
+    if explicit:
+        return explicit
+    source = get_example(source_slug)
+    target = get_example(target_slug)
+    if source and target and source.get("section") == target.get("section"):
+        return "related"
+    source_index = _example_index(source_slug)
+    target_index = _example_index(target_slug)
+    if target_index >= 0 and source_index >= 0 and target_index < source_index:
+        return "prerequisite"
+    return "next depth"
+
+
+def _recommended_examples(slug, limit=4):
+    matches = difflib.get_close_matches(slug, [example["slug"] for example in EXAMPLES], n=limit, cutoff=0.2)
+    recommendations = [get_example(match) for match in matches]
+    if not recommendations:
+        recommendations = EXAMPLES[:limit]
+    return [example for example in recommendations if example is not None][:limit]
 
 
 def build_dynamic_worker_code(example_code: str) -> str:
@@ -59,6 +90,21 @@ class Default(WorkerEntrypoint):
 _TEMPLATE_DIR = Path(__file__).with_name("templates")
 _TEMPLATE_CACHE = {}
 SITE_URL = "https://www.pythonbyexample.dev"
+
+SEE_ALSO_EDGE_LABELS = {
+    ("break-and-continue", "loop-else"): "contrast",
+    ("assignment-expressions", "conditionals"): "contrast",
+    ("yield-from", "generators"): "prerequisite",
+    ("async-iteration-and-context", "async-await"): "prerequisite",
+    ("delete-statements", "mutability"): "shared mechanism",
+    ("positional-only-parameters", "keyword-only-arguments"): "contrast",
+    ("assertions", "exceptions"): "alternative",
+    ("exception-chaining", "exceptions"): "builds on",
+    ("exception-groups", "exceptions"): "alternative",
+    ("operators-and-literals", "numbers"): "related syntax",
+    ("operators-and-literals", "strings"): "related syntax",
+    ("operators-and-literals", "sets"): "related syntax",
+}
 
 
 FAVICON_SVG = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Python By Example">
@@ -305,7 +351,7 @@ def render_example_page(example, output=None, code=None, execution_time_ms=None)
     notes_html = "".join(f"<li>{note}</li>" for note in notes)
     see_also_examples = [get_example(slug) for slug in example.get("see_also", [])]
     see_also_links = "".join(
-        f'<li><a class="text-link" href="/examples/{html.escape(item["slug"])}">{html.escape(item["title"])}</a></li>'
+        f'<li><span class="see-also-label">{html.escape(_see_also_label(example["slug"], item["slug"]))}</span> <a class="text-link" href="/examples/{html.escape(item["slug"])}">{html.escape(item["title"])}</a></li>'
         for item in see_also_examples
         if item is not None
     )
@@ -364,7 +410,12 @@ def route(url: str, method: str = "GET") -> AppResponse:
         slug = path.split("/", 2)[2]
         example = get_example(slug)
         if example is None:
-            return AppResponse(_layout("Not Found", "<h1>Example not found</h1>"), status=404)
+            recommendations = "".join(
+                f'<li><a class="text-link" href="/examples/{html.escape(item["slug"])}">{html.escape(item["title"])}</a></li>'
+                for item in _recommended_examples(slug)
+            )
+            body = f'<h1>Example not found</h1><p class="meta">Try one of these nearby examples.</p><section class="see-also"><h2>Recommended examples</h2><ul>{recommendations}</ul></section>'
+            return AppResponse(_layout("Not Found", body), status=404)
         return AppResponse(
             render_example_page(example), headers={"Content-Type": "text/html; charset=utf-8"}
         )

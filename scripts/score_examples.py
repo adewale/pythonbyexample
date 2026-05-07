@@ -35,6 +35,7 @@ class Score:
     literate: float
     output: float
     navigation: float
+    graph: float
     layout: float
 
 
@@ -87,19 +88,21 @@ def score_python_example(example: dict) -> Score:
 
     output = 1.0 if example.get("expected_output") is not None and "white-space: pre-wrap" in PROJECT_SURFACE and "overflow-wrap: anywhere" in PROJECT_SURFACE else 0.4
     navigation = 1.0 if "rel=\"prev\"" in PROJECT_SURFACE and "rel=\"next\"" in PROJECT_SURFACE and "docs.python.org/3.13/" in example.get("doc_url", "") else 0.5
+    see_also = example.get("see_also", [])
+    graph = 0.3 if see_also and "see-also-label" in PROJECT_SURFACE else 0.0
     layout = 1.0
     if "class=\"pill\"" in PROJECT_SURFACE or "corner" in PROJECT_SURFACE or "border-radius: 999px; color: inherit" in PROJECT_SURFACE:
         layout -= 0.4
     if "nav a { color: inherit; text-decoration: underline" not in PROJECT_SURFACE:
         layout -= 0.2
-    total = round(max(0, payoff + deterministic + idiom + literate + output + navigation + layout), 2)
-    return Score(example["slug"], total, payoff, deterministic, idiom, literate, output, navigation, max(0, layout))
+    total = round(max(0, payoff + deterministic + idiom + literate + output + navigation + graph + layout), 2)
+    return Score(example["slug"], total, payoff, deterministic, idiom, literate, output, navigation, graph, max(0, layout))
 
 
 def score_external_literate_page(name: str, url: str, language_markers: tuple[str, ...], reference_label: str) -> Score:
     text = _fetch_text(url)
     if not text:
-        return Score(name, 0, 0, 0, 0, 0, 0, 0, 0)
+        return Score(name, 0, 0, 0, 0, 0, 0, 0, 0, 0)
     words = text.split()
     payoff = 1.8 if len(words) > 220 else 1.5
     deterministic = 1.1 if any(marker in text for marker in ["Run", "Playground", "$ go run", "go run"]) else 0.8
@@ -110,7 +113,7 @@ def score_external_literate_page(name: str, url: str, language_markers: tuple[st
     navigation = 0.8 if any(marker in text for marker in ["Next", "Previous", "Rust By Example", "Go by Example"]) else 0.4
     layout = 1.0
     total = round(payoff + deterministic + idiom + literate + output + navigation + layout, 2)
-    return Score(name, total, payoff, deterministic, idiom, literate, output, navigation, layout)
+    return Score(name, total, payoff, deterministic, idiom, literate, output, navigation, 0.0, layout)
 
 
 def score_gobyexample_page(slug: str) -> Score:
@@ -123,9 +126,9 @@ def score_rust_by_example_page(slug: str) -> Score:
 
 def print_table(title: str, scores: list[Score]) -> None:
     print(f"\n{title}")
-    print("name,total,payoff,deterministic,idiom,literate,output,navigation,layout")
+    print("name,total,payoff,deterministic,idiom,literate,output,navigation,graph,layout")
     for s in scores:
-        print(f"{s.name},{s.total:.2f},{s.payoff:.1f},{s.deterministic:.1f},{s.idiom:.1f},{s.literate:.1f},{s.output:.1f},{s.navigation:.1f},{s.layout:.1f}")
+        print(f"{s.name},{s.total:.2f},{s.payoff:.1f},{s.deterministic:.1f},{s.idiom:.1f},{s.literate:.1f},{s.output:.1f},{s.navigation:.1f},{s.graph:.1f},{s.layout:.1f}")
     print(f"average,{mean(s.total for s in scores):.2f}")
 
 

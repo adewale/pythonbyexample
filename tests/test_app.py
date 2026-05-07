@@ -195,7 +195,11 @@ class AppTests(unittest.TestCase):
                 self.assertTrue(set(example["see_also"]).issubset(slugs), set(example["see_also"]) - slugs)
         html = render_example_page(get_example("break-and-continue"))
         self.assertIn("See also", html)
+        self.assertIn("contrast", html)
         self.assertIn('/examples/loop-else', html)
+        missing = route("https://example.com/examples/break-continue")
+        self.assertEqual(missing.status, 404)
+        self.assertIn("Recommended examples", missing.body)
 
     def test_examples_are_in_learning_order_and_link_supported_python_docs(self):
         examples = list_examples()
