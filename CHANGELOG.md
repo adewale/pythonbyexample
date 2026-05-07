@@ -25,6 +25,7 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 - `iterators` and `generator-expressions` examples to make the Iteration arc explicit.
 - Syntax coverage examples for loop control, loop `else`, assertions, deletion, scope rebinding, positional-only parameters, assignment expressions, `yield from`, exception chaining/groups, advanced match patterns, inheritance, metaclasses, async iteration/context managers, import aliases, and specialized operators/literals.
 - Optional `see_also` example graph links with validation tests.
+- `Protocol` example covering structural typing and its boundary with inheritance.
 
 ### Changed
 

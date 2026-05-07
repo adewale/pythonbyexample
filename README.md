@@ -6,7 +6,7 @@ Production: <https://www.pythonbyexample.dev> (`workers.dev` remains enabled as 
 
 ## Features
 
-- 69 curated Python 3.13 examples in learning order
+- 70 curated Python 3.13 examples in learning order
 - Literate source/output cells for each example walkthrough
 - Editable complete examples powered by CodeMirror
 - Read-only syntax highlighting powered by Shiki

@@ -2526,6 +2526,63 @@ EXAMPLES = [{'slug': 'hello-world',
              'code': 'def label(score: int) -> str:\n    return f"score={score}"\n\nprint(label("high"))',
              'output': 'score=high',
              'line': 44}]},
+ {'slug': 'protocols',
+  'title': 'Protocols',
+  'section': 'Types',
+  'summary': 'Protocol describes required behavior for structural typing.',
+  'doc_url': 'https://docs.python.org/3.13/library/typing.html#typing.Protocol',
+  'code': 'from typing import Protocol\n'
+          '\n'
+          'class Greeter(Protocol):\n'
+          '    def greet(self) -> str:\n'
+          '        ...\n'
+          '\n'
+          'class Person:\n'
+          '    def __init__(self, name):\n'
+          '        self.name = name\n'
+          '\n'
+          '    def greet(self):\n'
+          '        return f"hello {self.name}"\n'
+          '\n'
+          '\n'
+          'def welcome(greeter: Greeter):\n'
+          '    print(greeter.greet())\n'
+          '\n'
+          'welcome(Person("Ada"))\n'
+          'print(Greeter.__name__)\n',
+  'expected_output': 'hello Ada\nGreeter\n',
+  'notes': ['Protocols are for structural typing: compatibility by shape rather than explicit inheritance.',
+            'Type checkers understand protocols; normal runtime method calls still do the work.',
+            'Prefer inheritance when shared implementation matters, and protocols when only required behavior '
+            'matters.'],
+  'cells': [{'prose': ['A protocol names required behavior. The ellipsis marks the method body as intentionally '
+                       'unspecified, similar to an interface declaration.'],
+             'code': 'from typing import Protocol\n'
+                     '\n'
+                     'class Greeter(Protocol):\n'
+                     '    def greet(self) -> str:\n'
+                     '        ...\n'
+                     '\n'
+                     'print(Greeter.__name__)',
+             'output': 'Greeter',
+             'line': 22},
+            {'prose': ['A class can satisfy the protocol without inheriting from it. `Person` has a compatible '
+                       '`greet()` method, so it has the right shape for static type checkers.'],
+             'code': 'class Person:\n'
+                     '    def __init__(self, name):\n'
+                     '        self.name = name\n'
+                     '\n'
+                     '    def greet(self):\n'
+                     '        return f"hello {self.name}"\n'
+                     '\n'
+                     'print(Person("Ada").greet())',
+             'output': 'hello Ada',
+             'line': 40},
+            {'prose': ['Use the protocol as an annotation at the API boundary. The function only cares that the object '
+                       'can greet; it does not care about the concrete class.'],
+             'code': 'def welcome(greeter: Greeter):\n    print(greeter.greet())\n\nwelcome(Person("Ada"))',
+             'output': 'hello Ada',
+             'line': 59}]},
  {'slug': 'enums',
   'title': 'Enums',
   'section': 'Types',

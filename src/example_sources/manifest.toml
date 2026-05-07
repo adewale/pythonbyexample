@@ -63,6 +63,7 @@ order = [
   "modules",
   "import-aliases",
   "type-hints",
+  "protocols",
   "enums",
   "regular-expressions",
   "number-parsing",

@@ -112,6 +112,7 @@ class AppTests(unittest.TestCase):
             "inheritance-and-super",
             "metaclasses",
             "type-hints",
+            "protocols",
             "enums",
             "json",
             "assertions",
@@ -177,6 +178,7 @@ class AppTests(unittest.TestCase):
             "pattern = r\"\\d+\"",
             "data = b\"py\"",
             "number = 2 + 3j",
+            "class Greeter(Protocol):",
             "print(Scale(2) @ Scale(3))",
             "print(...)",
         ]
