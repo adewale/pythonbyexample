@@ -2,15 +2,15 @@
 slug = "itertools"
 title = "Itertools"
 section = "Iteration"
-summary = "itertools provides lazy iterator building blocks."
+summary = "itertools composes lazy iterator streams."
 doc_path = "/library/itertools.html"
 +++
 
-The `itertools` module contains iterator building blocks for combining, slicing, grouping, and repeating streams of values. These tools pair naturally with `for` loops and generators.
+The `itertools` module contains tools for composing iterator streams: combining, slicing, grouping, and repeating values without changing the consumer protocol.
 
 Many `itertools` functions are lazy. They describe work to do later instead of building a list immediately, so helpers such as `islice()` are useful when taking a finite window.
 
-Iterator pipelines let each step stay small. Convert to `list()` only at the edge when you need to display, store, or reuse the results.
+Iterator pipelines let each step stay small: one object produces values, another transforms them, and a final consumer such as `list()` or a loop pulls values through the pipeline.
 
 :::program
 ```python
@@ -71,6 +71,7 @@ print(list(high_scores))
 :::
 
 :::note
+- `itertools` composes producer and transformer streams.
 - Iterator pipelines avoid building intermediate lists.
 - Use `islice()` to take a finite piece from an infinite iterator.
 - Convert to a list only when you need concrete results.

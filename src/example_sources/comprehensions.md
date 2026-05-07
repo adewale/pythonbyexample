@@ -6,11 +6,11 @@ summary = "Comprehensions build collections by mapping and filtering iterables."
 doc_path = "/tutorial/datastructures.html#list-comprehensions"
 +++
 
-Comprehensions are expression forms for building collections from iterables. Read them from left to right: produce this value, for each item, optionally only when a condition is true.
+Comprehensions are expression forms for building concrete collections from iterables. Read them from left to right: produce this value, for each item, optionally only when a condition is true.
 
 They are best for direct transformations where the expression is still easy to scan. When the work needs several statements or names, an explicit loop is usually clearer.
 
-Comprehensions can build lists, dictionaries, and sets. Prefer them when the output shape is obvious from the expression.
+List, dictionary, and set comprehensions are eager: they build collections immediately. Generator expressions use similar syntax to stream values later and are covered in the Iteration section.
 
 :::program
 ```python
@@ -71,5 +71,6 @@ print(unique_scores)
 :::note
 - The left side says what to produce; the `for` clause says where values come from.
 - Use an `if` clause for simple filters.
+- List, dict, and set comprehensions build concrete collections immediately.
 - Switch to a loop when the transformation needs multiple steps or explanations.
 :::

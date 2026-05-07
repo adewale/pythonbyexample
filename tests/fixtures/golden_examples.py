@@ -465,53 +465,77 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'iterating-over-iterables',
   'title': 'Iterating over Iterables',
   'section': 'Iteration',
-  'summary': 'for loops work with any iterable, not just numeric ranges.',
+  'summary': 'for loops consume values from any iterable object.',
   'doc_url': 'https://docs.python.org/3.13/tutorial/controlflow.html#for-statements',
   'code': 'names = ["Ada", "Grace", "Guido"]\n'
           '\n'
-          '# Iterate over values directly.\n'
           'for name in names:\n'
           '    print(name)\n'
           '\n'
-          '# enumerate adds a counter without manual indexing.\n'
           'for index, name in enumerate(names):\n'
           '    print(index, name)\n'
           '\n'
           'scores = {"Ada": 10, "Grace": 9}\n'
-          '\n'
-          '# items yields key/value pairs from a dictionary.\n'
           'for name, score in scores.items():\n'
           '    print(name, score)\n',
   'expected_output': 'Ada\nGrace\nGuido\n0 Ada\n1 Grace\n2 Guido\nAda 10\nGrace 9\n',
-  'notes': ["Python's for statement consumes iterables through the iterator protocol.",
-            'Prefer enumerate() over range(len(...)) when you need an index.'],
-  'cells': [{'prose': ['Start with an ordinary list. A list is iterable, so a for loop can ask it for one value at a '
+  'notes': ['A `for` loop consumes values from an iterable.',
+            'Different producers can feed the same loop protocol.',
+            'Prefer `enumerate()` over `range(len(...))` when you need an index.'],
+  'cells': [{'prose': ['Start with an ordinary list. A list stores values, and a `for` loop asks it for one value at a '
                        'time.',
                        'When you only need the values, iterate over the collection directly. There is no index '
                        'variable because the loop body does not need one.'],
-             'code': 'names = ["Ada", "Grace", "Guido"]\n'
-                     '\n'
-                     '# Iterate over values directly.\n'
-                     'for name in names:\n'
-                     '    print(name)',
+             'code': 'names = ["Ada", "Grace", "Guido"]\n\nfor name in names:\n    print(name)',
              'output': 'Ada\nGrace\nGuido',
              'line': 17},
-            {'prose': ['When you need both a position and a value, use enumerate(). It keeps the counter tied to '
-                       'iteration without manual indexing.'],
-             'code': '# enumerate adds a counter without manual indexing.\n'
-                     'for index, name in enumerate(names):\n'
-                     '    print(index, name)',
+            {'prose': ['When you need both a position and a value, use `enumerate()`. It produces index/value pairs '
+                       'without manual indexing.'],
+             'code': 'for index, name in enumerate(names):\n    print(index, name)',
              'output': '0 Ada\n1 Grace\n2 Guido',
-             'line': 37},
-            {'prose': ['Dictionaries are iterable too, but dict.items() is the clearest way to say that the loop needs '
-                       'keys and values together.'],
-             'code': 'scores = {"Ada": 10, "Grace": 9}\n'
-                     '\n'
-                     '# items yields key/value pairs from a dictionary.\n'
-                     'for name, score in scores.items():\n'
-                     '    print(name, score)',
+             'line': 36},
+            {'prose': ['Dictionaries are iterable too, but `dict.items()` is the clearest way to say that the loop '
+                       'needs keys and values together.'],
+             'code': 'scores = {"Ada": 10, "Grace": 9}\nfor name, score in scores.items():\n    print(name, score)',
              'output': 'Ada 10\nGrace 9',
-             'line': 53}]},
+             'line': 51}]},
+ {'slug': 'iterators',
+  'title': 'Iterators',
+  'section': 'Iteration',
+  'summary': 'iter and next expose the protocol behind for loops.',
+  'doc_url': 'https://docs.python.org/3.13/library/stdtypes.html#iterator-types',
+  'code': 'names = ["Ada", "Grace", "Guido"]\n'
+          'iterator = iter(names)\n'
+          'print(next(iterator))\n'
+          'print(next(iterator))\n'
+          '\n'
+          'for name in iterator:\n'
+          '    print(name)\n'
+          '\n'
+          'again = iter(names)\n'
+          'print(next(again))\n',
+  'expected_output': 'Ada\nGrace\nGuido\nAda\n',
+  'notes': ['Iterables produce iterators; iterators produce values.',
+            '`next()` consumes one value from an iterator.',
+            'Many iterators are one-pass even when the original collection is reusable.'],
+  'cells': [{'prose': ['`iter()` asks an iterable for an iterator. `next()` consumes one value and advances the '
+                       "iterator's position."],
+             'code': 'names = ["Ada", "Grace", "Guido"]\n'
+                     'iterator = iter(names)\n'
+                     'print(next(iterator))\n'
+                     'print(next(iterator))',
+             'output': 'Ada\nGrace',
+             'line': 17},
+            {'prose': ['A `for` loop consumes the same iterator protocol. Because two values were already consumed, '
+                       'the loop sees only the remaining value.'],
+             'code': 'for name in iterator:\n    print(name)',
+             'output': 'Guido',
+             'line': 33},
+            {'prose': ['The list itself is reusable. Asking it for a fresh iterator starts a new pass over the same '
+                       'stored values.'],
+             'code': 'again = iter(names)\nprint(next(again))',
+             'output': 'Ada',
+             'line': 46}]},
  {'slug': 'match-statements',
   'title': 'Match Statements',
   'section': 'Control Flow',
@@ -796,6 +820,7 @@ EXAMPLES = [{'slug': 'hello-world',
   'expected_output': "['Ada', 'Guido', 'Grace']\n{'Ada': 10, 'Grace': 10}\n{8, 10}\n",
   'notes': ['The left side says what to produce; the `for` clause says where values come from.',
             'Use an `if` clause for simple filters.',
+            'List, dict, and set comprehensions build concrete collections immediately.',
             'Switch to a loop when the transformation needs multiple steps or explanations.'],
   'cells': [{'prose': ['A list comprehension maps each input item to one output item. This one calls `title()` for '
                        'every name and collects the results in a new list.'],
@@ -1128,7 +1153,7 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'generators',
   'title': 'Generators',
   'section': 'Iteration',
-  'summary': 'yield produces a lazy sequence of values.',
+  'summary': 'yield creates an iterator that produces values on demand.',
   'doc_url': 'https://docs.python.org/3.13/tutorial/classes.html#generators',
   'code': 'def countdown(n):\n'
           '    while n > 0:\n'
@@ -1142,7 +1167,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'for value in countdown(3):\n'
           '    print(value)\n',
   'expected_output': '3\n2\n3\n2\n1\n',
-  'notes': ['Generator functions return iterators.',
+  'notes': ['Generator functions are a concise way to create custom iterators.',
             'Values are produced on demand.',
             'A generator is consumed as you iterate over it.'],
   'cells': [{'prose': ['Calling a generator function returns an iterator. `next()` asks for one value and resumes the '
@@ -1162,10 +1187,49 @@ EXAMPLES = [{'slug': 'hello-world',
              'code': 'for value in countdown(3):\n    print(value)',
              'output': '3\n2\n1',
              'line': 37}]},
+ {'slug': 'generator-expressions',
+  'title': 'Generator Expressions',
+  'section': 'Iteration',
+  'summary': 'Generator expressions use comprehension-like syntax to stream values lazily.',
+  'doc_url': 'https://docs.python.org/3.13/tutorial/classes.html#generator-expressions',
+  'code': 'numbers = [1, 2, 3, 4]\n'
+          'list_squares = [number * number for number in numbers]\n'
+          'print(list_squares)\n'
+          '\n'
+          'stream_squares = (number * number for number in numbers)\n'
+          'print(next(stream_squares))\n'
+          'print(next(stream_squares))\n'
+          'print(list(stream_squares))\n'
+          '\n'
+          'print(sum(number * number for number in numbers))\n',
+  'expected_output': '[1, 4, 9, 16]\n1\n4\n[9, 16]\n30\n',
+  'notes': ['List, dict, and set comprehensions build concrete collections.',
+            'Generator expressions produce one-pass iterators.',
+            'Use generator expressions when the consumer can process values one at a time.'],
+  'cells': [{'prose': ['A list comprehension is eager: it builds a list immediately. That is useful when you need to '
+                       'store or reuse the results.'],
+             'code': 'numbers = [1, 2, 3, 4]\n'
+                     'list_squares = [number * number for number in numbers]\n'
+                     'print(list_squares)',
+             'output': '[1, 4, 9, 16]',
+             'line': 17},
+            {'prose': ['A generator expression is lazy: it creates an iterator that produces values as they are '
+                       'consumed. After two `next()` calls, only the remaining squares are left.'],
+             'code': 'stream_squares = (number * number for number in numbers)\n'
+                     'print(next(stream_squares))\n'
+                     'print(next(stream_squares))\n'
+                     'print(list(stream_squares))',
+             'output': '1\n4\n[9, 16]',
+             'line': 31},
+            {'prose': ['Generator expressions are common inside reducing functions. When a generator expression is the '
+                       'only argument, the extra parentheses can be omitted.'],
+             'code': 'print(sum(number * number for number in numbers))',
+             'output': '30',
+             'line': 48}]},
  {'slug': 'itertools',
   'title': 'Itertools',
   'section': 'Iteration',
-  'summary': 'itertools provides lazy iterator building blocks.',
+  'summary': 'itertools composes lazy iterator streams.',
   'doc_url': 'https://docs.python.org/3.13/library/itertools.html',
   'code': 'import itertools\n'
           '\n'
@@ -1179,7 +1243,8 @@ EXAMPLES = [{'slug': 'hello-world',
           'high_scores = itertools.compress(scores, [score >= 9 for score in scores])\n'
           'print(list(high_scores))\n',
   'expected_output': "[10, 11, 12]\n['intro', 'setup', 'deploy']\n[10, 10]\n",
-  'notes': ['Iterator pipelines avoid building intermediate lists.',
+  'notes': ['`itertools` composes producer and transformer streams.',
+            'Iterator pipelines avoid building intermediate lists.',
             'Use `islice()` to take a finite piece from an infinite iterator.',
             'Convert to a list only when you need concrete results.'],
   'cells': [{'prose': ['`count()` can produce values forever, so `islice()` takes a finite window. Nothing is '

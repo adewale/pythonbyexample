@@ -2,11 +2,11 @@
 slug = "generators"
 title = "Generators"
 section = "Iteration"
-summary = "yield produces a lazy sequence of values."
+summary = "yield creates an iterator that produces values on demand."
 doc_path = "/tutorial/classes.html#generators"
 +++
 
-A generator function uses `yield` to produce values lazily. Calling the function returns an iterator; the body runs only as values are requested.
+A generator function is a convenient way to write your own iterator. `yield` produces one value, pauses the function, and resumes when the next value is requested.
 
 Generators are useful for pipelines, large inputs, and infinite sequences because they avoid building an entire collection in memory.
 
@@ -64,7 +64,7 @@ for value in countdown(3):
 :::
 
 :::note
-- Generator functions return iterators.
+- Generator functions are a concise way to create custom iterators.
 - Values are produced on demand.
 - A generator is consumed as you iterate over it.
 :::

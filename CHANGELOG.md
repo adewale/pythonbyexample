@@ -22,10 +22,12 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 - Markdown-backed example sources with `:::program` and `:::cell` blocks.
 - Example source verifier, formatter, embedded-source build step, and golden parity check.
 - GitHub Actions verification workflow.
+- `iterators` and `generator-expressions` examples to make the Iteration arc explicit.
 
 ### Changed
 
 - Example walkthroughs now pair prose, source fragments, and output evidence.
+- Iteration examples now frame Python iteration as a value-stream protocol: producers, consumers, eager containers, lazy streams, and one-pass iterators.
 - Read-only code highlighting is handled by Shiki; editable code highlighting is handled by CodeMirror.
 - Prototype routes under `/layout-options/*` bypass the Worker Cache API and return `Cache-Control: no-store`.
 - Static assets use immutable cache headers only on fingerprinted filenames.

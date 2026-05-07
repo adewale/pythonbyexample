@@ -94,6 +94,8 @@ class AppTests(unittest.TestCase):
             "keyword-only-arguments",
             "lambdas",
             "generators",
+            "generator-expressions",
+            "iterators",
             "decorators",
             "context-managers",
             "dataclasses",
