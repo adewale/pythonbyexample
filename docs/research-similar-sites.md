@@ -31,4 +31,13 @@ Python-specific comparison sites remain relevant:
 | W3Schools Python examples | https://www.w3schools.com/python/python_examples.asp | Very approachable; many interactive snippets. | Less authoritative and less cohesive than Go By Example. |
 | PyMOTW-3 | https://pymotw.com/3/ | Strong standard-library coverage with focused module examples. | Module-reference focus; less suited as a beginner language progression. |
 
+String/Text lesson observed across example sites:
+
+- Go By Example's `Strings and Runes` page is a strong model for making text boundaries visible: it contrasts bytes, UTF-8, runes/code points, byte length, rune count, and iteration.
+- Rust By Example distinguishes `String` and `&str` as valid UTF-8 byte-backed text and shows Unicode escapes and character iteration.
+- Learn X By Example's Ruby string page also uses Thai text to contrast character length with UTF-8 bytes.
+- Nim By Example explicitly warns that Unicode text may require specialized handling beyond byte-like string operations.
+
+Implication for Python By Example: string examples should not be ASCII-only. They should show `str` as Unicode text, contrast it with `bytes`, and make UTF-8 encoding visible at I/O boundaries.
+
 Positioning for this project: keep Go By Example's compact language tour, borrow Rust/Kotlin's expectation that examples can run, preserve Python-doc authority, and avoid course-like sprawl.

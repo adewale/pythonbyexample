@@ -16,6 +16,10 @@ Score each example on a 10 point scale:
 10. **Representative coverage (0-0.75)** — the code covers the forms promised by the title, summary, and prose, and the catalog has an explicit home for every common Python syntax form. Do not claim lists, dictionaries, and sets while showing only two of them; do not let syntax such as `break`, `continue`, `assert`, `nonlocal`, `yield from`, or `async for` exist only as untested assumptions.
 11. **Practical usefulness (0-1.0)** — names, data, and outputs resemble simplified real code rather than toy placeholders; the example gives the feature a reason to exist.
 
+Topic-specific gates:
+
+- **Text and strings** — examples must distinguish text from bytes, explain Unicode/code-point behavior when relevant, and show the boundary where encoding such as UTF-8 appears. A string page that only demonstrates ASCII operations is incomplete.
+
 Release gates outside the score:
 
 - official Python documentation is linked through `doc_path`
@@ -51,7 +55,7 @@ Flag these during review even when the code is correct:
 - The rationale is missing: the page does not explain the pressure that made the feature useful.
 - Alternatives are missing: the page does not say what a reader might use instead or when this feature is the wrong choice.
 - The page teaches an operation but not the problem shape that made the feature worth having.
-- The page does not connect the feature to a nearby alternative, such as `while` vs `for`, slice vs index, tuple vs list, or f-string expression vs display formatting.
+- The page does not connect the feature to a nearby alternative, such as `while` vs `for`, slice vs index, tuple vs list, text `str` vs binary `bytes`, or f-string expression vs display formatting.
 - An iteration example uses a lazy object but does not show when values are consumed.
 - An iteration example blurs eager containers with one-pass streams.
 
@@ -69,3 +73,4 @@ Before publishing or substantially editing an example, ask:
 8. What neighboring feature would a learner confuse this with, and does the page explain the boundary?
 9. Does the data shape explain why this feature exists?
 10. What syntax form would disappear from the catalog if this page were removed, and is that covered somewhere else?
+11. For text examples, does the page make Unicode and encoding boundaries visible instead of assuming ASCII-only strings?

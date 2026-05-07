@@ -6,70 +6,78 @@ summary = "Strings are immutable Unicode text sequences."
 doc_path = "/library/stdtypes.html#text-sequence-type-str"
 +++
 
-Python strings are immutable Unicode text sequences. That means they behave like sequences for reading, but operations such as `lower()` and `strip()` create new strings instead of changing the original.
+Python strings are immutable Unicode text sequences. A `str` stores text as Unicode code points, so it can represent Thai, accented letters, emoji, and ordinary ASCII with the same type.
 
-Common string work is transformation and composition: normalize case, remove surrounding whitespace, interpolate values, and join pieces with a separator.
+This is different from bytes. Use `str` when you mean text, and encode to `bytes` only at boundaries such as files, network protocols, and binary APIs.
 
-Because strings are immutable, you can pass them around safely without worrying that another function will alter the object in place.
+String operations such as `upper()` and `strip()` return new strings instead of changing the original. Use indexing and iteration for code points, and `encode()` when you need the underlying UTF-8 bytes.
 
 :::program
 ```python
-language = "Python"
-message = "  Python by Example  "
+word = "สวัสดี"
+print(len(word))
+print(len(word.encode("utf-8")))
+print(word[0])
+print([hex(ord(char)) for char in word[:2]])
 
-print(language[0])
-print(language.lower())
-print(message.strip())
-print(f"Hello, {language}!")
-print(", ".join(["lists", "dicts", "sets"]))
+text = "  café  "
+clean = text.strip()
+print(clean)
+print(clean.upper())
+print(clean.encode("utf-8"))
 ```
 :::
 
 :::cell
-Strings store Unicode text and can be indexed like other sequences.
+A Python `str` is text, not raw bytes. `len()` counts Unicode code points, while UTF-8 encoding shows how many bytes are needed at a byte boundary.
 
 ```python
-language = "Python"
-message = "  Python by Example  "
-
-print(language[0])
+word = "สวัสดี"
+print(len(word))
+print(len(word.encode("utf-8")))
 ```
 
 ```output
-P
+6
+18
 ```
 :::
 
 :::cell
-Methods such as `lower()` and `strip()` return transformed strings. They do not mutate the original value.
+Indexing and iteration work with Unicode code points. `ord()` returns the integer code point, which is often displayed in hexadecimal when teaching text encoding.
 
 ```python
-print(language.lower())
-print(message.strip())
+print(word[0])
+print([hex(ord(char)) for char in word[:2]])
 ```
 
 ```output
-python
-Python by Example
+ส
+['0xe2a', '0xe27']
 ```
 :::
 
 :::cell
-Use f-strings for readable interpolation and `join()` when a separator belongs between several pieces.
+String methods return new strings because strings are immutable. Encoding turns text into bytes when another system needs a byte representation.
 
 ```python
-print(f"Hello, {language}!")
-print(", ".join(["lists", "dicts", "sets"]))
+text = "  café  "
+clean = text.strip()
+print(clean)
+print(clean.upper())
+print(clean.encode("utf-8"))
 ```
 
 ```output
-Hello, Python!
-lists, dicts, sets
+café
+CAFÉ
+b'caf\xc3\xa9'
 ```
 :::
 
 :::note
-- Strings are sequences of Unicode characters, so indexing and many sequence operations work.
+- Use `str` for text and `bytes` for binary data.
+- `len(text)` counts Unicode code points; `len(text.encode("utf-8"))` counts encoded bytes.
 - String methods return new strings because strings are immutable.
-- Use `join()` when building text from many pieces; it makes the separator explicit.
+- User-visible “characters” can be more subtle than code points; combining marks and emoji sequences may need specialized text handling.
 :::

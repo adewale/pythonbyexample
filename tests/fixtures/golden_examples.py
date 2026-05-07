@@ -434,31 +434,41 @@ EXAMPLES = [{'slug': 'hello-world',
   'section': 'Text',
   'summary': 'Strings are immutable Unicode text sequences.',
   'doc_url': 'https://docs.python.org/3.13/library/stdtypes.html#text-sequence-type-str',
-  'code': 'language = "Python"\n'
-          'message = "  Python by Example  "\n'
+  'code': 'word = "สวัสดี"\n'
+          'print(len(word))\n'
+          'print(len(word.encode("utf-8")))\n'
+          'print(word[0])\n'
+          'print([hex(ord(char)) for char in word[:2]])\n'
           '\n'
-          'print(language[0])\n'
-          'print(language.lower())\n'
-          'print(message.strip())\n'
-          'print(f"Hello, {language}!")\n'
-          'print(", ".join(["lists", "dicts", "sets"]))\n',
-  'expected_output': 'P\npython\nPython by Example\nHello, Python!\nlists, dicts, sets\n',
-  'notes': ['Strings are sequences of Unicode characters, so indexing and many sequence operations work.',
+          'text = "  café  "\n'
+          'clean = text.strip()\n'
+          'print(clean)\n'
+          'print(clean.upper())\n'
+          'print(clean.encode("utf-8"))\n',
+  'expected_output': "6\n18\nส\n['0xe2a', '0xe27']\ncafé\nCAFÉ\nb'caf\\xc3\\xa9'\n",
+  'notes': ['Use `str` for text and `bytes` for binary data.',
+            '`len(text)` counts Unicode code points; `len(text.encode("utf-8"))` counts encoded bytes.',
             'String methods return new strings because strings are immutable.',
-            'Use `join()` when building text from many pieces; it makes the separator explicit.'],
-  'cells': [{'prose': ['Strings store Unicode text and can be indexed like other sequences.'],
-             'code': 'language = "Python"\nmessage = "  Python by Example  "\n\nprint(language[0])',
-             'output': 'P',
+            'User-visible “characters” can be more subtle than code points; combining marks and emoji sequences may '
+            'need specialized text handling.'],
+  'cells': [{'prose': ['A Python `str` is text, not raw bytes. `len()` counts Unicode code points, while UTF-8 '
+                       'encoding shows how many bytes are needed at a byte boundary.'],
+             'code': 'word = "สวัสดี"\nprint(len(word))\nprint(len(word.encode("utf-8")))',
+             'output': '6\n18',
              'line': 17},
-            {'prose': ['Methods such as `lower()` and `strip()` return transformed strings. They do not mutate the '
-                       'original value.'],
-             'code': 'print(language.lower())\nprint(message.strip())',
-             'output': 'python\nPython by Example',
+            {'prose': ['Indexing and iteration work with Unicode code points. `ord()` returns the integer code point, '
+                       'which is often displayed in hexadecimal when teaching text encoding.'],
+             'code': 'print(word[0])\nprint([hex(ord(char)) for char in word[:2]])',
+             'output': "ส\n['0xe2a', '0xe27']",
              'line': 32},
-            {'prose': ['Use f-strings for readable interpolation and `join()` when a separator belongs between several '
-                       'pieces.'],
-             'code': 'print(f"Hello, {language}!")\nprint(", ".join(["lists", "dicts", "sets"]))',
-             'output': 'Hello, Python!\nlists, dicts, sets',
+            {'prose': ['String methods return new strings because strings are immutable. Encoding turns text into '
+                       'bytes when another system needs a byte representation.'],
+             'code': 'text = "  café  "\n'
+                     'clean = text.strip()\n'
+                     'print(clean)\n'
+                     'print(clean.upper())\n'
+                     'print(clean.encode("utf-8"))',
+             'output': "café\nCAFÉ\nb'caf\\xc3\\xa9'",
              'line': 46}]},
  {'slug': 'string-formatting',
   'title': 'String Formatting',
