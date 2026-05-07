@@ -138,7 +138,7 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'none',
   'title': 'None',
   'section': 'Basics',
-  'summary': 'None represents the absence of a value.',
+  'summary': 'None represents expected absence, distinct from missing keys and errors.',
   'doc_url': 'https://docs.python.org/3.13/library/constants.html#None',
   'code': 'result = None\n'
           'print(result is None)\n'
@@ -149,29 +149,46 @@ EXAMPLES = [{'slug': 'hello-world',
           '    return None\n'
           '\n'
           'score = find_score("Grace")\n'
-          'if score is None:\n'
-          '    print("missing score")\n',
-  'expected_output': 'True\nmissing score\n',
+          'print(score is None)\n'
+          '\n'
+          'profile = {"name": "Ada"}\n'
+          'print(profile.get("timezone", "UTC"))\n'
+          '\n'
+          'try:\n'
+          '    int("python")\n'
+          'except ValueError:\n'
+          '    print("invalid number")\n',
+  'expected_output': 'True\nTrue\nUTC\ninvalid number\n',
   'notes': ['Use `is None` rather than `== None`; `None` is a singleton identity value.',
-            'A function that reaches the end without `return` also returns `None`.'],
-  'cells': [{'prose': ["`None` is Python's value for “nothing here.” It is commonly used as a sentinel when a real "
-                       'result is unavailable.'],
+            'Use `None` for expected absence that callers can test.',
+            'Use dictionary defaults for missing mapping keys and exceptions for invalid operations.'],
+  'cells': [{'prose': ["`None` is Python's value for “nothing here.” Check it with `is None` because it is a singleton "
+                       'identity value.'],
              'code': 'result = None\nprint(result is None)',
              'output': 'True',
              'line': 17},
-            {'prose': ['Functions often return `None` when lookup or parsing fails without raising an exception.',
-                       'Check for `None` with `is None`. That tests identity with the singleton object instead of '
-                       'asking for value equality.'],
+            {'prose': ['Functions often return `None` when absence is expected and callers can continue. The function '
+                       'name and surrounding code should make that possibility clear.'],
              'code': 'def find_score(name):\n'
                      '    if name == "Ada":\n'
                      '        return 10\n'
                      '    return None\n'
                      '\n'
                      'score = find_score("Grace")\n'
-                     'if score is None:\n'
-                     '    print("missing score")',
-             'output': 'missing score',
-             'line': 30}]},
+                     'print(score is None)',
+             'output': 'True',
+             'line': 30},
+            {'prose': ['A missing dictionary key is another absence boundary. Use `get()` when the mapping can supply '
+                       'a default, and use exceptions for invalid operations that cannot produce a value.'],
+             'code': 'profile = {"name": "Ada"}\n'
+                     'print(profile.get("timezone", "UTC"))\n'
+                     '\n'
+                     'try:\n'
+                     '    int("python")\n'
+                     'except ValueError:\n'
+                     '    print("invalid number")',
+             'output': 'UTC\ninvalid number',
+             'line': 48}]},
  {'slug': 'variables',
   'title': 'Variables',
   'section': 'Basics',
@@ -311,33 +328,42 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'mutability',
   'title': 'Mutability',
   'section': 'Data Model',
-  'summary': 'Some objects can change in place, and names can share one object.',
+  'summary': 'Some objects change in place, while others return new values.',
   'doc_url': 'https://docs.python.org/3.13/reference/datamodel.html#objects-values-and-types',
   'code': 'first = ["python"]\n'
           'second = first\n'
           'second.append("workers")\n'
-          '\n'
           'print(first)\n'
           'print(second)\n'
           '\n'
           'text = "python"\n'
-          'text.upper()\n'
-          'print(text)\n',
-  'expected_output': "['python', 'workers']\n['python', 'workers']\npython\n",
+          'upper_text = text.upper()\n'
+          'print(text)\n'
+          'print(upper_text)\n'
+          '\n'
+          'numbers = [3, 1, 2]\n'
+          'ordered = sorted(numbers)\n'
+          'print(ordered)\n'
+          'print(numbers)\n',
+  'expected_output': "['python', 'workers']\n['python', 'workers']\npython\nPYTHON\n[1, 2, 3]\n[3, 1, 2]\n",
   'notes': ['Lists and dictionaries are mutable; strings and tuples are immutable.',
-            'Aliasing is useful, but copy mutable containers when independent changes are needed.'],
-  'cells': [{'prose': ['Objects in Python can be mutable or immutable. Mutable objects such as lists can change in '
-                       'place, while immutable objects such as strings produce new values instead.',
-                       'Names can share one mutable object, so a change through one name is visible through another. '
-                       'This is powerful, but it is also the source of many beginner surprises.'],
-             'code': 'first = ["python"]\nsecond = first\nsecond.append("workers")\n\nprint(first)\nprint(second)',
+            'Aliasing is useful, but copy mutable containers when independent changes are needed.',
+            'Pay attention to whether an operation mutates in place or returns a new value.'],
+  'cells': [{'prose': ['Mutable objects can change in place. `first` and `second` point to the same list, so appending '
+                       'through one name changes the object seen through both names.'],
+             'code': 'first = ["python"]\nsecond = first\nsecond.append("workers")\nprint(first)\nprint(second)',
              'output': "['python', 'workers']\n['python', 'workers']",
              'line': 17},
-            {'prose': ['Understanding mutability explains why copying containers, avoiding mutable defaults, and '
-                       'returning new values are recurring Python design choices.'],
-             'code': 'text = "python"\ntext.upper()\nprint(text)',
-             'output': 'python',
-             'line': 37}]},
+            {'prose': ['Immutable objects do not change in place. String methods such as `upper()` return a new '
+                       'string, leaving the original string unchanged.'],
+             'code': 'text = "python"\nupper_text = text.upper()\nprint(text)\nprint(upper_text)',
+             'output': 'python\nPYTHON',
+             'line': 34},
+            {'prose': ['Some APIs make the boundary explicit. `sorted()` returns a new list, while methods such as '
+                       '`append()` and `list.sort()` mutate an existing list.'],
+             'code': 'numbers = [3, 1, 2]\nordered = sorted(numbers)\nprint(ordered)\nprint(numbers)',
+             'output': '[1, 2, 3]\n[3, 1, 2]',
+             'line': 50}]},
  {'slug': 'strings',
   'title': 'Strings',
   'section': 'Text',
@@ -787,36 +813,44 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'sets',
   'title': 'Sets',
   'section': 'Collections',
-  'summary': 'Sets store unique values and support set algebra.',
+  'summary': 'Sets store unique values and make membership checks explicit.',
   'doc_url': 'https://docs.python.org/3.13/tutorial/datastructures.html#sets',
-  'code': 'languages = {"python", "go", "python"}\n'
-          'compiled = {"go", "rust"}\n'
+  'code': 'languages = ["python", "go", "python"]\n'
+          'unique_languages = set(languages)\n'
+          'print(sorted(unique_languages))\n'
           '\n'
-          'print(sorted(languages))\n'
-          'print("python" in languages)\n'
-          'print(sorted(languages | compiled))\n'
-          'print(sorted(languages & compiled))\n'
-          'print(sorted(languages - compiled))\n',
-  'expected_output': "['go', 'python']\nTrue\n['go', 'python', 'rust']\n['go']\n['python']\n",
-  'notes': ['Sets remove duplicates and support fast membership tests.',
-            'Set algebra operators make union, intersection, and difference explicit.',
+          'allowed = {"python", "rust"}\n'
+          'print("python" in allowed)\n'
+          'print("ruby" in allowed)\n'
+          '\n'
+          'compiled = {"go", "rust"}\n'
+          'print(sorted(allowed | compiled))\n'
+          'print(sorted(allowed & compiled))\n'
+          'print(sorted(allowed - compiled))\n',
+  'expected_output': "['go', 'python']\nTrue\nFalse\n['go', 'python', 'rust']\n['rust']\n['python']\n",
+  'notes': ['Use lists when order and repeated values matter.',
+            'Use sets when uniqueness and membership are the main operations.',
             'Sets are unordered, so sort them when examples need deterministic display.'],
-  'cells': [{'prose': ['Creating a set automatically removes duplicates. The repeated `python` value appears only '
-                       'once.'],
-             'code': 'languages = {"python", "go", "python"}\ncompiled = {"go", "rust"}\n\nprint(sorted(languages))',
+  'cells': [{'prose': ['Creating a set removes duplicates. Keep a list when order and repeated values matter; convert '
+                       'to a set when uniqueness is the point.'],
+             'code': 'languages = ["python", "go", "python"]\n'
+                     'unique_languages = set(languages)\n'
+                     'print(sorted(unique_languages))',
              'output': "['go', 'python']",
              'line': 17},
-            {'prose': ['Membership checks are the most common set operation.'],
-             'code': 'print("python" in languages)',
-             'output': 'True',
-             'line': 32},
+            {'prose': ['Membership checks are the everyday set operation. A list can also use `in`, but a set says '
+                       'that membership is central to the data shape.'],
+             'code': 'allowed = {"python", "rust"}\nprint("python" in allowed)\nprint("ruby" in allowed)',
+             'output': 'True\nFalse',
+             'line': 31},
             {'prose': ['Union, intersection, and difference describe relationships between groups without manual '
                        'loops.'],
-             'code': 'print(sorted(languages | compiled))\n'
-                     'print(sorted(languages & compiled))\n'
-                     'print(sorted(languages - compiled))',
-             'output': "['go', 'python', 'rust']\n['go']\n['python']",
-             'line': 44}]},
+             'code': 'compiled = {"go", "rust"}\n'
+                     'print(sorted(allowed | compiled))\n'
+                     'print(sorted(allowed & compiled))\n'
+                     'print(sorted(allowed - compiled))',
+             'output': "['go', 'python', 'rust']\n['rust']\n['python']",
+             'line': 46}]},
  {'slug': 'slices',
   'title': 'Slices',
   'section': 'Collections',

@@ -2,37 +2,40 @@
 slug = "sets"
 title = "Sets"
 section = "Collections"
-summary = "Sets store unique values and support set algebra."
+summary = "Sets store unique values and make membership checks explicit."
 doc_path = "/tutorial/datastructures.html#sets"
 +++
 
 Sets store unique hashable values. Use them when membership and de-duplication matter more than order.
 
-The `in` operator is the everyday membership test. Set algebra then expresses how groups relate to each other.
+A list can answer membership with `in`, but a set communicates that membership is the main operation. Set algebra then expresses how groups relate to each other.
 
 Because sets are unordered, examples often wrap output in `sorted()` so the display is deterministic.
 
 :::program
 ```python
-languages = {"python", "go", "python"}
-compiled = {"go", "rust"}
+languages = ["python", "go", "python"]
+unique_languages = set(languages)
+print(sorted(unique_languages))
 
-print(sorted(languages))
-print("python" in languages)
-print(sorted(languages | compiled))
-print(sorted(languages & compiled))
-print(sorted(languages - compiled))
+allowed = {"python", "rust"}
+print("python" in allowed)
+print("ruby" in allowed)
+
+compiled = {"go", "rust"}
+print(sorted(allowed | compiled))
+print(sorted(allowed & compiled))
+print(sorted(allowed - compiled))
 ```
 :::
 
 :::cell
-Creating a set automatically removes duplicates. The repeated `python` value appears only once.
+Creating a set removes duplicates. Keep a list when order and repeated values matter; convert to a set when uniqueness is the point.
 
 ```python
-languages = {"python", "go", "python"}
-compiled = {"go", "rust"}
-
-print(sorted(languages))
+languages = ["python", "go", "python"]
+unique_languages = set(languages)
+print(sorted(unique_languages))
 ```
 
 ```output
@@ -41,14 +44,17 @@ print(sorted(languages))
 :::
 
 :::cell
-Membership checks are the most common set operation.
+Membership checks are the everyday set operation. A list can also use `in`, but a set says that membership is central to the data shape.
 
 ```python
-print("python" in languages)
+allowed = {"python", "rust"}
+print("python" in allowed)
+print("ruby" in allowed)
 ```
 
 ```output
 True
+False
 ```
 :::
 
@@ -56,20 +62,21 @@ True
 Union, intersection, and difference describe relationships between groups without manual loops.
 
 ```python
-print(sorted(languages | compiled))
-print(sorted(languages & compiled))
-print(sorted(languages - compiled))
+compiled = {"go", "rust"}
+print(sorted(allowed | compiled))
+print(sorted(allowed & compiled))
+print(sorted(allowed - compiled))
 ```
 
 ```output
 ['go', 'python', 'rust']
-['go']
+['rust']
 ['python']
 ```
 :::
 
 :::note
-- Sets remove duplicates and support fast membership tests.
-- Set algebra operators make union, intersection, and difference explicit.
+- Use lists when order and repeated values matter.
+- Use sets when uniqueness and membership are the main operations.
 - Sets are unordered, so sort them when examples need deterministic display.
 :::

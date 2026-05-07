@@ -2,7 +2,7 @@
 slug = "none"
 title = "None"
 section = "Basics"
-summary = "None represents the absence of a value."
+summary = "None represents expected absence, distinct from missing keys and errors."
 doc_path = "/library/constants.html#None"
 +++
 
@@ -10,7 +10,7 @@ doc_path = "/library/constants.html#None"
 
 Because `None` is a singleton, idiomatic Python checks it with `is None` or `is not None`. This avoids confusing identity with value equality.
 
-A function that reaches the end without a `return` statement returns `None`, so explicit `None` results should be documented by names and control flow.
+Absence has several nearby shapes in Python. A function can return `None`, a dictionary lookup can supply a default for a missing key, and an invalid operation can raise an exception.
 
 :::program
 ```python
@@ -23,13 +23,20 @@ def find_score(name):
     return None
 
 score = find_score("Grace")
-if score is None:
-    print("missing score")
+print(score is None)
+
+profile = {"name": "Ada"}
+print(profile.get("timezone", "UTC"))
+
+try:
+    int("python")
+except ValueError:
+    print("invalid number")
 ```
 :::
 
 :::cell
-`None` is Python's value for “nothing here.” It is commonly used as a sentinel when a real result is unavailable.
+`None` is Python's value for “nothing here.” Check it with `is None` because it is a singleton identity value.
 
 ```python
 result = None
@@ -42,9 +49,7 @@ True
 :::
 
 :::cell
-Functions often return `None` when lookup or parsing fails without raising an exception.
-
-Check for `None` with `is None`. That tests identity with the singleton object instead of asking for value equality.
+Functions often return `None` when absence is expected and callers can continue. The function name and surrounding code should make that possibility clear.
 
 ```python
 def find_score(name):
@@ -53,16 +58,35 @@ def find_score(name):
     return None
 
 score = find_score("Grace")
-if score is None:
-    print("missing score")
+print(score is None)
 ```
 
 ```output
-missing score
+True
+```
+:::
+
+:::cell
+A missing dictionary key is another absence boundary. Use `get()` when the mapping can supply a default, and use exceptions for invalid operations that cannot produce a value.
+
+```python
+profile = {"name": "Ada"}
+print(profile.get("timezone", "UTC"))
+
+try:
+    int("python")
+except ValueError:
+    print("invalid number")
+```
+
+```output
+UTC
+invalid number
 ```
 :::
 
 :::note
 - Use `is None` rather than `== None`; `None` is a singleton identity value.
-- A function that reaches the end without `return` also returns `None`.
+- Use `None` for expected absence that callers can test.
+- Use dictionary defaults for missing mapping keys and exceptions for invalid operations.
 :::
