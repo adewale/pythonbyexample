@@ -197,6 +197,7 @@ class AppTests(unittest.TestCase):
         self.assertIn("See also", html)
         self.assertIn("contrast", html)
         self.assertIn('/examples/loop-else', html)
+        self.assertNotIn('class="see-also"', html)
         missing = route("https://example.com/examples/break-continue")
         self.assertEqual(missing.status, 404)
         self.assertIn("Recommended examples", missing.body)

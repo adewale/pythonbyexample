@@ -351,11 +351,11 @@ def render_example_page(example, output=None, code=None, execution_time_ms=None)
     notes_html = "".join(f"<li>{note}</li>" for note in notes)
     see_also_examples = [get_example(slug) for slug in example.get("see_also", [])]
     see_also_links = "".join(
-        f'<li><span class="see-also-label">{html.escape(_see_also_label(example["slug"], item["slug"]))}</span> <a class="text-link" href="/examples/{html.escape(item["slug"])}">{html.escape(item["title"])}</a></li>'
+        f'<li>{html.escape(_see_also_label(example["slug"], item["slug"]))}: <a class="text-link" href="/examples/{html.escape(item["slug"])}">{html.escape(item["title"])}</a></li>'
         for item in see_also_examples
         if item is not None
     )
-    see_also_html = f'<section class="see-also"><h2>See also</h2><ul>{see_also_links}</ul></section>' if see_also_links else ""
+    see_also_html = f'<h2>See also</h2><ul>{see_also_links}</ul>' if see_also_links else ""
     content = _replace(
         _template("example.html"),
         {
@@ -414,7 +414,7 @@ def route(url: str, method: str = "GET") -> AppResponse:
                 f'<li><a class="text-link" href="/examples/{html.escape(item["slug"])}">{html.escape(item["title"])}</a></li>'
                 for item in _recommended_examples(slug)
             )
-            body = f'<h1>Example not found</h1><p class="meta">Try one of these nearby examples.</p><section class="see-also"><h2>Recommended examples</h2><ul>{recommendations}</ul></section>'
+            body = f'<h1>Example not found</h1><p class="meta">Try one of these nearby examples.</p><h2>Recommended examples</h2><ul>{recommendations}</ul>'
             return AppResponse(_layout("Not Found", body), status=404)
         return AppResponse(
             render_example_page(example), headers={"Content-Type": "text/html; charset=utf-8"}

@@ -80,10 +80,6 @@
     .tool-button:hover { background: var(--surface-3); border-color: var(--accent); }
     .tool-button:active { transform: scale(0.96); }
     .output-panel { background: var(--surface); }
-    .see-also { margin-top: var(--space-4); padding: var(--space-3); border: 1px solid var(--hairline); border-radius: .75rem; background: var(--surface-2); }
-    .see-also h2 { margin: 0 0 var(--space-2); font-size: 1.05rem; letter-spacing: -0.02em; }
-    .see-also ul { display: flex; flex-wrap: wrap; gap: .5rem 1rem; margin: 0; padding-left: 1.2rem; }
-    .see-also-label { color: var(--muted); font-size: .72rem; font-weight: 750; letter-spacing: .08em; text-transform: uppercase; }
     .example-top, .example-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
     .example-nav { margin-top: var(--space-5); padding-top: var(--space-3); border-top: 1px solid var(--hairline); }
     footer { margin-block: 2rem; color: var(--muted); }
