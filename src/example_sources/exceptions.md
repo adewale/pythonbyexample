@@ -2,66 +2,80 @@
 slug = "exceptions"
 title = "Exceptions"
 section = "Errors"
-summary = "Use try and except to handle exceptional cases."
+summary = "Use try, except, else, and finally to separate success, recovery, and cleanup."
 doc_path = "/tutorial/errors.html"
 +++
 
-Exceptions represent errors or unusual conditions that interrupt normal control flow. `try` and `except` let you recover at the point where recovery makes sense.
+Exceptions represent errors or unusual conditions that interrupt normal control flow. `try` marks the operation that may fail, and `except` handles a specific failure where recovery makes sense.
+
+Keep the successful path separate from the recovery path. `else` runs only when no exception was raised, while `finally` runs either way for cleanup or bookkeeping.
 
 Catch specific exceptions whenever possible. A broad catch can hide programming mistakes, while a targeted `ValueError` handler documents exactly what failure is expected.
-
-Keep the successful path readable and put recovery logic near the operation that may fail.
 
 :::program
 ```python
 def parse_int(text):
     return int(text)
 
-print(parse_int("42"))
-
-try:
-    number = parse_int("python")
-except ValueError:
-    number = None
-
-print(number)
+for text in ["42", "python"]:
+    try:
+        number = parse_int(text)
+    except ValueError:
+        print(f"{text}: invalid")
+    else:
+        print(f"{text}: {number}")
+    finally:
+        print(f"checked {text}")
 ```
 :::
 
 :::cell
-When no exception is raised, execution continues normally and the function returns its value.
+When no exception is raised, the `else` block runs. Keeping success in `else` makes the `try` block contain only the operation that might fail.
 
 ```python
 def parse_int(text):
     return int(text)
 
-print(parse_int("42"))
+text = "42"
+try:
+    number = parse_int(text)
+except ValueError:
+    print(f"{text}: invalid")
+else:
+    print(f"{text}: {number}")
+finally:
+    print(f"checked {text}")
 ```
 
 ```output
-42
+42: 42
+checked 42
 ```
 :::
 
 :::cell
-When `int()` cannot parse the string, it raises `ValueError`. Catching that specific exception makes the recovery path explicit.
+When parsing fails, `int()` raises `ValueError`. Catching that specific exception makes the expected recovery path explicit.
 
 ```python
+text = "python"
 try:
-    number = parse_int("python")
+    number = parse_int(text)
 except ValueError:
-    number = None
-
-print(number)
+    print(f"{text}: invalid")
+else:
+    print(f"{text}: {number}")
+finally:
+    print(f"checked {text}")
 ```
 
 ```output
-None
+python: invalid
+checked python
 ```
 :::
 
 :::note
 - Catch the most specific exception you can.
-- Unhandled exceptions stop the current flow.
-- Put recovery where the program has enough context to choose a fallback.
+- `else` is for success code that should run only if the `try` block did not fail.
+- `finally` runs whether the operation succeeded or failed.
 :::

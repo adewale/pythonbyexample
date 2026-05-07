@@ -24,7 +24,7 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'values',
   'title': 'Values',
   'section': 'Basics',
-  'summary': 'Python has strings, integers, floats, booleans, and None.',
+  'summary': 'Python programs evaluate expressions into objects such as text, numbers, booleans, and None.',
   'doc_url': 'https://docs.python.org/3.13/library/stdtypes.html',
   'code': 'text = "python"\n'
           'count = 3\n'
@@ -32,36 +32,38 @@ EXAMPLES = [{'slug': 'hello-world',
           'ready = True\n'
           'missing = None\n'
           '\n'
+          'print(type(text).__name__)\n'
           'print(text.upper())\n'
           'print(count + 4)\n'
           'print(ratio * 2)\n'
+          '\n'
           'print(ready and count > 0)\n'
           'print(missing is None)\n',
-  'expected_output': 'PYTHON\n7\n5.0\nTrue\nTrue\n',
+  'expected_output': 'str\nPYTHON\n7\n5.0\nTrue\nTrue\n',
   'notes': ['Values are objects; names point to them and operations usually create new values.',
             'Use `is None` for the absence marker, not `== None`.',
-            'A small value tour should make later pages feel familiar, not replace the dedicated pages for numbers, '
-            'strings, and booleans.'],
+            'This overview introduces boundaries that later pages explain in detail.'],
   'cells': [{'prose': ['Start with several built-in values. Python does not require declarations before binding these '
-                       'names.',
-                       'Methods and operators evaluate to new values. The original `text`, `count`, and `ratio` '
-                       'bindings remain ordinary objects you can reuse.'],
+                       'names, and each value is still an object with a type.'],
              'code': 'text = "python"\n'
                      'count = 3\n'
                      'ratio = 2.5\n'
                      'ready = True\n'
                      'missing = None\n'
                      '\n'
-                     'print(text.upper())\n'
-                     'print(count + 4)\n'
-                     'print(ratio * 2)',
-             'output': 'PYTHON\n7\n5.0',
+                     'print(type(text).__name__)',
+             'output': 'str',
              'line': 17},
+            {'prose': ['Methods and operators evaluate to new values. The original `text`, `count`, and `ratio` '
+                       'bindings remain ordinary objects you can reuse.'],
+             'code': 'print(text.upper())\nprint(count + 4)\nprint(ratio * 2)',
+             'output': 'PYTHON\n7\n5.0',
+             'line': 35},
             {'prose': ['Boolean expressions combine facts, and `None` is checked by identity because it is a singleton '
                        'absence marker.'],
              'code': 'print(ready and count > 0)\nprint(missing is None)',
              'output': 'True\nTrue',
-             'line': 41}]},
+             'line': 51}]},
  {'slug': 'numbers',
   'title': 'Numbers',
   'section': 'Basics',
@@ -747,33 +749,41 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'dicts',
   'title': 'Dictionaries',
   'section': 'Collections',
-  'summary': 'Dictionaries map keys to values.',
+  'summary': 'Dictionaries map keys to values for records, lookup, and structured data.',
   'doc_url': 'https://docs.python.org/3.13/tutorial/datastructures.html#dictionaries',
   'code': 'profile = {"name": "Ada", "language": "Python"}\n'
           'profile["year"] = 1843\n'
-          '\n'
           'print(profile["name"])\n'
           'print(profile.get("timezone", "UTC"))\n'
           '\n'
-          'for key, value in profile.items():\n'
-          '    print(f"{key}: {value}")\n',
-  'expected_output': 'Ada\nUTC\nname: Ada\nlanguage: Python\nyear: 1843\n',
+          'scores = {"Ada": 10, "Grace": 9}\n'
+          'print(scores["Grace"])\n'
+          'print(scores.get("Guido", 0))\n'
+          '\n'
+          'for name, score in scores.items():\n'
+          '    print(f"{name}: {score}")\n',
+  'expected_output': 'Ada\nUTC\n9\n0\nAda: 10\nGrace: 9\n',
   'notes': ['Dictionaries preserve insertion order in modern Python.',
             'Use `get()` when a missing key has a reasonable default.',
             'Use direct indexing when a missing key should be treated as an error.'],
-  'cells': [{'prose': ['Create a dictionary with literal key/value pairs, then add another key by assignment.',
-                       'Use `[]` for required keys and `get()` when a missing key can use a default.'],
+  'cells': [{'prose': ['Use a dictionary as a small record when fields have names. Direct indexing communicates that '
+                       'the key is required, while `get()` communicates that a missing key has a fallback.'],
              'code': 'profile = {"name": "Ada", "language": "Python"}\n'
                      'profile["year"] = 1843\n'
-                     '\n'
                      'print(profile["name"])\n'
                      'print(profile.get("timezone", "UTC"))',
              'output': 'Ada\nUTC',
              'line': 17},
-            {'prose': ['Use `items()` when the loop needs both the key and the value.'],
-             'code': 'for key, value in profile.items():\n    print(f"{key}: {value}")',
-             'output': 'name: Ada\nlanguage: Python\nyear: 1843',
-             'line': 36}]},
+            {'prose': ['Use a dictionary as a lookup table when keys identify values. This is different from a list, '
+                       'where numeric position is the lookup key.'],
+             'code': 'scores = {"Ada": 10, "Grace": 9}\nprint(scores["Grace"])\nprint(scores.get("Guido", 0))',
+             'output': '9\n0',
+             'line': 33},
+            {'prose': ['Use `items()` when the loop needs both keys and values. It avoids looping over keys and then '
+                       'indexing back into the dictionary.'],
+             'code': 'for name, score in scores.items():\n    print(f"{name}: {score}")',
+             'output': 'Ada: 10\nGrace: 9',
+             'line': 48}]},
  {'slug': 'sets',
   'title': 'Sets',
   'section': 'Collections',
@@ -1464,7 +1474,7 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'properties',
   'title': 'Properties',
   'section': 'Classes',
-  'summary': '@property exposes computed or validated attributes with normal attribute syntax.',
+  'summary': '@property keeps attribute syntax while adding computation or validation.',
   'doc_url': 'https://docs.python.org/3.13/library/functions.html#property',
   'code': 'class Rectangle:\n'
           '    def __init__(self, width, height):\n'
@@ -1475,25 +1485,32 @@ EXAMPLES = [{'slug': 'hello-world',
           '    def area(self):\n'
           '        return self.width * self.height\n'
           '\n'
+          '    @property\n'
+          '    def width(self):\n'
+          '        return self._width\n'
+          '\n'
+          '    @width.setter\n'
+          '    def width(self, value):\n'
+          '        if value <= 0:\n'
+          '            raise ValueError("width must be positive")\n'
+          '        self._width = value\n'
+          '\n'
           'box = Rectangle(3, 4)\n'
-          'print(box.area)\n',
-  'expected_output': '12\n',
+          'print(box.area)\n'
+          '\n'
+          'box.width = 5\n'
+          'print(box.area)\n'
+          '\n'
+          'try:\n'
+          '    box.width = 0\n'
+          'except ValueError as error:\n'
+          '    print(error)\n',
+  'expected_output': '12\n20\nwidth must be positive\n',
   'notes': ['Properties let APIs start simple and grow validation or computation later.',
-            'Callers access a property like an attribute, not like a method.'],
-  'cells': [{'prose': ['A class can store ordinary attributes during initialization. Callers read those attributes '
-                       'directly when they are plain data.'],
-             'code': 'class Rectangle:\n'
-                     '    def __init__(self, width, height):\n'
-                     '        self.width = width\n'
-                     '        self.height = height\n'
-                     '\n'
-                     'box = Rectangle(3, 4)\n'
-                     'print(box.width)\n'
-                     'print(box.height)',
-             'output': '3\n4',
-             'line': 17},
-            {'prose': ['A property exposes computed data through attribute access. Callers write `box.area`, while the '
-                       'class still runs code to derive the value.'],
+            'Callers access a property like an attribute, not like a method.',
+            'Use methods instead when work is expensive or action-like.'],
+  'cells': [{'prose': ['A read-only property exposes computed data through attribute access. `area` stays current '
+                       'because it is calculated from `width` and `height` each time it is read.'],
              'code': 'class Rectangle:\n'
                      '    def __init__(self, width, height):\n'
                      '        self.width = width\n'
@@ -1503,10 +1520,30 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    def area(self):\n'
                      '        return self.width * self.height\n'
                      '\n'
+                     '    @property\n'
+                     '    def width(self):\n'
+                     '        return self._width\n'
+                     '\n'
+                     '    @width.setter\n'
+                     '    def width(self, value):\n'
+                     '        if value <= 0:\n'
+                     '            raise ValueError("width must be positive")\n'
+                     '        self._width = value\n'
+                     '\n'
                      'box = Rectangle(3, 4)\n'
                      'print(box.area)',
              'output': '12',
-             'line': 37}]},
+             'line': 17},
+            {'prose': ['A setter lets assignment keep normal attribute syntax while the class validates or normalizes '
+                       'the value.'],
+             'code': 'box.width = 5\nprint(box.area)',
+             'output': '20',
+             'line': 49},
+            {'prose': ['Validation belongs inside the class when every caller should obey the same rule. Invalid '
+                       'assignment raises an exception at the boundary.'],
+             'code': 'try:\n    box.width = 0\nexcept ValueError as error:\n    print(error)',
+             'output': 'width must be positive',
+             'line': 62}]},
  {'slug': 'special-methods',
   'title': 'Special Methods',
   'section': 'Data Model',
@@ -1645,32 +1682,53 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'exceptions',
   'title': 'Exceptions',
   'section': 'Errors',
-  'summary': 'Use try and except to handle exceptional cases.',
+  'summary': 'Use try, except, else, and finally to separate success, recovery, and cleanup.',
   'doc_url': 'https://docs.python.org/3.13/tutorial/errors.html',
   'code': 'def parse_int(text):\n'
           '    return int(text)\n'
           '\n'
-          'print(parse_int("42"))\n'
-          '\n'
-          'try:\n'
-          '    number = parse_int("python")\n'
-          'except ValueError:\n'
-          '    number = None\n'
-          '\n'
-          'print(number)\n',
-  'expected_output': '42\nNone\n',
+          'for text in ["42", "python"]:\n'
+          '    try:\n'
+          '        number = parse_int(text)\n'
+          '    except ValueError:\n'
+          '        print(f"{text}: invalid")\n'
+          '    else:\n'
+          '        print(f"{text}: {number}")\n'
+          '    finally:\n'
+          '        print(f"checked {text}")\n',
+  'expected_output': '42: 42\nchecked 42\npython: invalid\nchecked python\n',
   'notes': ['Catch the most specific exception you can.',
-            'Unhandled exceptions stop the current flow.',
-            'Put recovery where the program has enough context to choose a fallback.'],
-  'cells': [{'prose': ['When no exception is raised, execution continues normally and the function returns its value.'],
-             'code': 'def parse_int(text):\n    return int(text)\n\nprint(parse_int("42"))',
-             'output': '42',
+            '`else` is for success code that should run only if the `try` block did not fail.',
+            '`finally` runs whether the operation succeeded or failed.'],
+  'cells': [{'prose': ['When no exception is raised, the `else` block runs. Keeping success in `else` makes the `try` '
+                       'block contain only the operation that might fail.'],
+             'code': 'def parse_int(text):\n'
+                     '    return int(text)\n'
+                     '\n'
+                     'text = "42"\n'
+                     'try:\n'
+                     '    number = parse_int(text)\n'
+                     'except ValueError:\n'
+                     '    print(f"{text}: invalid")\n'
+                     'else:\n'
+                     '    print(f"{text}: {number}")\n'
+                     'finally:\n'
+                     '    print(f"checked {text}")',
+             'output': '42: 42\nchecked 42',
              'line': 17},
-            {'prose': ['When `int()` cannot parse the string, it raises `ValueError`. Catching that specific exception '
-                       'makes the recovery path explicit.'],
-             'code': 'try:\n    number = parse_int("python")\nexcept ValueError:\n    number = None\n\nprint(number)',
-             'output': 'None',
-             'line': 32}]},
+            {'prose': ['When parsing fails, `int()` raises `ValueError`. Catching that specific exception makes the '
+                       'expected recovery path explicit.'],
+             'code': 'text = "python"\n'
+                     'try:\n'
+                     '    number = parse_int(text)\n'
+                     'except ValueError:\n'
+                     '    print(f"{text}: invalid")\n'
+                     'else:\n'
+                     '    print(f"{text}: {number}")\n'
+                     'finally:\n'
+                     '    print(f"checked {text}")',
+             'output': 'python: invalid\nchecked python',
+             'line': 41}]},
  {'slug': 'modules',
   'title': 'Modules',
   'section': 'Modules',
