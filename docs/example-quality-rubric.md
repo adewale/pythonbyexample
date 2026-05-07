@@ -4,16 +4,17 @@ The target is to beat Go By Example and Rust By Example on Python teaching craft
 
 Score each example on a 10 point scale:
 
-1. **Conceptual payoff (0-1.25)** — the page teaches a real Python idea, not merely a doc fragment; the reader learns when and why the feature matters.
-2. **Executable determinism (0-1.0)** — the sample runs as-is, has stable output, avoids network/time/randomness unless that is the lesson, and demonstrates cause and effect.
-3. **Python idiom and accuracy (0-1.25)** — code uses current Python 3.13 idioms, names reflect the concept, and prose is technically precise without distracting caveats.
-4. **Literate programming fit (0-1.0)** — prose and source read as one continuous article; each paragraph explains the adjacent fragment; comments are used only when they clarify the program itself.
-5. **Source/result pairing (0-1.25)** — each important source fragment has nearby output that proves the semantic point, not merely that the code ran.
-6. **Concept decomposition (0-1.0)** — the example breaks the concept into meaningful parts instead of presenting one compressed trick.
-7. **Progressive walkthrough (0-0.75)** — each cell introduces one new idea, and the sequence builds toward the complete concept. Single-cell examples are acceptable only for intentionally atomic concepts.
-8. **Representative coverage (0-0.75)** — the code covers the forms promised by the title, summary, and prose, and the catalog has an explicit home for every common Python syntax form. Do not claim lists, dictionaries, and sets while showing only two of them; do not let syntax such as `break`, `continue`, `assert`, `nonlocal`, `yield from`, or `async for` exist only as untested assumptions.
-9. **Contrast and boundary clarity (0-0.75)** — when a feature is commonly confused with another feature, the example shows the distinction: comprehension vs loop, `sorted()` vs `list.sort()`, `lambda` vs `def`, `==` vs `is`, generator vs list, property vs method, and similar boundaries.
-10. **Practical usefulness (0-1.0)** — names, data, and outputs resemble simplified real code rather than toy placeholders; the example gives the feature a reason to exist.
+1. **Conceptual payoff (0-1.0)** — the page teaches a real Python idea, not merely a doc fragment; the reader leaves with a durable mental model, not just syntax recognition.
+2. **Rationale (0-0.75)** — the example explains why the feature exists, what problem shape calls for it, and what pressure made the syntax or API worth having.
+3. **Alternatives and boundaries (0-0.75)** — the page names nearby choices and shows when to prefer this feature instead: `while` vs `for`, tuple vs list, `None` vs exception, property vs method, eager collection vs lazy stream, and similar alternatives.
+4. **Executable determinism (0-1.0)** — the sample runs as-is, has stable output, avoids network/time/randomness unless that is the lesson, and demonstrates cause and effect.
+5. **Python idiom and accuracy (0-1.0)** — code uses current Python 3.13 idioms, names reflect the concept, and prose is technically precise without distracting caveats.
+6. **Literate programming fit (0-1.0)** — prose and source read as one continuous article; each paragraph explains the adjacent fragment; comments are used only when they clarify the program itself.
+7. **Source/result pairing (0-1.0)** — each important source fragment has nearby output that proves the semantic point, not merely that the code ran.
+8. **Concept decomposition (0-1.0)** — the example breaks the concept into meaningful parts instead of presenting one compressed trick.
+9. **Progressive walkthrough (0-0.75)** — each cell introduces one new idea, and the sequence builds toward the complete concept. Single-cell examples are acceptable only for intentionally atomic concepts.
+10. **Representative coverage (0-0.75)** — the code covers the forms promised by the title, summary, and prose, and the catalog has an explicit home for every common Python syntax form. Do not claim lists, dictionaries, and sets while showing only two of them; do not let syntax such as `break`, `continue`, `assert`, `nonlocal`, `yield from`, or `async for` exist only as untested assumptions.
+11. **Practical usefulness (0-1.0)** — names, data, and outputs resemble simplified real code rather than toy placeholders; the example gives the feature a reason to exist.
 
 Release gates outside the score:
 
@@ -42,11 +43,13 @@ Flag these during review even when the code is correct:
 - The title or prose promises forms not shown by code.
 - A Python syntax form appears in the language-tour checklist but has no runnable example.
 - Output is a single scalar for a collection transformation, so the reader cannot see the shape of the result.
-- A concept with a common confusion has no contrast or boundary example.
+- A concept with a common confusion has no contrast, boundary, or alternative-choice example.
 - More than half of nonblank code lines are `print(...)` calls.
 - Data is purely toy-shaped when realistic small data would clarify the purpose.
 - Notes repeat the prose instead of adding practical guidance.
 - The program shows valid syntax but not when or why to use it.
+- The rationale is missing: the page does not explain the pressure that made the feature useful.
+- Alternatives are missing: the page does not say what a reader might use instead or when this feature is the wrong choice.
 - The page teaches an operation but not the problem shape that made the feature worth having.
 - The page does not connect the feature to a nearby alternative, such as `while` vs `for`, slice vs index, tuple vs list, or f-string expression vs display formatting.
 - An iteration example uses a lazy object but does not show when values are consumed.
