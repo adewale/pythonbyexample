@@ -186,6 +186,31 @@ class AppTests(unittest.TestCase):
             with self.subTest(snippet=snippet):
                 self.assertIn(snippet, source)
 
+    def test_journey_pages_are_routable_but_not_linked_from_home(self):
+        from src.app import JOURNEYS, route
+
+        home = route("https://example.com/").body
+        self.assertNotIn("/journeys/", home)
+        index = route("https://example.com/journeys")
+        self.assertEqual(index.status, 200)
+        self.assertIn("Python learning journeys", index.body)
+        self.assertGreaterEqual(len(JOURNEYS), 6)
+        for journey in JOURNEYS:
+            self.assertIn(f'/journeys/{journey["slug"]}', index.body)
+        for journey in JOURNEYS:
+            self.assertGreaterEqual(len(journey["sections"]), 3)
+            page = route(f"https://example.com/journeys/{journey['slug']}")
+            self.assertEqual(page.status, 200)
+            self.assertIn("Journey", page.body)
+            self.assertIn("journey-overview", page.body)
+            self.assertIn("journey-section", page.body)
+            self.assertIn("Gap ·", page.body)
+            self.assertIn("/examples/", page.body)
+            self.assertIn("Use this example to ", page.body)
+            self.assertIn("This gap should ", page.body)
+            self.assertIn("Gap ·", page.body)
+            self.assertNotIn("journey-step-number", page.body)
+
     def test_see_also_links_form_valid_example_graph(self):
         examples = list_examples()
         slugs = {example["slug"] for example in examples}
