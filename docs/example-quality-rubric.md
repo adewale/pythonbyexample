@@ -45,6 +45,8 @@ Flag these during review even when the code is correct:
 - Data is purely toy-shaped when realistic small data would clarify the purpose.
 - Notes repeat the prose instead of adding practical guidance.
 - The program shows valid syntax but not when or why to use it.
+- The page teaches an operation but not the problem shape that made the feature worth having.
+- The page does not connect the feature to a nearby alternative, such as `while` vs `for`, slice vs index, tuple vs list, or f-string expression vs display formatting.
 - An iteration example uses a lazy object but does not show when values are consumed.
 - An iteration example blurs eager containers with one-pass streams.
 
@@ -59,3 +61,5 @@ Before publishing or substantially editing an example, ask:
 5. Is there a contrast readers commonly need to avoid misuse?
 6. Would an explicit loop, named function, or mutation-vs-copy contrast make the idiom clearer?
 7. For iteration examples, what produces values, what consumes them, and are they stored eagerly or streamed lazily?
+8. What neighboring feature would a learner confuse this with, and does the page explain the boundary?
+9. Does the data shape explain why this feature exists?

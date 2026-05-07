@@ -2,64 +2,74 @@
 slug = "slices"
 title = "Slices"
 section = "Collections"
-summary = "Slices select ranges from sequences."
+summary = "Slices copy meaningful ranges from ordered sequences."
 doc_path = "/tutorial/introduction.html#lists"
 +++
 
-Slicing reads a range from a sequence with `start:stop:step`. It is one of Python's most compact tools for working with ordered data.
+Slicing reads a range from an ordered sequence with `start:stop:step`. It exists because Python code often needs a meaningful piece of a sequence: a page, a prefix, a tail, a stride, or a reversed view.
 
-The stop index is excluded. This convention makes lengths and adjacent slices easier to reason about.
+The stop index is excluded. That convention makes lengths and adjacent ranges line up: `items[:3]` and `items[3:]` split a sequence without overlap.
 
-Omitted bounds default to the beginning or end, and the optional step can skip items or reverse a sequence.
+Slices return new sequence objects for built-in lists and strings. Use indexing for one item; use slicing when the result should still be a sequence.
 
 :::program
 ```python
-letters = ["a", "b", "c", "d", "e"]
+letters = ["a", "b", "c", "d", "e", "f"]
+first_page = letters[:3]
+rest = letters[3:]
+print(first_page)
+print(rest)
 
-print(letters[1:4])
-print(letters[:2])
-print(letters[2:])
-print(letters[::2])
-print(letters[::-1])
+middle = letters[1:5]
+every_other = letters[::2]
+reversed_letters = letters[::-1]
+print(middle)
+print(every_other)
+print(reversed_letters)
+print(letters)
 ```
 :::
 
 :::cell
-Start with an ordered sequence. Slices return selected ranges without changing the original list.
-
-The stop index is excluded. Omitting a bound means “from the beginning” or “through the end.”
+Omitted bounds mean “from the beginning” or “through the end.” Because the stop index is excluded, adjacent slices split a sequence cleanly.
 
 ```python
-letters = ["a", "b", "c", "d", "e"]
-
-print(letters[1:4])
-print(letters[:2])
-print(letters[2:])
+letters = ["a", "b", "c", "d", "e", "f"]
+first_page = letters[:3]
+rest = letters[3:]
+print(first_page)
+print(rest)
 ```
 
 ```output
-['b', 'c', 'd']
-['a', 'b']
-['c', 'd', 'e']
+['a', 'b', 'c']
+['d', 'e', 'f']
 ```
 :::
 
 :::cell
-The step controls how the slice moves. A step of `2` skips, and `-1` walks backward.
+Use `start:stop` for a middle range and `step` when you want to skip or walk backward. These operations return new lists; the original list is unchanged.
 
 ```python
-print(letters[::2])
-print(letters[::-1])
+middle = letters[1:5]
+every_other = letters[::2]
+reversed_letters = letters[::-1]
+print(middle)
+print(every_other)
+print(reversed_letters)
+print(letters)
 ```
 
 ```output
+['b', 'c', 'd', 'e']
 ['a', 'c', 'e']
-['e', 'd', 'c', 'b', 'a']
+['f', 'e', 'd', 'c', 'b', 'a']
+['a', 'b', 'c', 'd', 'e', 'f']
 ```
 :::
 
 :::note
 - Slice stop indexes are excluded, so adjacent ranges compose cleanly.
 - Omitted bounds mean the beginning or end of the sequence.
-- A negative step walks backward through the sequence.
+- A negative step walks backward; `[::-1]` is a common reversed-copy idiom.
 :::

@@ -370,32 +370,39 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'string-formatting',
   'title': 'String Formatting',
   'section': 'Text',
-  'summary': 'f-strings format values directly inside string literals.',
+  'summary': 'f-strings turn values into readable text at the point of use.',
   'doc_url': 'https://docs.python.org/3.13/tutorial/inputoutput.html#formatted-string-literals',
   'code': 'name = "Ada"\n'
           'score = 9.5\n'
+          'rank = 1\n'
           '\n'
-          'print(f"{name} scored {score}")\n'
-          'print(f"{name:>8} | {score:05.1f}")\n'
+          'message = f"{name} scored {score}"\n'
+          'print(message)\n'
+          '\n'
+          'row = f"{rank:>2} | {name:<8} | {score:05.1f}"\n'
+          'print(row)\n'
+          '\n'
           'print(f"{score = }")\n',
-  'expected_output': 'Ada scored 9.5\n     Ada | 009.5\nscore = 9.5\n',
+  'expected_output': 'Ada scored 9.5\n 1 | Ada      | 009.5\nscore = 9.5\n',
   'notes': ['Use `f"..."` strings for most new formatting code.',
+            'Expressions inside braces are evaluated before formatting.',
             'Format specifications after `:` control alignment, width, padding, and precision.'],
   'cells': [{'prose': ['An f-string evaluates expressions inside braces and inserts their string form into the '
-                       'surrounding text.'],
-             'code': 'name = "Ada"\nscore = 9.5\n\nprint(f"{name} scored {score}")',
+                       'surrounding text. This is clearer than joining several converted values by hand.'],
+             'code': 'name = "Ada"\nscore = 9.5\nrank = 1\n\nmessage = f"{name} scored {score}"\nprint(message)',
              'output': 'Ada scored 9.5',
              'line': 17},
-            {'prose': ['Format specifications after `:` control presentation. Here the name is right-aligned and the '
-                       'score is padded with one decimal place.'],
-             'code': 'print(f"{name:>8} | {score:05.1f}")',
-             'output': '     Ada | 009.5',
-             'line': 32},
-            {'prose': ['The debug form `name =` is handy while learning or logging because it prints both the '
+            {'prose': ['Format specifications after `:` control display without changing the underlying values. Here '
+                       'the rank is right-aligned, the name is left-aligned, and the score is padded to one decimal '
+                       'place.'],
+             'code': 'row = f"{rank:>2} | {name:<8} | {score:05.1f}"\nprint(row)',
+             'output': ' 1 | Ada      | 009.5',
+             'line': 34},
+            {'prose': ['The debug form with `=` is useful while learning or logging because it prints both the '
                        'expression and the value.'],
              'code': 'print(f"{score = }")',
              'output': 'score = 9.5',
-             'line': 44}]},
+             'line': 47}]},
  {'slug': 'conditionals',
   'title': 'Conditionals',
   'section': 'Control Flow',
@@ -594,30 +601,43 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'while-loops',
   'title': 'While Loops',
   'section': 'Control Flow',
-  'summary': 'while repeats as long as a condition is true.',
+  'summary': 'while repeats until changing state makes a condition false.',
   'doc_url': 'https://docs.python.org/3.13/reference/compound_stmts.html#while',
   'code': 'remaining = 3\n'
-          '\n'
           'while remaining > 0:\n'
           '    print(f"launch in {remaining}")\n'
           '    remaining -= 1\n'
+          'print("liftoff")\n'
           '\n'
-          'print("liftoff")\n',
-  'expected_output': 'launch in 3\nlaunch in 2\nlaunch in 1\nliftoff\n',
-  'notes': ['Use `while` when the stopping condition matters more than a fixed iterable.',
+          'responses = iter(["retry", "retry", "ok"])\n'
+          'status = next(responses)\n'
+          'while status != "ok":\n'
+          '    print(f"status: {status}")\n'
+          '    status = next(responses)\n'
+          'print(f"status: {status}")\n',
+  'expected_output': 'launch in 3\nlaunch in 2\nlaunch in 1\nliftoff\nstatus: retry\nstatus: retry\nstatus: ok\n',
+  'notes': ['Use `while` when changing state decides whether the loop continues.',
             'Update loop state inside the body so the condition can become false.',
-            'Prefer `for` when you already have a collection or range to consume.'],
-  'cells': [{'prose': ['Start with the state that controls the loop. The condition will be checked before every '
-                       'iteration.',
-                       'The body runs while the condition is true. Updating `remaining` moves the program toward '
-                       'stopping.'],
-             'code': 'remaining = 3\n\nwhile remaining > 0:\n    print(f"launch in {remaining}")\n    remaining -= 1',
-             'output': 'launch in 3\nlaunch in 2\nlaunch in 1',
+            'Prefer `for` when you already have a collection, range, iterator, or generator to consume.'],
+  'cells': [{'prose': ['Use `while` when the condition, not an iterable, controls repetition. Here the loop owns the '
+                       'countdown state and updates it each time through the body.'],
+             'code': 'remaining = 3\n'
+                     'while remaining > 0:\n'
+                     '    print(f"launch in {remaining}")\n'
+                     '    remaining -= 1\n'
+                     'print("liftoff")',
+             'output': 'launch in 3\nlaunch in 2\nlaunch in 1\nliftoff',
              'line': 17},
-            {'prose': ['Execution continues after the loop once the condition becomes false.'],
-             'code': 'print("liftoff")',
-             'output': 'liftoff',
-             'line': 37}]},
+            {'prose': ['A sentinel loop stops when a special value appears. The loop does not know in advance how many '
+                       'retries it will need; it keeps going until the state says to stop.'],
+             'code': 'responses = iter(["retry", "retry", "ok"])\n'
+                     'status = next(responses)\n'
+                     'while status != "ok":\n'
+                     '    print(f"status: {status}")\n'
+                     '    status = next(responses)\n'
+                     'print(f"status: {status}")',
+             'output': 'status: retry\nstatus: retry\nstatus: ok',
+             'line': 36}]},
  {'slug': 'lists',
   'title': 'Lists',
   'section': 'Collections',
@@ -651,23 +671,38 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'tuples',
   'title': 'Tuples',
   'section': 'Collections',
-  'summary': 'Tuples are ordered, immutable collections often used for records.',
+  'summary': 'Tuples group a fixed number of positional values.',
   'doc_url': 'https://docs.python.org/3.13/tutorial/datastructures.html#tuples-and-sequences',
-  'code': 'point = (3, 4)\nred = (255, 0, 0)\n\nx, y = point\nprint(x + y)\nprint(red)\nprint(point == (3, 4))\n',
-  'expected_output': '7\n(255, 0, 0)\nTrue\n',
+  'code': 'point = (3, 4)\n'
+          'x, y = point\n'
+          'print(x + y)\n'
+          '\n'
+          'red = (255, 0, 0)\n'
+          'print(red[0])\n'
+          'print(len(red))\n'
+          '\n'
+          'record = ("Ada", 10)\n'
+          'name, score = record\n'
+          'print(f"{name}: {score}")\n',
+  'expected_output': '7\n255\n3\nAda: 10\n',
   'notes': ['Tuples are immutable sequences with fixed length.',
             'Use tuples for small records where position has meaning.',
-            'Unpacking gives names to tuple positions at the point of use.'],
-  'cells': [{'prose': ['Use tuples for fixed-size groups where the positions are part of the meaning.',
-                       'Unpacking gives useful names to tuple positions instead of leaving readers to remember '
-                       'indexes.'],
-             'code': 'point = (3, 4)\nred = (255, 0, 0)\n\nx, y = point\nprint(x + y)',
+            'Use lists for variable-length collections of similar items.'],
+  'cells': [{'prose': ['Use a tuple for a fixed-size record where each position has a known meaning. Unpacking turns '
+                       'those positions into names at the point of use.'],
+             'code': 'point = (3, 4)\nx, y = point\nprint(x + y)',
              'output': '7',
              'line': 17},
-            {'prose': ['Tuples compare by value and keep their fixed structure.'],
-             'code': 'print(red)\nprint(point == (3, 4))',
-             'output': '(255, 0, 0)\nTrue',
-             'line': 35}]},
+            {'prose': ['Tuples are sequences, so indexing and `len()` work. They are different from lists because '
+                       'their length and item references are fixed after creation.'],
+             'code': 'red = (255, 0, 0)\nprint(red[0])\nprint(len(red))',
+             'output': '255\n3',
+             'line': 31},
+            {'prose': ['Tuples pair naturally with multiple return values and unpacking. If the fields need names '
+                       'everywhere, graduate to a dataclass or named tuple.'],
+             'code': 'record = ("Ada", 10)\nname, score = record\nprint(f"{name}: {score}")',
+             'output': 'Ada: 10',
+             'line': 46}]},
  {'slug': 'unpacking',
   'title': 'Unpacking',
   'section': 'Collections',
@@ -775,33 +810,53 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'slices',
   'title': 'Slices',
   'section': 'Collections',
-  'summary': 'Slices select ranges from sequences.',
+  'summary': 'Slices copy meaningful ranges from ordered sequences.',
   'doc_url': 'https://docs.python.org/3.13/tutorial/introduction.html#lists',
-  'code': 'letters = ["a", "b", "c", "d", "e"]\n'
+  'code': 'letters = ["a", "b", "c", "d", "e", "f"]\n'
+          'first_page = letters[:3]\n'
+          'rest = letters[3:]\n'
+          'print(first_page)\n'
+          'print(rest)\n'
           '\n'
-          'print(letters[1:4])\n'
-          'print(letters[:2])\n'
-          'print(letters[2:])\n'
-          'print(letters[::2])\n'
-          'print(letters[::-1])\n',
-  'expected_output': "['b', 'c', 'd']\n['a', 'b']\n['c', 'd', 'e']\n['a', 'c', 'e']\n['e', 'd', 'c', 'b', 'a']\n",
+          'middle = letters[1:5]\n'
+          'every_other = letters[::2]\n'
+          'reversed_letters = letters[::-1]\n'
+          'print(middle)\n'
+          'print(every_other)\n'
+          'print(reversed_letters)\n'
+          'print(letters)\n',
+  'expected_output': "['a', 'b', 'c']\n"
+                     "['d', 'e', 'f']\n"
+                     "['b', 'c', 'd', 'e']\n"
+                     "['a', 'c', 'e']\n"
+                     "['f', 'e', 'd', 'c', 'b', 'a']\n"
+                     "['a', 'b', 'c', 'd', 'e', 'f']\n",
   'notes': ['Slice stop indexes are excluded, so adjacent ranges compose cleanly.',
             'Omitted bounds mean the beginning or end of the sequence.',
-            'A negative step walks backward through the sequence.'],
-  'cells': [{'prose': ['Start with an ordered sequence. Slices return selected ranges without changing the original '
-                       'list.',
-                       'The stop index is excluded. Omitting a bound means “from the beginning” or “through the end.”'],
-             'code': 'letters = ["a", "b", "c", "d", "e"]\n'
-                     '\n'
-                     'print(letters[1:4])\n'
-                     'print(letters[:2])\n'
-                     'print(letters[2:])',
-             'output': "['b', 'c', 'd']\n['a', 'b']\n['c', 'd', 'e']",
+            'A negative step walks backward; `[::-1]` is a common reversed-copy idiom.'],
+  'cells': [{'prose': ['Omitted bounds mean “from the beginning” or “through the end.” Because the stop index is '
+                       'excluded, adjacent slices split a sequence cleanly.'],
+             'code': 'letters = ["a", "b", "c", "d", "e", "f"]\n'
+                     'first_page = letters[:3]\n'
+                     'rest = letters[3:]\n'
+                     'print(first_page)\n'
+                     'print(rest)',
+             'output': "['a', 'b', 'c']\n['d', 'e', 'f']",
              'line': 17},
-            {'prose': ['The step controls how the slice moves. A step of `2` skips, and `-1` walks backward.'],
-             'code': 'print(letters[::2])\nprint(letters[::-1])',
-             'output': "['a', 'c', 'e']\n['e', 'd', 'c', 'b', 'a']",
-             'line': 37}]},
+            {'prose': ['Use `start:stop` for a middle range and `step` when you want to skip or walk backward. These '
+                       'operations return new lists; the original list is unchanged.'],
+             'code': 'middle = letters[1:5]\n'
+                     'every_other = letters[::2]\n'
+                     'reversed_letters = letters[::-1]\n'
+                     'print(middle)\n'
+                     'print(every_other)\n'
+                     'print(reversed_letters)\n'
+                     'print(letters)',
+             'output': "['b', 'c', 'd', 'e']\n"
+                       "['a', 'c', 'e']\n"
+                       "['f', 'e', 'd', 'c', 'b', 'a']\n"
+                       "['a', 'b', 'c', 'd', 'e', 'f']",
+             'line': 34}]},
  {'slug': 'comprehensions',
   'title': 'Comprehensions',
   'section': 'Collections',

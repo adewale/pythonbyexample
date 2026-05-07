@@ -2,37 +2,37 @@
 slug = "tuples"
 title = "Tuples"
 section = "Collections"
-summary = "Tuples are ordered, immutable collections often used for records."
+summary = "Tuples group a fixed number of positional values."
 doc_path = "/tutorial/datastructures.html#tuples-and-sequences"
 +++
 
-Tuples are ordered immutable sequences. They are useful for small fixed records such as coordinates, colors, or multiple return values.
+Tuples are ordered, immutable sequences. They exist for small fixed groups where position has meaning: coordinates, RGB colors, database rows, and multiple return values.
 
-Unpacking turns positional data into named local variables. That makes tuple use readable when each position has a clear meaning.
+Use lists for variable-length collections of similar items. Use tuples when the number of positions is part of the data shape and unpacking can give each position a useful name.
 
-Because tuples are immutable, their length and item references cannot be changed in place after creation.
+Because tuples are immutable, you cannot append or replace positions in place. If the shape needs to grow or change, a list or dataclass is usually a better fit.
 
 :::program
 ```python
 point = (3, 4)
-red = (255, 0, 0)
-
 x, y = point
 print(x + y)
-print(red)
-print(point == (3, 4))
+
+red = (255, 0, 0)
+print(red[0])
+print(len(red))
+
+record = ("Ada", 10)
+name, score = record
+print(f"{name}: {score}")
 ```
 :::
 
 :::cell
-Use tuples for fixed-size groups where the positions are part of the meaning.
-
-Unpacking gives useful names to tuple positions instead of leaving readers to remember indexes.
+Use a tuple for a fixed-size record where each position has a known meaning. Unpacking turns those positions into names at the point of use.
 
 ```python
 point = (3, 4)
-red = (255, 0, 0)
-
 x, y = point
 print(x + y)
 ```
@@ -43,21 +43,36 @@ print(x + y)
 :::
 
 :::cell
-Tuples compare by value and keep their fixed structure.
+Tuples are sequences, so indexing and `len()` work. They are different from lists because their length and item references are fixed after creation.
 
 ```python
-print(red)
-print(point == (3, 4))
+red = (255, 0, 0)
+print(red[0])
+print(len(red))
 ```
 
 ```output
-(255, 0, 0)
-True
+255
+3
+```
+:::
+
+:::cell
+Tuples pair naturally with multiple return values and unpacking. If the fields need names everywhere, graduate to a dataclass or named tuple.
+
+```python
+record = ("Ada", 10)
+name, score = record
+print(f"{name}: {score}")
+```
+
+```output
+Ada: 10
 ```
 :::
 
 :::note
 - Tuples are immutable sequences with fixed length.
 - Use tuples for small records where position has meaning.
-- Unpacking gives names to tuple positions at the point of use.
+- Use lists for variable-length collections of similar items.
 :::
