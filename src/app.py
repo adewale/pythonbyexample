@@ -345,7 +345,7 @@ def render_example_page(example, output=None, code=None, execution_time_ms=None)
         else "<span></span>"
     )
     walkthrough_html = "".join(
-        f'<section class="lesson-step lp-cell"><div class="lp-prose">{"".join(f"<p>{render_inline(prose)}</p>" for prose in step["prose"])}</div><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">{html.escape(step["code"])}</code></pre></div><div class="cell-output"><p class="cell-label">Output</p><pre><code>{html.escape(step["output"])}</code></pre></div></section>'
+        f'<section class="lesson-step lp-cell"><div class="lp-prose">{"".join(f"<p>{render_inline(prose)}</p>" for prose in step["prose"])}</div><div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">{html.escape(step["code"])}</code></pre></div><div class="cell-output"><p class="cell-label">Output</p><pre><code>{html.escape(step["output"])}</code></pre></div></div></section>'
         for index, step in enumerate(walkthrough, 1)
     )
     notes_html = "".join(f"<li>{note}</li>" for note in notes)
