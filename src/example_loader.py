@@ -151,6 +151,7 @@ def example_to_dict(filename: str, catalog: ExampleCatalog) -> dict[str, Any]:
         "doc_url": f"{catalog.docs_base_url}{doc_path}",
         "explanation": intro,
         "notes": notes,
+        "see_also": list(frontmatter.get("see_also", [])),
         "walkthrough": [{"prose": prose, "code": cell.source} for cell in cells for prose in cell.prose],
         "cells": [{"prose": cell.prose, "code": cell.source, "output": cell.output, "line": cell.line} for cell in cells],
         "code": code,

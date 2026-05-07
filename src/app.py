@@ -303,6 +303,13 @@ def render_example_page(example, output=None, code=None, execution_time_ms=None)
         for index, step in enumerate(walkthrough, 1)
     )
     notes_html = "".join(f"<li>{note}</li>" for note in notes)
+    see_also_examples = [get_example(slug) for slug in example.get("see_also", [])]
+    see_also_links = "".join(
+        f'<li><a class="text-link" href="/examples/{html.escape(item["slug"])}">{html.escape(item["title"])}</a></li>'
+        for item in see_also_examples
+        if item is not None
+    )
+    see_also_html = f'<section class="see-also"><h2>See also</h2><ul>{see_also_links}</ul></section>' if see_also_links else ""
     content = _replace(
         _template("example.html"),
         {
@@ -312,6 +319,7 @@ def render_example_page(example, output=None, code=None, execution_time_ms=None)
             "SUMMARY": html.escape(example["summary"]),
             "WALKTHROUGH": walkthrough_html,
             "NOTES": notes_html,
+            "SEE_ALSO": see_also_html,
             "PREVIOUS_LINK": previous_link,
             "NEXT_LINK": next_link,
             "SLUG": html.escape(example["slug"]),

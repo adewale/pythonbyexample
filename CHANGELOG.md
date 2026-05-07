@@ -23,11 +23,14 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 - Example source verifier, formatter, embedded-source build step, and golden parity check.
 - GitHub Actions verification workflow.
 - `iterators` and `generator-expressions` examples to make the Iteration arc explicit.
+- Syntax coverage examples for loop control, loop `else`, assertions, deletion, scope rebinding, positional-only parameters, assignment expressions, `yield from`, exception chaining/groups, advanced match patterns, inheritance, metaclasses, async iteration/context managers, import aliases, and specialized operators/literals.
+- Optional `see_also` example graph links with validation tests.
 
 ### Changed
 
 - Example walkthroughs now pair prose, source fragments, and output evidence.
 - Iteration examples now frame Python iteration as a value-stream protocol: producers, consumers, eager containers, lazy streams, and one-pass iterators.
+- The quality rubric now requires explicit syntax-surface coverage and graph-style conceptual links for neighboring examples.
 - Read-only code highlighting is handled by Shiki; editable code highlighting is handled by CodeMirror.
 - Prototype routes under `/layout-options/*` bypass the Worker Cache API and return `Cache-Control: no-store`.
 - Static assets use immutable cache headers only on fingerprinted filenames.

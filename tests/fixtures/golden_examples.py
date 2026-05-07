@@ -135,6 +135,69 @@ EXAMPLES = [{'slug': 'hello-world',
              'code': 'name = "Ada"\nprint(name == "Ada" and len(name) > 0)',
              'output': 'True',
              'line': 38}]},
+ {'slug': 'operators-and-literals',
+  'title': 'Operators and Literals',
+  'section': 'Basics',
+  'summary': 'Python has specialized operators and literal forms for particular data shapes.',
+  'doc_url': 'https://docs.python.org/3.13/reference/lexical_analysis.html#literals',
+  'code': 'pattern = r"\\d+"\n'
+          'data = b"py"\n'
+          'number = 2 + 3j\n'
+          'print(pattern)\n'
+          'print(data)\n'
+          'print(number.real)\n'
+          '\n'
+          'flags = 0b0011\n'
+          'print(flags ^ 0b0101)\n'
+          'print(flags << 1)\n'
+          'print(~0)\n'
+          'print(sorted({"python", "go"} ^ {"go", "rust"}))\n'
+          '\n'
+          'class Scale:\n'
+          '    def __init__(self, value):\n'
+          '        self.value = value\n'
+          '\n'
+          '    def __matmul__(self, other):\n'
+          '        return self.value * other.value\n'
+          '\n'
+          'print(Scale(2) @ Scale(3))\n'
+          'print(...)\n',
+  'expected_output': "\\d+\nb'py'\n2.0\n6\n6\n-1\n['python', 'rust']\n6\nEllipsis\n",
+  'notes': ['Raw strings are useful when backslashes are part of the data, such as regular expressions.',
+            'Bytes literals represent binary data, not text strings.',
+            'Specialized operators should make the data model clearer, not more mysterious.'],
+  'cells': [{'prose': ['Raw strings keep backslashes literal, bytes literals store binary data, and complex literals '
+                       'use `j` for the imaginary part.'],
+             'code': 'pattern = r"\\d+"\n'
+                     'data = b"py"\n'
+                     'number = 2 + 3j\n'
+                     'print(pattern)\n'
+                     'print(data)\n'
+                     'print(number.real)',
+             'output': "\\d+\nb'py'\n2.0",
+             'line': 22},
+            {'prose': ['Bit operators work on integers and some collection types. For sets, `^` means symmetric '
+                       'difference: values in either set but not both.'],
+             'code': 'flags = 0b0011\n'
+                     'print(flags ^ 0b0101)\n'
+                     'print(flags << 1)\n'
+                     'print(~0)\n'
+                     'print(sorted({"python", "go"} ^ {"go", "rust"}))',
+             'output': "6\n6\n-1\n['python', 'rust']",
+             'line': 41},
+            {'prose': ['The `@` operator calls `__matmul__` on custom objects. `...` is the `Ellipsis` literal, '
+                       'commonly used as a placeholder in stubs and slicing APIs.'],
+             'code': 'class Scale:\n'
+                     '    def __init__(self, value):\n'
+                     '        self.value = value\n'
+                     '\n'
+                     '    def __matmul__(self, other):\n'
+                     '        return self.value * other.value\n'
+                     '\n'
+                     'print(Scale(2) @ Scale(3))\n'
+                     'print(...)',
+             'output': '6\nEllipsis',
+             'line': 60}]},
  {'slug': 'none',
   'title': 'None',
   'section': 'Basics',
@@ -479,6 +542,42 @@ EXAMPLES = [{'slug': 'hello-world',
              'code': 'status = "ok" if temperature < 90 else "danger"\nprint(status)',
              'output': 'ok',
              'line': 52}]},
+ {'slug': 'assignment-expressions',
+  'title': 'Assignment Expressions',
+  'section': 'Control Flow',
+  'summary': 'The walrus operator assigns a value inside an expression.',
+  'doc_url': 'https://docs.python.org/3.13/reference/expressions.html#assignment-expressions',
+  'code': 'messages = ["hello", "", "python"]\n'
+          '\n'
+          'for message in messages:\n'
+          '    if length := len(message):\n'
+          '        print(message, length)\n'
+          '\n'
+          'queue = ["retry", "ok"]\n'
+          'while (status := queue.pop(0)) != "ok":\n'
+          '    print(status)\n'
+          'print(status)\n',
+  'expected_output': 'hello 5\npython 6\nretry\nok\n',
+  'notes': ['`name := expression` assigns and evaluates to the assigned value.',
+            'Use it to avoid computing the same value twice.',
+            'Prefer a normal assignment when the expression becomes hard to scan.'],
+  'cells': [{'prose': ['An assignment expression can name a computed value while a condition tests it. Here empty '
+                       'strings are skipped because their length is zero.'],
+             'code': 'messages = ["hello", "", "python"]\n'
+                     '\n'
+                     'for message in messages:\n'
+                     '    if length := len(message):\n'
+                     '        print(message, length)',
+             'output': 'hello 5\npython 6',
+             'line': 22},
+            {'prose': ['The same idea works in loops that read state until a sentinel appears. The assignment and '
+                       'comparison stay together.'],
+             'code': 'queue = ["retry", "ok"]\n'
+                     'while (status := queue.pop(0)) != "ok":\n'
+                     '    print(status)\n'
+                     'print(status)',
+             'output': 'retry\nok',
+             'line': 39}]},
  {'slug': 'for-loops',
   'title': 'For Loops',
   'section': 'Control Flow',
@@ -497,6 +596,81 @@ EXAMPLES = [{'slug': 'hello-world',
              'code': 'for number in range(3):\n    print(number)',
              'output': '0\n1\n2',
              'line': 32}]},
+ {'slug': 'break-and-continue',
+  'title': 'Break and Continue',
+  'section': 'Control Flow',
+  'summary': 'break exits a loop early, while continue skips to the next iteration.',
+  'doc_url': 'https://docs.python.org/3.13/tutorial/controlflow.html#break-and-continue-statements',
+  'code': 'names = ["Ada", "", "Grace", "stop", "Guido"]\n'
+          '\n'
+          'for name in names:\n'
+          '    if not name:\n'
+          '        continue\n'
+          '    if name == "stop":\n'
+          '        break\n'
+          '    print(name)\n',
+  'expected_output': 'Ada\nGrace\n',
+  'notes': ['`continue` skips to the next loop iteration.',
+            '`break` exits the nearest enclosing loop immediately.',
+            'Prefer plain `if`/`else` when the loop does not need early skip or early stop behavior.'],
+  'cells': [{'prose': ['`continue` skips the rest of the current iteration. The empty name is ignored, and the loop '
+                       'moves on to the next value.'],
+             'code': 'names = ["Ada", "", "Grace", "stop", "Guido"]\n'
+                     '\n'
+                     'for name in names:\n'
+                     '    if not name:\n'
+                     '        continue\n'
+                     '    if name == "stop":\n'
+                     '        break\n'
+                     '    print(name)',
+             'output': 'Ada\nGrace',
+             'line': 22}]},
+ {'slug': 'loop-else',
+  'title': 'Loop Else',
+  'section': 'Control Flow',
+  'summary': 'A loop else block runs only when the loop did not end with break.',
+  'doc_url': 'https://docs.python.org/3.13/tutorial/controlflow.html#else-clauses-on-loops',
+  'code': 'names = ["Ada", "Grace", "Guido"]\n'
+          '\n'
+          'for name in names:\n'
+          '    if name == "Grace":\n'
+          '        print("found")\n'
+          '        break\n'
+          'else:\n'
+          '    print("missing")\n'
+          '\n'
+          'for name in names:\n'
+          '    if name == "Linus":\n'
+          '        print("found")\n'
+          '        break\n'
+          'else:\n'
+          '    print("missing")\n',
+  'expected_output': 'found\nmissing\n',
+  'notes': ['Loop `else` runs when the loop was not ended by `break`.',
+            'It is best for search loops with a clear found/not-found split.',
+            'It works with both `for` and `while` loops.'],
+  'cells': [{'prose': ['If the loop reaches `break`, the `else` block is skipped. This branch means the search '
+                       'succeeded early.'],
+             'code': 'names = ["Ada", "Grace", "Guido"]\n'
+                     '\n'
+                     'for name in names:\n'
+                     '    if name == "Grace":\n'
+                     '        print("found")\n'
+                     '        break\n'
+                     'else:\n'
+                     '    print("missing")',
+             'output': 'found',
+             'line': 22},
+            {'prose': ['If the loop finishes without `break`, the `else` block runs. This branch means the search '
+                       'examined every value and found nothing.'],
+             'code': 'for name in names:\n'
+                     '    if name == "Linus":\n'
+                     '        print("found")\n'
+                     '        break\n'
+                     'else:\n'
+                     '    print("missing")',
+             'output': 'missing',
+             'line': 41}]},
  {'slug': 'iterating-over-iterables',
   'title': 'Iterating over Iterables',
   'section': 'Iteration',
@@ -626,6 +800,56 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        print("invalid command")',
              'output': 'unknown action: jump',
              'line': 51}]},
+ {'slug': 'advanced-match-patterns',
+  'title': 'Advanced Match Patterns',
+  'section': 'Control Flow',
+  'summary': 'match patterns can destructure sequences, combine alternatives, and add guards.',
+  'doc_url': 'https://docs.python.org/3.13/tutorial/controlflow.html#match-statements',
+  'code': 'def describe(command):\n'
+          '    match command:\n'
+          '        case ["move", x, y] if x >= 0 and y >= 0:\n'
+          '            return f"move to {x},{y}"\n'
+          '        case ["quit" | "exit"]:\n'
+          '            return "stop"\n'
+          '        case ["echo", *words]:\n'
+          '            return " ".join(words)\n'
+          '        case _:\n'
+          '            return "unknown"\n'
+          '\n'
+          'print(describe(["move", 2, 3]))\n'
+          'print(describe(["exit"]))\n'
+          'print(describe(["echo", "hello", "python"]))\n'
+          'print(describe(["move", -1, 3]))\n',
+  'expected_output': 'move to 2,3\nstop\nhello python\nunknown\n',
+  'notes': ['Use `case _` as a wildcard fallback.',
+            'Guards refine a pattern after the structure matches.',
+            'OR patterns and star patterns keep shape-based branches compact.'],
+  'cells': [{'prose': ['Sequence patterns match by position. A guard after `if` adds a condition that must also be '
+                       'true.'],
+             'code': 'def describe(command):\n'
+                     '    match command:\n'
+                     '        case ["move", x, y] if x >= 0 and y >= 0:\n'
+                     '            return f"move to {x},{y}"\n'
+                     '        case ["quit" | "exit"]:\n'
+                     '            return "stop"\n'
+                     '        case ["echo", *words]:\n'
+                     '            return " ".join(words)\n'
+                     '        case _:\n'
+                     '            return "unknown"\n'
+                     '\n'
+                     'print(describe(["move", 2, 3]))',
+             'output': 'move to 2,3',
+             'line': 22},
+            {'prose': ['An OR pattern accepts several alternatives in one case. A star pattern captures the rest of a '
+                       'sequence.'],
+             'code': 'print(describe(["exit"]))\nprint(describe(["echo", "hello", "python"]))',
+             'output': 'stop\nhello python',
+             'line': 45},
+            {'prose': ['The wildcard `_` catches values that did not match earlier cases. Here the guard rejects the '
+                       'negative coordinate.'],
+             'code': 'print(describe(["move", -1, 3]))',
+             'output': 'unknown',
+             'line': 59}]},
  {'slug': 'while-loops',
   'title': 'While Loops',
   'section': 'Control Flow',
@@ -938,6 +1162,36 @@ EXAMPLES = [{'slug': 'hello-world',
              'code': 'unique_scores = {score for score in scores.values()}\nprint(unique_scores)',
              'output': '{8, 10}',
              'line': 45}]},
+ {'slug': 'comprehension-patterns',
+  'title': 'Comprehension Patterns',
+  'section': 'Collections',
+  'summary': 'Comprehensions can use multiple for clauses and filters when the shape stays clear.',
+  'doc_url': 'https://docs.python.org/3.13/tutorial/datastructures.html#list-comprehensions',
+  'code': 'colors = ["red", "blue"]\n'
+          'sizes = ["S", "M"]\n'
+          'variants = [(color, size) for color in colors for size in sizes]\n'
+          'print(variants)\n'
+          '\n'
+          'numbers = range(10)\n'
+          'filtered = [n for n in numbers if n % 2 == 0 if n > 2]\n'
+          'print(filtered)\n',
+  'expected_output': "[('red', 'S'), ('red', 'M'), ('blue', 'S'), ('blue', 'M')]\n[4, 6, 8]\n",
+  'notes': ['Read comprehension clauses from left to right.',
+            'Multiple `for` clauses act like nested loops.',
+            'Prefer an explicit loop when the comprehension stops being obvious.'],
+  'cells': [{'prose': ['Multiple `for` clauses behave like nested loops. The leftmost `for` is the outer loop, and the '
+                       'next `for` runs inside it.'],
+             'code': 'colors = ["red", "blue"]\n'
+                     'sizes = ["S", "M"]\n'
+                     'variants = [(color, size) for color in colors for size in sizes]\n'
+                     'print(variants)',
+             'output': "[('red', 'S'), ('red', 'M'), ('blue', 'S'), ('blue', 'M')]",
+             'line': 22},
+            {'prose': ['Multiple `if` clauses filter values. They are useful for simple conditions, but an explicit '
+                       'loop is clearer when the rules need names or explanation.'],
+             'code': 'numbers = range(10)\nfiltered = [n for n in numbers if n % 2 == 0 if n > 2]\nprint(filtered)',
+             'output': '[4, 6, 8]',
+             'line': 37}]},
  {'slug': 'sorting',
   'title': 'Sorting',
   'section': 'Collections',
@@ -1066,6 +1320,41 @@ EXAMPLES = [{'slug': 'hello-world',
              'code': 'connect("localhost", secure=False)',
              'output': 'http://localhost timeout=5',
              'line': 45}]},
+ {'slug': 'positional-only-parameters',
+  'title': 'Positional-only Parameters',
+  'section': 'Functions',
+  'summary': 'Use / to mark parameters that callers must pass by position.',
+  'doc_url': 'https://docs.python.org/3.13/tutorial/controlflow.html#special-parameters',
+  'code': 'def scale(value, /, factor=2, *, clamp=False):\n'
+          '    result = value * factor\n'
+          '    if clamp:\n'
+          '        result = min(result, 10)\n'
+          '    return result\n'
+          '\n'
+          'print(scale(4))\n'
+          'print(scale(4, factor=3))\n'
+          'print(scale(4, clamp=True))\n',
+  'expected_output': '8\n12\n8\n',
+  'notes': ['`/` marks parameters before it as positional-only.',
+            '`*` marks parameters after it as keyword-only.',
+            'Use these markers when the call shape is part of the API design.'],
+  'cells': [{'prose': ['Parameters before `/` are positional-only. `value` is the main input, while `factor` remains '
+                       'an ordinary parameter that can be named.'],
+             'code': 'def scale(value, /, factor=2, *, clamp=False):\n'
+                     '    result = value * factor\n'
+                     '    if clamp:\n'
+                     '        result = min(result, 10)\n'
+                     '    return result\n'
+                     '\n'
+                     'print(scale(4))\n'
+                     'print(scale(4, factor=3))',
+             'output': '8\n12',
+             'line': 22},
+            {'prose': ['Parameters after `*` are keyword-only. That makes options such as `clamp` explicit at the call '
+                       'site.'],
+             'code': 'print(scale(4, clamp=True))',
+             'output': '8',
+             'line': 42}]},
  {'slug': 'args-and-kwargs',
   'title': 'Args and Kwargs',
   'section': 'Functions',
@@ -1183,6 +1472,56 @@ EXAMPLES = [{'slug': 'hello-world',
              'code': 'triple = make_multiplier(3)\nprint(triple(5))',
              'output': '15',
              'line': 35}]},
+ {'slug': 'scope-global-nonlocal',
+  'title': 'Global and Nonlocal',
+  'section': 'Functions',
+  'summary': 'global and nonlocal choose which outer binding assignment should update.',
+  'doc_url': 'https://docs.python.org/3.13/reference/simple_stmts.html#the-global-statement',
+  'code': 'count = 0\n'
+          '\n'
+          'def bump_global():\n'
+          '    global count\n'
+          '    count += 1\n'
+          '\n'
+          'bump_global()\n'
+          'print(count)\n'
+          '\n'
+          '\n'
+          'def make_counter():\n'
+          '    total = 0\n'
+          '    def bump():\n'
+          '        nonlocal total\n'
+          '        total += 1\n'
+          '        return total\n'
+          '    return bump\n'
+          '\n'
+          'counter = make_counter()\n'
+          'print(counter())\n'
+          'print(counter())\n',
+  'expected_output': '1\n1\n2\n',
+  'notes': ['Assignment inside a function is local unless declared otherwise.',
+            'Prefer `nonlocal` for closure state and avoid `global` unless module state is truly intended.',
+            'Passing values and returning results is usually easier to test than rebinding outer names.'],
+  'cells': [{'prose': ['`global` tells assignment to update a module-level binding. Without it, `count += 1` would try '
+                       'to assign a local `count`.'],
+             'code': 'count = 0\n\ndef bump_global():\n    global count\n    count += 1\n\nbump_global()\nprint(count)',
+             'output': '1',
+             'line': 22},
+            {'prose': ['`nonlocal` tells assignment to update a binding in the nearest enclosing function scope. This '
+                       'is useful for small closures that keep state.'],
+             'code': 'def make_counter():\n'
+                     '    total = 0\n'
+                     '    def bump():\n'
+                     '        nonlocal total\n'
+                     '        total += 1\n'
+                     '        return total\n'
+                     '    return bump\n'
+                     '\n'
+                     'counter = make_counter()\n'
+                     'print(counter())\n'
+                     'print(counter())',
+             'output': '1\n2',
+             'line': 41}]},
  {'slug': 'recursion',
   'title': 'Recursion',
   'section': 'Functions',
@@ -1286,6 +1625,47 @@ EXAMPLES = [{'slug': 'hello-world',
              'code': 'for value in countdown(3):\n    print(value)',
              'output': '3\n2\n1',
              'line': 37}]},
+ {'slug': 'yield-from',
+  'title': 'Yield From',
+  'section': 'Iteration',
+  'summary': 'yield from delegates part of a generator to another iterable.',
+  'doc_url': 'https://docs.python.org/3.13/reference/expressions.html#yield-expressions',
+  'code': 'def page():\n'
+          '    yield "header"\n'
+          '    yield from ["intro", "body"]\n'
+          '    yield "footer"\n'
+          '\n'
+          'print(list(page()))\n'
+          '\n'
+          '\n'
+          'def flatten(rows):\n'
+          '    for row in rows:\n'
+          '        yield from row\n'
+          '\n'
+          'print(list(flatten([[1, 2], [3]])))\n',
+  'expected_output': "['header', 'intro', 'body', 'footer']\n[1, 2, 3]\n",
+  'notes': ['`yield from iterable` yields each value from that iterable.',
+            'It keeps generator pipelines compact.',
+            'Use a plain `yield` when producing one value directly.'],
+  'cells': [{'prose': ['`yield from` delegates to another iterable. The caller receives one stream even though part of '
+                       'it came from a list.'],
+             'code': 'def page():\n'
+                     '    yield "header"\n'
+                     '    yield from ["intro", "body"]\n'
+                     '    yield "footer"\n'
+                     '\n'
+                     'print(list(page()))',
+             'output': "['header', 'intro', 'body', 'footer']",
+             'line': 22},
+            {'prose': ['Delegation is useful when flattening nested iterables. `yield from row` replaces an inner loop '
+                       'that would yield each item by hand.'],
+             'code': 'def flatten(rows):\n'
+                     '    for row in rows:\n'
+                     '        yield from row\n'
+                     '\n'
+                     'print(list(flatten([[1, 2], [3]])))',
+             'output': '[1, 2, 3]',
+             'line': 39}]},
  {'slug': 'generator-expressions',
   'title': 'Generator Expressions',
   'section': 'Iteration',
@@ -1459,6 +1839,54 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(second.increment(5))',
              'output': '1\n15',
              'line': 37}]},
+ {'slug': 'inheritance-and-super',
+  'title': 'Inheritance and Super',
+  'section': 'Classes',
+  'summary': 'Inheritance reuses behavior, and super delegates to a parent implementation.',
+  'doc_url': 'https://docs.python.org/3.13/tutorial/classes.html#inheritance',
+  'code': 'class Animal:\n'
+          '    def __init__(self, name):\n'
+          '        self.name = name\n'
+          '\n'
+          '    def speak(self):\n'
+          '        return f"{self.name} makes a sound"\n'
+          '\n'
+          'class Dog(Animal):\n'
+          '    def speak(self):\n'
+          '        base = super().speak()\n'
+          '        return f"{base}; {self.name} barks"\n'
+          '\n'
+          'pet = Dog("Nina")\n'
+          'print(pet.name)\n'
+          'print(pet.speak())\n'
+          'print(isinstance(pet, Animal))\n',
+  'expected_output': 'Nina\nNina makes a sound; Nina barks\nTrue\n',
+  'notes': ['Inheritance models an “is a specialized kind of” relationship.',
+            '`super()` calls the next implementation in the method resolution order.',
+            'Prefer composition when an object only needs to use another object.'],
+  'cells': [{'prose': ['A child class names its parent in parentheses. `Dog` instances get the `Animal.__init__` '
+                       'method because `Dog` does not define its own initializer.'],
+             'code': 'class Animal:\n'
+                     '    def __init__(self, name):\n'
+                     '        self.name = name\n'
+                     '\n'
+                     '    def speak(self):\n'
+                     '        return f"{self.name} makes a sound"\n'
+                     '\n'
+                     'class Dog(Animal):\n'
+                     '    def speak(self):\n'
+                     '        base = super().speak()\n'
+                     '        return f"{base}; {self.name} barks"\n'
+                     '\n'
+                     'pet = Dog("Nina")\n'
+                     'print(pet.name)',
+             'output': 'Nina',
+             'line': 22},
+            {'prose': ['`super()` delegates to the parent implementation. The child method can reuse the parent result '
+                       'and then add specialized behavior.'],
+             'code': 'print(pet.speak())\nprint(isinstance(pet, Animal))',
+             'output': 'Nina makes a sound; Nina barks\nTrue',
+             'line': 47}]},
  {'slug': 'dataclasses',
   'title': 'Dataclasses',
   'section': 'Classes',
@@ -1661,6 +2089,40 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(bag)',
              'output': "Bag(['a', 'b'])",
              'line': 77}]},
+ {'slug': 'metaclasses',
+  'title': 'Metaclasses',
+  'section': 'Classes',
+  'summary': 'A metaclass customizes how classes themselves are created.',
+  'doc_url': 'https://docs.python.org/3.13/reference/datamodel.html#metaclasses',
+  'code': 'class Tagged(type):\n'
+          '    def __new__(mcls, name, bases, namespace):\n'
+          '        namespace["tag"] = name.lower()\n'
+          '        return super().__new__(mcls, name, bases, namespace)\n'
+          '\n'
+          'class Event(metaclass=Tagged):\n'
+          '    pass\n'
+          '\n'
+          'print(Event.tag)\n'
+          'print(type(Event).__name__)\n',
+  'expected_output': 'event\nTagged\n',
+  'notes': ['Metaclasses customize class creation, not instance behavior directly.',
+            'Most code should prefer class decorators, functions, or ordinary inheritance.',
+            'You are most likely to meet metaclasses inside frameworks and ORMs.'],
+  'cells': [{'prose': ['A metaclass customizes class creation. `__new__` receives the class name, bases, and namespace '
+                       'before the class object exists.'],
+             'code': 'class Tagged(type):\n'
+                     '    def __new__(mcls, name, bases, namespace):\n'
+                     '        namespace["tag"] = name.lower()\n'
+                     '        return super().__new__(mcls, name, bases, namespace)\n'
+                     '\n'
+                     'print(Tagged.__name__)',
+             'output': 'Tagged',
+             'line': 22},
+            {'prose': ['The `metaclass=` keyword applies that class-building rule. Here the metaclass adds a `tag` '
+                       'attribute to the new class.'],
+             'code': 'class Event(metaclass=Tagged):\n    pass\n\nprint(Event.tag)\nprint(type(Event).__name__)',
+             'output': 'event\nTagged',
+             'line': 39}]},
  {'slug': 'context-managers',
   'title': 'Context Managers',
   'section': 'Data Model',
@@ -1713,6 +2175,40 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    print("handled")',
              'output': '<error>\n</error>\nhandled',
              'line': 42}]},
+ {'slug': 'delete-statements',
+  'title': 'Delete Statements',
+  'section': 'Data Model',
+  'summary': 'del removes bindings, items, and attributes rather than producing a value.',
+  'doc_url': 'https://docs.python.org/3.13/reference/simple_stmts.html#the-del-statement',
+  'code': 'profile = {"name": "Ada", "temporary": True}\n'
+          'del profile["temporary"]\n'
+          'print(profile)\n'
+          '\n'
+          'items = ["a", "b", "c"]\n'
+          'del items[1]\n'
+          'print(items)\n'
+          '\n'
+          'value = "cached"\n'
+          'del value\n'
+          'print("value" in locals())\n',
+  'expected_output': "{'name': 'Ada'}\n['a', 'c']\nFalse\n",
+  'notes': ['`del` removes bindings or container entries.',
+            'Assign `None` when absence should remain an explicit value.',
+            'Use container methods such as `pop()` when you need the removed value back.'],
+  'cells': [{'prose': ['Deleting a dictionary key mutates the dictionary. The key is gone; it has not been set to '
+                       '`None`.'],
+             'code': 'profile = {"name": "Ada", "temporary": True}\ndel profile["temporary"]\nprint(profile)',
+             'output': "{'name': 'Ada'}",
+             'line': 22},
+            {'prose': ['Deleting a list item removes that position and shifts later items left.'],
+             'code': 'items = ["a", "b", "c"]\ndel items[1]\nprint(items)',
+             'output': "['a', 'c']",
+             'line': 36},
+            {'prose': ['Deleting a name removes the binding from the current namespace. It is different from rebinding '
+                       'the name to `None`.'],
+             'code': 'value = "cached"\ndel value\nprint("value" in locals())',
+             'output': 'False',
+             'line': 50}]},
  {'slug': 'exceptions',
   'title': 'Exceptions',
   'section': 'Errors',
@@ -1763,6 +2259,122 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    print(f"checked {text}")',
              'output': 'python: invalid\nchecked python',
              'line': 41}]},
+ {'slug': 'assertions',
+  'title': 'Assertions',
+  'section': 'Errors',
+  'summary': 'assert documents internal assumptions and fails loudly when they are false.',
+  'doc_url': 'https://docs.python.org/3.13/reference/simple_stmts.html#the-assert-statement',
+  'code': 'def average(scores):\n'
+          '    assert scores, "scores must not be empty"\n'
+          '    return sum(scores) / len(scores)\n'
+          '\n'
+          'print(average([8, 10]))\n'
+          '\n'
+          'try:\n'
+          '    average([])\n'
+          'except AssertionError as error:\n'
+          '    print(error)\n',
+  'expected_output': '9.0\nscores must not be empty\n',
+  'notes': ['Use `assert` for internal invariants and debugging assumptions.',
+            'Use explicit exceptions for user input, files, network responses, and other expected failures.',
+            'Assertions can be disabled with Python optimization flags, so do not rely on them for security checks.'],
+  'cells': [{'prose': ['When the assertion is true, execution continues normally. The assertion documents the '
+                       "function's internal expectation."],
+             'code': 'def average(scores):\n'
+                     '    assert scores, "scores must not be empty"\n'
+                     '    return sum(scores) / len(scores)\n'
+                     '\n'
+                     'print(average([8, 10]))',
+             'output': '9.0',
+             'line': 22},
+            {'prose': ['When the assertion is false, Python raises `AssertionError`. This signals a broken assumption, '
+                       'not a normal recovery path.'],
+             'code': 'try:\n    average([])\nexcept AssertionError as error:\n    print(error)',
+             'output': 'scores must not be empty',
+             'line': 38}]},
+ {'slug': 'exception-chaining',
+  'title': 'Exception Chaining',
+  'section': 'Errors',
+  'summary': 'raise from preserves the original cause when translating exceptions.',
+  'doc_url': 'https://docs.python.org/3.13/tutorial/errors.html#exception-chaining',
+  'code': 'class ConfigError(Exception):\n'
+          '    pass\n'
+          '\n'
+          '\n'
+          'def read_port(text):\n'
+          '    try:\n'
+          '        return int(text)\n'
+          '    except ValueError as error:\n'
+          '        raise ConfigError("port must be a number") from error\n'
+          '\n'
+          'print(ConfigError.__name__)\n'
+          '\n'
+          'try:\n'
+          '    read_port("abc")\n'
+          'except ConfigError as error:\n'
+          '    print(error)\n'
+          '    print(type(error.__cause__).__name__)\n',
+  'expected_output': 'ConfigError\nport must be a number\nValueError\n',
+  'notes': ['Use `raise ... from error` when translating exceptions across a boundary.',
+            "The new exception's `__cause__` points to the original exception.",
+            'Chaining keeps user-facing errors clear without losing debugging context.'],
+  'cells': [{'prose': ['Catch the low-level exception where it happens, then raise a domain-specific exception from '
+                       'it.'],
+             'code': 'class ConfigError(Exception):\n'
+                     '    pass\n'
+                     '\n'
+                     '\n'
+                     'def read_port(text):\n'
+                     '    try:\n'
+                     '        return int(text)\n'
+                     '    except ValueError as error:\n'
+                     '        raise ConfigError("port must be a number") from error\n'
+                     '\n'
+                     'print(ConfigError.__name__)',
+             'output': 'ConfigError',
+             'line': 22},
+            {'prose': ['The caller handles the domain error. The original `ValueError` remains available as '
+                       '`__cause__`.'],
+             'code': 'try:\n'
+                     '    read_port("abc")\n'
+                     'except ConfigError as error:\n'
+                     '    print(error)\n'
+                     '    print(type(error.__cause__).__name__)',
+             'output': 'port must be a number\nValueError',
+             'line': 44}]},
+ {'slug': 'exception-groups',
+  'title': 'Exception Groups',
+  'section': 'Errors',
+  'summary': 'except* handles matching exceptions inside an ExceptionGroup.',
+  'doc_url': 'https://docs.python.org/3.13/tutorial/errors.html#raising-and-handling-multiple-unrelated-exceptions',
+  'code': 'try:\n'
+          '    raise ExceptionGroup(\n'
+          '        "batch failed",\n'
+          '        [ValueError("bad port"), TypeError("bad mode")],\n'
+          '    )\n'
+          'except* ValueError as group:\n'
+          '    print(type(group).__name__)\n'
+          '    print(group.exceptions[0])\n'
+          'except* TypeError as group:\n'
+          '    print(group.exceptions[0])\n',
+  'expected_output': 'ExceptionGroup\nbad port\nbad mode\n',
+  'notes': ['`except*` is for `ExceptionGroup`, not ordinary single exceptions.',
+            'Each `except*` clause handles matching members of the group.',
+            'Exception groups often appear around concurrent work.'],
+  'cells': [{'prose': ['`ExceptionGroup` bundles several exception objects. `except* ValueError` receives a group '
+                       'containing only the matching `ValueError` members.'],
+             'code': 'try:\n'
+                     '    raise ExceptionGroup(\n'
+                     '        "batch failed",\n'
+                     '        [ValueError("bad port"), TypeError("bad mode")],\n'
+                     '    )\n'
+                     'except* ValueError as group:\n'
+                     '    print(type(group).__name__)\n'
+                     '    print(group.exceptions[0])\n'
+                     'except* TypeError as group:\n'
+                     '    print(group.exceptions[0])',
+             'output': 'ExceptionGroup\nbad port\nbad mode',
+             'line': 22}]},
  {'slug': 'modules',
   'title': 'Modules',
   'section': 'Modules',
@@ -1798,6 +2410,31 @@ EXAMPLES = [{'slug': 'hello-world',
              'code': 'print(math.__name__)',
              'output': 'math',
              'line': 48}]},
+ {'slug': 'import-aliases',
+  'title': 'Import Aliases',
+  'section': 'Modules',
+  'summary': 'as gives imported modules or names a local alias.',
+  'doc_url': 'https://docs.python.org/3.13/reference/simple_stmts.html#the-import-statement',
+  'code': 'import statistics as stats\n'
+          'from math import sqrt as square_root\n'
+          '\n'
+          'scores = [8, 10, 9]\n'
+          'print(stats.mean(scores))\n'
+          'print(square_root(81))\n',
+  'expected_output': '9\n9.0\n',
+  'notes': ['`import module as alias` keeps module-style access under a shorter or clearer name.',
+            '`from module import name as alias` imports one name under a local alias.',
+            'Avoid `from module import *` because it makes dependencies harder to see.'],
+  'cells': [{'prose': ['A module alias keeps the namespace but changes the local name. Readers can still see that '
+                       '`mean` comes from the statistics module.'],
+             'code': 'import statistics as stats\n\nscores = [8, 10, 9]\nprint(stats.mean(scores))',
+             'output': '9',
+             'line': 21},
+            {'prose': ['A name imported with `from` can also be aliased. This is most useful when the local name '
+                       'explains the role better than the original name.'],
+             'code': 'from math import sqrt as square_root\n\nprint(square_root(81))',
+             'output': '9.0',
+             'line': 36}]},
  {'slug': 'type-hints',
   'title': 'Type Hints',
   'section': 'Types',
@@ -2109,4 +2746,69 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'asyncio.run(main())',
              'output': "['Json', 'Datetime']",
-             'line': 53}]}]
+             'line': 53}]},
+ {'slug': 'async-iteration-and-context',
+  'title': 'Async Iteration and Context',
+  'section': 'Async',
+  'summary': 'async for and async with consume asynchronous streams and cleanup protocols.',
+  'doc_url': 'https://docs.python.org/3.13/reference/compound_stmts.html#async-for',
+  'code': 'import asyncio\n'
+          '\n'
+          'async def titles():\n'
+          '    for slug in ["values", "async-await"]:\n'
+          '        await asyncio.sleep(0)\n'
+          '        yield slug.replace("-", " ").title()\n'
+          '\n'
+          'class Session:\n'
+          '    async def __aenter__(self):\n'
+          '        print("open")\n'
+          '        return self\n'
+          '\n'
+          '    async def __aexit__(self, exc_type, exc, tb):\n'
+          '        print("close")\n'
+          '\n'
+          'async def main():\n'
+          '    async with Session():\n'
+          '        async for title in titles():\n'
+          '            print(title)\n'
+          '\n'
+          'asyncio.run(main())\n',
+  'expected_output': 'open\nValues\nAsync Await\nclose\n',
+  'notes': ['`async for` consumes asynchronous iterators.',
+            '`async with` awaits asynchronous setup and cleanup.',
+            'These forms are common around I/O-shaped resources.'],
+  'cells': [{'prose': ['An async generator can `await` before yielding each value. `async for` consumes those values '
+                       'with the asynchronous iteration protocol.'],
+             'code': 'import asyncio\n'
+                     '\n'
+                     'async def titles():\n'
+                     '    for slug in ["values", "async-await"]:\n'
+                     '        await asyncio.sleep(0)\n'
+                     '        yield slug.replace("-", " ").title()\n'
+                     '\n'
+                     'print(titles.__name__)',
+             'output': 'titles',
+             'line': 22},
+            {'prose': ['An async context manager defines `__aenter__` and `__aexit__`. `async with` awaits setup and '
+                       'cleanup around the block.'],
+             'code': 'class Session:\n'
+                     '    async def __aenter__(self):\n'
+                     '        print("open")\n'
+                     '        return self\n'
+                     '\n'
+                     '    async def __aexit__(self, exc_type, exc, tb):\n'
+                     '        print("close")\n'
+                     '\n'
+                     'print(Session.__name__)',
+             'output': 'Session',
+             'line': 41},
+            {'prose': ['The top-level coroutine combines both protocols: open the async resource, then consume the '
+                       'async stream inside it.'],
+             'code': 'async def main():\n'
+                     '    async with Session():\n'
+                     '        async for title in titles():\n'
+                     '            print(title)\n'
+                     '\n'
+                     'asyncio.run(main())',
+             'output': 'open\nValues\nAsync Await\nclose',
+             'line': 61}]}]

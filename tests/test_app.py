@@ -1,3 +1,4 @@
+import ast
 import contextlib
 import importlib
 import io
@@ -86,22 +87,37 @@ class AppTests(unittest.TestCase):
         slugs = {example["slug"] for example in list_examples()}
         expected_slugs = {
             "conditionals",
+            "assignment-expressions",
+            "break-and-continue",
+            "loop-else",
             "while-loops",
             "match-statements",
+            "advanced-match-patterns",
             "tuples",
             "sets",
             "slices",
+            "comprehension-patterns",
             "keyword-only-arguments",
+            "positional-only-parameters",
             "lambdas",
             "generators",
+            "yield-from",
             "generator-expressions",
             "iterators",
             "decorators",
+            "scope-global-nonlocal",
             "context-managers",
+            "delete-statements",
             "dataclasses",
+            "inheritance-and-super",
+            "metaclasses",
             "type-hints",
             "enums",
             "json",
+            "assertions",
+            "exception-chaining",
+            "exception-groups",
+            "import-aliases",
             "datetime",
             "sorting",
             "itertools",
@@ -124,8 +140,62 @@ class AppTests(unittest.TestCase):
             "recursion",
             "number-parsing",
             "custom-exceptions",
+            "operators-and-literals",
+            "async-iteration-and-context",
         }
         self.assertTrue(expected_slugs.issubset(slugs), slugs)
+
+    def test_syntax_surface_has_explicit_examples(self):
+        source = "\n".join(example["code"] for example in list_examples())
+        tree = ast.parse(source)
+        node_names = {type(node).__name__ for node in ast.walk(tree)}
+        required_nodes = {
+            "Assert",
+            "AsyncFor",
+            "AsyncWith",
+            "Break",
+            "Continue",
+            "Delete",
+            "Global",
+            "NamedExpr",
+            "Nonlocal",
+            "TryStar",
+            "YieldFrom",
+        }
+        self.assertTrue(required_nodes.issubset(node_names), required_nodes - node_names)
+        required_snippets = [
+            "for name in names:\n    if name ==",
+            "class Event(metaclass=Tagged):",
+            "def scale(value, /, factor=2, *, clamp=False):",
+            "raise ConfigError(\"port must be a number\") from error",
+            "except* ValueError as group:",
+            "import statistics as stats",
+            "from math import sqrt as square_root",
+            "case [\"quit\" | \"exit\"]:",
+            "case [\"echo\", *words]:",
+            "case _:",
+            "pattern = r\"\\d+\"",
+            "data = b\"py\"",
+            "number = 2 + 3j",
+            "print(Scale(2) @ Scale(3))",
+            "print(...)",
+        ]
+        for snippet in required_snippets:
+            with self.subTest(snippet=snippet):
+                self.assertIn(snippet, source)
+
+    def test_see_also_links_form_valid_example_graph(self):
+        examples = list_examples()
+        slugs = {example["slug"] for example in examples}
+        linked = [example for example in examples if example.get("see_also")]
+        self.assertGreaterEqual(len(linked), 12)
+        for example in linked:
+            with self.subTest(slug=example["slug"]):
+                self.assertNotIn(example["slug"], example["see_also"])
+                self.assertTrue(set(example["see_also"]).issubset(slugs), set(example["see_also"]) - slugs)
+        html = render_example_page(get_example("break-and-continue"))
+        self.assertIn("See also", html)
+        self.assertIn('/examples/loop-else', html)
 
     def test_examples_are_in_learning_order_and_link_supported_python_docs(self):
         examples = list_examples()
@@ -136,11 +206,11 @@ class AppTests(unittest.TestCase):
                 "values",
                 "numbers",
                 "booleans",
+                "operators-and-literals",
                 "none",
                 "variables",
                 "constants",
                 "truthiness",
-                "equality-and-identity",
             ],
         )
         for example in examples:
