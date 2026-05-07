@@ -38,6 +38,6 @@ String/Text lesson observed across example sites:
 - Learn X By Example's Ruby string page also uses Thai text to contrast character length with UTF-8 bytes.
 - Nim By Example explicitly warns that Unicode text may require specialized handling beyond byte-like string operations.
 
-Implication for Python By Example: string examples should not be ASCII-only. They should show `str` as Unicode text, contrast it with `bytes`, and make UTF-8 encoding visible at I/O boundaries.
+Implication for Python By Example: string examples should not be ASCII-only. They should show `str` as Unicode text, contrast it with `bytes`, and make UTF-8 encoding visible at I/O boundaries. When a non-English word demonstrates multi-byte encoding, pair it with an English/ASCII word of the same role so readers can see the baseline instead of inferring it.
 
 Positioning for this project: keep Go By Example's compact language tour, borrow Rust/Kotlin's expectation that examples can run, preserve Python-doc authority, and avoid course-like sprawl.

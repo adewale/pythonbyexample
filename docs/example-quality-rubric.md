@@ -18,7 +18,7 @@ Score each example on a 10 point scale:
 
 Topic-specific gates:
 
-- **Text and strings** — examples must distinguish text from bytes, explain Unicode/code-point behavior when relevant, and show the boundary where encoding such as UTF-8 appears. A string page that only demonstrates ASCII operations is incomplete.
+- **Text and strings** — examples must distinguish text from bytes, explain Unicode/code-point behavior when relevant, and show the boundary where encoding such as UTF-8 appears. A string page that only demonstrates ASCII operations is incomplete. When using non-English text to show that code points and bytes differ, include an English/ASCII baseline with the same kind of phrase so the contrast is visible rather than implied.
 
 Release gates outside the score:
 
@@ -73,4 +73,4 @@ Before publishing or substantially editing an example, ask:
 8. What neighboring feature would a learner confuse this with, and does the page explain the boundary?
 9. Does the data shape explain why this feature exists?
 10. What syntax form would disappear from the catalog if this page were removed, and is that covered somewhere else?
-11. For text examples, does the page make Unicode and encoding boundaries visible instead of assuming ASCII-only strings?
+11. For text examples, does the page make Unicode and encoding boundaries visible instead of assuming ASCII-only strings? If non-English text is used, is it compared with an English/ASCII baseline?

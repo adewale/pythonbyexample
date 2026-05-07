@@ -434,33 +434,41 @@ EXAMPLES = [{'slug': 'hello-world',
   'section': 'Text',
   'summary': 'Strings are immutable Unicode text sequences.',
   'doc_url': 'https://docs.python.org/3.13/library/stdtypes.html#text-sequence-type-str',
-  'code': 'word = "สวัสดี"\n'
-          'print(len(word))\n'
-          'print(len(word.encode("utf-8")))\n'
-          'print(word[0])\n'
-          'print([hex(ord(char)) for char in word[:2]])\n'
+  'code': 'english = "hello"\n'
+          'thai = "สวัสดี"\n'
+          '\n'
+          'for label, word in [("English", english), ("Thai", thai)]:\n'
+          '    print(label, word, len(word), len(word.encode("utf-8")))\n'
+          '\n'
+          'print(thai[0])\n'
+          'print([hex(ord(char)) for char in thai[:2]])\n'
           '\n'
           'text = "  café  "\n'
           'clean = text.strip()\n'
           'print(clean)\n'
           'print(clean.upper())\n'
           'print(clean.encode("utf-8"))\n',
-  'expected_output': "6\n18\nส\n['0xe2a', '0xe27']\ncafé\nCAFÉ\nb'caf\\xc3\\xa9'\n",
+  'expected_output': "English hello 5 5\nThai สวัสดี 6 18\nส\n['0xe2a', '0xe27']\ncafé\nCAFÉ\nb'caf\\xc3\\xa9'\n",
   'notes': ['Use `str` for text and `bytes` for binary data.',
             '`len(text)` counts Unicode code points; `len(text.encode("utf-8"))` counts encoded bytes.',
+            'ASCII text is a useful baseline because each ASCII code point is one UTF-8 byte.',
             'String methods return new strings because strings are immutable.',
             'User-visible “characters” can be more subtle than code points; combining marks and emoji sequences may '
             'need specialized text handling.'],
-  'cells': [{'prose': ['A Python `str` is text, not raw bytes. `len()` counts Unicode code points, while UTF-8 '
-                       'encoding shows how many bytes are needed at a byte boundary.'],
-             'code': 'word = "สวัสดี"\nprint(len(word))\nprint(len(word.encode("utf-8")))',
-             'output': '6\n18',
+  'cells': [{'prose': ['Compare an English greeting with a Thai greeting. Both are Python `str` values, but UTF-8 uses '
+                       'one byte for each ASCII code point and multiple bytes for many non-ASCII code points.'],
+             'code': 'english = "hello"\n'
+                     'thai = "สวัสดี"\n'
+                     '\n'
+                     'for label, word in [("English", english), ("Thai", thai)]:\n'
+                     '    print(label, word, len(word), len(word.encode("utf-8")))',
+             'output': 'English hello 5 5\nThai สวัสดี 6 18',
              'line': 17},
-            {'prose': ['Indexing and iteration work with Unicode code points. `ord()` returns the integer code point, '
-                       'which is often displayed in hexadecimal when teaching text encoding.'],
-             'code': 'print(word[0])\nprint([hex(ord(char)) for char in word[:2]])',
+            {'prose': ['Indexing and iteration work with Unicode code points, not encoded bytes. `ord()` returns the '
+                       'integer code point, which is often displayed in hexadecimal when teaching text encoding.'],
+             'code': 'print(thai[0])\nprint([hex(ord(char)) for char in thai[:2]])',
              'output': "ส\n['0xe2a', '0xe27']",
-             'line': 32},
+             'line': 34},
             {'prose': ['String methods return new strings because strings are immutable. Encoding turns text into '
                        'bytes when another system needs a byte representation.'],
              'code': 'text = "  café  "\n'
@@ -469,7 +477,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(clean.upper())\n'
                      'print(clean.encode("utf-8"))',
              'output': "café\nCAFÉ\nb'caf\\xc3\\xa9'",
-             'line': 46}]},
+             'line': 48}]},
  {'slug': 'string-formatting',
   'title': 'String Formatting',
   'section': 'Text',
