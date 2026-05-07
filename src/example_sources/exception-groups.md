@@ -11,19 +11,22 @@ see_also = [
 ]
 +++
 
-`ExceptionGroup` represents several unrelated exceptions raised together. `except*` handles the matching members of the group and lets other members continue separately.
+`ExceptionGroup` represents several unrelated exceptions raised together. `except*` exists for code that may receive multiple failures at once, especially concurrent work.
 
-This syntax is most useful with concurrent code, where several tasks can fail before the caller regains control.
+Use ordinary `except` for one exception. Use `except*` only when the value being handled is an exception group and each matching subgroup needs its own handling.
 
-Use ordinary `except` for one exception. Use `except*` only when the value being handled is an exception group.
+Each `except*` clause receives a smaller exception group containing the matching exceptions.
 
 :::program
 ```python
+errors = ExceptionGroup(
+    "batch failed",
+    [ValueError("bad port"), TypeError("bad mode")],
+)
+print(len(errors.exceptions))
+
 try:
-    raise ExceptionGroup(
-        "batch failed",
-        [ValueError("bad port"), TypeError("bad mode")],
-    )
+    raise errors
 except* ValueError as group:
     print(type(group).__name__)
     print(group.exceptions[0])
@@ -33,14 +36,27 @@ except* TypeError as group:
 :::
 
 :::cell
-`ExceptionGroup` bundles several exception objects. `except* ValueError` receives a group containing only the matching `ValueError` members.
+An exception group bundles several exception objects. This is different from an ordinary exception because more than one failure is present.
+
+```python
+errors = ExceptionGroup(
+    "batch failed",
+    [ValueError("bad port"), TypeError("bad mode")],
+)
+print(len(errors.exceptions))
+```
+
+```output
+2
+```
+:::
+
+:::cell
+`except*` handles matching members of the group. The `ValueError` handler sees the value error, and the `TypeError` handler sees the type error.
 
 ```python
 try:
-    raise ExceptionGroup(
-        "batch failed",
-        [ValueError("bad port"), TypeError("bad mode")],
-    )
+    raise errors
 except* ValueError as group:
     print(type(group).__name__)
     print(group.exceptions[0])

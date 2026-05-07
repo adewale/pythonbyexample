@@ -63,4 +63,5 @@ True
 :::note
 - Boolean constants are `True` and `False`, with capital letters.
 - `and` and `or` short-circuit: Python does not evaluate the right side if the left side already determines the result.
+- Prefer truthiness for containers and explicit comparisons when the exact boolean condition matters.
 :::

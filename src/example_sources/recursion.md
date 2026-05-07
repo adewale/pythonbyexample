@@ -2,61 +2,77 @@
 slug = "recursion"
 title = "Recursion"
 section = "Functions"
-summary = "Recursive functions solve a problem by calling themselves with a smaller input."
+summary = "Recursive functions solve nested problems by calling themselves on smaller pieces."
 doc_path = "/tutorial/controlflow.html#defining-functions"
 +++
 
-A recursive function calls itself to solve a smaller version of the same problem. The base case is the input that can be answered directly.
+A recursive function calls itself to solve a smaller piece of the same problem. Recursion exists for data that is naturally nested: trees, menus, expression nodes, and directory-like structures.
 
-The recursive case must move toward the base case. Without that progress, recursion becomes an infinite chain of calls until Python raises a recursion-depth error.
+Every recursive function needs a base case that can be answered directly. The recursive case must move toward that base case by passing a smaller part of the data.
 
-Python supports recursion, but it does not optimize tail calls. Prefer loops for very deep or simple repetition.
+Prefer loops for simple repetition over a flat sequence. Prefer recursion when the data shape is recursive too.
 
 :::program
 ```python
-def factorial(n):
-    if n == 0:
-        return 1
-    return n * factorial(n - 1)
+tree = {
+    "value": 1,
+    "children": [
+        {"value": 2, "children": []},
+        {"value": 3, "children": [{"value": 4, "children": []}]},
+    ],
+}
 
-print(factorial(5))
+def total(node):
+    subtotal = node["value"]
+    for child in node["children"]:
+        subtotal += total(child)
+    return subtotal
+
+print(total({"value": 2, "children": []}))
+print(total(tree))
 ```
 :::
 
 :::cell
-A recursive function must handle the smallest case directly. Here `0!` is the base case, so the function can answer without another call.
+A leaf node is the base case. It has no children, so the function can return its own value without making another recursive call.
 
 ```python
-def factorial(n):
-    if n == 0:
-        return 1
+def total(node):
+    subtotal = node["value"]
+    for child in node["children"]:
+        subtotal += total(child)
+    return subtotal
 
-print(factorial(0))
+print(total({"value": 2, "children": []}))
 ```
 
 ```output
-1
+2
 ```
 :::
 
 :::cell
-The recursive case calls the same function with a smaller input, moving toward the base case. The result is built as the calls return.
+A non-leaf node solves the same problem for each child, then combines those smaller totals with its own value.
 
 ```python
-def factorial(n):
-    if n == 0:
-        return 1
-    return n * factorial(n - 1)
+tree = {
+    "value": 1,
+    "children": [
+        {"value": 2, "children": []},
+        {"value": 3, "children": [{"value": 4, "children": []}]},
+    ],
+}
 
-print(factorial(5))
+print(total(tree))
 ```
 
 ```output
-120
+10
 ```
 :::
 
 :::note
 - Every recursive function needs a base case that stops the calls.
-- Python limits recursion depth, so loops are often better for very deep repetition.
+- Recursion fits nested data better than flat repetition.
+- Python limits recursion depth, so loops are often better for very deep or simple repetition.
 :::

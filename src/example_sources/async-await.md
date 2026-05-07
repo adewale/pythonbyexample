@@ -12,6 +12,8 @@ doc_path = "/library/asyncio-task.html"
 
 Cloudflare Workers handlers are asynchronous, so understanding `await` is practical for fetch calls, bindings, and service interactions even when a small example uses `asyncio.sleep(0)` as a stand-in.
 
+The alternative is ordinary `def` for work that completes immediately. Use async code for I/O-shaped waiting, not as a faster replacement for CPU-bound Python.
+
 :::program
 ```python
 import asyncio
@@ -86,4 +88,5 @@ asyncio.run(main())
 - Calling an async function creates a coroutine object.
 - `await` yields control until an awaitable completes.
 - Workers request handlers are async, so this pattern appears around fetches and bindings.
+- Prefer ordinary functions when there is no awaitable work to coordinate.
 :::

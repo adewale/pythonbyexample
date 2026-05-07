@@ -6,11 +6,11 @@ summary = "Annotations document expected types and power static analysis."
 doc_path = "/library/typing.html"
 +++
 
-Type hints are annotations that document expected shapes for values, parameters, and return results. Python stores many annotations but does not enforce most of them at runtime.
+Type hints are annotations that document expected shapes for values, parameters, and return results. They exist so tools and readers can understand API boundaries before the program runs.
 
-Editors, linters, and type checkers use annotations to catch mistakes earlier. They are especially valuable at API boundaries and in larger codebases.
+Python stores many annotations but does not enforce most of them at runtime. Use type hints for communication and static analysis; use validation or exceptions when runtime checks are required.
 
-Python does not enforce most type hints at runtime. Tools like type checkers and editors use annotations.
+The alternative to an annotation is prose, tests, or runtime validation. Good Python code often uses all three at important boundaries.
 
 :::program
 ```python
@@ -19,6 +19,12 @@ def total(numbers: list[int]) -> int:
 
 print(total([1, 2, 3]))
 print(total.__annotations__)
+
+
+def label(score: int) -> str:
+    return f"score={score}"
+
+print(label("high"))
 ```
 :::
 
@@ -38,12 +44,9 @@ print(total([1, 2, 3]))
 :::
 
 :::cell
-Python stores annotations on the function object for tools and introspection, but it does not enforce most hints by itself.
+Python stores annotations on the function object for tools and introspection. Type checkers use this information without changing the function call syntax.
 
 ```python
-def total(numbers: list[int]) -> int:
-    return sum(numbers)
-
 print(total.__annotations__)
 ```
 
@@ -52,7 +55,23 @@ print(total.__annotations__)
 ```
 :::
 
+:::cell
+Most hints are not runtime validation. This call passes a string where the hint says `int`; Python still calls the function because the body can format any value.
+
+```python
+def label(score: int) -> str:
+    return f"score={score}"
+
+print(label("high"))
+```
+
+```output
+score=high
+```
+:::
+
 :::note
 - Python does not enforce most type hints at runtime.
-- Tools like type checkers and editors use annotations.
+- Tools like type checkers and editors use annotations to catch mistakes earlier.
+- Use runtime validation when untrusted input must be rejected while the program runs.
 :::

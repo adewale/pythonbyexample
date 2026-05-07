@@ -117,7 +117,8 @@ EXAMPLES = [{'slug': 'hello-world',
   'expected_output': 'False\nTrue\nTrue\nTrue\n',
   'notes': ['Boolean constants are `True` and `False`, with capital letters.',
             '`and` and `or` short-circuit: Python does not evaluate the right side if the left side already determines '
-            'the result.'],
+            'the result.',
+            'Prefer truthiness for containers and explicit comparisons when the exact boolean condition matters.'],
   'cells': [{'prose': ['Use booleans for facts that are either true or false. Python spells the constants `True` and '
                        '`False`.',
                        'Use `and`, `or`, and `not` to combine truth values. These operators read like English and '
@@ -165,6 +166,7 @@ EXAMPLES = [{'slug': 'hello-world',
   'expected_output': "\\d+\nb'py'\n2.0\n6\n6\n-1\n['python', 'rust']\n6\nEllipsis\n",
   'notes': ['Raw strings are useful when backslashes are part of the data, such as regular expressions.',
             'Bytes literals represent binary data, not text strings.',
+            'Prefer everyday strings, numbers, and operators until the data shape calls for these specialized forms.',
             'Specialized operators should make the data model clearer, not more mysterious.'],
   'cells': [{'prose': ['Raw strings keep backslashes literal, bytes literals store binary data, and complex literals '
                        'use `j` for the imaginary part.'],
@@ -274,17 +276,17 @@ EXAMPLES = [{'slug': 'hello-world',
                        'needed.'],
              'code': 'message = "hi"\nprint(message)',
              'output': 'hi',
-             'line': 17},
+             'line': 19},
             {'prose': ['Assignment can rebind the same name to a different value. The name is not permanently attached '
                        'to the first object.'],
              'code': 'message = "hello"\nprint(message)',
              'output': 'hello',
-             'line': 30},
+             'line': 32},
             {'prose': ['Augmented assignment reads the current binding, computes an updated value, and stores the '
                        'result back under the same name.'],
              'code': 'count = 3\ncount += 1\nprint(count)',
              'output': '4',
-             'line': 43}]},
+             'line': 45}]},
  {'slug': 'constants',
   'title': 'Constants',
   'section': 'Basics',
@@ -601,30 +603,39 @@ EXAMPLES = [{'slug': 'hello-world',
   'section': 'Control Flow',
   'summary': 'break exits a loop early, while continue skips to the next iteration.',
   'doc_url': 'https://docs.python.org/3.13/tutorial/controlflow.html#break-and-continue-statements',
-  'code': 'names = ["Ada", "", "Grace", "stop", "Guido"]\n'
-          '\n'
+  'code': 'names = ["Ada", "", "Grace"]\n'
           'for name in names:\n'
           '    if not name:\n'
           '        continue\n'
-          '    if name == "stop":\n'
+          '    print(name)\n'
+          '\n'
+          'commands = ["load", "save", "stop", "delete"]\n'
+          'for command in commands:\n'
+          '    if command == "stop":\n'
           '        break\n'
-          '    print(name)\n',
-  'expected_output': 'Ada\nGrace\n',
+          '    print(command)\n',
+  'expected_output': 'Ada\nGrace\nload\nsave\n',
   'notes': ['`continue` skips to the next loop iteration.',
             '`break` exits the nearest enclosing loop immediately.',
             'Prefer plain `if`/`else` when the loop does not need early skip or early stop behavior.'],
   'cells': [{'prose': ['`continue` skips the rest of the current iteration. The empty name is ignored, and the loop '
                        'moves on to the next value.'],
-             'code': 'names = ["Ada", "", "Grace", "stop", "Guido"]\n'
-                     '\n'
+             'code': 'names = ["Ada", "", "Grace"]\n'
                      'for name in names:\n'
                      '    if not name:\n'
                      '        continue\n'
-                     '    if name == "stop":\n'
-                     '        break\n'
                      '    print(name)',
              'output': 'Ada\nGrace',
-             'line': 22}]},
+             'line': 22},
+            {'prose': ['`break` exits the loop immediately. The value after `stop` is never processed because the loop '
+                       'has already ended.'],
+             'code': 'commands = ["load", "save", "stop", "delete"]\n'
+                     'for command in commands:\n'
+                     '    if command == "stop":\n'
+                     '        break\n'
+                     '    print(command)',
+             'output': 'load\nsave',
+             'line': 39}]},
  {'slug': 'loop-else',
   'title': 'Loop Else',
   'section': 'Control Flow',
@@ -974,7 +985,9 @@ EXAMPLES = [{'slug': 'hello-world',
           'describe(**data)\n',
   'expected_output': '3 4\n1 [2, 3] 4\nAda Python\n',
   'notes': ['Starred unpacking collects the remaining values into a list.',
-            'Dictionary unpacking with ** is common when calling functions with structured data.'],
+            'Dictionary unpacking with ** is common when calling functions with structured data.',
+            'Prefer indexing when you need one position; prefer unpacking when naming several positions makes the '
+            'shape clearer.'],
   'cells': [{'prose': ['Unpacking binds multiple names from one iterable or mapping. It makes the structure of data '
                        'visible at the point where values are introduced.'],
              'code': 'point = (3, 4)\nx, y = point\nprint(x, y)',
@@ -1054,6 +1067,7 @@ EXAMPLES = [{'slug': 'hello-world',
   'expected_output': "['go', 'python']\nTrue\nFalse\n['go', 'python', 'rust']\n['rust']\n['python']\n",
   'notes': ['Use lists when order and repeated values matter.',
             'Use sets when uniqueness and membership are the main operations.',
+            'Prefer lists when order or repeated values are part of the meaning.',
             'Sets are unordered, so sort them when examples need deterministic display.'],
   'cells': [{'prose': ['Creating a set removes duplicates. Keep a list when order and repeated values matter; convert '
                        'to a set when uniqueness is the point.'],
@@ -1525,32 +1539,52 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'recursion',
   'title': 'Recursion',
   'section': 'Functions',
-  'summary': 'Recursive functions solve a problem by calling themselves with a smaller input.',
+  'summary': 'Recursive functions solve nested problems by calling themselves on smaller pieces.',
   'doc_url': 'https://docs.python.org/3.13/tutorial/controlflow.html#defining-functions',
-  'code': 'def factorial(n):\n'
-          '    if n == 0:\n'
-          '        return 1\n'
-          '    return n * factorial(n - 1)\n'
+  'code': 'tree = {\n'
+          '    "value": 1,\n'
+          '    "children": [\n'
+          '        {"value": 2, "children": []},\n'
+          '        {"value": 3, "children": [{"value": 4, "children": []}]},\n'
+          '    ],\n'
+          '}\n'
           '\n'
-          'print(factorial(5))\n',
-  'expected_output': '120\n',
+          'def total(node):\n'
+          '    subtotal = node["value"]\n'
+          '    for child in node["children"]:\n'
+          '        subtotal += total(child)\n'
+          '    return subtotal\n'
+          '\n'
+          'print(total({"value": 2, "children": []}))\n'
+          'print(total(tree))\n',
+  'expected_output': '2\n10\n',
   'notes': ['Every recursive function needs a base case that stops the calls.',
-            'Python limits recursion depth, so loops are often better for very deep repetition.'],
-  'cells': [{'prose': ['A recursive function must handle the smallest case directly. Here `0!` is the base case, so '
-                       'the function can answer without another call.'],
-             'code': 'def factorial(n):\n    if n == 0:\n        return 1\n\nprint(factorial(0))',
-             'output': '1',
-             'line': 17},
-            {'prose': ['The recursive case calls the same function with a smaller input, moving toward the base case. '
-                       'The result is built as the calls return.'],
-             'code': 'def factorial(n):\n'
-                     '    if n == 0:\n'
-                     '        return 1\n'
-                     '    return n * factorial(n - 1)\n'
+            'Recursion fits nested data better than flat repetition.',
+            'Python limits recursion depth, so loops are often better for very deep or simple repetition.'],
+  'cells': [{'prose': ['A leaf node is the base case. It has no children, so the function can return its own value '
+                       'without making another recursive call.'],
+             'code': 'def total(node):\n'
+                     '    subtotal = node["value"]\n'
+                     '    for child in node["children"]:\n'
+                     '        subtotal += total(child)\n'
+                     '    return subtotal\n'
                      '\n'
-                     'print(factorial(5))',
-             'output': '120',
-             'line': 33}]},
+                     'print(total({"value": 2, "children": []}))',
+             'output': '2',
+             'line': 17},
+            {'prose': ['A non-leaf node solves the same problem for each child, then combines those smaller totals '
+                       'with its own value.'],
+             'code': 'tree = {\n'
+                     '    "value": 1,\n'
+                     '    "children": [\n'
+                     '        {"value": 2, "children": []},\n'
+                     '        {"value": 3, "children": [{"value": 4, "children": []}]},\n'
+                     '    ],\n'
+                     '}\n'
+                     '\n'
+                     'print(total(tree))',
+             'output': '10',
+             'line': 35}]},
  {'slug': 'lambdas',
   'title': 'Lambdas',
   'section': 'Functions',
@@ -1607,7 +1641,9 @@ EXAMPLES = [{'slug': 'hello-world',
   'expected_output': '3\n2\n3\n2\n1\n',
   'notes': ['Generator functions are a concise way to create custom iterators.',
             'Values are produced on demand.',
-            'A generator is consumed as you iterate over it.'],
+            'A generator is consumed as you iterate over it.',
+            'Prefer a list when you need to reuse stored results; prefer a generator when values can be streamed '
+            'once.'],
   'cells': [{'prose': ['Calling a generator function returns an iterator. `next()` asks for one value and resumes the '
                        'function until the next `yield`.'],
              'code': 'def countdown(n):\n'
@@ -1792,7 +1828,7 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'classes',
   'title': 'Classes',
   'section': 'Classes',
-  'summary': 'Classes bundle data and behavior.',
+  'summary': 'Classes bundle data and behavior into new object types.',
   'doc_url': 'https://docs.python.org/3.13/tutorial/classes.html',
   'code': 'class Counter:\n'
           '    def __init__(self, start=0):\n'
@@ -1805,11 +1841,14 @@ EXAMPLES = [{'slug': 'hello-world',
           'first = Counter()\n'
           'second = Counter(10)\n'
           '\n'
+          'print(first.value)\n'
+          'print(second.value)\n'
           'print(first.increment())\n'
           'print(second.increment(5))\n',
-  'expected_output': '1\n15\n',
+  'expected_output': '0\n10\n1\n15\n',
   'notes': ['`self` is the instance the method is operating on.',
             '`__init__` initializes each new object.',
+            'Use classes when behavior belongs with state; use dictionaries for looser structured data.',
             'Instance attributes belong to one object, not to the class as a whole.'],
   'cells': [{'prose': ['Define a class when data and behavior should travel together. The initializer gives each '
                        'object its starting state.'],
@@ -2245,7 +2284,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'finally:\n'
                      '    print(f"checked {text}")',
              'output': '42: 42\nchecked 42',
-             'line': 17},
+             'line': 19},
             {'prose': ['When parsing fails, `int()` raises `ValueError`. Catching that specific exception makes the '
                        'expected recovery path explicit.'],
              'code': 'text = "python"\n'
@@ -2258,7 +2297,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'finally:\n'
                      '    print(f"checked {text}")',
              'output': 'python: invalid\nchecked python',
-             'line': 41}]},
+             'line': 43}]},
  {'slug': 'assertions',
   'title': 'Assertions',
   'section': 'Errors',
@@ -2347,34 +2386,43 @@ EXAMPLES = [{'slug': 'hello-world',
   'section': 'Errors',
   'summary': 'except* handles matching exceptions inside an ExceptionGroup.',
   'doc_url': 'https://docs.python.org/3.13/tutorial/errors.html#raising-and-handling-multiple-unrelated-exceptions',
-  'code': 'try:\n'
-          '    raise ExceptionGroup(\n'
-          '        "batch failed",\n'
-          '        [ValueError("bad port"), TypeError("bad mode")],\n'
-          '    )\n'
+  'code': 'errors = ExceptionGroup(\n'
+          '    "batch failed",\n'
+          '    [ValueError("bad port"), TypeError("bad mode")],\n'
+          ')\n'
+          'print(len(errors.exceptions))\n'
+          '\n'
+          'try:\n'
+          '    raise errors\n'
           'except* ValueError as group:\n'
           '    print(type(group).__name__)\n'
           '    print(group.exceptions[0])\n'
           'except* TypeError as group:\n'
           '    print(group.exceptions[0])\n',
-  'expected_output': 'ExceptionGroup\nbad port\nbad mode\n',
+  'expected_output': '2\nExceptionGroup\nbad port\nbad mode\n',
   'notes': ['`except*` is for `ExceptionGroup`, not ordinary single exceptions.',
             'Each `except*` clause handles matching members of the group.',
             'Exception groups often appear around concurrent work.'],
-  'cells': [{'prose': ['`ExceptionGroup` bundles several exception objects. `except* ValueError` receives a group '
-                       'containing only the matching `ValueError` members.'],
+  'cells': [{'prose': ['An exception group bundles several exception objects. This is different from an ordinary '
+                       'exception because more than one failure is present.'],
+             'code': 'errors = ExceptionGroup(\n'
+                     '    "batch failed",\n'
+                     '    [ValueError("bad port"), TypeError("bad mode")],\n'
+                     ')\n'
+                     'print(len(errors.exceptions))',
+             'output': '2',
+             'line': 22},
+            {'prose': ['`except*` handles matching members of the group. The `ValueError` handler sees the value '
+                       'error, and the `TypeError` handler sees the type error.'],
              'code': 'try:\n'
-                     '    raise ExceptionGroup(\n'
-                     '        "batch failed",\n'
-                     '        [ValueError("bad port"), TypeError("bad mode")],\n'
-                     '    )\n'
+                     '    raise errors\n'
                      'except* ValueError as group:\n'
                      '    print(type(group).__name__)\n'
                      '    print(group.exceptions[0])\n'
                      'except* TypeError as group:\n'
                      '    print(group.exceptions[0])',
              'output': 'ExceptionGroup\nbad port\nbad mode',
-             'line': 22}]},
+             'line': 38}]},
  {'slug': 'modules',
   'title': 'Modules',
   'section': 'Modules',
@@ -2420,21 +2468,29 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'scores = [8, 10, 9]\n'
           'print(stats.mean(scores))\n'
-          'print(square_root(81))\n',
-  'expected_output': '9\n9.0\n',
+          'print(stats.__name__)\n'
+          '\n'
+          'print(square_root(81))\n'
+          'print(square_root.__name__)\n',
+  'expected_output': '9\nstatistics\n9.0\nsqrt\n',
   'notes': ['`import module as alias` keeps module-style access under a shorter or clearer name.',
             '`from module import name as alias` imports one name under a local alias.',
+            'Prefer plain imports unless an alias improves clarity or follows a strong convention.',
             'Avoid `from module import *` because it makes dependencies harder to see.'],
-  'cells': [{'prose': ['A module alias keeps the namespace but changes the local name. Readers can still see that '
-                       '`mean` comes from the statistics module.'],
-             'code': 'import statistics as stats\n\nscores = [8, 10, 9]\nprint(stats.mean(scores))',
-             'output': '9',
+  'cells': [{'prose': ['A module alias keeps the namespace but changes the local name. Here `stats` is shorter, but '
+                       'readers can still see that `mean` belongs to the statistics module.'],
+             'code': 'import statistics as stats\n'
+                     '\n'
+                     'scores = [8, 10, 9]\n'
+                     'print(stats.mean(scores))\n'
+                     'print(stats.__name__)',
+             'output': '9\nstatistics',
              'line': 21},
-            {'prose': ['A name imported with `from` can also be aliased. This is most useful when the local name '
-                       'explains the role better than the original name.'],
-             'code': 'from math import sqrt as square_root\n\nprint(square_root(81))',
-             'output': '9.0',
-             'line': 36}]},
+            {'prose': ['A name imported with `from` can also be aliased. Use this when the local name explains the '
+                       'role better than the original name.'],
+             'code': 'from math import sqrt as square_root\n\nprint(square_root(81))\nprint(square_root.__name__)',
+             'output': '9.0\nsqrt',
+             'line': 38}]},
  {'slug': 'type-hints',
   'title': 'Type Hints',
   'section': 'Types',
@@ -2444,20 +2500,32 @@ EXAMPLES = [{'slug': 'hello-world',
           '    return sum(numbers)\n'
           '\n'
           'print(total([1, 2, 3]))\n'
-          'print(total.__annotations__)\n',
-  'expected_output': "6\n{'numbers': list[int], 'return': <class 'int'>}\n",
+          'print(total.__annotations__)\n'
+          '\n'
+          '\n'
+          'def label(score: int) -> str:\n'
+          '    return f"score={score}"\n'
+          '\n'
+          'print(label("high"))\n',
+  'expected_output': "6\n{'numbers': list[int], 'return': <class 'int'>}\nscore=high\n",
   'notes': ['Python does not enforce most type hints at runtime.',
-            'Tools like type checkers and editors use annotations.'],
+            'Tools like type checkers and editors use annotations to catch mistakes earlier.',
+            'Use runtime validation when untrusted input must be rejected while the program runs.'],
   'cells': [{'prose': ['Type hints document expected parameter and return shapes. Python still runs the function '
                        'normally at runtime.'],
              'code': 'def total(numbers: list[int]) -> int:\n    return sum(numbers)\n\nprint(total([1, 2, 3]))',
              'output': '6',
              'line': 17},
-            {'prose': ['Python stores annotations on the function object for tools and introspection, but it does not '
-                       'enforce most hints by itself.'],
-             'code': 'def total(numbers: list[int]) -> int:\n    return sum(numbers)\n\nprint(total.__annotations__)',
+            {'prose': ['Python stores annotations on the function object for tools and introspection. Type checkers '
+                       'use this information without changing the function call syntax.'],
+             'code': 'print(total.__annotations__)',
              'output': "{'numbers': list[int], 'return': <class 'int'>}",
-             'line': 32}]},
+             'line': 32},
+            {'prose': ['Most hints are not runtime validation. This call passes a string where the hint says `int`; '
+                       'Python still calls the function because the body can format any value.'],
+             'code': 'def label(score: int) -> str:\n    return f"score={score}"\n\nprint(label("high"))',
+             'output': 'score=high',
+             'line': 44}]},
  {'slug': 'enums',
   'title': 'Enums',
   'section': 'Types',
@@ -2477,7 +2545,8 @@ EXAMPLES = [{'slug': 'hello-world',
   'expected_output': 'PENDING\npending\nTrue\nFalse\n',
   'notes': ['Enums make states and choices explicit.',
             'Members have names and values.',
-            'Comparing enum members avoids string typo bugs.'],
+            'Comparing enum members avoids string typo bugs.',
+            'Prefer raw strings for open-ended text; prefer enums for a closed set of named choices.'],
   'cells': [{'prose': ['An enum member has a symbolic name and an underlying value. The symbolic name is what readers '
                        'usually care about in code.'],
              'code': 'from enum import Enum\n'
@@ -2715,7 +2784,8 @@ EXAMPLES = [{'slug': 'hello-world',
   'expected_output': "Async Await\n['Json', 'Datetime']\n",
   'notes': ['Calling an async function creates a coroutine object.',
             '`await` yields control until an awaitable completes.',
-            'Workers request handlers are async, so this pattern appears around fetches and bindings.'],
+            'Workers request handlers are async, so this pattern appears around fetches and bindings.',
+            'Prefer ordinary functions when there is no awaitable work to coordinate.'],
   'cells': [{'prose': ['An `async def` function returns a coroutine object when called. The function body has not '
                        'produced its final result yet.'],
              'code': 'import asyncio\n'
@@ -2728,7 +2798,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(coroutine.__class__.__name__)\n'
                      'coroutine.close()',
              'output': 'coroutine',
-             'line': 17},
+             'line': 19},
             {'prose': ['Use `await` inside another coroutine to get the eventual result. `asyncio.run()` starts an '
                        'event loop for the top-level coroutine.'],
              'code': 'async def main():\n'
@@ -2737,7 +2807,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'asyncio.run(main())',
              'output': 'Async Await',
-             'line': 37},
+             'line': 39},
             {'prose': ['`asyncio.gather()` awaits several awaitables and returns their results in order. This is the '
                        'shape used when independent I/O operations can progress together.'],
              'code': 'async def main():\n'
@@ -2746,7 +2816,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'asyncio.run(main())',
              'output': "['Json', 'Datetime']",
-             'line': 53}]},
+             'line': 55}]},
  {'slug': 'async-iteration-and-context',
   'title': 'Async Iteration and Context',
   'section': 'Async',
@@ -2788,7 +2858,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(titles.__name__)',
              'output': 'titles',
-             'line': 22},
+             'line': 24},
             {'prose': ['An async context manager defines `__aenter__` and `__aexit__`. `async with` awaits setup and '
                        'cleanup around the block.'],
              'code': 'class Session:\n'
@@ -2801,7 +2871,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(Session.__name__)',
              'output': 'Session',
-             'line': 41},
+             'line': 43},
             {'prose': ['The top-level coroutine combines both protocols: open the async resource, then consume the '
                        'async stream inside it.'],
              'code': 'async def main():\n'
@@ -2811,4 +2881,4 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'asyncio.run(main())',
              'output': 'open\nValues\nAsync Await\nclose',
-             'line': 61}]}]
+             'line': 63}]}]

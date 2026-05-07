@@ -10,6 +10,8 @@ Exceptions represent errors or unusual conditions that interrupt normal control 
 
 Keep the successful path separate from the recovery path. `else` runs only when no exception was raised, while `finally` runs either way for cleanup or bookkeeping.
 
+Use exceptions when an operation cannot produce a valid result. Prefer ordinary conditionals for expected branches that are not errors.
+
 Catch specific exceptions whenever possible. A broad catch can hide programming mistakes, while a targeted `ValueError` handler documents exactly what failure is expected.
 
 :::program

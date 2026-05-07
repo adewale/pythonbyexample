@@ -106,5 +106,6 @@ Ellipsis
 :::note
 - Raw strings are useful when backslashes are part of the data, such as regular expressions.
 - Bytes literals represent binary data, not text strings.
+- Prefer everyday strings, numbers, and operators until the data shape calls for these specialized forms.
 - Specialized operators should make the data model clearer, not more mysterious.
 :::

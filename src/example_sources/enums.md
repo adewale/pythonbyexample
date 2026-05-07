@@ -67,4 +67,5 @@ False
 - Enums make states and choices explicit.
 - Members have names and values.
 - Comparing enum members avoids string typo bugs.
+- Prefer raw strings for open-ended text; prefer enums for a closed set of named choices.
 :::

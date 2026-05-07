@@ -12,6 +12,8 @@ Rebinding changes which object a name refers to. Augmented assignment such as `+
 
 Use clear names for values that matter later. Python's flexibility makes naming more important, not less.
 
+Use assignment when a value needs a name for reuse or explanation. Prefer a direct expression when naming the intermediate value would add noise.
+
 :::program
 ```python
 message = "hi"

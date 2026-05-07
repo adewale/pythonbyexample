@@ -67,4 +67,5 @@ for value in countdown(3):
 - Generator functions are a concise way to create custom iterators.
 - Values are produced on demand.
 - A generator is consumed as you iterate over it.
+- Prefer a list when you need to reuse stored results; prefer a generator when values can be streamed once.
 :::

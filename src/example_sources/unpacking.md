@@ -77,4 +77,5 @@ Ada Python
 :::note
 - Starred unpacking collects the remaining values into a list.
 - Dictionary unpacking with ** is common when calling functions with structured data.
+- Prefer indexing when you need one position; prefer unpacking when naming several positions makes the shape clearer.
 :::

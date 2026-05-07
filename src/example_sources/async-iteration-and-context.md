@@ -15,6 +15,8 @@ see_also = [
 
 These forms appear around network streams, database cursors, locks, and service clients where both iteration and cleanup may wait on I/O.
 
+Use ordinary `for` and `with` when producing the next value or cleaning up does not need to await anything.
+
 The syntax mirrors `for` and `with`, but the protocol methods are asynchronous.
 
 :::program

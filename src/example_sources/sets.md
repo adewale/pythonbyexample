@@ -78,5 +78,6 @@ print(sorted(allowed - compiled))
 :::note
 - Use lists when order and repeated values matter.
 - Use sets when uniqueness and membership are the main operations.
+- Prefer lists when order or repeated values are part of the meaning.
 - Sets are unordered, so sort them when examples need deterministic display.
 :::
