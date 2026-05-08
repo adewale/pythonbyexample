@@ -141,7 +141,8 @@ class AppTests(unittest.TestCase):
             "recursion",
             "number-parsing",
             "custom-exceptions",
-            "operators-and-literals",
+            "operators",
+            "literals",
             "async-iteration-and-context",
         }
         self.assertTrue(expected_slugs.issubset(slugs), slugs)
@@ -204,11 +205,10 @@ class AppTests(unittest.TestCase):
             self.assertIn("Journey", page.body)
             self.assertIn("journey-overview", page.body)
             self.assertIn("journey-section", page.body)
-            self.assertIn("Gap ·", page.body)
+            self.assertNotIn("Gap ·", page.body)
             self.assertIn("/examples/", page.body)
             self.assertIn("Use this example to ", page.body)
-            self.assertIn("This gap should ", page.body)
-            self.assertIn("Gap ·", page.body)
+            self.assertNotIn("This gap should ", page.body)
             self.assertNotIn("journey-step-number", page.body)
 
     def test_see_also_links_form_valid_example_graph(self):
@@ -236,13 +236,13 @@ class AppTests(unittest.TestCase):
             [
                 "hello-world",
                 "values",
+                "literals",
                 "numbers",
                 "booleans",
-                "operators-and-literals",
+                "operators",
                 "none",
                 "variables",
                 "constants",
-                "truthiness",
             ],
         )
         for example in examples:

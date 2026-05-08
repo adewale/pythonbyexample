@@ -27,6 +27,7 @@ class Cell:
     source: str
     output: str
     line: int
+    kind: str = "cell"
 
 
 @dataclass(frozen=True)
@@ -105,23 +106,26 @@ def _parse_cells_and_notes(body: str, filename: str, body_line: int) -> tuple[li
         return "\n"
 
     body_no_notes = note_pattern.sub(note_repl, body)
-    cell_pattern = re.compile(r":::cell\n(.*?)\n:::", re.S)
-    matches = list(cell_pattern.finditer(body_no_notes))
+    block_pattern = re.compile(r":::(cell|unsupported)\n(.*?)\n:::", re.S)
+    matches = list(block_pattern.finditer(body_no_notes))
     if not matches:
         raise ValueError(f"{filename}:{body_line}: expected at least one :::cell block")
     intro = _paragraphs(body_no_notes[: matches[0].start()])
     cells: list[Cell] = []
     for match in matches:
+        kind = match.group(1)
         line = body_line + _line_for_offset(body_no_notes, match.start()) - 1
-        text = match.group(1).strip()
+        text = match.group(2).strip()
         source = _single_fence(text, "python", filename, line)
-        output = _single_fence(text, "output", filename, line)
+        output = ""
+        if kind == "cell":
+            output = _single_fence(text, "output", filename, line)
         prose_text = re.sub(r"```python\n.*?\n```", "", text, flags=re.S)
         prose_text = re.sub(r"```output\n.*?\n```", "", prose_text, flags=re.S)
         prose = _paragraphs(prose_text)
         if not prose:
             raise ValueError(f"{filename}:{line}: cell prose is required")
-        cells.append(Cell(prose, source.rstrip("\n"), output.rstrip("\n"), line))
+        cells.append(Cell(prose, source.rstrip("\n"), output.rstrip("\n"), line, kind))
     return intro, cells, notes
 
 
@@ -141,7 +145,9 @@ def example_to_dict(filename: str, catalog: ExampleCatalog) -> dict[str, Any]:
     intro, cells, notes = _parse_cells_and_notes(body_without_program, filename, body_line)
     slug = str(frontmatter["slug"])
     doc_path = str(frontmatter["doc_path"])
-    expected_output = _run(code)
+    expected_output = frontmatter.get("expected_output")
+    if expected_output is None:
+        expected_output = _run(code)
     return {
         "slug": slug,
         "title": str(frontmatter["title"]),
@@ -152,8 +158,8 @@ def example_to_dict(filename: str, catalog: ExampleCatalog) -> dict[str, Any]:
         "explanation": intro,
         "notes": notes,
         "see_also": list(frontmatter.get("see_also", [])),
-        "walkthrough": [{"prose": prose, "code": cell.source} for cell in cells for prose in cell.prose],
-        "cells": [{"prose": cell.prose, "code": cell.source, "output": cell.output, "line": cell.line} for cell in cells],
+        "walkthrough": [{"prose": prose, "code": cell.source} for cell in cells for prose in cell.prose if cell.kind == "cell"],
+        "cells": [{"prose": cell.prose, "code": cell.source, "output": cell.output, "line": cell.line, "kind": cell.kind} for cell in cells],
         "code": code,
         "expected_output": expected_output,
         "min_python": frontmatter.get("min_python"),
@@ -172,6 +178,12 @@ def verify_example_output(example: dict[str, Any]) -> list[str]:
     namespace: dict[str, Any] = {"__name__": "__main__"}
     for index, cell in enumerate(example["cells"], 1):
         line = cell.get("line", 1)
+        if cell.get("kind") == "unsupported":
+            try:
+                ast.parse(cell["code"])
+            except Exception as error:  # noqa: BLE001
+                errors.append(f"{example['slug']}.md:{line}: unsupported cell parse failed: {error.__class__.__name__}: {error}")
+            continue
         try:
             ast.parse(cell["code"])
             actual = _run(cell["code"], namespace).rstrip("\n")

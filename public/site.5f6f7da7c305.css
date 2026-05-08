@@ -69,6 +69,7 @@
     .cell-source pre, .cell-source .shiki-block, .cell-output pre { margin: 0; padding: 0; border-left: 0; border-radius: 0; background: transparent !important; color: var(--text); box-shadow: none; white-space: pre-wrap; overflow-x: visible; }
     .cell-source .shiki-block .line { display: inline; }
     .cell-output { margin-top: var(--space-3); padding: var(--space-3) 0 0; border-top: 1px solid var(--hairline-soft); background: transparent; }
+    .unsupported-cell .cell-code-stack { border-left-style: dashed; }
     .notebook-notes { margin-top: var(--space-5); }
     @media (max-width: 980px) { .lp-cell { grid-template-columns: 1fr; } .cell-output { max-width: none; } }
     .playground { margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--hairline); }
@@ -101,5 +102,6 @@
     .example-top, .example-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
     .example-nav { margin-top: var(--space-5); padding-top: var(--space-3); border-top: 1px solid var(--hairline); }
     footer { margin-block: 2rem; color: var(--muted); }
+    .site-footer-note { font-size: .82rem; }
     @media (max-width: 860px) { .lesson-step, .runner-grid { grid-template-columns: 1fr; } body { padding: .875rem; } header { margin-inline: -.875rem; padding-inline: .875rem; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 1ms !important; } }

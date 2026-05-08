@@ -103,6 +103,7 @@ JOURNEYS = [
                 "items": [
                     ("example", "hello-world", "start with a complete program and its output"),
                     ("example", "values", "see that Python programs manipulate runtime objects"),
+                    ("example", "literals", "write small values directly in source code"),
                     ("example", "variables", "understand that names bind to objects rather than storing values themselves"),
                     ("example", "constants", "learn the convention Python uses for values that should not change"),
                 ],
@@ -112,62 +113,93 @@ JOURNEYS = [
                 "summary": "This section prevents early confusion about equality, object identity, missing values, and truth tests.",
                 "items": [
                     ("example", "none", "represent expected absence with a singleton object"),
+                    ("example", "booleans", "combine facts with boolean operators"),
                     ("example", "truthiness", "predict how objects behave in boolean contexts"),
                     ("example", "equality-and-identity", "distinguish value equality from object identity"),
                     ("example", "mutability", "predict when operations change an object in place"),
-                    ("gap", "Object lifecycle", "explain references, garbage collection, and why identity can outlive a single name"),
+                    ("example", "object-lifecycle", "explain references, garbage collection, and why identity can outlive a single name"),
                 ],
             },
             {
                 "title": "Read expressions as object operations.",
-                "summary": "This section connects literals, operators, text, and formatting to Python's data model.",
+                "summary": "This section connects operators, text, and formatting to Python's data model.",
                 "items": [
                     ("example", "numbers", "use numeric objects and arithmetic operators"),
-                    ("example", "booleans", "combine facts with boolean operators"),
-                    ("example", "operators-and-literals", "recognize the literal and operator surface of the language"),
+                    ("example", "operators", "combine, compare, and test values with expression syntax"),
                     ("example", "strings", "treat text as Unicode rather than raw bytes"),
                     ("example", "string-formatting", "turn objects into readable text at output boundaries"),
-                    ("gap", "Bytes and bytearray", "contrast text with binary data and explicit decoding"),
+                    ("example", "bytes-and-bytearray", "contrast text with binary data and explicit decoding"),
                 ],
             },
         ],
     },
     {
-        "slug": "streams",
-        "title": "Streams",
-        "summary": "This journey shows how Python code chooses paths, repeats work, stops early, and eventually treats iteration as streams of values.",
+        "slug": "control-flow",
+        "title": "Control Flow",
+        "summary": "This journey follows how a Python program chooses which path runs, names facts at decision points, and exits early when the remaining work no longer applies.",
         "sections": [
             {
-                "title": "Make decisions explicitly.",
-                "summary": "Learners should first understand ordinary branching before reaching for compact expression forms.",
+                "title": "Choose between paths.",
+                "summary": "Start with ordinary branching and boolean predicates before reaching for more compact forms.",
                 "items": [
+                    ("example", "booleans", "combine facts into readable conditions"),
+                    ("example", "truthiness", "use object truth values without hiding intent"),
+                    ("example", "operators", "build comparisons and boolean expressions for conditions"),
                     ("example", "conditionals", "choose between branches with clear predicates"),
+                ],
+            },
+            {
+                "title": "Name and shape decisions.",
+                "summary": "Some branches become clearer when the code names an intermediate value or dispatches on data shape.",
+                "items": [
                     ("example", "assignment-expressions", "name an intermediate value inside a condition when it improves clarity"),
                     ("example", "match-statements", "dispatch on the shape of data rather than only on boolean tests"),
                     ("example", "advanced-match-patterns", "combine destructuring, alternatives, and guards in pattern matching"),
-                    ("gap", "Guard clause style", "show how early returns reduce nested conditional code"),
                 ],
             },
+            {
+                "title": "Stop as soon as the answer is known.",
+                "summary": "Early exits make the successful path easier to read by moving exceptional or completed cases out of the way.",
+                "items": [
+                    ("example", "guard-clauses", "show how early returns reduce nested conditional code"),
+                    ("example", "assertions", "state assumptions that should fail loudly while developing"),
+                    ("example", "exceptions", "leave the current path when ordinary return values are not enough"),
+                ],
+            },
+        ],
+    },
+    {
+        "slug": "iteration",
+        "title": "Iteration",
+        "summary": "This journey follows repeated work from ordinary loops to the iterator protocol: consume values, stop deliberately, and produce lazy streams only when they help.",
+        "sections": [
             {
                 "title": "Choose the right loop shape.",
-                "summary": "This section distinguishes counting, consuming, open-ended repetition, and loop completion logic.",
+                "summary": "Loops differ by what they consume, when they stop, and whether completion itself carries meaning.",
                 "items": [
                     ("example", "for-loops", "consume values from an iterable"),
+                    ("example", "while-loops", "repeat while a condition must be rechecked"),
                     ("example", "break-and-continue", "interrupt or skip loop work intentionally"),
                     ("example", "loop-else", "attach completion logic to loops that did not break"),
-                    ("example", "while-loops", "repeat while a condition must be rechecked"),
-                    ("gap", "Sentinel iteration", "show `iter(callable, sentinel)` for repeated reads until a marker appears"),
+                    ("example", "sentinel-iteration", "show `iter(callable, sentinel)` for repeated reads until a marker appears"),
                 ],
             },
             {
-                "title": "Recognize iteration as a protocol.",
-                "summary": "The important mental shift is that loops consume value streams rather than special-casing lists.",
+                "title": "See the protocol behind `for`.",
+                "summary": "The important mental shift is that loops consume producers through a protocol rather than special-casing lists.",
                 "items": [
                     ("example", "iterating-over-iterables", "separate value producers from value consumers"),
                     ("example", "iterators", "use `iter()` and `next()` to expose the protocol behind `for`"),
                     ("example", "generators", "write functions that produce values lazily"),
+                ],
+            },
+            {
+                "title": "Compose lazy value streams.",
+                "summary": "Iterator pipelines are useful when code can transform values one at a time instead of materializing every intermediate result.",
+                "items": [
                     ("example", "generator-expressions", "create lazy one-pass streams with expression syntax"),
                     ("example", "itertools", "compose iterator streams without materializing every value"),
+                    ("example", "yield-from", "delegate part of a generator to another iterable"),
                 ],
             },
         ],
@@ -185,7 +217,7 @@ JOURNEYS = [
                     ("example", "tuples", "group fixed-position values"),
                     ("example", "dicts", "look up values by key"),
                     ("example", "sets", "model uniqueness and membership"),
-                    ("gap", "Collections module", "show `deque`, `Counter`, `defaultdict`, and `namedtuple` as specialized shapes"),
+                    ("example", "collections-module", "show `deque`, `Counter`, `defaultdict`, and `namedtuple` as specialized shapes"),
                 ],
             },
             {
@@ -197,7 +229,7 @@ JOURNEYS = [
                     ("example", "comprehensions", "build concrete collections from compact loops"),
                     ("example", "comprehension-patterns", "compose filters and nested transformations"),
                     ("example", "sorting", "order records with key functions"),
-                    ("gap", "Copying collections", "contrast shallow copies, deep copies, and shared nested data"),
+                    ("example", "copying-collections", "contrast shallow copies, deep copies, and shared nested data"),
                 ],
             },
             {
@@ -208,7 +240,7 @@ JOURNEYS = [
                     ("example", "json", "move structured data across a text boundary"),
                     ("example", "regular-expressions", "extract structure from text patterns"),
                     ("example", "datetime", "represent dates, times, and durations as typed values"),
-                    ("gap", "CSV data", "show row-shaped text data and dictionary records"),
+                    ("example", "csv-data", "show row-shaped text data and dictionary records"),
                 ],
             },
         ],
@@ -233,12 +265,12 @@ JOURNEYS = [
                 "title": "Use functions as values.",
                 "summary": "Python functions can capture state, be passed around, and wrap other functions.",
                 "items": [
-                    ("example", "closures", "capture state in nested functions"),
                     ("example", "scope-global-nonlocal", "control where assignment happens"),
+                    ("example", "closures", "capture state in nested functions"),
                     ("example", "recursion", "solve self-similar problems with a base case"),
                     ("example", "lambdas", "write small unnamed functions for expression positions"),
                     ("example", "decorators", "wrap behavior without changing call sites"),
-                    ("gap", "Partial functions", "show how to pre-fill arguments with `functools.partial`"),
+                    ("example", "partial-functions", "show how to pre-fill arguments with `functools.partial`"),
                 ],
             },
             {
@@ -250,8 +282,13 @@ JOURNEYS = [
                     ("example", "dataclasses", "generate common methods for data containers"),
                     ("example", "properties", "keep attribute syntax while adding computation or validation"),
                     ("example", "special-methods", "connect objects to Python syntax and built-ins"),
+                    ("example", "truth-and-size", "make objects work with truth tests and `len()`"),
+                    ("example", "container-protocols", "support membership, lookup, and assignment syntax"),
+                    ("example", "callable-objects", "make stateful instances callable like functions"),
+                    ("example", "operator-overloading", "define operators only when the operation is unsurprising"),
+                    ("example", "attribute-access", "customize fallback lookup and assignment carefully"),
+                    ("example", "descriptors", "explain the protocol behind methods, properties, and managed attributes"),
                     ("example", "metaclasses", "customize class creation when ordinary class tools are not enough"),
-                    ("gap", "Descriptors", "explain the protocol behind methods, properties, and managed attributes"),
                 ],
             },
         ],
@@ -268,29 +305,29 @@ JOURNEYS = [
                     ("example", "type-hints", "document expected types and feed type checkers"),
                     ("example", "protocols", "describe required behavior by structural shape"),
                     ("example", "enums", "name a fixed set of symbolic values"),
-                    ("gap", "Runtime type checks", "show `type()`, `isinstance()`, and `issubclass()` without turning Python into Java"),
+                    ("example", "runtime-type-checks", "show `type()`, `isinstance()`, and `issubclass()` without turning Python into Java"),
                 ],
             },
             {
                 "title": "Describe realistic data shapes.",
                 "summary": "Typed Python becomes useful when annotations explain optional values, unions, callables, and JSON-like records.",
                 "items": [
-                    ("gap", "Union and Optional types", "show `X | Y` and `None`-aware APIs"),
-                    ("gap", "Type aliases", "name complex types with `type` statements or aliases"),
-                    ("gap", "TypedDict", "type dictionary records that come from JSON"),
-                    ("gap", "Literal and Final", "express constrained values and names that should not be rebound"),
-                    ("gap", "Callable", "type functions that are passed as arguments"),
+                    ("example", "union-and-optional-types", "show `X | Y` and `None`-aware APIs"),
+                    ("example", "type-aliases", "name complex types with `type` statements or aliases"),
+                    ("example", "typed-dicts", "type dictionary records that come from JSON"),
+                    ("example", "literal-and-final", "express constrained values and names that should not be rebound"),
+                    ("example", "callable-types", "type functions that are passed as arguments"),
                 ],
             },
             {
                 "title": "Scale annotations for reusable libraries.",
                 "summary": "Advanced typing exists to preserve information across reusable functions, containers, and decorators.",
                 "items": [
-                    ("gap", "Generics and TypeVar", "write reusable typed containers and functions"),
-                    ("gap", "ParamSpec", "preserve callable signatures through decorators"),
-                    ("gap", "Overloads", "describe APIs whose return type depends on the input shape"),
-                    ("gap", "Casts and Any", "show escape hatches and their tradeoffs"),
-                    ("gap", "NewType", "create distinct static identities for runtime-compatible values"),
+                    ("example", "generics-and-typevar", "write reusable typed containers and functions"),
+                    ("example", "paramspec", "preserve callable signatures through decorators"),
+                    ("example", "overloads", "describe APIs whose return type depends on the input shape"),
+                    ("example", "casts-and-any", "show escape hatches and their tradeoffs"),
+                    ("example", "newtype", "create distinct static identities for runtime-compatible values"),
                 ],
             },
         ],
@@ -309,7 +346,7 @@ JOURNEYS = [
                     ("example", "exception-chaining", "preserve the cause while translating an error"),
                     ("example", "exception-groups", "handle multiple failures together"),
                     ("example", "custom-exceptions", "name failures in the language of the problem domain"),
-                    ("gap", "Warnings", "signal soft problems and deprecations"),
+                    ("example", "warnings", "signal soft problems and deprecations"),
                 ],
             },
             {
@@ -320,8 +357,8 @@ JOURNEYS = [
                     ("example", "delete-statements", "remove names, attributes, and items intentionally"),
                     ("example", "modules", "split code into importable files"),
                     ("example", "import-aliases", "make imported names clear at use sites"),
-                    ("gap", "Packages", "show package directories, `__init__.py`, and public module boundaries"),
-                    ("gap", "Virtual environments", "isolate dependencies for a project"),
+                    ("example", "packages", "show package directories, `__init__.py`, and public module boundaries"),
+                    ("example", "virtual-environments", "isolate dependencies for a project"),
                 ],
             },
             {
@@ -330,11 +367,45 @@ JOURNEYS = [
                 "items": [
                     ("example", "async-await", "await concurrent I/O-shaped work"),
                     ("example", "async-iteration-and-context", "consume async streams and cleanup protocols"),
-                    ("gap", "Logging", "record operational events without using `print()`"),
-                    ("gap", "Testing", "write deterministic tests with `unittest` or `pytest`"),
-                    ("gap", "Subprocesses", "run external commands safely"),
-                    ("gap", "Threads and processes", "contrast concurrency choices beyond `asyncio`"),
-                    ("gap", "Networking", "make HTTP or socket boundaries explicit"),
+                    ("example", "logging", "record operational events without using `print()`"),
+                    ("example", "testing", "write deterministic tests with `unittest` or `pytest`"),
+                    ("example", "subprocesses", "run external commands safely"),
+                    ("example", "threads-and-processes", "contrast concurrency choices beyond `asyncio`"),
+                    ("example", "networking", "make HTTP or socket boundaries explicit"),
+                ],
+            },
+        ],
+    },
+    {
+        "slug": "workers",
+        "title": "Workers",
+        "summary": "This journey explains the examples that were adapted so they can teach operating-system boundaries while still running inside Cloudflare Dynamic Workers.",
+        "sections": [
+            {
+                "title": "Replace unavailable process boundaries with portable evidence.",
+                "summary": "Dynamic Workers run Python in a constrained runtime, so examples cannot assume child processes, shell commands, or project-local virtual environments are available.",
+                "items": [
+                    ("example", "virtual-environments", "report stable environment facts instead of creating or depending on a local virtual environment"),
+                    ("example", "subprocesses", "show the command and `CompletedProcess` result shape"),
+                    ("example", "threads-and-processes", "compare thread and process executor boundaries"),
+                ],
+            },
+            {
+                "title": "Keep network lessons local to the protocol boundary.",
+                "summary": "Workers should not open arbitrary low-level sockets, so the networking example teaches addresses, protocol constants, and bytes without making an outbound connection.",
+                "items": [
+                    ("example", "bytes-and-bytearray", "show the text-to-bytes boundary that networking and subprocess APIs usually require"),
+                    ("example", "networking", "make endpoint and byte-encoding boundaries visible without opening a socket"),
+                    ("example", "async-await", "show the supported coroutine model for I/O-shaped work in this environment"),
+                ],
+            },
+            {
+                "title": "Preserve the lesson while respecting the runtime.",
+                "summary": "The changed examples favor deterministic, editable evidence over fake demonstrations of unavailable operating-system features.",
+                "items": [
+                    ("example", "logging", "show operational output through a configurable Python API rather than shell output"),
+                    ("example", "testing", "capture test-runner output so the page remains deterministic"),
+                    ("example", "context-managers", "show cleanup boundaries that still apply when resources are represented abstractly"),
                 ],
             },
         ],
@@ -354,9 +425,12 @@ SEE_ALSO_EDGE_LABELS = {
     ("assertions", "exceptions"): "alternative",
     ("exception-chaining", "exceptions"): "builds on",
     ("exception-groups", "exceptions"): "alternative",
-    ("operators-and-literals", "numbers"): "related syntax",
-    ("operators-and-literals", "strings"): "related syntax",
-    ("operators-and-literals", "sets"): "related syntax",
+    ("operators", "numbers"): "related syntax",
+    ("operators", "booleans"): "condition building",
+    ("operators", "assignment-expressions"): "specialized expression",
+    ("literals", "values"): "value surface",
+    ("literals", "strings"): "text literal",
+    ("literals", "sets"): "container literal",
 }
 
 
@@ -647,6 +721,14 @@ const field = editor(); if (field) field.addEventListener('input', resizeEditor)
     return _layout(f'{example["title"]} literate cells option', content, description=f'Prototype layout for the {example["title"]} Python example.', path='/layout-options/cell-output-flow', include_editor=True)
 
 
+def _render_cell(step):
+    prose_html = "".join(f"<p>{render_inline(prose)}</p>" for prose in step["prose"])
+    source = html.escape(step["code"])
+    if step.get("kind") == "unsupported":
+        return f'<section class="lesson-step lp-cell unsupported-cell"><div class="lp-prose">{prose_html}</div><div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Standard Python</p><pre><code class="language-python">{source}</code></pre></div></div></section>'
+    return f'<section class="lesson-step lp-cell"><div class="lp-prose">{prose_html}</div><div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">{source}</code></pre></div><div class="cell-output"><p class="cell-label">Output</p><pre><code>{html.escape(step["output"])}</code></pre></div></div></section>'
+
+
 def render_example_page(example, output=None, code=None, execution_time_ms=None):
     notes = [render_inline(note) for note in example.get("notes", [])]
     walkthrough = _walkthrough_cells(example)
@@ -665,10 +747,7 @@ def render_example_page(example, output=None, code=None, execution_time_ms=None)
         if next_example
         else "<span></span>"
     )
-    walkthrough_html = "".join(
-        f'<section class="lesson-step lp-cell"><div class="lp-prose">{"".join(f"<p>{render_inline(prose)}</p>" for prose in step["prose"])}</div><div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">{html.escape(step["code"])}</code></pre></div><div class="cell-output"><p class="cell-label">Output</p><pre><code>{html.escape(step["output"])}</code></pre></div></div></section>'
-        for index, step in enumerate(walkthrough, 1)
-    )
+    walkthrough_html = "".join(_render_cell(step) for step in walkthrough)
     notes_html = "".join(f"<li>{note}</li>" for note in notes)
     see_also_examples = [get_example(slug) for slug in example.get("see_also", [])]
     see_also_links = "".join(

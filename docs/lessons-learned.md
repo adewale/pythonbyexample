@@ -37,6 +37,22 @@ This document records project lessons that should guide future changes to Python
 - When storing examples as Markdown, keep the full editable program in `:::program` and teaching fragments in separate `:::cell` blocks. Do not concatenate cells to recreate the editor source.
 - Fine-grained cells can restate definitions to stay executable. This is better than collapsing class, property, recursion, match, or type-hint examples into one large cell.
 - Preserve a frozen golden catalog while migrating source formats. Full stdout parity is not enough; rendered teaching-cell structure must also match.
+- Beware broad-surface titles that quietly teach only one narrow slice. Pages named `Testing`, `Packages`, `Regular Expressions`, `Type Hints`, `Async Await`, or `Special Methods` must either cover the forms a reader reasonably expects or explicitly frame themselves as a first pass and link to focused neighbors.
+- Do not let an important syntax form live only in a separate page if another page title strongly implies it. An umbrella `Operators` page should at least point to and lightly show `:=`, even though `Assignment Expressions` remains the focused lesson.
+- Journey order should follow prerequisite thinking, not catalog order. Put booleans before truthiness and conditionals, scope before closures, bytes before networking, and environment boundaries before subprocess/thread boundaries.
+- Runtime-boundary caveats should not become the hero. For Dynamic Worker limitations, teach normal Python first and state the constraint once in the marked boundary cell.
+- Algebrica's useful editorial principle is “reduce without distorting.” Python examples should be compact, but not so compressed that the concept loses its necessary contrast, edge case, or progression.
+- Broad examples need a visible learning arc. If a page reads like a tray of samples, either add a map-like progression or split it into narrower examples.
+- Keep teaching artifacts inspectable. Markdown sources, editable programs, teaching cells, expected output, and diagrams/screenshots should be clean enough to serve as public educational material, not just implementation input.
+
+### Broad-surface audit notes
+
+- `Operators and Literals`: fixed by splitting it into `Operators` and `Literals`, then adding `:=` surface coverage and a `See also` link to `Assignment Expressions` from `Operators`.
+- `Special Methods`: fixed by keeping the entry page small and adding focused data-model pages for truth/size, containers, callables, operators, and attribute access.
+- `Testing`: fixed by replacing boilerplate with arrange/assert/run structure and explicit scoping to the smallest `unittest` loop.
+- `Packages`: fixed by splitting package-as-module, dotted imports, and dynamic import into separate cells.
+- `Regular Expressions`: fixed by separating repeated extraction, first-match groups, and the string-method alternative.
+- `Async Await` and `Type Hints`: acceptable for now because both state their boundaries and are supported by focused neighboring examples/journeys.
 
 ## Layout and mobile
 

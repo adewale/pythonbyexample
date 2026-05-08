@@ -13,12 +13,17 @@ Score each example on a 10 point scale:
 7. **Source/result pairing (0-1.0)** — each important source fragment has nearby output that proves the semantic point, not merely that the code ran.
 8. **Concept decomposition (0-1.0)** — the example breaks the concept into meaningful parts instead of presenting one compressed trick.
 9. **Progressive walkthrough (0-0.75)** — each cell introduces one new idea, and the sequence builds toward the complete concept. Single-cell examples are acceptable only for intentionally atomic concepts.
-10. **Representative coverage (0-0.75)** — the code covers the forms promised by the title, summary, and prose, and the catalog has an explicit home for every common Python syntax form. Do not claim lists, dictionaries, and sets while showing only two of them; do not let syntax such as `break`, `continue`, `assert`, `nonlocal`, `yield from`, or `async for` exist only as untested assumptions.
+10. **Representative coverage (0-0.75)** — the code covers the forms promised by the title, summary, and prose, and the catalog has an explicit home for every common Python syntax form. Do not claim lists, dictionaries, and sets while showing only two of them; do not let syntax such as `break`, `continue`, `assert`, `nonlocal`, `yield from`, `async for`, or `:=` exist only as untested assumptions.
 11. **Practical usefulness (0-1.0)** — names, data, and outputs resemble simplified real code rather than toy placeholders; the example gives the feature a reason to exist.
+12. **Editorial progression (0-1.0)** — broad examples move through a deliberate sequence: motivation, smallest concrete form, model/protocol, common operations, boundary or edge case, and neighboring concepts. The page should feel like a guided exposition rather than a sample tray.
 
 Topic-specific gates:
 
 - **Text and strings** — examples must distinguish text from bytes, explain Unicode/code-point behavior when relevant, and show the boundary where encoding such as UTF-8 appears. A string page that only demonstrates ASCII operations is incomplete. When using non-English text to show that code points and bytes differ, include an English/ASCII baseline with the same kind of phrase so the contrast is visible rather than implied.
+- **Broad surface tours** — if a title names a broad surface area (`Testing`, `Packages`, `Regular Expressions`, `Type Hints`, `Async Await`, `Special Methods`, `Operators`, `Literals`), the page must either cover the reader's reasonable expectations or clearly frame itself as a first pass and link to focused neighbors. A broad title with one narrow demonstration is a scope bug, not just a content gap.
+- **Reduce without distorting** — small examples are good only when the necessary boundary, contrast, or edge case remains visible. If compression removes the part that makes the concept understandable, split the example or add another cell.
+- **Map-or-split rule** — broad pages must either be surface maps with explicit categories and `See also` links, or be split into narrower pages. Do not ship a broad page that merely samples unrelated forms.
+- **Runtime-boundary examples** — when standard Python code cannot run in Dynamic Workers, teach the standard form first, state the runtime constraint once, and avoid repeated apology or caveat-heavy prose.
 
 Release gates outside the score:
 
@@ -58,6 +63,13 @@ Flag these during review even when the code is correct:
 - The page does not connect the feature to a nearby alternative, such as `while` vs `for`, slice vs index, tuple vs list, text `str` vs binary `bytes`, or f-string expression vs display formatting.
 - An iteration example uses a lazy object but does not show when values are consumed.
 - An iteration example blurs eager containers with one-pass streams.
+- A broad title hides a narrow example: the page sounds like a tour of a surface area but demonstrates only one isolated technique.
+- A syntax form has a focused example but is missing from a natural umbrella page where learners would expect to see it.
+- The journey order follows implementation/catalog history instead of prerequisites: conditionals before booleans, closures before scope, networking before bytes, or process boundaries before environment boundaries.
+- Runtime constraints are repeated in the intro, code block, notes, and runner area until the limitation overwhelms the Python lesson.
+- The page has no editorial progression: examples are technically related but ordered like a checklist rather than a learning path.
+- The page reduces so aggressively that a necessary edge case or contrast disappears.
+- `See also` links behave like tags instead of prerequisite, neighbor, or next-depth graph edges.
 
 ## Strengthening checklist
 
@@ -74,3 +86,11 @@ Before publishing or substantially editing an example, ask:
 9. Does the data shape explain why this feature exists?
 10. What syntax form would disappear from the catalog if this page were removed, and is that covered somewhere else?
 11. For text examples, does the page make Unicode and encoding boundaries visible instead of assuming ASCII-only strings? If non-English text is used, is it compared with an English/ASCII baseline?
+12. If the title names a broad surface area, what would a learner reasonably expect to see, and is that expectation met or explicitly scoped down?
+13. Is any important syntax form covered only in a focused page even though an umbrella page should point to it?
+14. Does the journey sequence respect prerequisites rather than merely mirroring catalog order?
+15. If the page mentions a runtime limitation, is the constraint stated once without becoming the main story?
+16. Does the page reduce the concept without distorting it, or did compression remove an essential boundary?
+17. For broad pages, is this a map with categories and links, or should it be split?
+18. Do edge cases appear close enough to the main idea that readers understand the boundary?
+19. Do `See also` links express prerequisite, neighbor, or next-depth relationships rather than tags?
