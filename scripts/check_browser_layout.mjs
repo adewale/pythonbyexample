@@ -35,7 +35,7 @@ async function jsonGet(endpoint) {
   return response.json();
 }
 async function waitForChrome() {
-  for (let i = 0; i < 80; i++) {
+  for (let i = 0; i < 300; i++) {
     try { return await jsonGet('/json/version'); } catch { await sleep(100); }
   }
   throw new Error(`Chrome did not start. stderr:\n${stderr}`);
