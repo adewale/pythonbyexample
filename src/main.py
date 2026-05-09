@@ -10,7 +10,7 @@ from app import FAVICON_SVG, build_dynamic_worker_code, get_example, render_exam
 from asset_manifest import HTML_CACHE_VERSION
 from examples import PYTHON_VERSION
 
-import asgi
+import worker_asgi_bridge as asgi
 
 try:
     from js import Object, Request as JsRequest, caches

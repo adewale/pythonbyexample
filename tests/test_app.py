@@ -393,7 +393,7 @@ class AppTests(unittest.TestCase):
         main_source = (ROOT / "src" / "main.py").read_text()
         self.assertIn("from fastapi import FastAPI, Request", main_source)
         self.assertIn("app = FastAPI", main_source)
-        self.assertIn("import asgi", main_source)
+        self.assertIn("import worker_asgi_bridge as asgi", main_source)
         self.assertIn("return await asgi.fetch(app, request.js_object, self.env)", main_source)
         self.assertIn("caches.default.match", main_source)
         self.assertIn("caches.default.put", main_source)
