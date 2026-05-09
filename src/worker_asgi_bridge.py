@@ -1,3 +1,4 @@
+# ruff: noqa: F401,F821
 from __future__ import annotations
 
 import logging
