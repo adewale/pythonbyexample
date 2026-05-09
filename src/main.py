@@ -10,10 +10,8 @@ from app import FAVICON_SVG, build_dynamic_worker_code, get_example, render_exam
 from asset_manifest import HTML_CACHE_VERSION
 from examples import PYTHON_VERSION
 
-try:
-    import asgi as worker_asgi
-except ImportError:  # Allows editor tooling outside Workers, where the js module is unavailable.
-    worker_asgi = None
+if False:  # Ensure the Worker bundler includes the ASGI bridge without importing js during local tooling.
+    import asgi
 
 try:
     from js import Object, Request as JsRequest, caches
@@ -130,6 +128,8 @@ async def not_found(path: str, request: Request):
 
 class Default(WorkerEntrypoint):
     async def fetch(self, request):
+        import asgi
+
         global _CURRENT_WORKER_REQUEST
         _CURRENT_WORKER_REQUEST = request
 
@@ -141,13 +141,13 @@ class Default(WorkerEntrypoint):
                 cached = await caches.default.match(cache_key)
                 if cached:
                     return cached
-                response = await worker_asgi.fetch(app, request.js_object, self.env)
+                response = await asgi.fetch(app, request.js_object, self.env)
                 if getattr(response, "status", 200) == 200:
                     response.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=86400")
                     await caches.default.put(cache_key, response.clone())
                 return response
-            response = await worker_asgi.fetch(app, request.js_object, self.env)
+            response = await asgi.fetch(app, request.js_object, self.env)
             response.headers.set("Cache-Control", "no-store")
             return response
 
-        return await worker_asgi.fetch(app, request.js_object, self.env)
+        return await asgi.fetch(app, request.js_object, self.env)
