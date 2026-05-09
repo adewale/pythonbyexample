@@ -1,11 +1,11 @@
+from __future__ import annotations
+
 import logging
 from asyncio import Event, Future, Queue, create_task, ensure_future, sleep
 from collections.abc import Awaitable
 from contextlib import contextmanager
 from inspect import isawaitable
 from typing import Any
-
-import js
 
 from workers import Context, Request
 

@@ -10,8 +10,7 @@ from app import FAVICON_SVG, build_dynamic_worker_code, get_example, render_exam
 from asset_manifest import HTML_CACHE_VERSION
 from examples import PYTHON_VERSION
 
-if False:  # Ensure the Worker bundler includes the ASGI bridge without importing js during local tooling.
-    import asgi
+import asgi
 
 try:
     from js import Object, Request as JsRequest, caches
@@ -128,8 +127,6 @@ async def not_found(path: str, request: Request):
 
 class Default(WorkerEntrypoint):
     async def fetch(self, request):
-        import asgi
-
         global _CURRENT_WORKER_REQUEST
         _CURRENT_WORKER_REQUEST = request
 
