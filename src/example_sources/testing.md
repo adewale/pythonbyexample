@@ -4,6 +4,12 @@ title = "Testing"
 section = "Standard Library"
 summary = "Tests make expected behavior executable and repeatable."
 doc_path = "/library/unittest.html"
+scope_first_pass = true
+see_also = [
+  "assertions",
+  "exceptions",
+  "modules",
+]
 +++
 
 Tests turn expected behavior into code that can be run again. The useful unit is usually a small example of behavior with clear input, action, and assertion.

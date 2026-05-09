@@ -4,11 +4,13 @@ title = "Operators"
 section = "Basics"
 summary = "Operators combine, compare, and test values in expressions."
 doc_path = "/reference/expressions.html#operator-precedence"
+scope_first_pass = true
 see_also = [
   "numbers",
   "conditionals",
   "assignment-expressions",
   "operator-overloading",
+  "equality-and-identity",
 ]
 +++
 

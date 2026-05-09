@@ -1,4 +1,4 @@
-.PHONY: test embed-examples build check-generated fingerprint browser-layout-test seo-cache-lint verify-examples format-examples verify-python-version verify dev deploy lint
+.PHONY: test embed-examples build check-generated fingerprint browser-layout-test seo-cache-lint verify-examples check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported quality-checks format-examples verify-python-version verify dev deploy lint
 
 test:
 	python3 -m unittest discover -s tests -v
@@ -23,6 +23,20 @@ seo-cache-lint:
 verify-examples: build
 	scripts/verify_examples.py
 
+check-confusable-pairs:
+	scripts/check_confusable_pairs.py
+
+check-broad-surface-tours:
+	scripts/check_broad_surface_tours.py
+
+check-footgun-coverage:
+	scripts/check_footgun_coverage.py
+
+check-notes-supported:
+	scripts/check_notes_supported.py
+
+quality-checks: check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported
+
 format-examples:
 	scripts/format_examples.py
 
@@ -32,7 +46,7 @@ verify-python-version: build
 lint:
 	uv run ruff check src tests scripts
 
-verify: build test seo-cache-lint verify-examples browser-layout-test lint check-generated
+verify: build test seo-cache-lint verify-examples quality-checks browser-layout-test lint check-generated
 
 dev:
 	uv run pywrangler dev --port 9696

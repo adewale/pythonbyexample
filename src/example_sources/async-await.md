@@ -4,6 +4,12 @@ title = "Async Await"
 section = "Async"
 summary = "async def creates coroutines, and await pauses until awaitable work completes."
 doc_path = "/library/asyncio-task.html"
+scope_first_pass = true
+see_also = [
+  "async-iteration-and-context",
+  "functions",
+  "context-managers",
+]
 +++
 
 `async def` creates a coroutine function. Calling it creates a coroutine object; the body runs when an event loop awaits or schedules it.

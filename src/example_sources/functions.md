@@ -32,6 +32,24 @@ def log(message):
 
 result = log("saved")
 print(result)
+
+
+def append_broken(item, items=[]):
+    items.append(item)
+    return items
+
+print(append_broken("a"))
+print(append_broken("b"))
+
+
+def append_fixed(item, items=None):
+    if items is None:
+        items = []
+    items.append(item)
+    return items
+
+print(append_fixed("a"))
+print(append_fixed("b"))
 ```
 :::
 
@@ -84,8 +102,39 @@ None
 ```
 :::
 
+:::cell
+Mutable default arguments are evaluated once when the function is defined, not on each call. The same list is shared across calls, so successive calls see each other's mutations. Use `None` as the sentinel and create a fresh container inside the body.
+
+```python
+def append_broken(item, items=[]):
+    items.append(item)
+    return items
+
+print(append_broken("a"))
+print(append_broken("b"))
+
+
+def append_fixed(item, items=None):
+    if items is None:
+        items = []
+    items.append(item)
+    return items
+
+print(append_fixed("a"))
+print(append_fixed("b"))
+```
+
+```output
+['a']
+['a', 'b']
+['a']
+['b']
+```
+:::
+
 :::note
 - Use `return` for values the caller should receive.
 - Defaults keep common calls concise.
 - Keyword arguments make options readable at the call site.
+- Never use a mutable value as a default argument; use `None` and build the container inside the function body.
 :::

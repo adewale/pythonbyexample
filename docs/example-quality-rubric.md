@@ -70,6 +70,62 @@ Flag these during review even when the code is correct:
 - The page has no editorial progression: examples are technically related but ordered like a checklist rather than a learning path.
 - The page reduces so aggressively that a necessary edge case or contrast disappears.
 - `See also` links behave like tags instead of prerequisite, neighbor, or next-depth graph edges.
+- A claim in the `:::note` block is not demonstrated by a cell on the same page.
+- A confusable pair listed in the registry has only one side shown on its owning page.
+- A canonical Python footgun listed in the registry has no page that shows the broken case and the fix.
+- Pages whose titles differ only by a suffix or modifier (`iterators` vs `iterating-over-iterables`, `generators` vs `generator-expressions`) assert the relationship in prose without a cell that demonstrates it.
+
+## Confusable-pair index
+
+Each pair below names two or three concepts learners commonly confuse, and the single page that owns the contrast. The owning page must show both (or all) sides in cells, not merely mention them in prose. `scripts/check_confusable_pairs.py` enforces this.
+
+| Pair | Owning page |
+| --- | --- |
+| `__str__` / `__repr__` | `special-methods.md` |
+| `is` / `==` | `equality-and-identity.md` |
+| list / tuple | `tuples.md` |
+| `@classmethod` / `@staticmethod` / instance method | `classmethods-and-staticmethods.md` |
+| `isinstance()` / `type() ==` | `runtime-type-checks.md` |
+| generator / class iterator | `generators.md` |
+| iterator / iterable | `iterator-vs-iterable.md` |
+| mutable / immutable class attributes | `classes.md` |
+| eager / lazy production | `generators.md` |
+| `Protocol` / `ABC` | `abstract-base-classes.md` |
+| `dataclass` / `NamedTuple` / `TypedDict` | `structured-data-shapes.md` |
+| bound / unbound methods | `bound-and-unbound-methods.md` |
+| `yield` / `return` | `generators.md` |
+| shallow / deep copy | `copying-collections.md` |
+| sync / async functions | `async-await.md` |
+
+## Broad-surface checklists
+
+For each title that names a broad surface area, the page must touch every form below or scope itself down explicitly with a `see_also` link to a focused neighbor. `scripts/check_broad_surface_tours.py` enforces this.
+
+- **Special Methods** (`special-methods.md`): `__init__`, `__repr__`, `__str__`, `__eq__`, `__hash__`, `__lt__`, `__len__`, `__iter__`, `__contains__`, `__getitem__`, `__setitem__`, `__call__`, `__enter__`/`__exit__`, `__bool__`.
+- **Operators** (`operators.md`): arithmetic, comparison, identity (`is`), membership (`in`), boolean short-circuit (`and`/`or`), bitwise, walrus (`:=`).
+- **Type Hints** (`type-hints.md`): scalar annotations, container generics (`list[int]`), `|` unions, `Optional`, function signatures, `TypeAlias`, runtime visibility note.
+- **Testing** (`testing.md`): `unittest.TestCase`, `assertEqual`/`assertRaises`, fixtures or `setUp`, parametrized cases or sub-tests, discovery convention.
+- **Async Await** (`async-await.md`): `async def`, `await`, `asyncio.run`, `asyncio.gather`, `async for`, `async with`.
+- **Packages** (`packages.md`): package layout, `__init__.py`, relative vs absolute imports, `__all__`, namespace packages.
+- **Regular Expressions** (`regular-expressions.md`): `re.match`/`re.search`/`re.findall`, groups, named groups, `re.compile`, flags such as `re.IGNORECASE`/`re.MULTILINE`, substitution.
+- **Literals** (`literals.md`): integer (decimal/hex/binary/underscored), float, string (raw/bytes/f-string), boolean, `None`, container literals.
+
+## Footgun coverage
+
+Each canonical Python surprise below must have a page that demonstrates the broken case and the fix. `scripts/check_footgun_coverage.py` enforces this.
+
+| Footgun | Owning page |
+| --- | --- |
+| Mutable default class attribute (`items = []` on the class body) | `classes.md` |
+| Mutable default function argument (`def f(items=[])`) | `functions.md` |
+| Late-binding closure in a loop | `closures.md` |
+| Integer identity caching (`is` for small ints) | `equality-and-identity.md` |
+| Shallow vs deep copy on nested mutable structures | `copying-collections.md` |
+| Generator one-pass exhaustion | `generators.md` |
+| Dictionary mutation during iteration | `dicts.md` |
+| Floating-point equality | `numbers.md` |
+| `bool` as a subclass of `int` | `booleans.md` |
+| Bare `except` swallowing `KeyboardInterrupt` / `SystemExit` | `exceptions.md` |
 
 ## Strengthening checklist
 
@@ -94,3 +150,5 @@ Before publishing or substantially editing an example, ask:
 17. For broad pages, is this a map with categories and links, or should it be split?
 18. Do edge cases appear close enough to the main idea that readers understand the boundary?
 19. Do `See also` links express prerequisite, neighbor, or next-depth relationships rather than tags?
+20. Is every claim in the `:::note` block demonstrated by a cell on this page?
+21. If this page's title appears in the confusable-pair index or footgun registry, does the page show both sides (or both the broken and fixed forms)?

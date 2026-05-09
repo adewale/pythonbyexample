@@ -8,6 +8,8 @@ see_also = [
   "classes",
   "properties",
   "special-methods",
+  "classmethods-and-staticmethods",
+  "abstract-base-classes",
 ]
 +++
 

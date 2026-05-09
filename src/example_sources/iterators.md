@@ -4,6 +4,11 @@ title = "Iterators"
 section = "Iteration"
 summary = "iter and next expose the protocol behind for loops."
 doc_path = "/library/stdtypes.html#iterator-types"
+see_also = [
+  "iterating-over-iterables",
+  "iterator-vs-iterable",
+  "generators",
+]
 +++
 
 An iterable is an object that can produce values for a loop. An iterator is the object that remembers where that production currently is.

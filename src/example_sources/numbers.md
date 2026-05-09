@@ -18,6 +18,8 @@ Use rounding for display, not as a substitute for understanding floating-point a
 
 :::program
 ```python
+import math
+
 count = 10
 ratio = 0.25
 z = 2 + 3j
@@ -29,6 +31,8 @@ print(count % 4)
 print(2 ** 5)
 print(z.real, z.imag)
 print(0.1 + 0.2)
+print(0.1 + 0.2 == 0.3)
+print(math.isclose(0.1 + 0.2, 0.3))
 print(round(3.14159, 2))
 ```
 :::
@@ -82,15 +86,21 @@ print(z.real, z.imag)
 :::
 
 :::cell
-Floating-point values are approximate. Round for display when the exact binary representation is not the lesson.
+Floating-point values are approximate, so `==` between expected and computed floats is rarely the right test. Compare with `math.isclose` (or work in `decimal.Decimal`) when the question is "are these the same number to within tolerance".
 
 ```python
+import math
+
 print(0.1 + 0.2)
+print(0.1 + 0.2 == 0.3)
+print(math.isclose(0.1 + 0.2, 0.3))
 print(round(3.14159, 2))
 ```
 
 ```output
 0.30000000000000004
+False
+True
 3.14
 ```
 :::
@@ -99,5 +109,5 @@ print(round(3.14159, 2))
 - Python's `int` has arbitrary precision; it grows as large as memory allows.
 - Python's `float` is approximate double-precision floating point.
 - Use `/` for true division and `//` for floor division.
-- Use `decimal.Decimal` when decimal precision is the domain requirement, not just display polish.
+- Use `math.isclose` instead of `==` for floating-point comparison; reach for `decimal.Decimal` when exact decimal precision is the domain requirement.
 :::

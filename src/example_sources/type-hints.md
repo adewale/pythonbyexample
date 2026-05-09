@@ -4,6 +4,14 @@ title = "Type Hints"
 section = "Types"
 summary = "Annotations document expected types and power static analysis."
 doc_path = "/library/typing.html"
+scope_first_pass = true
+see_also = [
+  "union-and-optional-types",
+  "type-aliases",
+  "protocols",
+  "generics-and-typevar",
+  "runtime-type-checks",
+]
 +++
 
 Type hints are annotations that document expected shapes for values, parameters, and return results. They exist so tools and readers can understand API boundaries before the program runs.

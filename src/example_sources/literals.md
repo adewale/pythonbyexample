@@ -4,11 +4,14 @@ title = "Literals"
 section = "Basics"
 summary = "Literals write values directly in Python source code."
 doc_path = "/reference/lexical_analysis.html#literals"
+scope_first_pass = true
 see_also = [
   "values",
   "strings",
   "bytes-and-bytearray",
   "dicts",
+  "string-formatting",
+  "numbers",
 ]
 +++
 

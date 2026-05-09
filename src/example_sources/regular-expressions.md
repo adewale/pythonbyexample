@@ -4,6 +4,11 @@ title = "Regular Expressions"
 section = "Text"
 summary = "The re module searches and extracts text using regular expressions."
 doc_path = "/library/re.html"
+scope_first_pass = true
+see_also = [
+  "strings",
+  "string-formatting",
+]
 +++
 
 Regular expressions are a compact language for searching and extracting text patterns. Python's `re` module provides the standard interface.

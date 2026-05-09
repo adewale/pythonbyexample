@@ -25,6 +25,12 @@ print(scores.get("Guido", 0))
 
 for name, score in scores.items():
     print(f"{name}: {score}")
+
+inventory = {"apple": 0, "pear": 3, "plum": 0}
+for name in list(inventory.keys()):
+    if inventory[name] == 0:
+        del inventory[name]
+print(inventory)
 ```
 :::
 
@@ -73,8 +79,25 @@ Grace: 9
 ```
 :::
 
+:::cell
+Mutating a dictionary while iterating it raises `RuntimeError`. Snapshot the keys with `list(d.keys())` (or build a list of changes and apply them after the loop) so the iteration sees a stable view.
+
+```python
+inventory = {"apple": 0, "pear": 3, "plum": 0}
+for name in list(inventory.keys()):
+    if inventory[name] == 0:
+        del inventory[name]
+print(inventory)
+```
+
+```output
+{'pear': 3}
+```
+:::
+
 :::note
 - Dictionaries preserve insertion order in modern Python.
 - Use `get()` when a missing key has a reasonable default.
 - Use direct indexing when a missing key should be treated as an error.
+- Snapshot keys with `list(d.keys())` before deleting items in a loop; mutating during iteration raises `RuntimeError`.
 :::

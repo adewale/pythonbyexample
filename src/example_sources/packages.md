@@ -4,6 +4,12 @@ title = "Packages"
 section = "Modules"
 summary = "Packages organize modules into importable directories."
 doc_path = "/tutorial/modules.html#packages"
+scope_first_pass = true
+see_also = [
+  "modules",
+  "import-aliases",
+  "virtual-environments",
+]
 +++
 
 Packages are modules that can contain other modules. They let a project group related code behind dotted import paths such as `json.decoder` or `email.message`.

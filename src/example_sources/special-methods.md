@@ -4,6 +4,15 @@ title = "Special Methods"
 section = "Data Model"
 summary = "Special methods connect your objects to Python syntax and built-ins."
 doc_path = "/reference/datamodel.html#special-method-names"
+scope_first_pass = true
+see_also = [
+  "operator-overloading",
+  "attribute-access",
+  "callable-objects",
+  "container-protocols",
+  "context-managers",
+  "equality-and-identity",
+]
 +++
 
 Special methods, often called dunder methods, connect user-defined classes to Python syntax and built-ins such as len(), iter(), and repr().
@@ -27,10 +36,14 @@ class Bag:
     def __repr__(self):
         return f"Bag({self.items!r})"
 
+    def __str__(self):
+        return ", ".join(self.items)
+
 bag = Bag(["a", "b"])
 print(len(bag))
 print(list(bag))
 print(bag)
+print(repr(bag))
 ```
 :::
 
@@ -95,7 +108,7 @@ print(list(bag))
 :::
 
 :::cell
-Implement `__repr__` to give the object a useful developer-facing representation when it is printed or inspected.
+Implement `__repr__` to give the object a useful developer-facing representation when it is printed or inspected. With no `__str__` defined, `print()` falls back to `__repr__`.
 
 ```python
 class Bag:
@@ -120,7 +133,33 @@ Bag(['a', 'b'])
 ```
 :::
 
+:::cell
+Add `__str__` for an end-user representation. `print()` and `str()` prefer `__str__`; `repr()` and the REPL still use `__repr__`. Keep `__repr__` unambiguous for debugging and let `__str__` be the friendly form.
+
+```python
+class Bag:
+    def __init__(self, items):
+        self.items = list(items)
+
+    def __repr__(self):
+        return f"Bag({self.items!r})"
+
+    def __str__(self):
+        return ", ".join(self.items)
+
+bag = Bag(["a", "b"])
+print(bag)
+print(repr(bag))
+```
+
+```output
+a, b
+Bag(['a', 'b'])
+```
+:::
+
 :::note
 - Dunder methods are looked up by Python's data model protocols.
+- `__repr__` is the developer-facing form; `__str__` is the user-facing form. `print()` falls back to `__repr__` when `__str__` is missing.
 - Implement the smallest protocol that makes your object feel native.
 :::
