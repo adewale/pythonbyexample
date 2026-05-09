@@ -11,6 +11,11 @@ from asset_manifest import HTML_CACHE_VERSION
 from examples import PYTHON_VERSION
 
 try:
+    import asgi as worker_asgi
+except ImportError:  # Allows editor tooling outside Workers, where the js module is unavailable.
+    worker_asgi = None
+
+try:
     from js import Object, Request as JsRequest, caches
     from pyodide.ffi import create_once_callable, jsnull, to_js
 except ImportError:  # Allows editor tooling outside Workers.
@@ -125,8 +130,6 @@ async def not_found(path: str, request: Request):
 
 class Default(WorkerEntrypoint):
     async def fetch(self, request):
-        import asgi
-
         global _CURRENT_WORKER_REQUEST
         _CURRENT_WORKER_REQUEST = request
 
@@ -138,13 +141,13 @@ class Default(WorkerEntrypoint):
                 cached = await caches.default.match(cache_key)
                 if cached:
                     return cached
-                response = await asgi.fetch(app, request.js_object, self.env)
+                response = await worker_asgi.fetch(app, request.js_object, self.env)
                 if getattr(response, "status", 200) == 200:
                     response.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=86400")
                     await caches.default.put(cache_key, response.clone())
                 return response
-            response = await asgi.fetch(app, request.js_object, self.env)
+            response = await worker_asgi.fetch(app, request.js_object, self.env)
             response.headers.set("Cache-Control", "no-store")
             return response
 
-        return await asgi.fetch(app, request.js_object, self.env)
+        return await worker_asgi.fetch(app, request.js_object, self.env)
