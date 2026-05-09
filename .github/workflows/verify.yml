@@ -15,6 +15,8 @@ jobs:
           python-version: '3.13'
       - name: Install dependencies
         run: uv sync --all-groups
+      - name: Pin Wrangler for local Worker runtime
+        run: npm install --global wrangler@4.90.0
       - name: Start local Worker for browser checks
         run: |
           uv run --group workers pywrangler dev --port 9696 > /tmp/pythonbyexample-ci.log 2>&1 &
