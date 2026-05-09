@@ -86,13 +86,24 @@ try {
   await client.send('Page.enable');
   await client.send('Page.navigate', { url });
 
-  for (let i = 0; i < 100; i++) {
+  let pageReady = false;
+  for (let i = 0; i < 300; i++) {
     const ready = await client.send('Runtime.evaluate', {
-      expression: "document.readyState === 'complete' && !!document.querySelector('.lesson-step code')",
+      expression: `location.href === ${JSON.stringify(url)} && document.readyState === 'complete' && !!document.querySelector('.lesson-step code')`,
       returnByValue: true,
     });
-    if (ready.result.value) break;
+    if (ready.result.value) {
+      pageReady = true;
+      break;
+    }
     await sleep(100);
+  }
+  if (!pageReady) {
+    const debug = await client.send('Runtime.evaluate', {
+      expression: `({ href: location.href, readyState: document.readyState, title: document.title, text: document.body?.innerText?.slice(0, 500) })`,
+      returnByValue: true,
+    });
+    throw new Error(`Browser layout page did not become ready: ${JSON.stringify(debug.result.value)}`);
   }
 
   const result = await client.send('Runtime.evaluate', {
