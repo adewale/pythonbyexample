@@ -25,6 +25,14 @@ print(len(red))
 record = ("Ada", 10)
 name, score = record
 print(f"{name}: {score}")
+
+scores = [10, 9, 8]
+scores.append(7)
+print(scores)
+
+student = ("Ada", 2024, "math")
+name, year, subject = student
+print(name, year, subject)
 ```
 :::
 
@@ -71,8 +79,28 @@ Ada: 10
 ```
 :::
 
+:::cell
+Lists and tuples carry different intent. A list holds a variable number of similar items and grows with `append`; a tuple has a fixed shape where each position has its own meaning, and unpacking gives those positions names.
+
+```python
+scores = [10, 9, 8]
+scores.append(7)
+print(scores)
+
+student = ("Ada", 2024, "math")
+name, year, subject = student
+print(name, year, subject)
+```
+
+```output
+[10, 9, 8, 7]
+Ada 2024 math
+```
+:::
+
 :::note
 - Tuples are immutable sequences with fixed length.
 - Use tuples for small records where position has meaning.
 - Use lists for variable-length collections of similar items.
+- Reach for a dataclass or `NamedTuple` when fields deserve names everywhere they're used.
 :::

@@ -25,6 +25,37 @@ print(next(numbers))
 
 for value in countdown(3):
     print(value)
+
+def countdown_eager(n):
+    result = []
+    while n > 0:
+        result.append(n)
+        n -= 1
+    return result
+
+values = countdown_eager(3)
+print(values)
+print(values)
+
+stream = countdown(3)
+print(list(stream))
+print(list(stream))
+
+class Countdown:
+    def __init__(self, n):
+        self.n = n
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.n <= 0:
+            raise StopIteration
+        value = self.n
+        self.n -= 1
+        return value
+
+print(list(Countdown(3)))
 ```
 :::
 
@@ -63,9 +94,63 @@ for value in countdown(3):
 ```
 :::
 
+:::cell
+`return` builds the entire result before handing it back; `yield` produces values on demand. The list keeps its values for repeated use, while the generator is exhausted after one pass.
+
+```python
+def countdown_eager(n):
+    result = []
+    while n > 0:
+        result.append(n)
+        n -= 1
+    return result
+
+values = countdown_eager(3)
+print(values)
+print(values)
+
+stream = countdown(3)
+print(list(stream))
+print(list(stream))
+```
+
+```output
+[3, 2, 1]
+[3, 2, 1]
+[3, 2, 1]
+[]
+```
+:::
+
+:::cell
+Every generator is an iterator. The same countdown written by hand needs `__iter__` and `__next__` and an explicit `StopIteration`. The generator function expresses the same protocol with one `yield`.
+
+```python
+class Countdown:
+    def __init__(self, n):
+        self.n = n
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.n <= 0:
+            raise StopIteration
+        value = self.n
+        self.n -= 1
+        return value
+
+print(list(Countdown(3)))
+```
+
+```output
+[3, 2, 1]
+```
+:::
+
 :::note
-- Generator functions are a concise way to create custom iterators.
-- Values are produced on demand.
+- Generator functions are a concise way to create custom iterators; every generator is an iterator.
+- `yield` defers work and streams values; `return` produces the whole result up front.
 - A generator is consumed as you iterate over it.
 - Prefer a list when you need to reuse stored results; prefer a generator when values can be streamed once.
 :::
