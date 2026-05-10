@@ -979,6 +979,187 @@ def delete_name_erased(c: Canvas) -> None:
     c.cell(102, 60, "[1, 2, 3]", w=90, h=22, soft=True)
 
 
+# ─── Fourth coverage push: constraint-shaped examples ─────────────────
+
+
+def package_tree(c: Canvas) -> None:
+    """Packages · a directory with __init__.py becomes an importable package; submodules nest."""
+    c.frame(70, 0, 100, 22, label="mypackage")
+    c.mono(120, 14, "__init__.py")
+    c.stroke(120, 22, 40, 50)
+    c.stroke(120, 22, 120, 50)
+    c.stroke(120, 22, 200, 50)
+    c.cell(10, 50, "a.py", w=60, h=22)
+    c.cell(90, 50, "b.py", w=60, h=22)
+    c.cell(170, 50, "sub/", w=60, h=22, soft=True)
+
+
+def venv_boundary(c: Canvas) -> None:
+    """Virtual environments · a venv isolates a project's interpreter and packages from the system."""
+    c.frame(0, 0, 110, 70, label="project")
+    c.cell(12, 18, "code", w=84, h=20)
+    c.cell(12, 42, "requirements", w=84, h=20)
+    c.closed_arrow(110, 35, 142, 35, emphasis=True)
+    c.frame(144, 0, 130, 70, label="venv")
+    c.mono(209, 22, "python")
+    c.mono(209, 42, "site-packages")
+
+
+def subprocess_spawn(c: Canvas) -> None:
+    """Subprocesses · spawn a child process; capture stdout, stderr, and exit code as portable evidence."""
+    c.cell(0, 22, "parent", w=70, h=24)
+    c.closed_arrow(70, 34, 110, 34, emphasis=True)
+    c.label(90, 26, "spawn", anchor="middle")
+    c.cell(112, 22, "child process", w=110, h=24, soft=True)
+    c.closed_arrow(222, 34, 252, 34, emphasis=False)
+    c.cell(254, 22, "output", w=70, h=24)
+
+
+def logging_levels(c: Canvas) -> None:
+    """Logging · five levels; messages below the configured threshold are dropped."""
+    levels = [("CRITICAL", "50"), ("ERROR", "40"), ("WARNING", "30"), ("INFO", "20"), ("DEBUG", "10")]
+    for i, (name, num) in enumerate(levels):
+        c.cell(0, i * 22, name, w=120, h=20)
+        c.cell(122, i * 22, num, w=40, h=20, soft=True)
+
+
+def aaa_pattern(c: Canvas) -> None:
+    """Testing · arrange-act-assert: set up, run the behavior, compare the result."""
+    rows = [("arrange", "set up state"), ("act", "perform behavior"), ("assert", "compare result")]
+    for i, (label_text, body) in enumerate(rows):
+        c.cell(0, i * 24, label_text, w=80, h=22, soft=(i == 2))
+        c.closed_arrow(80, i * 24 + 11, 108, i * 24 + 11, emphasis=False)
+        c.cell(110, i * 24, body, w=140, h=22)
+
+
+def protocol_layers(c: Canvas) -> None:
+    """Networking · each layer in the stack hides the next; HTTP rests on TCP on IP on the link."""
+    layers = ["application · HTTP", "transport · TCP", "network · IP", "link"]
+    for i, name in enumerate(layers):
+        c.cell(0, i * 22, name, w=200, h=20)
+
+
+def gil_lanes(c: Canvas) -> None:
+    """Threads and processes · the GIL serialises Python bytecode across threads; processes run in parallel."""
+    c.lane(20, x0=0, x1=240, label="GIL")
+    c.lane(50, x0=0, x1=240, label="thread A")
+    c.lane(80, x0=0, x1=240, label="thread B")
+    c.cell(10, 44, "", w=30, h=12)
+    c.cell(70, 74, "", w=30, h=12)
+    c.cell(130, 44, "", w=30, h=12)
+    c.cell(190, 74, "", w=30, h=12)
+
+
+def cast_escape(c: Canvas) -> None:
+    """Casts and any · cast(T, x) tells the type checker to treat x as T; runtime is unaffected."""
+    c.cell(0, 22, "Any", w=70, h=24, ghost=True)
+    c.closed_arrow(70, 34, 110, 34, emphasis=True)
+    c.label(90, 26, "cast(T, x)", anchor="middle")
+    c.cell(112, 22, "T", w=70, h=24, soft=True)
+
+
+def newtype_phantom(c: Canvas) -> None:
+    """NewType · two static identities backed by the same runtime type."""
+    c.tag(0, 0, "runtime: int")
+    c.cell(0, 12, "42", w=60, h=24)
+    c.tag(0, 50, "static: UserId")
+    c.cell(0, 62, "UserId(42)", w=90, h=24, soft=True)
+
+
+def overload_signatures(c: Canvas) -> None:
+    """Overloads · @overload declares multiple signatures; one implementation routes to the right return type."""
+    c.tag(0, 0, "@overload")
+    c.cell(0, 12, "def f(x: int) -> str", w=180, h=20)
+    c.cell(0, 36, "def f(x: str) -> int", w=180, h=20)
+    c.closed_arrow(180, 32, 220, 32, emphasis=True)
+    c.cell(222, 22, "one impl", w=80, h=22, soft=True)
+
+
+def paramspec_preserve(c: Canvas) -> None:
+    """ParamSpec · the decorator preserves the wrapped function's full signature, parameter for parameter."""
+    c.cell(0, 22, "f(P)", w=50, h=24)
+    c.closed_arrow(50, 34, 80, 34, emphasis=True)
+    c.frame(82, 12, 100, 44, label="@dec")
+    c.mono(132, 36, "P preserved")
+    c.closed_arrow(182, 34, 212, 34, emphasis=True)
+    c.cell(214, 22, "wrapper(P)", w=80, h=24, soft=True)
+
+
+def literal_constrained(c: Canvas) -> None:
+    """Literal · the type narrows the slot to a fixed set of constant values."""
+    c.tag(0, 0, "Literal['red', 'green', 'blue']")
+    c.cell(0, 12, "x", w=40, h=24)
+    c.closed_arrow(40, 24, 70, 4, emphasis=False)
+    c.closed_arrow(40, 24, 70, 24, emphasis=False)
+    c.closed_arrow(40, 24, 70, 44, emphasis=False)
+    c.cell(72, 0, "'red'", w=70, h=20, soft=True)
+    c.cell(72, 22, "'green'", w=70, h=20, soft=True)
+    c.cell(72, 44, "'blue'", w=70, h=20, soft=True)
+
+
+def callable_type(c: Canvas) -> None:
+    """Callable types · the annotation captures the call shape: argument types and return type."""
+    c.tag(0, 0, "Callable[[int, str], bool]")
+    c.cell(0, 12, "(int, str)", w=100, h=22)
+    c.closed_arrow(100, 23, 130, 23, emphasis=False)
+    c.cell(132, 12, "bool", w=60, h=22)
+
+
+def isinstance_check(c: Canvas) -> None:
+    """Runtime type checks · isinstance asks the runtime; the answer is a bool, not a refinement."""
+    c.cell(0, 22, "isinstance(x, T)", w=140, h=24)
+    c.closed_arrow(140, 22, 170, 4, emphasis=True)
+    c.cell(172, 0, "True", w=60, h=20, soft=True)
+    c.closed_arrow(140, 46, 170, 56, emphasis=False)
+    c.cell(172, 50, "False", w=60, h=20)
+
+
+def collections_containers(c: Canvas) -> None:
+    """Collections module · four specialised containers for shapes the built-in types don't cover well."""
+    rows = [("deque", "fast appends both ends"), ("Counter", "key → count"), ("defaultdict", "missing key default"), ("namedtuple", "tuple with names")]
+    for i, (name, role) in enumerate(rows):
+        c.cell(0, i * 22, name, w=110, h=20)
+        c.cell(112, i * 22, role, w=170, h=20, soft=True)
+
+
+def typed_dict_shape(c: Canvas) -> None:
+    """Structured data shapes · TypedDict names each key's value type; the dict obeys the declared shape."""
+    c.frame(0, 0, 200, 86, label="User TypedDict")
+    rows = [("id", "int"), ("name", "str"), ("active", "bool")]
+    for i, (k, v) in enumerate(rows):
+        c.cell(14, 18 + i * 20, f"{k}: {v}", w=172, h=18)
+
+
+def csv_records(c: Canvas) -> None:
+    """CSV data · rows of records; each line has the same columns in the same order."""
+    c.tag(0, 0, "rows · records")
+    headers = ["id", "name", "score"]
+    rows = [["1", "Ada", "97"], ["2", "Bo", "88"], ["3", "Cy", "76"]]
+    for j, h in enumerate(headers):
+        c.cell(j * 70, 12, h, w=70, h=20, soft=True)
+    for i, r in enumerate(rows):
+        for j, v in enumerate(r):
+            c.cell(j * 70, 32 + i * 20, v, w=70, h=18)
+
+
+def warning_signal(c: Canvas) -> None:
+    """Warnings · a soft signal: the warning is reported, execution continues."""
+    c.cell(0, 22, "code path", w=90, h=24)
+    c.closed_arrow(90, 22, 120, 4, emphasis=False)
+    c.cell(122, 0, "DeprecationWarning", w=170, h=22, soft=True)
+    c.closed_arrow(90, 46, 120, 56, emphasis=True)
+    c.cell(122, 50, "execution continues", w=170, h=22)
+
+
+def object_lifecycle(c: Canvas) -> None:
+    """Object lifecycle · __init__ creates; the object lives while refcount > 0; __del__ finalises."""
+    c.cell(0, 22, "__init__", w=80, h=24)
+    c.closed_arrow(80, 34, 110, 34, emphasis=True)
+    c.cell(112, 22, "live · refcount > 0", w=140, h=24, soft=True)
+    c.closed_arrow(252, 34, 282, 34, emphasis=False)
+    c.cell(284, 22, "__del__", w=80, h=24)
+
+
 def lazy_stream(c: Canvas) -> None:
     """Iteration · Compose lazy value streams: filter and map flow values without materialising."""
     c.object_box(0, 26, "source", "[a,b,c]", w=78, h=24)
@@ -1086,6 +1267,26 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "custom-exception-chain": (custom_exception_chain, 220, 90),
     "exception-group-peel": (exception_group_peel, 240, 50),
     "delete-name-erased": (delete_name_erased, 200, 84),
+    # Fourth coverage push: 19 figures for constraint-shaped examples
+    "package-tree": (package_tree, 240, 76),
+    "venv-boundary": (venv_boundary, 274, 76),
+    "subprocess-spawn": (subprocess_spawn, 324, 60),
+    "logging-levels": (logging_levels, 164, 124),
+    "aaa-pattern": (aaa_pattern, 250, 80),
+    "protocol-layers": (protocol_layers, 200, 100),
+    "gil-lanes": (gil_lanes, 244, 100),
+    "cast-escape": (cast_escape, 184, 56),
+    "newtype-phantom": (newtype_phantom, 96, 92),
+    "overload-signatures": (overload_signatures, 304, 64),
+    "paramspec-preserve": (paramspec_preserve, 294, 60),
+    "literal-constrained": (literal_constrained, 144, 76),
+    "callable-type": (callable_type, 196, 40),
+    "isinstance-check": (isinstance_check, 232, 76),
+    "collections-containers": (collections_containers, 284, 92),
+    "typed-dict-shape": (typed_dict_shape, 200, 92),
+    "csv-records": (csv_records, 212, 96),
+    "warning-signal": (warning_signal, 292, 80),
+    "object-lifecycle": (object_lifecycle, 366, 60),
 }
 
 
@@ -1496,6 +1697,83 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
     "literals": [(
         "cell-0", "value-types",
         "Each literal form constructs an object of a specific type; the source spelling and the value type stay in sync.",
+    )],
+    # Fourth coverage push: constraint-shaped examples
+    "packages": [(
+        "cell-0", "package-tree",
+        "A directory with __init__.py becomes an importable package; submodules and subpackages nest beneath it.",
+    )],
+    "virtual-environments": [(
+        "cell-0", "venv-boundary",
+        "A venv carries its own interpreter and site-packages, isolating a project's dependencies from the system.",
+    )],
+    "subprocesses": [(
+        "cell-0", "subprocess-spawn",
+        "subprocess.run spawns a child process and captures its stdout, stderr, and exit code as portable evidence.",
+    )],
+    "logging": [(
+        "cell-0", "logging-levels",
+        "Five severity levels; the logger's configured threshold drops everything below it.",
+    )],
+    "testing": [(
+        "cell-0", "aaa-pattern",
+        "arrange-act-assert: set up the state, perform the behavior under test, compare the result to expectations.",
+    )],
+    "networking": [(
+        "cell-0", "protocol-layers",
+        "Network protocols stack: HTTP rests on TCP, which rests on IP, which rests on the link layer.",
+    )],
+    "threads-and-processes": [(
+        "cell-0", "gil-lanes",
+        "Threads share memory but the GIL serialises Python bytecode; processes run in parallel with isolated memory.",
+    )],
+    "casts-and-any": [(
+        "cell-0", "cast-escape",
+        "cast(T, x) tells the type checker to treat x as T; the runtime is unaffected.",
+    )],
+    "newtype": [(
+        "cell-0", "newtype-phantom",
+        "NewType creates a distinct static identity backed by the same runtime type — UserId is int with a name.",
+    )],
+    "overloads": [(
+        "cell-0", "overload-signatures",
+        "@overload declares multiple call signatures; one underlying implementation routes input shape to return type.",
+    )],
+    "paramspec": [(
+        "cell-0", "paramspec-preserve",
+        "ParamSpec preserves the wrapped function's signature through a decorator, parameter for parameter.",
+    )],
+    "literal-and-final": [(
+        "cell-0", "literal-constrained",
+        "Literal narrows a slot to a fixed set of constant values; Final says the binding will not change.",
+    )],
+    "callable-types": [(
+        "cell-0", "callable-type",
+        "Callable[[A, B], R] captures the call shape: a tuple of argument types and one return type.",
+    )],
+    "runtime-type-checks": [(
+        "cell-0", "isinstance-check",
+        "isinstance and issubclass ask the runtime; the answer is a bool, not a static type refinement.",
+    )],
+    "collections-module": [(
+        "cell-0", "collections-containers",
+        "Four specialised containers for shapes the built-in types don't cover well: deque, Counter, defaultdict, namedtuple.",
+    )],
+    "structured-data-shapes": [(
+        "cell-0", "typed-dict-shape",
+        "TypedDict names each key's value type; the dict obeys the declared shape at static-check time.",
+    )],
+    "csv-data": [(
+        "cell-0", "csv-records",
+        "CSV files are rows of records; each line has the same columns in the same order.",
+    )],
+    "warnings": [(
+        "cell-0", "warning-signal",
+        "A warning is a soft signal: the message is reported, but execution continues unless filters elevate it.",
+    )],
+    "object-lifecycle": [(
+        "cell-0", "object-lifecycle",
+        "__init__ constructs the object; it lives while at least one reference holds it; __del__ runs when refcount hits zero.",
     )],
 }
 
