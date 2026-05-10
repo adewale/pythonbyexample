@@ -484,33 +484,226 @@ def dict_buckets(c: Canvas) -> None:
 
 
 def workers_portable_evidence(c: Canvas) -> None:
-    """Workers · process boundaries unavailable; portable evidence (a value) crosses instead."""
-    c.frame(0, 8, 70, 30, ghost=True, label="process A")
-    c.frame(110, 8, 70, 30, ghost=True, label="process B")
-    c.dashed(74, 8, 106, 38)
-    c.dashed(74, 38, 106, 8)
-    c.tag(0, 60, "instead")
-    c.cell(0, 66, "value", w=60, h=22, soft=True)
-    c.closed_arrow(60, 77, 116, 77, emphasis=True)
-    c.cell(118, 66, "captured", w=62, h=22)
+    """Workers · the process API is unavailable; a captured value crosses instead."""
+    c.tag(0, 4, "unavailable")
+    c.cell(0, 12, "multiprocessing.Process()", w=180, h=22, ghost=True)
+    c.dashed(0, 24, 180, 24)
+    c.tag(0, 50, "portable evidence")
+    c.cell(0, 58, "value", w=60, h=22, soft=True)
+    c.closed_arrow(60, 69, 100, 69, emphasis=True)
+    c.cell(102, 58, "asserted in-process", w=120, h=22)
 
 
 def workers_protocol_local(c: Canvas) -> None:
-    """Workers · protocol shape, not real network: assert on the shape, not the socket."""
-    c.tag(0, 12, "request shape")
-    c.cell(0, 18, "GET /resource", w=140, h=22, soft=True)
-    c.closed_arrow(70, 44, 70, 60, emphasis=True)
-    c.tag(0, 80, "response shape")
-    c.cell(0, 86, "200 · { … }", w=140, h=22, soft=True)
+    """Workers · the protocol shape is the lesson; no real socket is opened."""
+    c.tag(0, 4, "request shape")
+    c.cell(0, 12, "GET /resource", w=140, h=22)
+    c.closed_arrow(70, 38, 70, 56, emphasis=True)
+    c.tag(0, 76, "response shape · asserted locally")
+    c.cell(0, 84, "200 OK · { … }", w=140, h=22)
 
 
 def workers_lesson_runtime(c: Canvas) -> None:
-    """Workers · lesson shape preserved while runtime constraints are respected."""
-    c.frame(0, 6, 70, 32, label="lesson")
-    c.mono(34, 26, "evidence")
-    c.frame(110, 6, 70, 32, label="runtime")
-    c.mono(144, 26, "respected")
-    c.closed_arrow(70, 22, 110, 22, emphasis=True)
+    """Workers · lesson and runtime meet at a boundary; evidence carries across."""
+    c.frame(0, 4, 80, 36, label="lesson")
+    c.mono(40, 26, "shape")
+    c.frame(120, 4, 80, 36, label="runtime")
+    c.mono(160, 26, "limits")
+    c.closed_arrow(80, 22, 120, 22, emphasis=True)
+    c.label(100, 22, "value", anchor="middle")
+
+
+# ─── Examples promoted from the gestalt: new paint code ──────────────
+
+
+def number_lines(c: Canvas) -> None:
+    """Numbers · int unbounded; float spacing widens at the extremes."""
+    c.tag(0, 8, "int · unbounded")
+    c.register(0, 22, 260, divisions=8)
+    c.tag(0, 50, "float · representable spacing widens")
+    c.register(0, 64, 260)
+    for x in (10, 30, 60, 100, 130, 140, 148, 160, 188, 230, 260):
+        c.tick(x, 64)
+    c.dot(140, 64, emphasis=True)
+
+
+def expression_tree(c: Canvas) -> None:
+    """Operators and Literals · expression `(2+3)*4` parsed as a tree."""
+    c.node(120, 12, "*", r=12)
+    c.node(80, 50, "+", r=12)
+    c.node(180, 50, "4", r=10)
+    c.node(56, 80, "2", r=10)
+    c.node(104, 80, "3", r=10)
+    c.connect(120, 12, 12, 80, 50, 12)
+    c.connect(120, 12, 12, 180, 50, 10)
+    c.connect(80, 50, 12, 56, 80, 10)
+    c.connect(80, 50, 12, 104, 80, 10)
+
+
+def none_singleton(c: Canvas) -> None:
+    """None · three names converging on the single None object."""
+    for i, n in enumerate("abc"):
+        c.name_box(0, i * 28, n)
+    for y in (12, 40, 68):
+        c.closed_arrow(60, y, 158, 40, emphasis=False)
+    c.object_box(160, 24, "NoneType", "None", w=80)
+
+
+def codepoints_bytes(c: Canvas) -> None:
+    """Strings · text is unicode; bytes are a separate encoding layer."""
+    c.tag(0, 8, "codepoints")
+    for i, ch in enumerate("café"):
+        c.cell(i * 40, 16, ch, w=40, h=28)
+    c.tag(0, 60, "utf-8 bytes")
+    widths = [40, 40, 40, 20, 20]
+    bytes_ = ["63", "61", "66", "c3", "a9"]
+    x = 0
+    for w, b in zip(widths, bytes_):
+        c.cell(x, 68, b, w=w, h=14)
+        x += w
+
+
+def sort_stability(c: Canvas) -> None:
+    """Sorting · stable sort preserves equal keys' original order."""
+    c.tag(0, 4, "input")
+    c.tag(180, 4, "stable sort by key")
+    inputs = ["2 · Ada", "1 · Bo", "2 · Eve", "1 · Cy"]
+    outputs = ["1 · Bo", "1 · Cy", "2 · Ada", "2 · Eve"]
+    for i, (a, b) in enumerate(zip(inputs, outputs)):
+        c.cell(0, 12 + i * 22, a, w=80, h=20)
+        c.cell(180, 12 + i * 22, b, w=80, h=20)
+    c.dashed(80, 44, 180, 22)
+    c.dashed(80, 88, 180, 44)
+    c.dashed(80, 22, 180, 66)
+    c.dashed(80, 66, 180, 88)
+
+
+def kw_only_separator(c: Canvas) -> None:
+    """Keyword-only arguments · `*` divides positional from keyword-only."""
+    c.mono(0, 18, "def f(a, b, *, c, d): …", anchor="start")
+    c.dashed(82, 22, 82, 38)
+    c.label(40, 50, "positional or kw", anchor="middle")
+    c.label(140, 50, "keyword only", anchor="middle")
+
+
+def positional_only_separator(c: Canvas) -> None:
+    """Positional-only parameters · `/` divides positional-only from positional-or-kw."""
+    c.mono(0, 18, "def f(a, b, /, c, d): …", anchor="start")
+    c.dashed(82, 22, 82, 38)
+    c.label(40, 50, "positional only", anchor="middle")
+    c.label(140, 50, "positional or kw", anchor="middle")
+
+
+def generator_ribbon(c: Canvas) -> None:
+    """Generators · execution paused between yields, resumed by next()."""
+    c.tag(0, 8, "paused between yields · resumed by next()")
+    c.ribbon(0, 16, 260, h=30, gates=[64, 136, 208], soft_segments=[(0, 64), (136, 208)])
+    c.mono(32, 36, "…")
+    c.mono(100, 36, "yield")
+    c.mono(172, 36, "…")
+    c.mono(244, 36, "yield")
+
+
+def truth_and_size(c: Canvas) -> None:
+    """Truth and size · bool(x) checks __bool__, then __len__, else True."""
+    c.cell(0, 22, "x", w=40, h=24)
+    c.closed_arrow(40, 34, 70, 34, emphasis=True)
+    c.cell(72, 0, "__bool__()", w=160, h=22)
+    c.cell(72, 22, "__len__() != 0", w=160, h=22, ghost=True)
+    c.cell(72, 44, "default: True", w=160, h=22, ghost=True)
+
+
+def descriptor_protocol(c: Canvas) -> None:
+    """Descriptors · attribute access routes to __get__/__set__/__delete__."""
+    c.cell(0, 22, "obj.attr", w=80, h=24)
+    c.closed_arrow(80, 34, 110, 34, emphasis=True)
+    c.frame(112, 0, 110, 70, label="descriptor")
+    c.mono(167, 22, "__get__")
+    c.mono(167, 38, "__set__")
+    c.mono(167, 54, "__delete__")
+
+
+def bound_unbound(c: Canvas) -> None:
+    """Bound vs unbound methods · instance.method binds self; Class.method does not."""
+    c.cell(0, 0, "obj.method", w=110, h=22)
+    c.closed_arrow(110, 11, 140, 11, emphasis=True)
+    c.cell(142, 0, "bound · self filled", w=130, h=22, soft=True)
+    c.cell(0, 32, "Class.method", w=110, h=22)
+    c.closed_arrow(110, 43, 140, 43, emphasis=False)
+    c.cell(142, 32, "function · self required", w=130, h=22)
+
+
+def method_kinds(c: Canvas) -> None:
+    """Method kinds · classmethod, staticmethod, instance — first-arg differs."""
+    rows = [
+        ("@classmethod", "Cls"),
+        ("@staticmethod", "(none)"),
+        ("instance", "self"),
+    ]
+    for i, (decorator, first_arg) in enumerate(rows):
+        y = i * 24
+        c.cell(0, y, decorator, w=110, h=22)
+        c.closed_arrow(110, y + 11, 140, y + 11, emphasis=False)
+        c.cell(142, y, f"first arg · {first_arg}", w=130, h=22, soft=True)
+
+
+def callable_objects(c: Canvas) -> None:
+    """Callable objects · `__call__` makes any object look like a function."""
+    c.frame(0, 4, 100, 36, label="object")
+    c.mono(50, 26, "__call__")
+    c.closed_arrow(100, 22, 138, 22, emphasis=True)
+    c.cell(140, 10, "obj(...)", w=80, h=24, soft=True)
+
+
+def attribute_lookup(c: Canvas) -> None:
+    """Attribute access · instance dict, then class dict, then __getattr__; first hit wins."""
+    c.cell(0, 22, "obj.x", w=70, h=24)
+    c.closed_arrow(70, 34, 100, 34, emphasis=True)
+    c.cell(102, 0, "instance __dict__", w=140, h=22)
+    c.cell(102, 22, "class __dict__", w=140, h=22)
+    c.cell(102, 44, "__getattr__", w=140, h=22, ghost=True)
+
+
+def guard_clauses(c: Canvas) -> None:
+    """Guard clauses · early returns first; main work runs only when guards fall through."""
+    c.cell(0, 0, "if not valid: return", w=180, h=22, soft=True)
+    c.cell(0, 24, "if missing: return None", w=180, h=22, soft=True)
+    c.cell(0, 48, "if special_case: return X", w=180, h=22, soft=True)
+    c.cell(0, 78, "main work …", w=180, h=22)
+    c.closed_arrow(190, 11, 220, 11, emphasis=False)
+    c.closed_arrow(190, 35, 220, 35, emphasis=False)
+    c.closed_arrow(190, 59, 220, 59, emphasis=False)
+    c.label(222, 38, "exit", anchor="start")
+
+
+def bytes_vs_bytearray(c: Canvas) -> None:
+    """Bytes vs bytearray · frozen sequence of integers vs mutable counterpart."""
+    c.tag(0, 4, "bytes — frozen")
+    c.cell(0, 12, "b'\\\\x63\\\\x61\\\\x66'", w=160, h=24)
+    c.tag(0, 50, "bytearray — mutable")
+    c.cell(0, 58, "bytearray(b'\\\\x63\\\\x61')", w=180, h=24)
+    c.closed_arrow(180, 70, 218, 70, emphasis=True)
+    c.label(222, 67, ".append(0x66)", anchor="start")
+
+
+def sentinel_iteration(c: Canvas) -> None:
+    """Sentinel iteration · `iter(callable, sentinel)` calls until the sentinel returns."""
+    c.cell(0, 22, "iter(read, '')", w=120, h=24)
+    c.closed_arrow(120, 34, 152, 34, emphasis=True)
+    c.cell(154, 0, "value", w=70, h=20)
+    c.cell(154, 22, "value", w=70, h=20)
+    c.cell(154, 44, "value", w=70, h=20)
+    c.cell(154, 66, "''", w=70, h=20, ghost=True)
+    c.label(228, 80, "sentinel · stop", anchor="start")
+
+
+def partial_functions(c: Canvas) -> None:
+    """Partial functions · `partial(f, 1)` pre-fills arguments, returning a thinner callable."""
+    c.cell(0, 12, "f(a, b, c)", w=100, h=24)
+    c.closed_arrow(100, 24, 130, 24, emphasis=True)
+    c.cell(132, 0, "partial(f, 1)", w=100, h=24)
+    c.closed_arrow(232, 24, 262, 24, emphasis=False)
+    c.cell(264, 12, "g(b, c)", w=70, h=24, soft=True)
 
 
 def lazy_stream(c: Canvas) -> None:
@@ -571,10 +764,29 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "comprehension-equivalence": (comprehension_equivalence, 280, 76),
     "list-append": (list_append, 220, 36),
     "dict-buckets": (dict_buckets, 270, 88),
-    # Workers journey (constraint-shaped sections; designs tentative)
-    "workers-portable-evidence": (workers_portable_evidence, 200, 96),
-    "workers-protocol-local": (workers_protocol_local, 144, 116),
-    "workers-lesson-runtime": (workers_lesson_runtime, 188, 50),
+    # Workers journey (constraint-shaped sections; tightened designs)
+    "workers-portable-evidence": (workers_portable_evidence, 222, 84),
+    "workers-protocol-local": (workers_protocol_local, 144, 110),
+    "workers-lesson-runtime": (workers_lesson_runtime, 200, 46),
+    # Newly designed paint code for examples that lacked a figure
+    "number-lines": (number_lines, 260, 78),
+    "expression-tree": (expression_tree, 220, 92),
+    "none-singleton": (none_singleton, 240, 84),
+    "codepoints-bytes": (codepoints_bytes, 200, 84),
+    "sort-stability": (sort_stability, 270, 100),
+    "kw-only-separator": (kw_only_separator, 200, 56),
+    "positional-only-separator": (positional_only_separator, 200, 56),
+    "generator-ribbon": (generator_ribbon, 260, 50),
+    "truth-and-size": (truth_and_size, 232, 70),
+    "descriptor-protocol": (descriptor_protocol, 222, 76),
+    "bound-unbound": (bound_unbound, 272, 56),
+    "method-kinds": (method_kinds, 272, 70),
+    "callable-objects": (callable_objects, 220, 44),
+    "attribute-lookup": (attribute_lookup, 242, 70),
+    "guard-clauses": (guard_clauses, 264, 104),
+    "bytes-vs-bytearray": (bytes_vs_bytearray, 308, 86),
+    "sentinel-iteration": (sentinel_iteration, 300, 92),
+    "partial-functions": (partial_functions, 334, 36),
 }
 
 
@@ -673,6 +885,157 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
             "`raise X from Y` sets `__cause__` (explicit); raising during except sets `__context__` (implicit).",
         ),
     ],
+    # Promoted from gestalt with newly-written paint code
+    "hello-world": [(
+        "cell-0", "program-output",
+        "Every Python program starts as source and produces text on standard output. The smallest mental model.",
+    )],
+    "numbers": [(
+        "cell-1", "number-lines",
+        "Ints have unbounded precision; floats use IEEE doubles whose representable values thin out near the extremes.",
+    )],
+    "operators": [(
+        "cell-0", "expression-tree",
+        "An expression like `(2 + 3) * 4` parses as a tree; operator precedence and parentheses determine its shape.",
+    )],
+    "none": [(
+        "cell-0", "none-singleton",
+        "`None` is a single object: every name that points at None points at the same object.",
+    )],
+    "equality-and-identity": [(
+        "cell-0", "identity-and-equality",
+        "Two names can share one object (`is` and `==` both true) or hold two equal-but-distinct objects (only `==` true).",
+    )],
+    "strings": [(
+        "cell-0", "codepoints-bytes",
+        "Strings are sequences of Unicode codepoints. UTF-8 encoding turns them into bytes; `é` takes two bytes, `c` takes one.",
+    )],
+    "for-loops": [(
+        "cell-1", "iterator-unroll",
+        "Each call to next() advances the caret one cell along the iterable — the same shape behind range(), strings, and any sequence.",
+    )],
+    "sorting": [(
+        "cell-1", "sort-stability",
+        "Python's sort is stable: items with equal keys keep their original order, so chained sorts compose predictably.",
+    )],
+    "keyword-only-arguments": [(
+        "cell-0", "kw-only-separator",
+        "A bare `*` divides positional or keyword arguments from keyword-only ones; callers must pass `c` and `d` by name.",
+    )],
+    "positional-only-parameters": [(
+        "cell-0", "positional-only-separator",
+        "A bare `/` divides positional-only arguments from positional-or-keyword ones; callers cannot name `a` or `b`.",
+    )],
+    "closures": [(
+        "cell-0", "closure-cell",
+        "The inner function keeps a reference into the outer scope's cell, so the captured factor survives the outer return.",
+    )],
+    "scope-global-nonlocal": [(
+        "cell-0", "scope-rings",
+        "Name lookup walks LEGB — local, enclosing, global, built-in — outward, returning the first binding it finds.",
+    )],
+    "generators": [(
+        "cell-0", "generator-ribbon",
+        "A generator's body is a timeline cut by yield gates: each next() advances to the next gate; locals survive the pause.",
+    )],
+    "type-hints": [(
+        "cell-0", "annotation-ghost",
+        "Annotations describe expected types for tools; the runtime accepts any object regardless.",
+    )],
+    "exceptions": [(
+        "cell-0", "exception-lanes",
+        "try, except, else, and finally as parallel lanes; a single coral path traces what actually runs.",
+    )],
+    "context-managers": [(
+        "cell-0", "context-bowtie",
+        "A context manager pairs setup with reliable cleanup; the raise path still routes through __exit__.",
+    )],
+    "async-await": [(
+        "cell-0", "async-swimlane",
+        "On await, the coroutine yields to the loop; the loop runs other work and resumes when the awaitable is ready.",
+    )],
+    "iterators": [(
+        "cell-0", "iter-protocol",
+        "iter() exposes the iterator behind for; next() pulls one value at a time until exhausted.",
+    )],
+    "slices": [(
+        "cell-0", "slice-ruler",
+        "Slice indices sit between cells; [:3] and [3:] partition the sequence at index 3, never overlapping or losing an item.",
+    )],
+    # Mappings of existing FIGURES to new examples added on main
+    "operator-overloading": [(
+        "cell-0", "operator-dispatch",
+        "Defining `__add__` on a class lets `+` dispatch into the class's own behavior.",
+    )],
+    "iterator-vs-iterable": [(
+        "cell-0", "iter-protocol",
+        "An iterable knows how to produce an iterator (via iter()); the iterator knows how to produce values (via next()).",
+    )],
+    "type-aliases": [(
+        "cell-0", "annotation-ghost",
+        "A type alias names a complex annotation once so call sites read as their domain meaning, not their type composition.",
+    )],
+    "typed-dicts": [(
+        "cell-0", "union-types",
+        "TypedDict gives each key a typed value, so `obj['x']` is checked against the declared shape.",
+    )],
+    "union-and-optional-types": [(
+        "cell-0", "union-types",
+        "`int | str | None` says one slot may hold any of three shapes — including expected absence.",
+    )],
+    "generics-and-typevar": [(
+        "cell-0", "generic-preservation",
+        "A generic preserves the input type through the call: the same T flows in and out of fn[T].",
+    )],
+    "abstract-base-classes": [(
+        "cell-0", "class-triangle",
+        "An ABC sits on the same triangle as concrete classes; subclasses inherit the abstract methods they must implement.",
+    )],
+    "copying-collections": [(
+        "cell-0", "aliasing-mutation",
+        "Without copy() two names share the same object; mutating through one is visible through the other.",
+    )],
+    # Newly designed figures for examples that previously had none
+    "truth-and-size": [(
+        "cell-0", "truth-and-size",
+        "bool(x) calls __bool__ first; if absent, __len__() != 0; if neither, defaults to True.",
+    )],
+    "descriptors": [(
+        "cell-0", "descriptor-protocol",
+        "Attribute access on an instance routes through the descriptor's __get__/__set__/__delete__ when the attribute is a descriptor.",
+    )],
+    "bound-and-unbound-methods": [(
+        "cell-0", "bound-unbound",
+        "Accessing a method via an instance binds self; accessing it via the class returns the underlying function.",
+    )],
+    "classmethods-and-staticmethods": [(
+        "cell-0", "method-kinds",
+        "Three method kinds, three first-argument conventions: classmethod gets the class, staticmethod gets nothing, instance gets self.",
+    )],
+    "callable-objects": [(
+        "cell-0", "callable-objects",
+        "Defining __call__ makes any object callable; functions are just one shape that satisfies this protocol.",
+    )],
+    "attribute-access": [(
+        "cell-0", "attribute-lookup",
+        "obj.x checks instance __dict__, then class __dict__, then __getattr__; the first hit wins.",
+    )],
+    "guard-clauses": [(
+        "cell-0", "guard-clauses",
+        "Early returns handle the exceptional cases first so the main work is the body of the function, not its tail.",
+    )],
+    "bytes-and-bytearray": [(
+        "cell-0", "bytes-vs-bytearray",
+        "bytes is a frozen sequence of integers; bytearray is the mutable counterpart with append/extend/etc.",
+    )],
+    "sentinel-iteration": [(
+        "cell-0", "sentinel-iteration",
+        "`iter(callable, sentinel)` calls the callable repeatedly, stopping when it returns the sentinel.",
+    )],
+    "partial-functions": [(
+        "cell-0", "partial-functions",
+        "`functools.partial(f, 1)` pre-fills `a=1`, returning a thinner callable `g(b, c)` that only needs the rest.",
+    )],
 }
 
 

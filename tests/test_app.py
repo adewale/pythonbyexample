@@ -40,7 +40,7 @@ class AppTests(unittest.TestCase):
         for example in list_examples():
             with self.subTest(slug=example["slug"]):
                 html = render_example_page(example)
-                self.assertIn('class="lesson-step lp-cell"', html)
+                self.assertIn('lesson-step lp-cell', html)
                 self.assertIn('class="cell-source"', html)
                 self.assertIn('class="cell-output"', html)
                 self.assertNotIn('<div class="cell-output"><p class="cell-label">Output</p><pre><code></code></pre></div>', html)
@@ -274,7 +274,7 @@ class AppTests(unittest.TestCase):
         self.assertIn('<textarea name="code"', html)
         self.assertNotIn('class="lesson-grid"', html)
         self.assertNotIn('class="lesson-copy"', html)
-        self.assertIn('class="lesson-step lp-cell"', html)
+        self.assertIn('lesson-step lp-cell', html)
         self.assertIn('class="cell-output"', html)
         self.assertIn('class="literate-program"', html)
         self.assertIn('Annotated code walkthrough', html)
