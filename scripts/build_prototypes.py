@@ -223,7 +223,7 @@ BANNER_CSS = """
     justify-items: center;
   }
   .cell-banner figure { margin: 0; padding: 0; max-width: 360px; }
-  .cell-banner svg { width: 100%; height: auto; display: block; }
+  .cell-banner svg { max-width: 100%; height: auto; display: block; }
   .cell-banner figcaption {
     margin-top: var(--space-2);
     color: var(--muted);
@@ -245,7 +245,7 @@ JOURNEY_STYLE = """
     .journey-section { grid-template-columns: minmax(0, 1.4fr) minmax(220px, 320px); align-items: start; }
   }
   .journey-figure { margin: 0; padding: 0; }
-  .journey-figure svg { width: 100%; height: auto; display: block; }
+  .journey-figure svg { max-width: 100%; height: auto; display: block; }
   .journey-figure figcaption { margin-top: var(--space-2); color: var(--muted); font-size: .85rem; font-style: italic; }
 """
 
@@ -420,7 +420,7 @@ JOURNEY_FIGURES_GESTALT_STYLE = """
     font-size: 1rem; font-weight: 600; letter-spacing: -0.005em;
     margin: 0 0 var(--space-2); color: var(--text);
   }
-  .section-grid svg { width: 100%; max-width: 320px; height: auto; display: block; }
+  .section-grid svg { max-width: min(100%, 320px); height: auto; display: block; }
   .section-grid figcaption {
     margin-top: var(--space-2); color: var(--muted);
     font-size: .9rem; font-style: italic; max-width: 44ch;

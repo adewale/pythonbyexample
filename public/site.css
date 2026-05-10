@@ -111,5 +111,5 @@
        prose|code 2-column grid unchanged. See docs/visual-explainer-spec.md. */
     .lp-cell.has-figure { grid-template-columns: 1fr; }
     .cell-figure { margin: 0; padding: 0; }
-    .cell-figure svg { width: 100%; max-width: 360px; height: auto; display: block; }
+    .cell-figure svg { max-width: min(100%, 360px); height: auto; display: block; }
     .cell-figure figcaption { margin-top: var(--space-2); color: var(--muted); font-size: .92rem; font-style: italic; max-width: 56ch; }

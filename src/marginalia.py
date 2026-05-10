@@ -247,7 +247,6 @@ def function_as_value(c: Canvas) -> None:
     c.mono(40, 44, "def f")
     c.closed_arrow(80, 40, 116, 40, emphasis=True)
     c.cell(118, 26, "g = fn", w=80, h=28, soft=True)
-    c.label(105, 76, "second name binds to the same function", anchor="middle")
 
 
 def class_with_state(c: Canvas) -> None:
@@ -264,11 +263,10 @@ def class_with_state(c: Canvas) -> None:
 
 def annotation_ghost(c: Canvas) -> None:
     """Types · Keep runtime and static separate: annotations describe; runtime accepts any object."""
-    c.mono(0, 50, "def f(x: int, y: str) -> bool: …", anchor="start")
-    c.dashed(54, 42, 76, 42)
-    c.dashed(102, 42, 124, 42)
-    c.dashed(150, 42, 192, 42)
-    c.label(96, 80, "annotations describe; runtime accepts any object", anchor="middle")
+    c.mono(0, 36, "def f(x: int, y: str) -> bool: …", anchor="start")
+    c.dashed(54, 28, 76, 28)
+    c.dashed(102, 28, 124, 28)
+    c.dashed(150, 28, 192, 28)
 
 
 def union_types(c: Canvas) -> None:
@@ -290,7 +288,6 @@ def generic_preservation(c: Canvas) -> None:
     c.frame(74, 26, 100, 36, label="fn[T]")
     c.closed_arrow(174, 44, 210, 44, emphasis=True)
     c.cell(212, 30, "T", w=36, h=28, soft=True)
-    c.label(124, 78, "the same T flows in and out", anchor="middle")
 
 
 # ─── Reliability journey ──────────────────────────────────────────────
@@ -311,7 +308,6 @@ def context_bowtie(c: Canvas) -> None:
     c.closed_arrow(164, 48, 206, 48, emphasis=False)
     c.node(220, 48, "out", r=14)
     c.dashed(122, 60, 210, 48)
-    c.label(170, 84, "raise still routes through __exit__", anchor="middle")
 
 
 def async_swimlane(c: Canvas) -> None:
@@ -340,7 +336,6 @@ def naming_decisions(c: Canvas) -> None:
     c.cell(112, 50, "value", w=78, h=22, soft=True)
     c.dashed(152, 16, 196, 16)
     c.cell(198, 4, "n > 10", w=72, h=22)
-    c.label(135, 90, "one expression: bind a name and use the value", anchor="middle")
 
 
 def early_exit(c: Canvas) -> None:
@@ -364,7 +359,6 @@ def lazy_stream(c: Canvas) -> None:
     c.object_box(198, 26, "map", "x*2", w=64, h=24)
     c.closed_arrow(262, 38, 294, 38, emphasis=True)
     c.label(278, 30, "next()", anchor="middle")
-    c.label(150, 70, "values flow lazily — nothing materialised", anchor="middle")
 
 
 # Registry: figure_name -> (paint_fn, viewbox_w, viewbox_h)
@@ -388,20 +382,20 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "text-data-boundary": (text_data_boundary, 172, 70),
     # Interfaces
     "function-signature": (function_signature, 188, 80),
-    "function-as-value": (function_as_value, 200, 92),
+    "function-as-value": (function_as_value, 200, 66),
     "class-with-state": (class_with_state, 152, 108),
     # Types
-    "annotation-ghost": (annotation_ghost, 220, 96),
+    "annotation-ghost": (annotation_ghost, 220, 52),
     "union-types": (union_types, 156, 80),
-    "generic-preservation": (generic_preservation, 250, 92),
+    "generic-preservation": (generic_preservation, 250, 70),
     # Reliability
     "exception-lanes": (exception_lanes, 320, 100),
-    "context-bowtie": (context_bowtie, 244, 96),
+    "context-bowtie": (context_bowtie, 244, 76),
     "async-swimlane": (async_swimlane, 280, 84),
     # Control flow + Iteration coverage gap (see audit)
-    "naming-decisions": (naming_decisions, 274, 110),
+    "naming-decisions": (naming_decisions, 274, 80),
     "early-exit": (early_exit, 144, 116),
-    "lazy-stream": (lazy_stream, 300, 84),
+    "lazy-stream": (lazy_stream, 300, 56),
 }
 
 

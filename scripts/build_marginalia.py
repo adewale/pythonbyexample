@@ -891,7 +891,7 @@ HEAD = """<!doctype html>
   }
   .card h3 { font-size: 15px; font-weight: 500; margin: 0; letter-spacing: -0.005em; }
   .card.journey h3 { font-style: italic; font-size: 17px; }
-  .card svg { margin-top: 8px; width: 100%; height: auto; overflow: visible; }
+  .card svg { margin-top: 8px; max-width: 100%; height: auto; overflow: visible; }
   .card .note {
     margin: 6px 0 0; font-style: italic; font-size: 12px; color: var(--ink-soft);
     max-width: 38ch;

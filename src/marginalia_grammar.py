@@ -312,8 +312,14 @@ class Canvas:
 
     # ── render ────────────────────────────────────────────────────────
     def to_svg(self) -> str:
+        # Emit explicit width/height so the SVG renders at intrinsic CSS-pixel
+        # size by default. CSS `max-width: 100%` then clamps the figure on
+        # narrow columns. Without these attributes, browsers stretch the SVG
+        # to fit width: 100% containers, magnifying text inside small
+        # viewBoxes (a 156-wide viewBox in a 320-wide column ran at 2x).
         return (
-            f'<svg viewBox="0 0 {self.w} {self.h}" xmlns="http://www.w3.org/2000/svg">'
+            f'<svg viewBox="0 0 {self.w} {self.h}" width="{self.w}" height="{self.h}" '
+            f'xmlns="http://www.w3.org/2000/svg">'
             + "".join(self.parts)
             + "</svg>"
         )
