@@ -18,6 +18,9 @@
   "limits": {
     "cpu_ms": 60000
   },
+  "observability": {
+    "enabled": true
+  },
   "assets": {
     "directory": "./public"
   },
