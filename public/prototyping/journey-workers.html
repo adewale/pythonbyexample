@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Journey · Workers · Prototype</title>
+<link rel="stylesheet" href="/site.css">
+<style>
+  .prototype-banner {
+    margin: 0 0 var(--space-4);
+    padding: var(--space-2) var(--space-3);
+    background: var(--accent-soft);
+    border: 1px dashed var(--hairline);
+    border-radius: .5rem;
+    color: var(--muted);
+    font-size: .85rem;
+  }
+  .prototype-banner strong { color: var(--text); font-weight: 600; }
+  .prototype-banner a { color: inherit; }
+
+  .journey-section { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
+  @media (min-width: 900px) {
+    .journey-section { grid-template-columns: minmax(0, 1.4fr) minmax(220px, 320px); align-items: start; }
+  }
+  .journey-figure { margin: 0; padding: 0; }
+  .journey-figure svg { width: 100%; height: auto; display: block; }
+  .journey-figure figcaption { margin-top: var(--space-2); color: var(--muted); font-size: .85rem; font-style: italic; }
+
+</style>
+</head>
+<body>
+<div class="prototype-banner"><strong>Prototype</strong> · Workers journey with one section-faithful figure per section. Each figure captures the conceptual shift the section introduces. · <a href="/prototyping/">all prototypes</a></div>
+
+<article class="example-shell journey-page">
+  <div class="example-top"><a class="text-link" href="/">← Home</a></div>
+  <section class="example-intro">
+    <p class="eyebrow">Journey</p>
+    <h1>Workers</h1>
+    <p class="meta">This journey explains the examples that were adapted so they can teach operating-system boundaries while still running inside Cloudflare Dynamic Workers.</p>
+  </section>
+  <section class="journey-section"><div><h2>Replace unavailable process boundaries with portable evidence.</h2><p class="meta">Dynamic Workers run Python in a constrained runtime, so examples cannot assume child processes, shell commands, or project-local virtual environments are available.</p><ul class="journey-list"><li><a class="text-link journey-item-title" href="/examples/virtual-environments">Virtual Environments</a><p class="meta">report stable environment facts instead of creating or depending on a local virtual environment</p></li><li><a class="text-link journey-item-title" href="/examples/subprocesses">Subprocesses</a><p class="meta">show the command and `CompletedProcess` result shape</p></li><li><a class="text-link journey-item-title" href="/examples/threads-and-processes">Threads and Processes</a><p class="meta">compare thread and process executor boundaries</p></li></ul></div></section><section class="journey-section"><div><h2>Keep network lessons local to the protocol boundary.</h2><p class="meta">Workers should not open arbitrary low-level sockets, so the networking example teaches addresses, protocol constants, and bytes without making an outbound connection.</p><ul class="journey-list"><li><a class="text-link journey-item-title" href="/examples/bytes-and-bytearray">Bytes and Bytearray</a><p class="meta">show the text-to-bytes boundary that networking and subprocess APIs usually require</p></li><li><a class="text-link journey-item-title" href="/examples/networking">Networking</a><p class="meta">make endpoint and byte-encoding boundaries visible without opening a socket</p></li><li><a class="text-link journey-item-title" href="/examples/async-await">Async Await</a><p class="meta">show the supported coroutine model for I/O-shaped work in this environment</p></li></ul></div></section><section class="journey-section"><div><h2>Preserve the lesson while respecting the runtime.</h2><p class="meta">The changed examples favor deterministic, editable evidence over fake demonstrations of unavailable operating-system features.</p><ul class="journey-list"><li><a class="text-link journey-item-title" href="/examples/logging">Logging</a><p class="meta">show operational output through a configurable Python API rather than shell output</p></li><li><a class="text-link journey-item-title" href="/examples/testing">Testing</a><p class="meta">capture test-runner output so the page remains deterministic</p></li><li><a class="text-link journey-item-title" href="/examples/context-managers">Context Managers</a><p class="meta">show cleanup boundaries that still apply when resources are represented abstractly</p></li></ul></div></section>
+</article>
+
+</body>
+</html>

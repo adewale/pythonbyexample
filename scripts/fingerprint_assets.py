@@ -41,6 +41,8 @@ def html_version(paths: dict[str, str]) -> str:
         ROOT / "src" / "examples.py",
         ROOT / "src" / "example_loader.py",
         ROOT / "src" / "example_sources_data.py",
+        ROOT / "src" / "marginalia.py",
+        ROOT / "src" / "marginalia_grammar.py",
         ROOT / "src" / "example_sources" / "manifest.toml",
         *sorted((ROOT / "src" / "example_sources").glob("*.md")),
         *sorted((ROOT / "src" / "templates").glob("*.html")),
@@ -67,7 +69,9 @@ def main() -> None:
         "/editor.*.js\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/favicon.svg\n"
-        "  Cache-Control: public, max-age=31536000, immutable\n"
+        "  Cache-Control: public, max-age=31536000, immutable\n\n"
+        "/prototyping/*\n"
+        "  Cache-Control: no-cache, must-revalidate\n"
     )
     for name, path in paths.items():
         print(f"{name}={path}")
