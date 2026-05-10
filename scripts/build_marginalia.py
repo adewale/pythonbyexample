@@ -774,6 +774,82 @@ def e_async_iteration(c: Canvas) -> None:
     c.mono(264, 50, "await yield")
 
 
+# Scores against docs/example-figure-rubric.md. Bands: 9.0+ ship-ready,
+# 8.0-8.9 ship after minor tightening, 7.0-7.9 redesign before promoting.
+SCORES: dict[str, tuple[float, str]] = {
+    "hello-world": (9.0, "program → output, smallest mechanism"),
+    "values": (8.0, "three typed boxes; static enumeration"),
+    "numbers": (9.0, "int register + float thinning"),
+    "booleans": (8.5, "2×2 truth table"),
+    "operators-and-literals": (9.0, "expression tree mechanism"),
+    "none": (9.0, "three names converging on one None"),
+    "variables": (9.5, "the canonical Python picture"),
+    "constants": (8.0, "name → value, convention only"),
+    "truthiness": (7.0, "row of falsy values; static"),
+    "equality-and-identity": (9.0, "shared vs separate, side-by-side"),
+    "mutability": (9.5, "three states; in production"),
+    "strings": (9.0, "codepoints + bytes registers"),
+    "string-formatting": (8.5, "format-spec railroad"),
+    "conditionals": (8.5, "branch fork"),
+    "assignment-expressions": (8.0, "walrus binding; abstract"),
+    "for-loops": (9.0, "4-row caret advance"),
+    "break-and-continue": (7.5, "two moves competing"),
+    "loop-else": (8.5, "fell-through gate"),
+    "iterating-over-iterables": (8.5, "iter ribbon"),
+    "iterators": (8.5, "three-state machine"),
+    "match-statements": (8.5, "dispatch ladder"),
+    "advanced-match-patterns": (7.5, "dense; four variants"),
+    "while-loops": (8.5, "cond + body + back-edge"),
+    "lists": (9.0, "cells with append"),
+    "tuples": (8.5, "closed shape"),
+    "unpacking": (9.0, "binding-line mechanism"),
+    "dicts": (9.0, "hash buckets with collision"),
+    "sets": (8.5, "bucket + x-in-s"),
+    "slices": (9.0, "ruler with bracket overlay"),
+    "comprehensions": (9.0, "equivalence stacked"),
+    "comprehension-patterns": (8.0, "pipeline"),
+    "sorting": (9.0, "stability ribbons"),
+    "functions": (8.0, "input → body → return"),
+    "keyword-only-arguments": (9.0, "signature with * separator"),
+    "positional-only-parameters": (9.0, "signature with /"),
+    "args-and-kwargs": (8.5, "extra-positionals/keywords regions"),
+    "multiple-return-values": (8.5, "tuple unpack"),
+    "closures": (9.0, "captured cell reference"),
+    "scope-global-nonlocal": (9.0, "LEGB rings"),
+    "recursion": (9.0, "stack with same name"),
+    "lambdas": (8.0, "lambda as expression"),
+    "generators": (9.0, "ribbon with yield gates"),
+    "yield-from": (8.5, "stitched ribbons"),
+    "generator-expressions": (8.5, "lazy pipeline"),
+    "itertools": (7.5, "three mini icons"),
+    "decorators": (9.0, "before/after rebinding"),
+    "classes": (9.0, "instance/class/type triangle"),
+    "inheritance-and-super": (9.0, "MRO chain with diamond ghost"),
+    "dataclasses": (9.0, "fields → generated init"),
+    "properties": (8.5, "Y-fork: fget vs __dict__"),
+    "special-methods": (9.0, "syntax → method dispatch"),
+    "metaclasses": (8.5, "extended triangle"),
+    "context-managers": (9.0, "enter / body / exit bowtie"),
+    "delete-statements": (8.5, "name erased; object survives"),
+    "exceptions": (9.0, "lanes with traced path"),
+    "assertions": (7.5, "pass/raise"),
+    "exception-chaining": (8.5, "cause vs context"),
+    "exception-groups": (8.5, "before/after peel"),
+    "modules": (8.5, "sys.path resolution"),
+    "import-aliases": (8.0, "alias → module binding"),
+    "type-hints": (9.0, "ghost annotations"),
+    "protocols": (8.5, "structural duck check"),
+    "enums": (8.0, "closed set"),
+    "regular-expressions": (8.5, "pattern ruler with anchors"),
+    "number-parsing": (7.5, "state machine fragment"),
+    "custom-exceptions": (8.5, "subclass chain"),
+    "json": (8.5, "two-column mapping"),
+    "datetime": (8.0, "timezone strip"),
+    "async-await": (9.0, "two-lane swimlane"),
+    "async-iteration-and-context": (8.5, "ribbon with await yields"),
+}
+
+
 EXAMPLES = [
     Card("hello-world", "Hello World", "Basics", 1, e_hello_world),
     Card("values", "Values", "Basics", 2, e_values, note="every value is an object with a type"),
@@ -847,6 +923,10 @@ EXAMPLES = [
     Card("async-iteration-and-context", "Async Iteration and Context", "Async", 70, e_async_iteration),
 ]
 
+for _card in EXAMPLES:
+    if _card.slug in SCORES:
+        _card.score, _card.score_note = SCORES[_card.slug]
+
 
 # ─── Page scaffold ─────────────────────────────────────────────────────
 
@@ -896,6 +976,13 @@ HEAD = """<!doctype html>
     margin: 6px 0 0; font-style: italic; font-size: 12px; color: var(--ink-soft);
     max-width: 38ch;
   }
+  .card .score {
+    margin: 6px 0 0; font-size: 11px; color: var(--ink-soft);
+    font-family: -apple-system, 'Source Sans Pro', sans-serif;
+  }
+  .card .score::before { content: "▍ "; opacity: 0.4; }
+  .card .score-high { color: var(--ink); }
+  .card .score-low::before { content: "▍ "; opacity: 0.6; color: #a2604c; }
 </style>
 </head>
 <body>

@@ -207,6 +207,36 @@ Edit `ATTACHMENTS` in `src/marginalia.py`. Add a paint function (composed
 from grammar primitives) and register it in `FIGURES`. Append a tuple of
 `(anchor, figure_name, caption)` to `ATTACHMENTS[slug]`. Done.
 
+## Pipeline invariants (root-cause rules)
+
+These rules exist because we hit, and fixed, both failure modes
+explicitly. Re-introducing either is a defect.
+
+1. **The SVG element renders at intrinsic CSS-pixel size.**
+   `Canvas.to_svg()` emits `width="W"` and `height="H"` matching the
+   `viewBox`. CSS that displays a figure must use `max-width: 100%`,
+   never `width: 100%`. With `width: 100%` a small viewBox is stretched
+   to fill the container, which doubles or triples the apparent text
+   size inside; with `max-width: 100%` the figure renders at its
+   designed size and only shrinks when the container is narrower.
+
+2. **A figure's diagrammatic content does not duplicate its figcaption.**
+   Where a figure is rendered with a `<figcaption>` (production cell
+   pages, prototype journey pages, the journey-figures gestalt) the
+   SVG must not contain an inline `<text>` that repeats the caption's
+   sentence. Captions are the canonical prose; the SVG is diagrammatic.
+   Functional labels inside the SVG (`stdout`, `iter()`, `next()`,
+   `await`, panel tags like `before` / `after`, type-signature
+   annotations like `x: int | str | None`) are diagrammatic — they
+   name a part of the figure, not the figure as a whole. A full
+   sentence describing the figure is prose and belongs in the
+   figcaption.
+
+   The `marginalia-gestalt` review page is an exception: cards there
+   have no figcaption, so inline prose can stand in as the only
+   explanation. Figures destined for promotion to the production
+   registry must drop their inline prose first.
+
 ## Files
 
 - `src/marginalia_grammar.py` — palette, tokens, words, phrases, metrics.

@@ -148,7 +148,9 @@ PROTOTYPES = [
     ("marginalia-gestalt.html", "Marginalia gestalt",
      "Every journey and example as a card, drawn from the shared grammar. Pure design review."),
     ("journey-figures-gestalt.html", "Journey-figures gestalt",
-     "All 18 journey section figures on one page, grouped by journey, for uniform rubric review."),
+     "All journey section figures on one page, grouped by journey, for uniform rubric review."),
+    ("production-figures-gestalt.html", "Production figures gestalt",
+     "Every figure currently registered in src/marginalia.py FIGURES, with a tag showing where it renders (example attachment, journey section, or unattached)."),
     ("operators-polish-comparison.html", "Operators alignment polish",
      "Side-by-side before/after for the tree-edge alignment fix; demonstrates Canvas.connect()."),
     ("layout-banner-single.html", "Layout · banner between cells",
@@ -292,6 +294,19 @@ JOURNEY_SECTION_FIGURES: dict[str, tuple[str, str]] = {
     "Compose lazy value streams.": (
         "lazy-stream",
         "Filters and maps compose without materialising intermediate lists; values flow through the pipeline only when next() pulls them.",
+    ),
+    # Workers — constraint-shaped sections; figures tentative.
+    "Replace unavailable process boundaries with portable evidence.": (
+        "workers-portable-evidence",
+        "Worker isolation breaks the usual cross-process pathways; the lesson preserves a captured value as portable evidence instead.",
+    ),
+    "Keep network lessons local to the protocol boundary.": (
+        "workers-protocol-local",
+        "Demonstrate the protocol shape (request and response) rather than calling out over the network.",
+    ),
+    "Preserve the lesson while respecting the runtime.": (
+        "workers-lesson-runtime",
+        "The lesson's evidence survives across the boundary that the worker runtime enforces.",
     ),
     # Shapes
     "Pick the container that matches the question.": (
@@ -486,6 +501,63 @@ def build_journey_figures_gestalt() -> None:
     )
 
 
+def build_production_figures_gestalt() -> None:
+    """One page showing exactly what is registered in src/marginalia.py FIGURES.
+
+    Distinct from marginalia-gestalt (which renders the design-only catalogue
+    in scripts/build_marginalia.py) and journey-figures-gestalt (which only
+    renders figures attached to journey sections). This page makes the
+    ship-vs-design gap visible: any figure shown here is wired through to
+    production attachments OR available for attachment.
+    """
+    from marginalia import ATTACHMENTS, FIGURES  # noqa: PLC0415
+
+    # Build a slug→figure_names index of attached figures so we can mark
+    # figures that already render somewhere on a real page.
+    attached_to_slug: dict[str, list[str]] = {}
+    for slug, attachments in ATTACHMENTS.items():
+        for _, fig_name, _ in attachments:
+            attached_to_slug.setdefault(fig_name, []).append(slug)
+    journey_section_figs = {n for n, _ in JOURNEY_SECTION_FIGURES.values()}
+
+    cards: list[str] = []
+    for name, (_, w, h) in FIGURES.items():
+        kind: list[str] = []
+        if name in attached_to_slug:
+            slugs = ", ".join(attached_to_slug[name])
+            kind.append(f"attached to /examples/{slugs}")
+        if name in journey_section_figs:
+            kind.append("attached to a journey section")
+        if not kind:
+            kind.append("registered, not yet attached")
+        kind_html = " · ".join(html.escape(k) for k in kind)
+        cards.append(
+            f"<figure>"
+            f'<h3>{html.escape(name)}</h3>'
+            f"{_render_svg(name)}"
+            f'<figcaption>{kind_html} · viewBox {w}×{h}</figcaption>'
+            f"</figure>"
+        )
+    body = f"""
+<article class="example-shell">
+  <section class="example-intro">
+    <p class="eyebrow">Production figure registry · {len(FIGURES)} figures</p>
+    <h1>Production figures gestalt</h1>
+    <p class="meta">Every figure currently registered in <code>src/marginalia.py</code> <code>FIGURES</code>. Each card names the figure, where it renders today (an example attachment, a journey section, or "not yet attached"), and the intrinsic viewBox dimensions. Use this page beside the example-figure rubric to triage which figures are shipping, which are journey-only, and which are sitting in the registry waiting for an example attachment.</p>
+  </section>
+  <div class="section-grid">{"".join(cards)}</div>
+</article>
+"""
+    (OUT_DIR / "production-figures-gestalt.html").write_text(
+        page(
+            "Production figures gestalt",
+            f"All {len(FIGURES)} figures currently registered in src/marginalia.py FIGURES; each card names where it renders.",
+            JOURNEY_FIGURES_GESTALT_STYLE,
+            body,
+        )
+    )
+
+
 def main() -> None:
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     build_index()
@@ -571,6 +643,7 @@ def main() -> None:
     ):
         build_journey(journey_slug)
     build_journey_figures_gestalt()
+    build_production_figures_gestalt()
     written = sorted(p.name for p in OUT_DIR.iterdir() if p.is_file() and p.suffix == ".html")
     print(f"wrote {len(written)} files to {OUT_DIR.relative_to(ROOT)}/:")
     for name in written:

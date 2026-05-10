@@ -350,6 +350,169 @@ def early_exit(c: Canvas) -> None:
 # ─── Iteration journey ────────────────────────────────────────────────
 
 
+# ─── Example figures (promoted from the gestalt) ──────────────────────
+
+
+def variables_bind(c: Canvas) -> None:
+    """Variables · names bind to objects: the canonical Python picture."""
+    c.bind(0, 6, "x", "int", "42", object_w=70, gap=20)
+
+
+def call_stack(c: Canvas) -> None:
+    """Recursion · stacked frames of the same function with different arguments."""
+    chain = [3, 2, 1, 0]
+    for i, n in enumerate(chain):
+        suffix = " ← base" if n == 0 else ""
+        c.cell(0, i * 22, f"factorial({n}){suffix}", w=180, h=20)
+    c.dashed(192, 90, 192, 18)
+    c.closed_arrow(192, 30, 192, 18, emphasis=True)
+
+
+def decorator_rebind(c: Canvas) -> None:
+    """Decorators · before: name binds to function. After @dec: name binds to wrapper."""
+    c.tag(0, 12, "before")
+    c.bind(0, 18, "f", "fn", "f₀", object_w=50, gap=20)
+    c.tag(0, 70, "after @dec")
+    c.name_box(0, 78, "f")
+    c.closed_arrow(60, 90, 96, 90, emphasis=True)
+    c.cell(98, 76, "wrapper", w=80, h=28)
+    c.object_box(186, 78, "", "f₀", w=44, h=24)
+    c.dashed(178, 90, 186, 90)
+
+
+def mro_chain(c: Canvas) -> None:
+    """Inheritance · diamond becomes a linear MRO via C3 linearization."""
+    # Diamond ghost above
+    c.frame(80, 0, 40, 22, ghost=True)
+    c.mono(100, 16, "A")
+    c.ghost(98, 22, 58, 42)
+    c.ghost(102, 22, 142, 42)
+    c.frame(40, 42, 40, 22, ghost=True)
+    c.mono(60, 58, "B")
+    c.frame(120, 42, 40, 22, ghost=True)
+    c.mono(140, 58, "C")
+    c.ghost(60, 64, 96, 80)
+    c.ghost(140, 64, 104, 80)
+    c.frame(80, 80, 40, 22, ghost=True)
+    c.mono(100, 96, "D")
+    # MRO chain below
+    c.tag(0, 118, "mro")
+    chain = [("D", 36), ("B", 36), ("C", 36), ("A", 36), ("object", 56)]
+    x = 0
+    for v, w in chain:
+        c.cell(x, 124, v, w=w, h=22)
+        x += w
+
+
+def dataclass_fields(c: Canvas) -> None:
+    """Dataclasses · fields declared once become __init__ parameters."""
+    c.tag(0, 12, "declaration")
+    fields = [("name", "str"), ("age", "int"), ("tags", "list")]
+    for i, (n, t) in enumerate(fields):
+        c.cell(0, 18 + i * 20, f"{n} : {t}", w=110, h=20)
+    c.closed_arrow(110, 48, 146, 48, emphasis=True)
+    c.object_box(148, 32, "", "__init__(name, age, tags)", w=128, h=32)
+
+
+def class_triangle(c: Canvas) -> None:
+    """Classes · instance → class → type — every Python value sits on this triangle."""
+    c.dot(20, 28)
+    c.label(20, 54, "instance", anchor="middle")
+    c.closed_arrow(26, 28, 86, 28, emphasis=False)
+    c.frame(88, 10, 60, 36, label="class")
+    c.mono(118, 32, "Class")
+    c.closed_arrow(148, 28, 208, 28, emphasis=False)
+    c.frame(210, 10, 60, 36, label="type")
+    c.mono(240, 32, "type")
+
+
+def exception_cause_context(c: Canvas) -> None:
+    """Exception chaining · explicit `__cause__` (raise from) vs implicit `__context__`."""
+    c.cell(0, 20, "ValueError", w=100, h=32)
+    c.closed_arrow(100, 28, 180, 28, emphasis=True)
+    c.label(140, 20, "__cause__", anchor="middle")
+    c.dashed(100, 44, 180, 44)
+    c.label(140, 62, "__context__", anchor="middle")
+    c.cell(182, 20, "RuntimeError", w=100, h=32)
+
+
+def unpacking_bind(c: Canvas) -> None:
+    """Unpacking · left-side names bind to right-side positions; *rest gathers the middle."""
+    items = ["1", "2", "3", "4", "5"]
+    for i, v in enumerate(items):
+        c.cell(i * 30, 0, v, w=30, h=22)
+    c.cell(0, 58, "a", w=30, h=22)
+    c.cell(30, 58, "*rest", w=90, h=22, ghost=True)
+    c.cell(120, 58, "b", w=30, h=22)
+    c.dashed(15, 22, 15, 58)
+    c.dashed(45, 22, 75, 58)
+    c.dashed(75, 22, 75, 58)
+    c.dashed(105, 22, 75, 58)
+    c.dashed(135, 22, 135, 58)
+
+
+def comprehension_equivalence(c: Canvas) -> None:
+    """Comprehensions · the comprehension above and the equivalent for-loop below."""
+    c.cell(0, 0, "[x*2 for x in xs if x > 0]", w=280, h=22, soft=True)
+    c.cell(0, 30, "out = []", w=280, h=14, ghost=True)
+    c.cell(0, 44, "for x in xs:", w=280, h=14, ghost=True)
+    c.cell(0, 58, "    if x > 0: out.append(x*2)", w=280, h=14, ghost=True)
+
+
+def list_append(c: Canvas) -> None:
+    """Lists · mutable sequence; `.append` extends the same list object."""
+    c.cells(0, 8, ["3", "1", "4"], w=24)
+    c.cell(72, 8, "+1", ghost=True)
+    c.closed_arrow(98, 20, 132, 20, emphasis=True)
+    c.label(136, 18, ".append", anchor="start")
+
+
+def dict_buckets(c: Canvas) -> None:
+    """Dictionaries · hashed buckets; collisions chain into a neighbouring slot."""
+    c.tag(0, 12, "hash → bucket")
+    rows = [("0", '"a" → 1'), ("1", '"b" → 2'), ("2", '"c" → 3')]
+    for i, (idx, body) in enumerate(rows):
+        y = 18 + i * 24
+        c.label(0, y + 16, idx, anchor="start")
+        c.cell(14, y, body, w=80, h=24)
+    c.closed_arrow(96, 54, 132, 54, emphasis=True)
+    c.cell(134, 42, '"d" → 4', w=80, h=24, soft=True)
+    c.label(218, 58, "collision", anchor="start")
+
+
+# ─── Workers journey (abstract sections; designs tentative) ──────────
+
+
+def workers_portable_evidence(c: Canvas) -> None:
+    """Workers · process boundaries unavailable; portable evidence (a value) crosses instead."""
+    c.frame(0, 8, 70, 30, ghost=True, label="process A")
+    c.frame(110, 8, 70, 30, ghost=True, label="process B")
+    c.dashed(74, 8, 106, 38)
+    c.dashed(74, 38, 106, 8)
+    c.tag(0, 60, "instead")
+    c.cell(0, 66, "value", w=60, h=22, soft=True)
+    c.closed_arrow(60, 77, 116, 77, emphasis=True)
+    c.cell(118, 66, "captured", w=62, h=22)
+
+
+def workers_protocol_local(c: Canvas) -> None:
+    """Workers · protocol shape, not real network: assert on the shape, not the socket."""
+    c.tag(0, 12, "request shape")
+    c.cell(0, 18, "GET /resource", w=140, h=22, soft=True)
+    c.closed_arrow(70, 44, 70, 60, emphasis=True)
+    c.tag(0, 80, "response shape")
+    c.cell(0, 86, "200 · { … }", w=140, h=22, soft=True)
+
+
+def workers_lesson_runtime(c: Canvas) -> None:
+    """Workers · lesson shape preserved while runtime constraints are respected."""
+    c.frame(0, 6, 70, 32, label="lesson")
+    c.mono(34, 26, "evidence")
+    c.frame(110, 6, 70, 32, label="runtime")
+    c.mono(144, 26, "respected")
+    c.closed_arrow(70, 22, 110, 22, emphasis=True)
+
+
 def lazy_stream(c: Canvas) -> None:
     """Iteration · Compose lazy value streams: filter and map flow values without materialising."""
     c.object_box(0, 26, "source", "[a,b,c]", w=78, h=24)
@@ -396,6 +559,22 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "naming-decisions": (naming_decisions, 274, 80),
     "early-exit": (early_exit, 144, 116),
     "lazy-stream": (lazy_stream, 300, 56),
+    # Promoted from the gestalt — wired to example pages via ATTACHMENTS
+    "variables-bind": (variables_bind, 180, 44),
+    "call-stack": (call_stack, 200, 100),
+    "decorator-rebind": (decorator_rebind, 232, 110),
+    "mro-chain": (mro_chain, 200, 152),
+    "dataclass-fields": (dataclass_fields, 280, 76),
+    "class-triangle": (class_triangle, 274, 60),
+    "exception-cause-context": (exception_cause_context, 282, 70),
+    "unpacking-bind": (unpacking_bind, 152, 80),
+    "comprehension-equivalence": (comprehension_equivalence, 280, 76),
+    "list-append": (list_append, 220, 36),
+    "dict-buckets": (dict_buckets, 270, 88),
+    # Workers journey (constraint-shaped sections; designs tentative)
+    "workers-portable-evidence": (workers_portable_evidence, 200, 96),
+    "workers-protocol-local": (workers_protocol_local, 144, 116),
+    "workers-lesson-runtime": (workers_lesson_runtime, 188, 50),
 }
 
 
@@ -408,6 +587,90 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
             "cell-0",
             "aliasing-mutation",
             "Two names share one mutable list — appending through one name changes the object visible through both.",
+        ),
+    ],
+    "variables": [
+        (
+            "cell-0",
+            "variables-bind",
+            "A name is a label that points at an object. Assignment binds the label; the object exists independently.",
+        ),
+    ],
+    "lists": [
+        (
+            "cell-0",
+            "list-append",
+            "Lists are mutable sequences. `.append` extends the same list object — no new list is created.",
+        ),
+    ],
+    "dicts": [
+        (
+            "cell-0",
+            "dict-buckets",
+            "Each key is hashed to a bucket; collisions chain into the next slot. Lookup is constant-time on average.",
+        ),
+    ],
+    "unpacking": [
+        (
+            "cell-0",
+            "unpacking-bind",
+            "Left-side names bind to right-side positions; `*rest` gathers the middle into a list.",
+        ),
+    ],
+    "comprehensions": [
+        (
+            "cell-0",
+            "comprehension-equivalence",
+            "A comprehension is a compact spelling of the equivalent for-loop with append, made into one expression.",
+        ),
+    ],
+    "classes": [
+        (
+            "cell-0",
+            "class-triangle",
+            "Every Python value sits on the instance → class → type triangle; the metaclass is the type of the class.",
+        ),
+    ],
+    "inheritance-and-super": [
+        (
+            "cell-0",
+            "mro-chain",
+            "Multiple inheritance forms a graph; C3 linearisation flattens it into the MRO Python uses for attribute lookup.",
+        ),
+    ],
+    "dataclasses": [
+        (
+            "cell-0",
+            "dataclass-fields",
+            "Field declarations become the generated __init__ signature: declaration is the constructor.",
+        ),
+    ],
+    "special-methods": [
+        (
+            "cell-0",
+            "operator-dispatch",
+            "Operators are method calls. `a + b` dispatches to `a.__add__(b)`; the data model exposes the syntax.",
+        ),
+    ],
+    "decorators": [
+        (
+            "cell-0",
+            "decorator-rebind",
+            "@dec rebinds the name to wrapper(f₀); the original function survives only in the wrapper's closure cell.",
+        ),
+    ],
+    "recursion": [
+        (
+            "cell-1",
+            "call-stack",
+            "Each call pushes a new frame with the same name and a smaller argument; the base case unwinds back up the stack.",
+        ),
+    ],
+    "exception-chaining": [
+        (
+            "cell-0",
+            "exception-cause-context",
+            "`raise X from Y` sets `__cause__` (explicit); raising during except sets `__context__` (implicit).",
         ),
     ],
 }

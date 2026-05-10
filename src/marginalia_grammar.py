@@ -336,6 +336,8 @@ class Card:
     width: int = 320
     height: int = 110
     is_journey: bool = False
+    score: float | None = None
+    score_note: str = ""
 
     def render_html(self) -> str:
         c = Canvas(w=self.width, h=self.height)
@@ -346,11 +348,21 @@ class Card:
         else:
             eyebrow = f"Journey · {self.order}"
         note_html = f'  <p class="note">{self.note}</p>\n' if self.note else ""
+        score_html = ""
+        if self.score is not None:
+            band = (
+                "score-high" if self.score >= 9.0
+                else "score-mid" if self.score >= 8.0
+                else "score-low"
+            )
+            note = f" · {self.score_note}" if self.score_note else ""
+            score_html = f'  <p class="score {band}">{self.score:.1f}{note}</p>\n'
         return (
             f'<div class="card{kind}">\n'
             f'  <p class="eyebrow">{eyebrow}</p>\n'
             f'  <h3>{self.title}</h3>\n'
             f"  {c.to_svg()}\n"
+            f"{score_html}"
             f"{note_html}"
             f"</div>"
         )
