@@ -706,6 +706,279 @@ def partial_functions(c: Canvas) -> None:
     c.cell(264, 12, "g(b, c)", w=70, h=24, soft=True)
 
 
+# ─── More example figures (third coverage push) ───────────────────────
+
+
+def args_kwargs(c: Canvas) -> None:
+    """Args and kwargs · *args gathers extra positionals; **kwargs gathers extra keywords."""
+    c.mono(0, 22, "def f(*args, **kwargs): …", anchor="start")
+    c.dashed(60, 26, 60, 44)
+    c.dashed(132, 26, 132, 44)
+    c.label(40, 56, "extra positionals → tuple", anchor="middle")
+    c.label(170, 56, "extra keywords → dict", anchor="middle")
+
+
+def multiple_return(c: Canvas) -> None:
+    """Multiple return values · the function returns a tuple; the caller unpacks it."""
+    c.cell(0, 0, "def f(): return a, b", w=180, h=24)
+    c.closed_arrow(90, 26, 90, 44, emphasis=True)
+    c.cell(58, 44, "(a, b)", w=64, h=22, soft=True)
+    c.closed_arrow(90, 68, 90, 86, emphasis=False)
+    c.cell(50, 86, "x, y", w=80, h=22)
+
+
+def lambda_expression(c: Canvas) -> None:
+    """Lambdas · a function as a value: parameters on the left, expression on the right."""
+    c.cell(0, 0, "lambda x: x + 1", w=170, h=28, soft=True)
+    c.dashed(40, 28, 40, 50)
+    c.dashed(120, 28, 120, 50)
+    c.label(40, 62, "params", anchor="middle")
+    c.label(120, 62, "expression", anchor="middle")
+
+
+def property_fork(c: Canvas) -> None:
+    """Properties · obj.x routes through fget/fset instead of touching __dict__."""
+    c.cell(0, 22, "obj.x", w=70, h=24)
+    c.closed_arrow(70, 22, 110, 4, emphasis=True)
+    c.cell(112, 0, "fget / fset", w=120, h=22, soft=True)
+    c.closed_arrow(70, 46, 110, 56, emphasis=False)
+    c.cell(112, 50, "__dict__", w=120, h=22, ghost=True)
+
+
+def metaclass_triangle(c: Canvas) -> None:
+    """Metaclasses · instance → class → metaclass; the metaclass is the type of the class."""
+    c.dot(20, 30)
+    c.label(20, 56, "instance", anchor="middle")
+    c.closed_arrow(26, 30, 86, 30, emphasis=False)
+    c.frame(88, 12, 60, 36, label="class")
+    c.mono(118, 34, "Class")
+    c.closed_arrow(148, 30, 218, 30, emphasis=False)
+    c.frame(220, 12, 80, 36, label="metaclass")
+    c.mono(260, 34, "type")
+
+
+def sys_path_resolution(c: Canvas) -> None:
+    """Modules · imports walk sys.path; the first hit wins."""
+    c.tag(0, 4, "sys.path")
+    paths = ["cwd", "site-packages", "stdlib", "…"]
+    for i, p in enumerate(paths):
+        c.cell(0, 14 + i * 20, p, w=120, h=20)
+    c.closed_arrow(120, 46, 156, 46, emphasis=True)
+    c.label(138, 38, "first hit", anchor="middle")
+    c.cell(158, 34, "mymod.py", w=100, h=24, soft=True)
+
+
+def import_alias(c: Canvas) -> None:
+    """Import aliases · `import x as y` makes y point at the same module object as x."""
+    c.mono(0, 8, "import numpy as np", anchor="start")
+    c.cell(0, 24, "np", w=40, h=22)
+    c.closed_arrow(40, 35, 80, 35, emphasis=True)
+    c.cell(82, 24, "numpy module", w=130, h=22, soft=True)
+
+
+def protocol_check(c: Canvas) -> None:
+    """Protocols · structural check; an object satisfies a protocol if it has the required methods."""
+    c.frame(0, 4, 100, 70, label="object")
+    c.mono(50, 20, "read()")
+    c.mono(50, 36, "write()")
+    c.mono(50, 52, "close()")
+    c.closed_arrow(100, 38, 138, 38, emphasis=True)
+    c.label(118, 30, "structural", anchor="middle")
+    c.frame(140, 4, 80, 70, label="protocol", ghost=True)
+    c.mono(180, 28, "read()")
+    c.mono(180, 46, "close()")
+
+
+def enum_members(c: Canvas) -> None:
+    """Enums · a fixed set of named symbolic values; no new members appear at runtime."""
+    c.frame(0, 0, 280, 60, label="Color · closed set", ghost=True)
+    members = ["RED", "GREEN", "BLUE", "no more"]
+    for i, m in enumerate(members):
+        c.cell(20 + i * 60, 16, m, w=50, h=28)
+
+
+def datetime_instant(c: Canvas) -> None:
+    """Datetime · one instant; the offset names which clock face you're reading."""
+    c.register(10, 40, 260, divisions=8)
+    c.dashed(150, 30, 150, 50)
+    c.label(150, 24, "one instant", anchor="middle")
+    c.node(90, 70, "−5h", r=12)
+    c.dashed(90, 58, 150, 50)
+    c.node(210, 70, "+0h", r=12)
+    c.dashed(210, 58, 150, 50)
+
+
+def json_python_mapping(c: Canvas) -> None:
+    """JSON ↔ Python · six type pairs map across the text boundary."""
+    c.hairline(120, 0, 120, 110)
+    c.tag(60, 4, "json", anchor="middle")
+    c.tag(180, 4, "python", anchor="middle")
+    rows = [
+        ("object", "dict"),
+        ("array", "list"),
+        ("string", "str"),
+        ("number", "int / float"),
+        ("true / false", "True / False"),
+        ("null", "None"),
+    ]
+    for i, (a, b) in enumerate(rows):
+        y = 24 + i * 14
+        c.mono(0, y, a, anchor="start", size=10)
+        c.mono(132, y, b, anchor="start", size=10)
+
+
+def regex_anchors(c: Canvas) -> None:
+    """Regular expressions · anchors and quantifiers shape what the pattern matches."""
+    c.tag(0, 4, "pattern")
+    c.mono(0, 24, "^\\d{2}-\\d{2}$", anchor="start")
+    c.tag(0, 56, "input")
+    c.cell(0, 64, "", w=200, h=20)
+    c.cell(40, 64, "12-34", w=120, h=20, soft=True)
+
+
+def number_parse(c: Canvas) -> None:
+    """Number parsing · text → typed number, raising on bad input."""
+    c.cell(0, 22, '"42"', w=70, h=24)
+    c.closed_arrow(70, 34, 102, 34, emphasis=True)
+    c.label(86, 26, "int()", anchor="middle")
+    c.cell(104, 10, "42", w=60, h=22, soft=True)
+    c.cell(104, 36, "ValueError", w=100, h=22, ghost=True)
+
+
+def format_spec(c: Canvas) -> None:
+    """String formatting · the format spec is a railroad of named optional fields."""
+    c.tag(0, 4, "format spec")
+    stations = [("align", 36), ("sign", 30), ("width", 40), (",", 22), (".prec", 44), ("type", 32)]
+    x = 0
+    for label_text, w in stations:
+        c.cell(x, 16, label_text, w=w, h=18)
+        x += w + 2
+    c.label(0, 54, "{:>6,.2f}")
+
+
+def truthy_check(c: Canvas) -> None:
+    """Truthiness · bool(x) is True except for a small fixed set of falsy values."""
+    c.cell(0, 0, "x", w=40, h=24)
+    c.closed_arrow(40, 12, 70, 12, emphasis=True)
+    c.label(55, 6, "bool", anchor="middle")
+    c.cell(72, 0, "True or False", w=130, h=24)
+    c.tag(0, 38, "falsy values")
+    falsy = [("0", 22), ("0.0", 30), ('""', 26), ("[]", 22), ("{}", 22), ("None", 40), ("False", 40)]
+    x = 0
+    for label_text, w in falsy:
+        c.cell(x, 46, label_text, w=w, h=20)
+        x += w + 2
+
+
+def boolean_truth_table(c: Canvas) -> None:
+    """Booleans · `a and b` is True only when both are True; otherwise False."""
+    c.tag(64, 0, "a and b", anchor="middle")
+    c.label(80, 16, "T", anchor="middle")
+    c.label(112, 16, "F", anchor="middle")
+    c.label(58, 36, "T", anchor="end")
+    c.label(58, 56, "F", anchor="end")
+    c.cell(64, 22, "T", w=32, h=20, soft=True)
+    c.cell(96, 22, "F", w=32, h=20)
+    c.cell(64, 42, "F", w=32, h=20)
+    c.cell(96, 42, "F", w=32, h=20)
+
+
+def set_buckets(c: Canvas) -> None:
+    """Sets · hash buckets with no values; membership is O(1)."""
+    c.tag(0, 4, "keys only")
+    for i, k in enumerate("abc"):
+        c.cell(0, 14 + i * 22, k, w=50, h=20)
+    c.closed_arrow(50, 36, 90, 36, emphasis=True)
+    c.label(70, 28, "x in s", anchor="middle")
+    c.cell(92, 24, "O(1)", w=60, h=22, soft=True)
+
+
+def tuple_frozen(c: Canvas) -> None:
+    """Tuples · ordered, immutable sequence; positions matter, contents do not change."""
+    c.tag(0, 0, "immutable sequence")
+    c.cell(0, 12, "(3, 1, 4, 1)", w=180, h=26)
+    c.dashed(45, 8, 45, 42)
+    c.dashed(90, 8, 90, 42)
+    c.dashed(135, 8, 135, 42)
+
+
+def value_types(c: Canvas) -> None:
+    """Values · every literal is a typed object: int, str, list, dict each carry their behaviour."""
+    rows = [("int", "42"), ("str", '"hi"'), ("list", "[1,2,3]"), ("dict", "{k:v}")]
+    for i, (t, v) in enumerate(rows):
+        y = i * 28
+        c.object_box(0, y, t, v, w=160, h=24)
+
+
+def yield_delegation(c: Canvas) -> None:
+    """Yield from · delegate iteration to an inner generator; its yields surface here."""
+    c.tag(0, 4, "outer")
+    c.ribbon(0, 14, 240, h=20, gates=[100, 180])
+    c.mono(140, 28, "yield from inner")
+    c.tag(100, 46, "inner")
+    c.ribbon(100, 56, 80, h=24, gates=[124, 152])
+    c.dashed(140, 56, 140, 34)
+
+
+def itertools_chain(c: Canvas) -> None:
+    """Itertools · chain joins two iterables into one stream without materialising either."""
+    c.object_box(0, 0, "iter A", "1 · 2", w=70, h=24)
+    c.object_box(0, 32, "iter B", "3 · 4", w=70, h=24)
+    c.closed_arrow(70, 12, 100, 22, emphasis=False)
+    c.closed_arrow(70, 44, 100, 34, emphasis=False)
+    c.object_box(102, 16, "chain", "1 · 2 · 3 · 4", w=140, h=28)
+
+
+def assertion_check(c: Canvas) -> None:
+    """Assertions · assert tests a condition; True passes, False raises AssertionError."""
+    c.cell(0, 22, "assert cond", w=110, h=24)
+    c.closed_arrow(110, 22, 140, 0, emphasis=True)
+    c.cell(142, 0, "True · pass", w=120, h=20, soft=True)
+    c.closed_arrow(110, 46, 140, 56, emphasis=False)
+    c.cell(142, 50, "False · AssertionError", w=160, h=20)
+
+
+def custom_exception_chain(c: Canvas) -> None:
+    """Custom exceptions · subclass an existing exception; gain a domain name without changing semantics."""
+    chain = ["BaseException", "Exception", "ValueError", "MyDomainError"]
+    for i, name in enumerate(chain):
+        emph = i == len(chain) - 1
+        c.cell(0, i * 24, name, w=220, h=22, soft=emph)
+
+
+def exception_group_peel(c: Canvas) -> None:
+    """Exception groups · except* peels matching leaves; survivors regroup."""
+    c.tag(0, 0, "before")
+    c.dot(40, 14)
+    for x in (20, 36, 52, 68):
+        c.ghost(40, 18, x, 40)
+    c.dot(20, 44)
+    c.dot(36, 44, emphasis=True)
+    c.dot(52, 44)
+    c.dot(68, 44, emphasis=True)
+    c.closed_arrow(90, 30, 140, 30, emphasis=True)
+    c.label(115, 22, "except*", anchor="middle")
+    c.tag(160, 0, "after")
+    c.dot(200, 14)
+    c.ghost(200, 18, 180, 40)
+    c.ghost(200, 18, 220, 40)
+    c.dot(180, 44)
+    c.dot(220, 44)
+
+
+def delete_name_erased(c: Canvas) -> None:
+    """Delete statements · `del x` removes the name; the object survives if any other name holds it."""
+    c.tag(0, 0, "before")
+    c.name_box(0, 12, "x")
+    c.closed_arrow(60, 23, 100, 23, emphasis=False)
+    c.cell(102, 12, "[1, 2, 3]", w=90, h=22, soft=True)
+    c.tag(0, 52, "after del x")
+    c.name_box(0, 60, "x")
+    c.dashed(0, 70, 60, 70)
+    c.dashed(60, 60, 0, 80)
+    c.cell(102, 60, "[1, 2, 3]", w=90, h=22, soft=True)
+
+
 def lazy_stream(c: Canvas) -> None:
     """Iteration · Compose lazy value streams: filter and map flow values without materialising."""
     c.object_box(0, 26, "source", "[a,b,c]", w=78, h=24)
@@ -787,6 +1060,32 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "bytes-vs-bytearray": (bytes_vs_bytearray, 308, 86),
     "sentinel-iteration": (sentinel_iteration, 300, 92),
     "partial-functions": (partial_functions, 334, 36),
+    # Third coverage push: 24 more figures
+    "args-kwargs": (args_kwargs, 240, 68),
+    "multiple-return": (multiple_return, 180, 110),
+    "lambda-expression": (lambda_expression, 170, 76),
+    "property-fork": (property_fork, 232, 72),
+    "metaclass-triangle": (metaclass_triangle, 300, 60),
+    "sys-path-resolution": (sys_path_resolution, 258, 100),
+    "import-alias": (import_alias, 212, 56),
+    "protocol-check": (protocol_check, 220, 78),
+    "enum-members": (enum_members, 280, 60),
+    "datetime-instant": (datetime_instant, 280, 88),
+    "json-python-mapping": (json_python_mapping, 220, 116),
+    "regex-anchors": (regex_anchors, 200, 92),
+    "number-parse": (number_parse, 204, 64),
+    "format-spec": (format_spec, 220, 64),
+    "truthy-check": (truthy_check, 240, 70),
+    "boolean-truth-table": (boolean_truth_table, 132, 64),
+    "set-buckets": (set_buckets, 156, 90),
+    "tuple-frozen": (tuple_frozen, 180, 48),
+    "value-types": (value_types, 160, 100),
+    "yield-delegation": (yield_delegation, 240, 84),
+    "itertools-chain": (itertools_chain, 246, 60),
+    "assertion-check": (assertion_check, 304, 76),
+    "custom-exception-chain": (custom_exception_chain, 220, 90),
+    "exception-group-peel": (exception_group_peel, 240, 50),
+    "delete-name-erased": (delete_name_erased, 200, 84),
 }
 
 
@@ -1035,6 +1334,168 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
     "partial-functions": [(
         "cell-0", "partial-functions",
         "`functools.partial(f, 1)` pre-fills `a=1`, returning a thinner callable `g(b, c)` that only needs the rest.",
+    )],
+    # Third coverage push: 24 more attachments — newly designed figures and journey-figure reuse
+    "args-and-kwargs": [(
+        "cell-0", "args-kwargs",
+        "*args captures the extra positionals as a tuple; **kwargs captures the extra keywords as a dict.",
+    )],
+    "multiple-return-values": [(
+        "cell-0", "multiple-return",
+        "A function returning multiple values really returns one tuple; the caller unpacks it into named bindings.",
+    )],
+    "lambdas": [(
+        "cell-0", "lambda-expression",
+        "A lambda is a function literal: parameters before the colon, a single expression after, no statement body.",
+    )],
+    "properties": [(
+        "cell-0", "property-fork",
+        "When x is a property, attribute access routes through fget/fset instead of touching __dict__.",
+    )],
+    "metaclasses": [(
+        "cell-0", "metaclass-triangle",
+        "A metaclass is the type of a class, just as a class is the type of its instances; type is the default metaclass.",
+    )],
+    "modules": [(
+        "cell-0", "sys-path-resolution",
+        "An import walks sys.path entry by entry; the first directory containing the module wins.",
+    )],
+    "import-aliases": [(
+        "cell-0", "import-alias",
+        "`import x as y` binds the name y to the same module object x would have.",
+    )],
+    "protocols": [(
+        "cell-0", "protocol-check",
+        "An object satisfies a protocol structurally — by having the required methods — not by inheriting it.",
+    )],
+    "enums": [(
+        "cell-0", "enum-members",
+        "An enum names a fixed set of symbolic values; no new members appear at runtime.",
+    )],
+    "datetime": [(
+        "cell-0", "datetime-instant",
+        "An aware datetime carries a UTC offset; one instant in time reads differently on two clocks.",
+    )],
+    "json": [(
+        "cell-0", "json-python-mapping",
+        "Six type pairs bridge the JSON text boundary; each json value maps to one Python type.",
+    )],
+    "regular-expressions": [(
+        "cell-0", "regex-anchors",
+        "^ and $ anchor the pattern; quantifiers like {2} bound how many times a token repeats.",
+    )],
+    "number-parsing": [(
+        "cell-0", "number-parse",
+        "int() turns text into a typed number; malformed input raises ValueError instead of guessing.",
+    )],
+    "string-formatting": [(
+        "cell-0", "format-spec",
+        "The format spec is a railroad of named optional fields: alignment, sign, width, precision, type.",
+    )],
+    "truthiness": [(
+        "cell-0", "truthy-check",
+        "bool(x) is True except for a small fixed set: 0, 0.0, \"\", [], {}, None, False.",
+    )],
+    "booleans": [(
+        "cell-0", "boolean-truth-table",
+        "`a and b` returns True only when both are True; otherwise it returns the first falsy value.",
+    )],
+    "sets": [(
+        "cell-0", "set-buckets",
+        "Sets are hash buckets without values; `x in s` averages O(1) regardless of size.",
+    )],
+    "tuples": [(
+        "cell-0", "tuple-frozen",
+        "Tuples are ordered, immutable sequences; positions matter, contents do not change once constructed.",
+    )],
+    "values": [(
+        "cell-0", "value-types",
+        "Every literal is an object with a type; the type carries the behaviour, not the variable name.",
+    )],
+    "yield-from": [(
+        "cell-0", "yield-delegation",
+        "`yield from inner` delegates iteration to an inner generator; its yields surface here unchanged.",
+    )],
+    "itertools": [(
+        "cell-0", "itertools-chain",
+        "chain stitches two iterables into one stream without materialising either: values arrive lazily.",
+    )],
+    "assertions": [(
+        "cell-0", "assertion-check",
+        "assert tests a condition; True passes silently, False raises AssertionError with the optional message.",
+    )],
+    "custom-exceptions": [(
+        "cell-0", "custom-exception-chain",
+        "Subclassing an existing exception gains a domain name without changing semantics.",
+    )],
+    "exception-groups": [(
+        "cell-0", "exception-group-peel",
+        "except* peels matched leaves out of an ExceptionGroup; survivors regroup and propagate.",
+    )],
+    "delete-statements": [(
+        "cell-0", "delete-name-erased",
+        "`del x` removes the name; the object survives if any other reference holds it, otherwise gets collected.",
+    )],
+    # Easy promotions: existing journey figures, reused on examples that fit
+    "conditionals": [(
+        "cell-0", "branch-fork",
+        "A predicate sorts a value into one of several branches; if/elif/else is the explicit spelling.",
+    )],
+    "match-statements": [(
+        "cell-0", "branch-fork",
+        "match dispatches on the shape of a value to one of several branches; richer than if-elif.",
+    )],
+    "assignment-expressions": [(
+        "cell-0", "naming-decisions",
+        "The walrus binds a name during the surrounding expression; one expression, two outputs.",
+    )],
+    "iterating-over-iterables": [(
+        "cell-0", "iter-protocol",
+        "iter() exposes the iterator behind for; next() pulls one value at a time until exhausted.",
+    )],
+    "generator-expressions": [(
+        "cell-0", "lazy-stream",
+        "A generator expression composes filter and map lazily; values flow only when next() pulls them.",
+    )],
+    "async-iteration-and-context": [(
+        "cell-0", "async-swimlane",
+        "async iteration and async with both rest on the same loop-vs-coroutine handoff as await.",
+    )],
+    "loop-else": [(
+        "cell-0", "early-exit",
+        "The loop's else branch runs only when the loop falls through naturally; break skips it.",
+    )],
+    "break-and-continue": [(
+        "cell-0", "early-exit",
+        "break exits the loop; continue skips to the next iteration. Both interrupt the natural fall-through.",
+    )],
+    "comprehension-patterns": [(
+        "cell-0", "comprehension-equivalence",
+        "Nested clauses compose left to right; the comprehension is still equivalent to a for-loop with append.",
+    )],
+    "container-protocols": [(
+        "cell-0", "iter-protocol",
+        "Container protocols share the iter/next backbone; __iter__ + __next__ make any object iterable.",
+    )],
+    "functions": [(
+        "cell-0", "function-signature",
+        "A function packages parameters, a body, and a return value behind a name.",
+    )],
+    "constants": [(
+        "cell-0", "variables-bind",
+        "UPPER_CASE is a naming convention, not a language constraint; the binding behaves like any other variable.",
+    )],
+    "while-loops": [(
+        "cell-0", "loop-repetition",
+        "while repeats the body until the condition becomes false; the back-edge returns to the test each pass.",
+    )],
+    "advanced-match-patterns": [(
+        "cell-0", "branch-fork",
+        "Capture, guard, OR-pattern, and class patterns each refine how a value sorts into one of several branches.",
+    )],
+    "literals": [(
+        "cell-0", "value-types",
+        "Each literal form constructs an object of a specific type; the source spelling and the value type stay in sync.",
     )],
 }
 
