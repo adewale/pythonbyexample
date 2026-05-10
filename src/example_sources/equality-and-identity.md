@@ -26,6 +26,15 @@ print(same is left)
 
 value = None
 print(value is None)
+
+small_a = 100
+small_b = 100
+print(small_a is small_b)
+
+big_a = int("1000")
+big_b = int("1000")
+print(big_a is big_b)
+print(big_a == big_b)
 ```
 :::
 
@@ -74,8 +83,30 @@ True
 ```
 :::
 
+:::cell
+`is` for integers is unreliable because CPython caches small integers (roughly `-5` to `256`) but not larger ones. Two equal large integers can be different objects. Use `==` for value comparisons; reserve `is` for singletons.
+
+```python
+small_a = 100
+small_b = 100
+print(small_a is small_b)
+
+big_a = int("1000")
+big_b = int("1000")
+print(big_a is big_b)
+print(big_a == big_b)
+```
+
+```output
+True
+False
+True
+```
+:::
+
 :::note
 - Use `==` for ordinary value comparisons.
 - Use `is` primarily for identity checks against singletons such as `None`.
 - Equal mutable containers can still be independent objects.
+- Never use `is` to compare numbers; CPython's small-integer cache makes the result an implementation detail.
 :::

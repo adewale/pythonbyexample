@@ -8,6 +8,7 @@ see_also = [
   "properties",
   "descriptors",
   "special-methods",
+  "bound-and-unbound-methods",
 ]
 +++
 

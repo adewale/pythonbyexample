@@ -4,6 +4,11 @@ title = "Iterating over Iterables"
 section = "Iteration"
 summary = "for loops consume values from any iterable object."
 doc_path = "/tutorial/controlflow.html#for-statements"
+see_also = [
+  "iterators",
+  "iterator-vs-iterable",
+  "for-loops",
+]
 +++
 
 Python's `for` statement consumes values from any iterable object: lists, strings, dictionaries, ranges, generators, files, and many standard-library helpers.

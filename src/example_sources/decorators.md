@@ -8,6 +8,7 @@ see_also = [
   "closures",
   "functions",
   "callable-types",
+  "classmethods-and-staticmethods",
 ]
 +++
 

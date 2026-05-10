@@ -6,11 +6,11 @@ summary = "ParamSpec preserves callable parameter types through wrappers."
 doc_path = "/library/typing.html#typing.ParamSpec"
 +++
 
-ParamSpec preserves callable parameter types through wrappers. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.
+`ParamSpec` lets a wrapper preserve the parameter types of the function it wraps. The pressure that justifies it is decorators: a generic decorator that returns `Callable[..., R]` erases the wrapped function's argument types, so callers lose type-checker help on every call.
 
-Use it when the problem shape matches the example, and prefer simpler neighboring tools when the extra machinery would hide the intent. The notes call out the boundary so the feature stays practical rather than decorative.
+Use `ParamSpec` when a decorator should be transparent to type checkers — the wrapped function and the decorated name should accept the same arguments. Reach for plain `Callable` when the wrapper deliberately changes the signature.
 
-The example is small, deterministic, and focused on the semantic point. The complete source is editable below, while the walkthrough pairs the source with its output.
+`P.args` and `P.kwargs` annotate the `*args` and `**kwargs` of the inner wrapper, which is how the parameter spec gets bound. Pair `ParamSpec` with a `TypeVar` for the return type when the wrapper should also stay generic over what the wrapped function returns.
 
 :::program
 ```python

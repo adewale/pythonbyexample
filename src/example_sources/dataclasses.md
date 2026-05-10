@@ -4,6 +4,11 @@ title = "Dataclasses"
 section = "Classes"
 summary = "dataclass generates common class methods for data containers."
 doc_path = "/library/dataclasses.html"
+see_also = [
+  "structured-data-shapes",
+  "classes",
+  "type-hints",
+]
 +++
 
 `dataclass` is a standard-library decorator for classes that mainly store data. It generates methods such as `__init__` and `__repr__` from type-annotated fields.

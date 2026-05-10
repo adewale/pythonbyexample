@@ -8,6 +8,7 @@ see_also = [
   "type-hints",
   "protocols",
   "casts-and-any",
+  "abstract-base-classes",
 ]
 +++
 

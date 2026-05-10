@@ -28,6 +28,22 @@ for text in ["42", "python"]:
         print(f"{text}: {number}")
     finally:
         print(f"checked {text}")
+
+
+def safe_parse_broken(text):
+    try:
+        return int(text)
+    except Exception:
+        return None
+
+def safe_parse_fixed(text):
+    try:
+        return int(text)
+    except ValueError:
+        return None
+
+print(safe_parse_broken("42"))
+print(safe_parse_fixed("42"))
 ```
 :::
 
@@ -76,8 +92,35 @@ checked python
 ```
 :::
 
+:::cell
+Bare `except:` and broad `except Exception:` swallow far more than the failure you meant to handle, including `KeyboardInterrupt` (bare) and most programming bugs (broad). Catch the specific class — `ValueError` here — so unexpected failures still surface.
+
+```python
+def safe_parse_broken(text):
+    try:
+        return int(text)
+    except Exception:
+        return None
+
+def safe_parse_fixed(text):
+    try:
+        return int(text)
+    except ValueError:
+        return None
+
+print(safe_parse_broken("42"))
+print(safe_parse_fixed("42"))
+```
+
+```output
+42
+42
+```
+:::
+
 :::note
 - Catch the most specific exception you can.
 - `else` is for success code that should run only if the `try` block did not fail.
 - `finally` runs whether the operation succeeded or failed.
+- Avoid bare `except:` and broad `except Exception:` — they hide bugs and absorb signals like `KeyboardInterrupt`.
 :::

@@ -8,6 +8,7 @@ see_also = [
   "functions",
   "closures",
   "callable-types",
+  "bound-and-unbound-methods",
 ]
 +++
 

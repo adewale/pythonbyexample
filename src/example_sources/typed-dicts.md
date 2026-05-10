@@ -8,6 +8,7 @@ see_also = [
   "dicts",
   "json",
   "dataclasses",
+  "structured-data-shapes",
 ]
 +++
 

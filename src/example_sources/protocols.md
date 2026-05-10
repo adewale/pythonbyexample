@@ -8,6 +8,7 @@ see_also = [
   "type-hints",
   "classes",
   "inheritance-and-super",
+  "abstract-base-classes",
 ]
 +++
 
