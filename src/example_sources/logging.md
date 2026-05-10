@@ -6,11 +6,11 @@ summary = "logging records operational events without using print as infrastruct
 doc_path = "/library/logging.html"
 +++
 
-logging records operational events without using print as infrastructure. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.
+`logging` records operational events without using `print` as infrastructure. Loggers name where each event came from, handlers route records to outputs, and levels (`DEBUG`, `INFO`, `WARNING`, `ERROR`) let operators choose how much detail they want to see.
 
-Use it when the problem shape matches the example, and prefer simpler neighboring tools when the extra machinery would hide the intent. The notes call out the boundary so the feature stays practical rather than decorative.
+Use it when a program needs structured records with thresholds — production services, command-line tools, scheduled jobs. Prefer plain `print` when a small script just needs to show a line of human output.
 
-The example is small, deterministic, and focused on the semantic point. The complete source is editable below, while the walkthrough pairs the source with its output.
+The example wires a single stream handler to stdout to keep the output deterministic. Real applications usually configure logging once at startup and then call `logging.getLogger(__name__)` from each module.
 
 :::program
 ```python

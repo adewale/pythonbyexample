@@ -62,6 +62,20 @@ make verify-examples
 make check-generated
 ```
 
+## Quality checks
+
+Five scripts enforce the catalog-level rules from `docs/example-quality-rubric.md`. Run them together with `make quality-checks`.
+
+| Script | What it gates |
+| --- | --- |
+| `scripts/check_registry_integrity.py` | Every owner slug in `docs/quality-registries.toml` exists in `manifest.toml`; tokens are present. |
+| `scripts/check_confusable_pairs.py` | Each confusable pair's owning page contains every token that signals the contrast. |
+| `scripts/check_broad_surface_tours.py` | Each broad-title page either covers every required form or sets `scope_first_pass = true` with `see_also` links to focused neighbors. |
+| `scripts/check_footgun_coverage.py` | Each canonical Python footgun has a page that contains both broken-form and fixed-form tokens. |
+| `scripts/check_notes_supported.py` | Every `:::note` bullet shares at least one keyword with the page body, so notes cannot assert behavior the page never demonstrates. |
+
+The single source of truth for the registries is `docs/quality-registries.toml`. Add a new pair, broad tour, or footgun there, then update the owning page so the tokens appear in cells or prose.
+
 ## Style expectations
 
 - Keep examples compact and language-tour focused.

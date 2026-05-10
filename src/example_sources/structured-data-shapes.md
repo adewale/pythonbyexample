@@ -43,7 +43,7 @@ print(a.score)
 
 b = UserTuple("Ada", 98)
 print(b)
-print(b.name, b[0])
+print(b.name, b[1])
 print(b._replace(score=100))
 
 c: UserDict = {"name": "Ada", "score": 98}
@@ -81,7 +81,7 @@ UserClass(name='Ada', score=98)
 :::
 
 :::cell
-A `NamedTuple` is a tuple subclass with named positions. Instances are immutable, support both `obj.field` and `obj[index]`, and `_replace` produces a modified copy without mutating the original.
+A `NamedTuple` is a tuple subclass with named positions. Instances are immutable, support both `obj.field` and `obj[index]`, and the helper `_replace` produces a modified copy without mutating the original (since assigning to a field would fail).
 
 ```python
 from typing import NamedTuple
@@ -92,13 +92,13 @@ class UserTuple(NamedTuple):
 
 b = UserTuple("Ada", 98)
 print(b)
-print(b.name, b[0])
+print(b.name, b[1])
 print(b._replace(score=100))
 ```
 
 ```output
 UserTuple(name='Ada', score=98)
-Ada Ada
+Ada 98
 UserTuple(name='Ada', score=100)
 ```
 :::

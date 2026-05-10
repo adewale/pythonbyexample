@@ -46,6 +46,10 @@ print(sorted(unique))
 
 print(True, False, None)
 print(...)
+
+print(type({}).__name__)
+print(type(set()).__name__)
+print(type({1, 2}).__name__)
 ```
 :::
 
@@ -116,6 +120,22 @@ print(...)
 ```output
 True False None
 Ellipsis
+```
+:::
+
+:::cell
+Curly-brace literals are dictionaries by default. The empty form `{}` is an empty dictionary, not an empty set; use `set()` for that. A non-empty `{1, 2}` is a set because keyless items can only be a set.
+
+```python
+print(type({}).__name__)
+print(type(set()).__name__)
+print(type({1, 2}).__name__)
+```
+
+```output
+dict
+set
+set
 ```
 :::
 

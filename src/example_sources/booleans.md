@@ -23,6 +23,16 @@ print(not has_permission)
 
 name = "Ada"
 print(name == "Ada" and len(name) > 0)
+
+print(isinstance(True, int))
+print(True + True)
+print(sum([True, True, False, True]))
+
+def is_strict_int(value):
+    return isinstance(value, int) and not isinstance(value, bool)
+
+print(is_strict_int(True))
+print(is_strict_int(1))
 ```
 :::
 
@@ -60,8 +70,33 @@ True
 ```
 :::
 
+:::cell
+`bool` is a subclass of `int`, which is occasionally a footgun. `True` behaves as `1` and `False` as `0` in arithmetic, and `isinstance(True, int)` is `True`. When a function must reject booleans, exclude them explicitly with `isinstance(value, int) and not isinstance(value, bool)`.
+
+```python
+print(isinstance(True, int))
+print(True + True)
+print(sum([True, True, False, True]))
+
+def is_strict_int(value):
+    return isinstance(value, int) and not isinstance(value, bool)
+
+print(is_strict_int(True))
+print(is_strict_int(1))
+```
+
+```output
+True
+2
+3
+False
+True
+```
+:::
+
 :::note
 - Boolean constants are `True` and `False`, with capital letters.
 - `and` and `or` short-circuit: Python does not evaluate the right side if the left side already determines the result.
 - Prefer truthiness for containers and explicit comparisons when the exact boolean condition matters.
+- `bool` subclasses `int`; `isinstance(True, int)` is `True`. Exclude booleans explicitly when only "real" integers should pass.
 :::

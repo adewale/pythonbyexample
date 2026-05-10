@@ -136,6 +136,27 @@ if (size := len(items)) > 0:
 ```
 :::
 
+:::cell
+`and` and `or` short-circuit: the right side runs only when the left side cannot already determine the result. That makes them safe for guard expressions like `obj and obj.value` where the right side would fail on `None`.
+
+```python
+def loud():
+    print("ran")
+    return True
+
+print(False and loud())
+print(True or loud())
+print(True and loud())
+```
+
+```output
+False
+True
+ran
+True
+```
+:::
+
 :::note
 - Use the clearest operator for the question: arithmetic, comparison, boolean logic, membership, identity, or bitwise manipulation.
 - `and` and `or` short-circuit, so the right side may not run.

@@ -28,31 +28,32 @@ class Counter:
         self.value += 1
         return self.value
 
-c = Counter(10)
-m = c.increment
-print(m.__self__ is c)
+bound_counter = Counter(10)
+m = bound_counter.increment
+print(m.__self__ is bound_counter)
 print(m())
 print(m())
 
+unbound_counter = Counter(0)
 unbound = Counter.increment
 print(type(unbound).__name__)
-print(unbound(c))
-print(unbound(c))
+print(unbound(unbound_counter))
+print(unbound(unbound_counter))
 
 handlers = []
 for _ in range(2):
-    counter = Counter()
-    handlers.append(counter.increment)
+    handlers.append(Counter().increment)
 
 print(handlers[0]())
 print(handlers[0]())
 print(handlers[1]())
 
+descriptor_counter = Counter(0)
 func = Counter.__dict__["increment"]
 print(type(func).__name__)
-rebound = func.__get__(c, Counter)
+rebound = func.__get__(descriptor_counter, Counter)
 print(type(rebound).__name__)
-print(rebound.__self__ is c)
+print(rebound.__self__ is descriptor_counter)
 ```
 :::
 
@@ -68,9 +69,9 @@ class Counter:
         self.value += 1
         return self.value
 
-c = Counter(10)
-m = c.increment
-print(m.__self__ is c)
+bound_counter = Counter(10)
+m = bound_counter.increment
+print(m.__self__ is bound_counter)
 print(m())
 print(m())
 ```
@@ -83,19 +84,20 @@ True
 :::
 
 :::cell
-`Class.method` returns the underlying function — there is no `self` attached. Calling it requires passing the instance as the first argument explicitly.
+`Class.method` returns the underlying function — there is no `self` attached. Calling it requires passing the instance as the first argument explicitly. Using a fresh counter here makes the output independent of the previous cell.
 
 ```python
+unbound_counter = Counter(0)
 unbound = Counter.increment
 print(type(unbound).__name__)
-print(unbound(c))
-print(unbound(c))
+print(unbound(unbound_counter))
+print(unbound(unbound_counter))
 ```
 
 ```output
 function
-13
-14
+1
+2
 ```
 :::
 
@@ -105,8 +107,7 @@ Bound methods are first-class values. They can be stored in lists, passed to oth
 ```python
 handlers = []
 for _ in range(2):
-    counter = Counter()
-    handlers.append(counter.increment)
+    handlers.append(Counter().increment)
 
 print(handlers[0]())
 print(handlers[0]())
@@ -124,11 +125,12 @@ print(handlers[1]())
 The binding is the descriptor protocol at work. The function lives on the class as a plain function; instance attribute access invokes `__get__`, which returns a bound method that knows the instance.
 
 ```python
+descriptor_counter = Counter(0)
 func = Counter.__dict__["increment"]
 print(type(func).__name__)
-rebound = func.__get__(c, Counter)
+rebound = func.__get__(descriptor_counter, Counter)
 print(type(rebound).__name__)
-print(rebound.__self__ is c)
+print(rebound.__self__ is descriptor_counter)
 ```
 
 ```output

@@ -6,11 +6,11 @@ summary = "Literal restricts values, while Final marks names that should not be 
 doc_path = "/library/typing.html#typing.Literal"
 +++
 
-Literal restricts values, while Final marks names that should not be rebound. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.
+`Literal` restricts a value to one of a small set of exact options, and `Final` tells the type checker that a name should not be rebound. Both are static promises that type checkers enforce; Python's runtime assignment rules still permit any value through if a program ignores the annotation.
 
-Use it when the problem shape matches the example, and prefer simpler neighboring tools when the extra machinery would hide the intent. The notes call out the boundary so the feature stays practical rather than decorative.
+Use them when an annotation makes a constant or a small option set explicit at the API boundary. Prefer simpler neighboring tools when the extra machinery would hide the intent.
 
-The example is small, deterministic, and focused on the semantic point. The complete source is editable below, while the walkthrough pairs the source with its output.
+`Literal` pairs naturally with type aliases and overloads when a function should accept only a known set of strings or numbers. `Final` is most useful for module-level constants and class attributes that the rest of the codebase should treat as immutable.
 
 :::program
 ```python

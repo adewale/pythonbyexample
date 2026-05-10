@@ -1,19 +1,20 @@
 #!/usr/bin/env python3
-"""Heuristic check that each :::note bullet is grounded in the page body.
+"""Strict check that each :::note bullet is grounded in the page body.
 
 For every example page, extract the `:::note` block and compare each
 bullet's keywords against tokens drawn from the rest of the page. A
 bullet that has no overlap with any cell, prose paragraph, or program
-fragment is reported.
+fragment fails the build.
 
-This is a heuristic that prints warnings without failing the build. It
-catches notes that assert something the page never demonstrates without
-forcing every bullet to mirror cell wording. Pages can satisfy the check
-by adding a cell, citing the term in prose, or softening the note.
+The intent is to catch notes that assert something the page never
+demonstrates without forcing every bullet to mirror cell wording. Fix a
+failure by adding a cell that grounds the claim, citing the term in
+prose, or softening the note.
 """
 from __future__ import annotations
 
 import re
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -61,9 +62,11 @@ def main() -> int:
                 errors.append(
                     f"{path}: note bullet has no keyword overlap with the rest of the page: {bullet!r}"
                 )
-    for warning in errors:
-        print(f"warning: {warning}")
-    print(f"Notes-supported check OK ({len(errors)} warning(s)).")
+    if errors:
+        for error in errors:
+            print(error, file=sys.stderr)
+        return 1
+    print("Notes-supported check OK.")
     return 0
 
 

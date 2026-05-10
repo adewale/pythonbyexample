@@ -118,20 +118,20 @@ fixed_tokens = ["self.items = []"]
 [[footguns]]
 name = "Mutable default function argument"
 owner = "functions"
-broken_tokens = ["=[]", "={}"]
-fixed_tokens = ["= None", "is None"]
+broken_tokens = ["items=[]", "append_broken"]
+fixed_tokens = ["items=None", "append_fixed"]
 
 [[footguns]]
 name = "Late-binding closure in a loop"
 owner = "closures"
-broken_tokens = ["for ", "lambda"]
-fixed_tokens = ["default", "="]
+broken_tokens = ["lambda: i", "[2, 2, 2]"]
+fixed_tokens = ["lambda i=i", "[0, 1, 2]"]
 
 [[footguns]]
 name = "Integer identity caching"
 owner = "equality-and-identity"
-broken_tokens = [" is "]
-fixed_tokens = ["=="]
+broken_tokens = ["small_a is small_b", "big_a is big_b"]
+fixed_tokens = ["big_a == big_b", "small-integer cache"]
 
 [[footguns]]
 name = "Shallow vs deep copy"
@@ -160,14 +160,14 @@ fixed_tokens = ["isclose", "math"]
 [[footguns]]
 name = "bool as a subclass of int"
 owner = "booleans"
-broken_tokens = ["True", "1"]
-fixed_tokens = ["isinstance", "bool"]
+broken_tokens = ["isinstance(True, int)", "True + True"]
+fixed_tokens = ["not isinstance(value, bool)", "is_strict_int"]
 
 [[footguns]]
 name = "Bare except swallowing KeyboardInterrupt"
 owner = "exceptions"
-broken_tokens = ["except:", "except Exception"]
-fixed_tokens = ["except ", " as "]
+broken_tokens = ["except Exception"]
+fixed_tokens = ["except ValueError"]
 
 [paired_pages]
 # Pages whose titles differ only by a suffix or modifier; at least one

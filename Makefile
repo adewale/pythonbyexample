@@ -1,4 +1,4 @@
-.PHONY: test embed-examples build check-generated fingerprint browser-layout-test seo-cache-lint verify-examples check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported quality-checks format-examples verify-python-version verify dev deploy lint
+.PHONY: test embed-examples build check-generated fingerprint browser-layout-test seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported quality-checks format-examples verify-python-version verify dev deploy lint
 
 test:
 	python3 -m unittest discover -s tests -v
@@ -23,6 +23,9 @@ seo-cache-lint:
 verify-examples: build
 	scripts/verify_examples.py
 
+check-registry-integrity:
+	scripts/check_registry_integrity.py
+
 check-confusable-pairs:
 	scripts/check_confusable_pairs.py
 
@@ -35,7 +38,7 @@ check-footgun-coverage:
 check-notes-supported:
 	scripts/check_notes_supported.py
 
-quality-checks: check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported
+quality-checks: check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported
 
 format-examples:
 	scripts/format_examples.py

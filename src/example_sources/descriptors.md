@@ -4,6 +4,11 @@ title = "Descriptors"
 section = "Data Model"
 summary = "Descriptors customize attribute access through __get__, __set__, or __delete__."
 doc_path = "/howto/descriptor.html"
+see_also = [
+  "attribute-access",
+  "properties",
+  "bound-and-unbound-methods",
+]
 +++
 
 Descriptors customize attribute access through __get__, __set__, or __delete__. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.

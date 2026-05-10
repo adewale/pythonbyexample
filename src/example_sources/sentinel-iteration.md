@@ -6,11 +6,11 @@ summary = "iter(callable, sentinel) repeats calls until a marker value appears."
 doc_path = "/library/functions.html#iter"
 +++
 
-iter(callable, sentinel) repeats calls until a marker value appears. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.
+`iter(callable, sentinel)` keeps calling a zero-argument callable and yields each result until the callable returns the sentinel value. It is the right shape for repeated reads from files, sockets, or queues — sources where each call produces the next chunk and a known marker means "no more".
 
-Use it when the problem shape matches the example, and prefer simpler neighboring tools when the extra machinery would hide the intent. The notes call out the boundary so the feature stays practical rather than decorative.
+Reach for it instead of writing `while True:` plus a manual break when the loop body would do nothing else but read and check. The two-argument form turns a polling callable into something that composes with `for` loops, comprehensions, and other iterator helpers.
 
-The example is small, deterministic, and focused on the semantic point. The complete source is editable below, while the walkthrough pairs the source with its output.
+The callable must take no arguments. Wrap a parameterized reader in a small lambda or method that closes over the parameters when the underlying API needs them.
 
 :::program
 ```python
