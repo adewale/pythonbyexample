@@ -3,7 +3,7 @@ slug = "bound-and-unbound-methods"
 title = "Bound and Unbound Methods"
 section = "Data Model"
 summary = "instance.method binds self automatically; Class.method is a plain function."
-doc_path = "/reference/datamodel.html#methods"
+doc_path = "/reference/datamodel.html#instance-methods"
 see_also = [
   "classes",
   "attribute-access",

@@ -4,13 +4,11 @@ title = "Operators"
 section = "Basics"
 summary = "Operators combine, compare, and test values in expressions."
 doc_path = "/reference/expressions.html#operator-precedence"
-scope_first_pass = true
 see_also = [
   "numbers",
-  "conditionals",
+  "equality-and-identity",
   "assignment-expressions",
   "operator-overloading",
-  "equality-and-identity",
 ]
 +++
 
@@ -34,6 +32,8 @@ print(score == 100 or score >= 90)
 print("py" in "python")
 
 flags = 0b0011
+print(flags & 0b0101)
+print(flags | 0b0100)
 print(flags ^ 0b0101)
 print(flags << 1)
 
@@ -89,15 +89,19 @@ True
 :::
 
 :::cell
-Bitwise operators work on integer bit patterns. They are useful for masks and flags, not ordinary boolean logic.
+Bitwise operators work on integer bit patterns. They are useful for masks and flags, not ordinary boolean logic. `&` is bitwise AND, `|` is bitwise OR, `^` is exclusive OR, and `<<` shifts left.
 
 ```python
 flags = 0b0011
+print(flags & 0b0101)
+print(flags | 0b0100)
 print(flags ^ 0b0101)
 print(flags << 1)
 ```
 
 ```output
+1
+7
 6
 6
 ```

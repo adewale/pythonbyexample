@@ -4,7 +4,6 @@ title = "Testing"
 section = "Standard Library"
 summary = "Tests make expected behavior executable and repeatable."
 doc_path = "/library/unittest.html"
-scope_first_pass = true
 see_also = [
   "assertions",
   "exceptions",
@@ -27,12 +26,26 @@ import unittest
 def add(left, right):
     return left + right
 
+
+def divide(left, right):
+    if right == 0:
+        raise ZeroDivisionError("denominator is zero")
+    return left / right
+
+
 class AddTests(unittest.TestCase):
+    def setUp(self):
+        self.zero = 0
+
     def test_adds_numbers(self):
-        self.assertEqual(add(2, 3), 5)
+        self.assertEqual(add(self.zero + 2, 3), 5)
 
     def test_adds_empty_strings(self):
         self.assertEqual(add("", "py"), "py")
+
+    def test_divide_by_zero_raises(self):
+        with self.assertRaises(ZeroDivisionError):
+            divide(1, 0)
 
 suite = unittest.defaultTestLoader.loadTestsFromTestCase(AddTests)
 stream = io.StringIO()
@@ -58,23 +71,37 @@ print(add(2, 3))
 :::
 
 :::cell
-`unittest.TestCase` groups test methods. Assertion methods such as `assertEqual` make the expected behavior explicit.
+`unittest.TestCase` groups test methods. `setUp` runs before each test method to build per-test fixtures, `assertEqual` checks values, and `assertRaises` asserts that a block raises the expected exception type.
 
 ```python
 import unittest
 
+
+def divide(left, right):
+    if right == 0:
+        raise ZeroDivisionError("denominator is zero")
+    return left / right
+
+
 class AddTests(unittest.TestCase):
+    def setUp(self):
+        self.zero = 0
+
     def test_adds_numbers(self):
-        self.assertEqual(add(2, 3), 5)
+        self.assertEqual(add(self.zero + 2, 3), 5)
 
     def test_adds_empty_strings(self):
         self.assertEqual(add("", "py"), "py")
+
+    def test_divide_by_zero_raises(self):
+        with self.assertRaises(ZeroDivisionError):
+            divide(1, 0)
 
 print([name for name in dir(AddTests) if name.startswith("test_")])
 ```
 
 ```output
-['test_adds_empty_strings', 'test_adds_numbers']
+['test_adds_empty_strings', 'test_adds_numbers', 'test_divide_by_zero_raises']
 ```
 :::
 
@@ -92,7 +119,7 @@ print(result.wasSuccessful())
 ```
 
 ```output
-2
+3
 True
 ```
 :::

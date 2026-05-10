@@ -6,10 +6,9 @@ summary = "Inheritance reuses behavior, and super delegates to a parent implemen
 doc_path = "/tutorial/classes.html#inheritance"
 see_also = [
   "classes",
-  "properties",
-  "special-methods",
-  "classmethods-and-staticmethods",
   "abstract-base-classes",
+  "classmethods-and-staticmethods",
+  "special-methods",
 ]
 +++
 

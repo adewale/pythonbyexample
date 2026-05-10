@@ -124,21 +124,35 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'complex_number = 2 + 3j\n'
                      'print(whole, fraction, complex_number.imag)',
              'kind': 'cell',
-             'line': 26,
+             'line': 23,
              'output': '42 3.5 3.0',
              'prose': ['Numeric literals write numbers directly. Complex literals use `j` for the '
                        'imaginary part.']},
+            {'code': 'flags = 0xFF\n'
+                     'mask = 0b1010\n'
+                     'million = 1_000_000\n'
+                     'print(flags, mask, million)',
+             'kind': 'cell',
+             'line': 38,
+             'output': '255 10 1000000',
+             'prose': ['Integer literals also accept hexadecimal (`0x`), binary (`0b`), and octal '
+                       '(`0o`) prefixes. Underscores group digits visually without changing the '
+                       'value.']},
             {'code': 'text = "python"\n'
                      'raw_pattern = r"\\d+"\n'
                      'data = b"py"\n'
+                     'score = 98\n'
+                     'formatted = f"score={score}"\n'
                      'print(text)\n'
                      'print(raw_pattern)\n'
-                     'print(data)',
+                     'print(data)\n'
+                     'print(formatted)',
              'kind': 'cell',
-             'line': 41,
-             'output': "python\n\\d+\nb'py'",
+             'line': 53,
+             'output': "python\n\\d+\nb'py'\nscore=98",
              'prose': ['String literals write Unicode text. Raw strings keep backslashes literal, '
-                       'and bytes literals write binary data rather than text.']},
+                       'bytes literals write binary data rather than text, and f-strings '
+                       '(`f"..."`) embed expressions inline.']},
             {'code': 'point = (2, 3)\n'
                      'names = ["Ada", "Grace"]\n'
                      'scores = {"Ada": 98}\n'
@@ -148,14 +162,14 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'print(scores["Ada"])\n'
                      'print(sorted(unique))',
              'kind': 'cell',
-             'line': 60,
+             'line': 76,
              'output': "(2, 3)\nAda\n98\n['go', 'py']",
              'prose': ['Container literals create tuples, lists, dictionaries, and sets. Each '
                        'container answers a different question about order, position, lookup, or '
                        'uniqueness.']},
             {'code': 'print(True, False, None)\nprint(...)',
              'kind': 'cell',
-             'line': 82,
+             'line': 98,
              'output': 'True False None\nEllipsis',
              'prose': ['`True`, `False`, `None`, and `...` are singleton literal-like constants '
                        'used for truth values, absence, and placeholders.']},
@@ -163,7 +177,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'print(type(set()).__name__)\n'
                      'print(type({1, 2}).__name__)',
              'kind': 'cell',
-             'line': 96,
+             'line': 112,
              'output': 'dict\nset\nset',
              'prose': ['Curly-brace literals are dictionaries by default. The empty form `{}` is '
                        'an empty dictionary, not an empty set; use `set()` for that. A non-empty '
@@ -173,12 +187,20 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           'complex_number = 2 + 3j\n'
           'print(whole, fraction, complex_number.imag)\n'
           '\n'
+          'flags = 0xFF\n'
+          'mask = 0b1010\n'
+          'million = 1_000_000\n'
+          'print(flags, mask, million)\n'
+          '\n'
           'text = "python"\n'
           'raw_pattern = r"\\d+"\n'
           'data = b"py"\n'
+          'score = 98\n'
+          'formatted = f"score={score}"\n'
           'print(text)\n'
           'print(raw_pattern)\n'
           'print(data)\n'
+          'print(formatted)\n'
           '\n'
           'point = (2, 3)\n'
           'names = ["Ada", "Grace"]\n'
@@ -198,9 +220,11 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
   'doc_path': '/reference/lexical_analysis.html#literals',
   'doc_url': 'https://docs.python.org/3.13/reference/lexical_analysis.html#literals',
   'expected_output': '42 3.5 3.0\n'
+                     '255 10 1000000\n'
                      'python\n'
                      '\\d+\n'
                      "b'py'\n"
+                     'score=98\n'
                      '(2, 3)\n'
                      'Ada\n'
                      '98\n'
@@ -225,7 +249,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
             'Bytes literals are binary data; string literals are Unicode text.',
             '`...` evaluates to the `Ellipsis` object.'],
   'section': 'Basics',
-  'see_also': ['values', 'strings', 'bytes-and-bytearray', 'dicts', 'string-formatting', 'numbers'],
+  'see_also': ['values', 'strings', 'numbers', 'string-formatting'],
   'slug': 'literals',
   'summary': 'Literals write values directly in Python source code.',
   'title': 'Literals',
@@ -237,14 +261,25 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                            'print(whole, fraction, complex_number.imag)',
                    'prose': 'Numeric literals write numbers directly. Complex literals use `j` for '
                             'the imaginary part.'},
+                  {'code': 'flags = 0xFF\n'
+                           'mask = 0b1010\n'
+                           'million = 1_000_000\n'
+                           'print(flags, mask, million)',
+                   'prose': 'Integer literals also accept hexadecimal (`0x`), binary (`0b`), and '
+                            'octal (`0o`) prefixes. Underscores group digits visually without '
+                            'changing the value.'},
                   {'code': 'text = "python"\n'
                            'raw_pattern = r"\\d+"\n'
                            'data = b"py"\n'
+                           'score = 98\n'
+                           'formatted = f"score={score}"\n'
                            'print(text)\n'
                            'print(raw_pattern)\n'
-                           'print(data)',
+                           'print(data)\n'
+                           'print(formatted)',
                    'prose': 'String literals write Unicode text. Raw strings keep backslashes '
-                            'literal, and bytes literals write binary data rather than text.'},
+                            'literal, bytes literals write binary data rather than text, and '
+                            'f-strings (`f"..."`) embed expressions inline.'},
                   {'code': 'point = (2, 3)\n'
                            'names = ["Ada", "Grace"]\n'
                            'scores = {"Ada": 98}\n'
@@ -487,7 +522,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'print(count % 4)\n'
                      'print(2 ** 5)',
              'kind': 'cell',
-             'line': 25,
+             'line': 23,
              'output': '15\n2\n2\n32',
              'prose': ['Arithmetic operators compute new values. Use `//` for floor division, `%` '
                        'for remainder, and `**` for powers.']},
@@ -496,16 +531,21 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'print(score == 100 or score >= 90)\n'
                      'print("py" in "python")',
              'kind': 'cell',
-             'line': 44,
+             'line': 42,
              'output': 'True\nTrue\nTrue',
              'prose': ['Comparison operators produce booleans. Python comparisons can chain, which '
                        'keeps range checks readable.']},
-            {'code': 'flags = 0b0011\nprint(flags ^ 0b0101)\nprint(flags << 1)',
+            {'code': 'flags = 0b0011\n'
+                     'print(flags & 0b0101)\n'
+                     'print(flags | 0b0100)\n'
+                     'print(flags ^ 0b0101)\n'
+                     'print(flags << 1)',
              'kind': 'cell',
-             'line': 61,
-             'output': '6\n6',
+             'line': 59,
+             'output': '1\n7\n6\n6',
              'prose': ['Bitwise operators work on integer bit patterns. They are useful for masks '
-                       'and flags, not ordinary boolean logic.']},
+                       'and flags, not ordinary boolean logic. `&` is bitwise AND, `|` is bitwise '
+                       'OR, `^` is exclusive OR, and `<<` shifts left.']},
             {'code': 'class Scale:\n'
                      '    def __init__(self, value):\n'
                      '        self.value = value\n'
@@ -515,13 +555,13 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      '\n'
                      'print(Scale(2) @ Scale(3))',
              'kind': 'cell',
-             'line': 76,
+             'line': 78,
              'output': '6',
              'prose': ['The `@` operator is reserved for matrix-like multiplication and custom '
                        'types that define `__matmul__`.']},
             {'code': 'items = ["a", "b"]\nif (size := len(items)) > 0:\n    print(size)',
              'kind': 'cell',
-             'line': 95,
+             'line': 97,
              'output': '2',
              'prose': ['The walrus operator `:=` assigns inside an expression. Use it when naming '
                        'a value avoids repeating work in a condition.']},
@@ -533,7 +573,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'print(True or loud())\n'
                      'print(True and loud())',
              'kind': 'cell',
-             'line': 109,
+             'line': 111,
              'output': 'False\nTrue\nran\nTrue',
              'prose': ['`and` and `or` short-circuit: the right side runs only when the left side '
                        'cannot already determine the result. That makes them safe for guard '
@@ -551,6 +591,8 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           'print("py" in "python")\n'
           '\n'
           'flags = 0b0011\n'
+          'print(flags & 0b0101)\n'
+          'print(flags | 0b0100)\n'
           'print(flags ^ 0b0101)\n'
           'print(flags << 1)\n'
           '\n'
@@ -568,7 +610,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           '    print(size)\n',
   'doc_path': '/reference/expressions.html#operator-precedence',
   'doc_url': 'https://docs.python.org/3.13/reference/expressions.html#operator-precedence',
-  'expected_output': '15\n2\n2\n32\nTrue\nTrue\nTrue\n6\n6\n6\n2\n',
+  'expected_output': '15\n2\n2\n32\nTrue\nTrue\nTrue\n1\n7\n6\n6\n6\n2\n',
   'explanation': ['Operators are the punctuation and keywords that combine values into '
                   'expressions. Some operators compute new values, some compare values, and some '
                   'ask relationship questions such as membership or identity.',
@@ -588,10 +630,9 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
             'Custom operator behavior should make an object feel more natural, not more clever.'],
   'section': 'Basics',
   'see_also': ['numbers',
-               'conditionals',
+               'equality-and-identity',
                'assignment-expressions',
-               'operator-overloading',
-               'equality-and-identity'],
+               'operator-overloading'],
   'slug': 'operators',
   'summary': 'Operators combine, compare, and test values in expressions.',
   'title': 'Operators',
@@ -610,9 +651,14 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                            'print("py" in "python")',
                    'prose': 'Comparison operators produce booleans. Python comparisons can chain, '
                             'which keeps range checks readable.'},
-                  {'code': 'flags = 0b0011\nprint(flags ^ 0b0101)\nprint(flags << 1)',
+                  {'code': 'flags = 0b0011\n'
+                           'print(flags & 0b0101)\n'
+                           'print(flags | 0b0100)\n'
+                           'print(flags ^ 0b0101)\n'
+                           'print(flags << 1)',
                    'prose': 'Bitwise operators work on integer bit patterns. They are useful for '
-                            'masks and flags, not ordinary boolean logic.'},
+                            'masks and flags, not ordinary boolean logic. `&` is bitwise AND, `|` '
+                            'is bitwise OR, `^` is exclusive OR, and `<<` shifts left.'},
                   {'code': 'class Scale:\n'
                            '    def __init__(self, value):\n'
                            '        self.value = value\n'
@@ -4901,14 +4947,14 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'pet = Dog("Nina")\n'
                      'print(pet.name)',
              'kind': 'cell',
-             'line': 24,
+             'line': 23,
              'output': 'Nina',
              'prose': ['A child class names its parent in parentheses. `Dog` instances get the '
                        '`Animal.__init__` method because `Dog` does not define its own '
                        'initializer.']},
             {'code': 'print(pet.speak())\nprint(isinstance(pet, Animal))',
              'kind': 'cell',
-             'line': 49,
+             'line': 48,
              'output': 'Nina makes a sound; Nina barks\nTrue',
              'prose': ['`super()` delegates to the parent implementation. The child method can '
                        'reuse the parent result and then add specialized behavior.']}],
@@ -4943,10 +4989,9 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
             'Prefer composition when an object only needs to use another object.'],
   'section': 'Classes',
   'see_also': ['classes',
-               'properties',
-               'special-methods',
+               'abstract-base-classes',
                'classmethods-and-staticmethods',
-               'abstract-base-classes'],
+               'special-methods'],
   'slug': 'inheritance-and-super',
   'summary': 'Inheritance reuses behavior, and super delegates to a parent implementation.',
   'title': 'Inheritance and Super',
@@ -5390,7 +5435,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'bag = Bag(["a", "b"])\n'
                      'print(bag.items)',
              'kind': 'cell',
-             'line': 26,
+             'line': 23,
              'output': "['a', 'b']",
              'prose': ['Start with a normal class that stores its data. Special methods build on '
                        'ordinary instance state.']},
@@ -5404,7 +5449,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'bag = Bag(["a", "b"])\n'
                      'print(len(bag))',
              'kind': 'cell',
-             'line': 43,
+             'line': 40,
              'output': '2',
              'prose': ['Implement `__len__` to let `len()` ask the object for its size using '
                        "Python's standard protocol."]},
@@ -5421,7 +5466,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'bag = Bag(["a", "b"])\n'
                      'print(list(bag))',
              'kind': 'cell',
-             'line': 63,
+             'line': 60,
              'output': "['a', 'b']",
              'prose': ['Implement `__iter__` to make the object iterable. Then tools such as '
                        '`list()` can consume it without a custom method name.']},
@@ -5441,7 +5486,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'bag = Bag(["a", "b"])\n'
                      'print(bag)',
              'kind': 'cell',
-             'line': 86,
+             'line': 83,
              'output': "Bag(['a', 'b'])",
              'prose': ['Implement `__repr__` to give the object a useful developer-facing '
                        'representation when it is printed or inspected. With no `__str__` defined, '
@@ -5460,11 +5505,94 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'print(bag)\n'
                      'print(repr(bag))',
              'kind': 'cell',
-             'line': 112,
+             'line': 109,
              'output': "a, b\nBag(['a', 'b'])",
              'prose': ['Add `__str__` for an end-user representation. `print()` and `str()` prefer '
                        '`__str__`; `repr()` and the REPL still use `__repr__`. Keep `__repr__` '
-                       'unambiguous for debugging and let `__str__` be the friendly form.']}],
+                       'unambiguous for debugging and let `__str__` be the friendly form.']},
+            {'code': 'class Bag:\n'
+                     '    def __init__(self, items):\n'
+                     '        self.items = list(items)\n'
+                     '\n'
+                     '    def __eq__(self, other):\n'
+                     '        return isinstance(other, Bag) and self.items == other.items\n'
+                     '\n'
+                     '    def __hash__(self):\n'
+                     '        return hash(tuple(self.items))\n'
+                     '\n'
+                     '    def __lt__(self, other):\n'
+                     '        return len(self.items) < len(other.items)\n'
+                     '\n'
+                     'print(Bag(["a", "b"]) == Bag(["a", "b"]))\n'
+                     'print(Bag(["a"]) < Bag(["a", "b"]))\n'
+                     'print(hash(Bag(["a"])) == hash(Bag(["a"])))',
+             'kind': 'cell',
+             'line': 134,
+             'output': 'True\nTrue\nTrue',
+             'prose': ['`__eq__` decides what equality means for the type. Defining `__eq__` '
+                       'removes the default `__hash__`, so add `__hash__` back when instances '
+                       'should work in sets or as dict keys. `__lt__` enables `<` and, with the '
+                       'rest of the order family, `sorted()`.']},
+            {'code': 'class Bag:\n'
+                     '    def __init__(self, items):\n'
+                     '        self.items = list(items)\n'
+                     '\n'
+                     '    def __contains__(self, item):\n'
+                     '        return item in self.items\n'
+                     '\n'
+                     '    def __getitem__(self, index):\n'
+                     '        return self.items[index]\n'
+                     '\n'
+                     '    def __setitem__(self, index, value):\n'
+                     '        self.items[index] = value\n'
+                     '\n'
+                     '    def __bool__(self):\n'
+                     '        return bool(self.items)\n'
+                     '\n'
+                     'bag = Bag(["a", "b"])\n'
+                     'print("a" in bag)\n'
+                     'print(bag[0])\n'
+                     'bag[1] = "z"\n'
+                     'print(bag.items)\n'
+                     'print(bool(Bag([])))',
+             'kind': 'cell',
+             'line': 163,
+             'output': "True\na\n['a', 'z']\nFalse",
+             'prose': ['The container protocols make instances behave like built-in containers. '
+                       '`__contains__` powers `in`, `__getitem__`/`__setitem__` power '
+                       'subscription, and `__bool__` decides truthiness for `if` and `while`. See '
+                       '[container-protocols](/data-model/container-protocols) for the full '
+                       'surface.']},
+            {'code': 'class Multiplier:\n'
+                     '    def __init__(self, factor):\n'
+                     '        self.factor = factor\n'
+                     '\n'
+                     '    def __call__(self, value):\n'
+                     '        return value * self.factor\n'
+                     '\n'
+                     'triple = Multiplier(3)\n'
+                     'print(triple(5))\n'
+                     '\n'
+                     '\n'
+                     'class Trace:\n'
+                     '    def __enter__(self):\n'
+                     '        print("enter")\n'
+                     '        return self\n'
+                     '\n'
+                     '    def __exit__(self, *exc):\n'
+                     '        print("exit")\n'
+                     '        return False\n'
+                     '\n'
+                     'with Trace():\n'
+                     '    print("inside")',
+             'kind': 'cell',
+             'line': 199,
+             'output': '15\nenter\ninside\nexit',
+             'prose': ['`__call__` makes an instance callable like a function — useful for '
+                       'stateful operations whose configuration deserves a name. `__enter__` and '
+                       '`__exit__` make a class a context manager so it can be used with `with`. '
+                       'The focused [callable-objects](/data-model/callable-objects) and '
+                       '[context-managers](/data-model/context-managers) pages go deeper.']}],
   'code': 'class Bag:\n'
           '    def __init__(self, items):\n'
           '        self.items = list(items)\n'
@@ -5481,14 +5609,81 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           '    def __str__(self):\n'
           '        return ", ".join(self.items)\n'
           '\n'
+          '    def __eq__(self, other):\n'
+          '        return isinstance(other, Bag) and self.items == other.items\n'
+          '\n'
+          '    def __hash__(self):\n'
+          '        return hash(tuple(self.items))\n'
+          '\n'
+          '    def __lt__(self, other):\n'
+          '        return len(self.items) < len(other.items)\n'
+          '\n'
+          '    def __contains__(self, item):\n'
+          '        return item in self.items\n'
+          '\n'
+          '    def __getitem__(self, index):\n'
+          '        return self.items[index]\n'
+          '\n'
+          '    def __setitem__(self, index, value):\n'
+          '        self.items[index] = value\n'
+          '\n'
+          '    def __bool__(self):\n'
+          '        return bool(self.items)\n'
+          '\n'
           'bag = Bag(["a", "b"])\n'
           'print(len(bag))\n'
           'print(list(bag))\n'
           'print(bag)\n'
-          'print(repr(bag))\n',
+          'print(repr(bag))\n'
+          'print(Bag(["a", "b"]) == Bag(["a", "b"]))\n'
+          'print(Bag(["a"]) < Bag(["a", "b"]))\n'
+          'print(hash(Bag(["a"])) == hash(Bag(["a"])))\n'
+          'print("a" in bag)\n'
+          'print(bag[0])\n'
+          'bag[1] = "z"\n'
+          'print(list(bag))\n'
+          'print(bool(Bag([])))\n'
+          '\n'
+          '\n'
+          'class Multiplier:\n'
+          '    def __init__(self, factor):\n'
+          '        self.factor = factor\n'
+          '\n'
+          '    def __call__(self, value):\n'
+          '        return value * self.factor\n'
+          '\n'
+          'triple = Multiplier(3)\n'
+          'print(triple(5))\n'
+          '\n'
+          '\n'
+          'class Trace:\n'
+          '    def __enter__(self):\n'
+          '        print("enter")\n'
+          '        return self\n'
+          '\n'
+          '    def __exit__(self, *exc):\n'
+          '        print("exit")\n'
+          '        return False\n'
+          '\n'
+          'with Trace():\n'
+          '    print("inside")\n',
   'doc_path': '/reference/datamodel.html#special-method-names',
   'doc_url': 'https://docs.python.org/3.13/reference/datamodel.html#special-method-names',
-  'expected_output': "2\n['a', 'b']\na, b\nBag(['a', 'b'])\n",
+  'expected_output': '2\n'
+                     "['a', 'b']\n"
+                     'a, b\n'
+                     "Bag(['a', 'b'])\n"
+                     'True\n'
+                     'True\n'
+                     'True\n'
+                     'True\n'
+                     'a\n'
+                     "['a', 'z']\n"
+                     'False\n'
+                     '15\n'
+                     'enter\n'
+                     'inside\n'
+                     'exit\n',
   'explanation': ['Special methods, often called dunder methods, connect user-defined classes to '
                   'Python syntax and built-ins such as len(), iter(), and repr().',
                   'Implementing these methods lets your objects participate in Python protocols '
@@ -5499,14 +5694,18 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
   'notes': ["Dunder methods are looked up by Python's data model protocols.",
             '`__repr__` is the developer-facing form; `__str__` is the user-facing form. `print()` '
             'falls back to `__repr__` when `__str__` is missing.',
+            'Defining `__eq__` removes the default `__hash__`; restore it when the type should be '
+            'hashable.',
+            'Container protocols (`__contains__`, `__getitem__`, `__setitem__`, `__bool__`) make '
+            'instances behave like built-in containers.',
+            '`__call__` makes instances callable; `__enter__`/`__exit__` make them context '
+            'managers.',
             'Implement the smallest protocol that makes your object feel native.'],
   'section': 'Data Model',
-  'see_also': ['operator-overloading',
-               'attribute-access',
+  'see_also': ['container-protocols',
+               'operator-overloading',
                'callable-objects',
-               'container-protocols',
-               'context-managers',
-               'equality-and-identity'],
+               'context-managers'],
   'slug': 'special-methods',
   'summary': 'Special methods connect your objects to Python syntax and built-ins.',
   'title': 'Special Methods',
@@ -5579,7 +5778,82 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                    'prose': 'Add `__str__` for an end-user representation. `print()` and `str()` '
                             'prefer `__str__`; `repr()` and the REPL still use `__repr__`. Keep '
                             '`__repr__` unambiguous for debugging and let `__str__` be the '
-                            'friendly form.'}]},
+                            'friendly form.'},
+                  {'code': 'class Bag:\n'
+                           '    def __init__(self, items):\n'
+                           '        self.items = list(items)\n'
+                           '\n'
+                           '    def __eq__(self, other):\n'
+                           '        return isinstance(other, Bag) and self.items == other.items\n'
+                           '\n'
+                           '    def __hash__(self):\n'
+                           '        return hash(tuple(self.items))\n'
+                           '\n'
+                           '    def __lt__(self, other):\n'
+                           '        return len(self.items) < len(other.items)\n'
+                           '\n'
+                           'print(Bag(["a", "b"]) == Bag(["a", "b"]))\n'
+                           'print(Bag(["a"]) < Bag(["a", "b"]))\n'
+                           'print(hash(Bag(["a"])) == hash(Bag(["a"])))',
+                   'prose': '`__eq__` decides what equality means for the type. Defining `__eq__` '
+                            'removes the default `__hash__`, so add `__hash__` back when instances '
+                            'should work in sets or as dict keys. `__lt__` enables `<` and, with '
+                            'the rest of the order family, `sorted()`.'},
+                  {'code': 'class Bag:\n'
+                           '    def __init__(self, items):\n'
+                           '        self.items = list(items)\n'
+                           '\n'
+                           '    def __contains__(self, item):\n'
+                           '        return item in self.items\n'
+                           '\n'
+                           '    def __getitem__(self, index):\n'
+                           '        return self.items[index]\n'
+                           '\n'
+                           '    def __setitem__(self, index, value):\n'
+                           '        self.items[index] = value\n'
+                           '\n'
+                           '    def __bool__(self):\n'
+                           '        return bool(self.items)\n'
+                           '\n'
+                           'bag = Bag(["a", "b"])\n'
+                           'print("a" in bag)\n'
+                           'print(bag[0])\n'
+                           'bag[1] = "z"\n'
+                           'print(bag.items)\n'
+                           'print(bool(Bag([])))',
+                   'prose': 'The container protocols make instances behave like built-in '
+                            'containers. `__contains__` powers `in`, `__getitem__`/`__setitem__` '
+                            'power subscription, and `__bool__` decides truthiness for `if` and '
+                            '`while`. See [container-protocols](/data-model/container-protocols) '
+                            'for the full surface.'},
+                  {'code': 'class Multiplier:\n'
+                           '    def __init__(self, factor):\n'
+                           '        self.factor = factor\n'
+                           '\n'
+                           '    def __call__(self, value):\n'
+                           '        return value * self.factor\n'
+                           '\n'
+                           'triple = Multiplier(3)\n'
+                           'print(triple(5))\n'
+                           '\n'
+                           '\n'
+                           'class Trace:\n'
+                           '    def __enter__(self):\n'
+                           '        print("enter")\n'
+                           '        return self\n'
+                           '\n'
+                           '    def __exit__(self, *exc):\n'
+                           '        print("exit")\n'
+                           '        return False\n'
+                           '\n'
+                           'with Trace():\n'
+                           '    print("inside")',
+                   'prose': '`__call__` makes an instance callable like a function — useful for '
+                            'stateful operations whose configuration deserves a name. `__enter__` '
+                            'and `__exit__` make a class a context manager so it can be used with '
+                            '`with`. The focused [callable-objects](/data-model/callable-objects) '
+                            'and [context-managers](/data-model/context-managers) pages go '
+                            'deeper.'}]},
  {'cells': [{'code': 'class Inbox:\n'
                      '    def __init__(self, messages):\n'
                      '        self.messages = list(messages)\n'
@@ -6219,8 +6493,8 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           'rebound = func.__get__(descriptor_counter, Counter)\n'
           'print(type(rebound).__name__)\n'
           'print(rebound.__self__ is descriptor_counter)\n',
-  'doc_path': '/reference/datamodel.html#methods',
-  'doc_url': 'https://docs.python.org/3.13/reference/datamodel.html#methods',
+  'doc_path': '/reference/datamodel.html#instance-methods',
+  'doc_url': 'https://docs.python.org/3.13/reference/datamodel.html#instance-methods',
   'expected_output': 'True\n11\n12\nfunction\n1\n2\n1\n2\n1\nfunction\nmethod\nTrue\n',
   'explanation': ['When you write `instance.method`, Python returns a bound method — a callable '
                   'that already remembers which instance to pass as `self`. When you write '
@@ -7251,7 +7525,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                             'local name explains the role better than the original name.'}]},
  {'cells': [{'code': 'import json\n\nprint(json.__name__)',
              'kind': 'cell',
-             'line': 23,
+             'line': 22,
              'output': 'json',
              'prose': ['A package is itself a module. The `json` package exposes a namespace that '
                        'can contain submodules.']},
@@ -7260,7 +7534,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'print(json.decoder.__name__)\n'
                      'print(json.decoder.JSONDecoder.__name__)',
              'kind': 'cell',
-             'line': 37,
+             'line': 36,
              'output': 'json.decoder\nJSONDecoder',
              'prose': ['Dotted imports name a path through a package. Importing `json.decoder` '
                        'makes that submodule available under the package namespace.']},
@@ -7269,11 +7543,38 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'module = importlib.import_module("json.decoder")\n'
                      'print(module is json.decoder)',
              'kind': 'cell',
-             'line': 53,
+             'line': 52,
              'output': 'True',
              'prose': ['`importlib.import_module()` imports by string. It is useful for plugin '
                        'systems and dynamic imports, but ordinary `import` is clearer when the '
-                       'dependency is known.']}],
+                       'dependency is known.']},
+            {'code': 'import os\n'
+                     'import sys\n'
+                     'import tempfile\n'
+                     '\n'
+                     'with tempfile.TemporaryDirectory() as tmp:\n'
+                     '    pkg = os.path.join(tmp, "shapes")\n'
+                     '    os.makedirs(pkg)\n'
+                     '    with open(os.path.join(pkg, "__init__.py"), "w") as init:\n'
+                     '        init.write("from .square import area\\n__all__ = [\'area\']\\n")\n'
+                     '    with open(os.path.join(pkg, "square.py"), "w") as square:\n'
+                     '        square.write("def area(side):\\n    return side * side\\n")\n'
+                     '    sys.path.insert(0, tmp)\n'
+                     '    try:\n'
+                     '        import shapes\n'
+                     '        print(shapes.area(3))\n'
+                     '        print(shapes.__all__)\n'
+                     '    finally:\n'
+                     '        sys.path.remove(tmp)\n'
+                     '        sys.modules.pop("shapes", None)\n'
+                     '        sys.modules.pop("shapes.square", None)',
+             'kind': 'cell',
+             'line': 67,
+             'output': "9\n['area']",
+             'prose': ["Inside a package's `__init__.py`, `from .submodule import name` re-exports "
+                       "a submodule's name at the package root, and `__all__` lists the names that "
+                       '`from package import *` should make visible. This cell builds a temporary '
+                       '`shapes` package on disk to make both forms concrete.']}],
   'code': 'import importlib\n'
           'import json\n'
           'import json.decoder\n'
@@ -7283,10 +7584,32 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           'print(json.__name__)\n'
           'print(json.decoder.__name__)\n'
           'print(module.JSONDecoder.__name__)\n'
-          'print(module is json.decoder)\n',
+          'print(module is json.decoder)\n'
+          '\n'
+          '\n'
+          'import os\n'
+          'import sys\n'
+          'import tempfile\n'
+          '\n'
+          'with tempfile.TemporaryDirectory() as tmp:\n'
+          '    pkg = os.path.join(tmp, "shapes")\n'
+          '    os.makedirs(pkg)\n'
+          '    with open(os.path.join(pkg, "__init__.py"), "w") as init:\n'
+          '        init.write("from .square import area\\n__all__ = [\'area\']\\n")\n'
+          '    with open(os.path.join(pkg, "square.py"), "w") as square:\n'
+          '        square.write("def area(side):\\n    return side * side\\n")\n'
+          '    sys.path.insert(0, tmp)\n'
+          '    try:\n'
+          '        import shapes\n'
+          '        print(shapes.area(3))\n'
+          '        print(shapes.__all__)\n'
+          '    finally:\n'
+          '        sys.path.remove(tmp)\n'
+          '        sys.modules.pop("shapes", None)\n'
+          '        sys.modules.pop("shapes.square", None)\n',
   'doc_path': '/tutorial/modules.html#packages',
   'doc_url': 'https://docs.python.org/3.13/tutorial/modules.html#packages',
-  'expected_output': 'json\njson.decoder\nJSONDecoder\nTrue\n',
+  'expected_output': "json\njson.decoder\nJSONDecoder\nTrue\n9\n['area']\n",
   'explanation': ['Packages are modules that can contain other modules. They let a project group '
                   'related code behind dotted import paths such as `json.decoder` or '
                   '`email.message`.',
@@ -7299,6 +7622,8 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
   'min_python': None,
   'notes': ['A package is a module that can contain submodules.',
             'Dotted imports should mirror a meaningful project structure.',
+            'Use `from .submodule import name` inside a package to re-export submodule names; set '
+            '`__all__` to declare the public surface.',
             'Prefer ordinary imports unless the module name is truly dynamic.'],
   'section': 'Modules',
   'see_also': ['modules', 'import-aliases', 'virtual-environments'],
@@ -7323,7 +7648,33 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                            'print(module is json.decoder)',
                    'prose': '`importlib.import_module()` imports by string. It is useful for '
                             'plugin systems and dynamic imports, but ordinary `import` is clearer '
-                            'when the dependency is known.'}]},
+                            'when the dependency is known.'},
+                  {'code': 'import os\n'
+                           'import sys\n'
+                           'import tempfile\n'
+                           '\n'
+                           'with tempfile.TemporaryDirectory() as tmp:\n'
+                           '    pkg = os.path.join(tmp, "shapes")\n'
+                           '    os.makedirs(pkg)\n'
+                           '    with open(os.path.join(pkg, "__init__.py"), "w") as init:\n'
+                           '        init.write("from .square import area\\n__all__ = '
+                           '[\'area\']\\n")\n'
+                           '    with open(os.path.join(pkg, "square.py"), "w") as square:\n'
+                           '        square.write("def area(side):\\n    return side * side\\n")\n'
+                           '    sys.path.insert(0, tmp)\n'
+                           '    try:\n'
+                           '        import shapes\n'
+                           '        print(shapes.area(3))\n'
+                           '        print(shapes.__all__)\n'
+                           '    finally:\n'
+                           '        sys.path.remove(tmp)\n'
+                           '        sys.modules.pop("shapes", None)\n'
+                           '        sys.modules.pop("shapes.square", None)',
+                   'prose': "Inside a package's `__init__.py`, `from .submodule import name` "
+                            "re-exports a submodule's name at the package root, and `__all__` "
+                            'lists the names that `from package import *` should make visible. '
+                            'This cell builds a temporary `shapes` package on disk to make both '
+                            'forms concrete.'}]},
  {'cells': [{'code': 'builder = venv.EnvBuilder(with_pip=False)\nbuilder.create(".venv")',
              'kind': 'unsupported',
              'line': 18,
@@ -7400,13 +7751,13 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      '\n'
                      'print(total([1, 2, 3]))',
              'kind': 'cell',
-             'line': 25,
+             'line': 23,
              'output': '6',
              'prose': ['Type hints document expected parameter and return shapes. Python still '
                        'runs the function normally at runtime.']},
             {'code': 'print(total.__annotations__)',
              'kind': 'cell',
-             'line': 40,
+             'line': 38,
              'output': "{'numbers': list[int], 'return': <class 'int'>}",
              'prose': ['Python stores annotations on the function object for tools and '
                        'introspection. Type checkers use this information without changing the '
@@ -7416,12 +7767,50 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      '\n'
                      'print(label("high"))',
              'kind': 'cell',
-             'line': 52,
+             'line': 50,
              'output': 'score=high',
              'prose': ['Most hints are not runtime validation. This call passes a string where the '
                        'hint says `int`; Python still calls the function because the body can '
-                       'format any value.']}],
-  'code': 'def total(numbers: list[int]) -> int:\n'
+                       'format any value.']},
+            {'code': 'def find(name: str, options: list[str]) -> str | None:\n'
+                     '    return name if name in options else None\n'
+                     '\n'
+                     'print(find("Ada", ["Ada", "Grace"]))\n'
+                     'print(find("Guido", ["Ada", "Grace"]))\n'
+                     '\n'
+                     '\n'
+                     'from typing import Optional\n'
+                     '\n'
+                     'def lookup(name: str) -> Optional[int]:\n'
+                     '    table = {"Ada": 1815, "Grace": 1906}\n'
+                     '    return table.get(name)\n'
+                     '\n'
+                     'print(lookup("Ada"))\n'
+                     'print(lookup("Guido"))',
+             'kind': 'cell',
+             'line': 65,
+             'output': 'Ada\nNone\n1815\nNone',
+             'prose': ['Use `X | Y` (PEP 604) to express "either type". `str | None` says the '
+                       'result is a string or absent. `typing.Optional[X]` is the older, '
+                       'still-supported spelling for the same idea — `Optional[X]` is equivalent '
+                       'to `X | None`.']},
+            {'code': 'from typing import TypeAlias\n'
+                     '\n'
+                     'Score: TypeAlias = int\n'
+                     '\n'
+                     'def grade(score: Score) -> str:\n'
+                     '    return "pass" if score >= 50 else "fail"\n'
+                     '\n'
+                     'print(grade(72))',
+             'kind': 'cell',
+             'line': 94,
+             'output': 'pass',
+             'prose': ['`TypeAlias` names a type so it can be reused with intent. `Score: '
+                       'TypeAlias = int` keeps the underlying type at runtime but lets the API '
+                       'talk about a domain concept rather than a primitive.']}],
+  'code': 'from typing import TypeAlias\n'
+          '\n'
+          'def total(numbers: list[int]) -> int:\n'
           '    return sum(numbers)\n'
           '\n'
           'print(total([1, 2, 3]))\n'
@@ -7431,10 +7820,42 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           'def label(score: int) -> str:\n'
           '    return f"score={score}"\n'
           '\n'
-          'print(label("high"))\n',
+          'print(label("high"))\n'
+          '\n'
+          '\n'
+          'def find(name: str, options: list[str]) -> str | None:\n'
+          '    return name if name in options else None\n'
+          '\n'
+          'print(find("Ada", ["Ada", "Grace"]))\n'
+          'print(find("Guido", ["Ada", "Grace"]))\n'
+          '\n'
+          '\n'
+          'from typing import Optional\n'
+          '\n'
+          'def lookup(name: str) -> Optional[int]:\n'
+          '    table = {"Ada": 1815, "Grace": 1906}\n'
+          '    return table.get(name)\n'
+          '\n'
+          'print(lookup("Ada"))\n'
+          'print(lookup("Guido"))\n'
+          '\n'
+          '\n'
+          'Score: TypeAlias = int\n'
+          '\n'
+          'def grade(score: Score) -> str:\n'
+          '    return "pass" if score >= 50 else "fail"\n'
+          '\n'
+          'print(grade(72))\n',
   'doc_path': '/library/typing.html',
   'doc_url': 'https://docs.python.org/3.13/library/typing.html',
-  'expected_output': "6\n{'numbers': list[int], 'return': <class 'int'>}\nscore=high\n",
+  'expected_output': '6\n'
+                     "{'numbers': list[int], 'return': <class 'int'>}\n"
+                     'score=high\n'
+                     'Ada\n'
+                     'None\n'
+                     '1815\n'
+                     'None\n'
+                     'pass\n',
   'explanation': ['Type hints are annotations that document expected shapes for values, '
                   'parameters, and return results. They exist so tools and readers can understand '
                   'API boundaries before the program runs.',
@@ -7446,11 +7867,13 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
   'min_python': None,
   'notes': ['Python does not enforce most type hints at runtime.',
             'Tools like type checkers and editors use annotations to catch mistakes earlier.',
+            'Use `X | Y` for unions and `Optional[X]` for "X or None"; both spellings mean the '
+            'same thing.',
+            'Reach for `TypeAlias` when a domain name reads better than a raw primitive type.',
             'Use runtime validation when untrusted input must be rejected while the program runs.'],
   'section': 'Types',
   'see_also': ['union-and-optional-types',
                'type-aliases',
-               'protocols',
                'generics-and-typevar',
                'runtime-type-checks'],
   'slug': 'type-hints',
@@ -7474,7 +7897,37 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                            'print(label("high"))',
                    'prose': 'Most hints are not runtime validation. This call passes a string '
                             'where the hint says `int`; Python still calls the function because '
-                            'the body can format any value.'}]},
+                            'the body can format any value.'},
+                  {'code': 'def find(name: str, options: list[str]) -> str | None:\n'
+                           '    return name if name in options else None\n'
+                           '\n'
+                           'print(find("Ada", ["Ada", "Grace"]))\n'
+                           'print(find("Guido", ["Ada", "Grace"]))\n'
+                           '\n'
+                           '\n'
+                           'from typing import Optional\n'
+                           '\n'
+                           'def lookup(name: str) -> Optional[int]:\n'
+                           '    table = {"Ada": 1815, "Grace": 1906}\n'
+                           '    return table.get(name)\n'
+                           '\n'
+                           'print(lookup("Ada"))\n'
+                           'print(lookup("Guido"))',
+                   'prose': 'Use `X | Y` (PEP 604) to express "either type". `str | None` says the '
+                            'result is a string or absent. `typing.Optional[X]` is the older, '
+                            'still-supported spelling for the same idea — `Optional[X]` is '
+                            'equivalent to `X | None`.'},
+                  {'code': 'from typing import TypeAlias\n'
+                           '\n'
+                           'Score: TypeAlias = int\n'
+                           '\n'
+                           'def grade(score: Score) -> str:\n'
+                           '    return "pass" if score >= 50 else "fail"\n'
+                           '\n'
+                           'print(grade(72))',
+                   'prose': '`TypeAlias` names a type so it can be reused with intent. `Score: '
+                            'TypeAlias = int` keeps the underlying type at runtime but lets the '
+                            'API talk about a domain concept rather than a primitive.'}]},
  {'cells': [{'code': 'class Animal:\n'
                      '    pass\n'
                      '\n'
@@ -8979,22 +9432,47 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'for name, score in re.findall(pattern, text):\n'
                      '    print(name, int(score))',
              'kind': 'cell',
-             'line': 22,
+             'line': 21,
              'output': 'Ada 10\nGrace 9',
              'prose': ['Raw strings keep backslashes readable in regex patterns. Capturing groups '
                        'return just the pieces inside parentheses.']},
             {'code': 'match = re.search(r"Grace: (\\d+)", text)\nprint(match.group(1))',
              'kind': 'cell',
-             'line': 41,
+             'line': 40,
              'output': '9',
              'prose': ['`re.search()` finds the first match. A match object exposes captured '
                        'groups by position.']},
             {'code': 'print("Grace" in text)',
              'kind': 'cell',
-             'line': 54,
+             'line': 53,
              'output': 'True',
              'prose': ['For a simple substring check, ordinary string membership is clearer than '
-                       'regex.']}],
+                       'regex.']},
+            {'code': 'start = re.match(r"Ada", text)\n'
+                     'print(start is not None)\n'
+                     'print(re.match(r"Grace", text))',
+             'kind': 'cell',
+             'line': 65,
+             'output': 'True\nNone',
+             'prose': ['`re.match` only matches at the start of the string; `re.search` finds the '
+                       'first match anywhere. Picking the right one keeps anchoring intent visible '
+                       'without an explicit `^`.']},
+            {'code': 'scoreline = re.compile(pattern)\nprint(scoreline.findall(text))',
+             'kind': 'cell',
+             'line': 80,
+             'output': "[('Ada', '10'), ('Grace', '9')]",
+             'prose': ['`re.compile` produces a reusable pattern object whose methods skip the '
+                       'parser on each call. Reach for it when the same pattern runs in a loop.']},
+            {'code': 'casey = "ADA: 11"\n'
+                     'print(re.search(r"ada", casey, flags=re.IGNORECASE).group(0))\n'
+                     '\n'
+                     'print(re.sub(r"\\d+", "?", text))',
+             'kind': 'cell',
+             'line': 93,
+             'output': 'ADA\nAda: ?, Grace: ?',
+             'prose': ['Flags such as `re.IGNORECASE` adjust matching without changing the '
+                       'pattern. `re.sub` replaces every match with a replacement string and '
+                       'returns the rewritten text.']}],
   'code': 'import re\n'
           '\n'
           'text = "Ada: 10, Grace: 9"\n'
@@ -9005,21 +9483,47 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           '\n'
           'match = re.search(r"Grace: (\\d+)", text)\n'
           'print(match.group(1))\n'
-          'print("Grace" in text)\n',
+          'print("Grace" in text)\n'
+          '\n'
+          'start = re.match(r"Ada", text)\n'
+          'print(start is not None)\n'
+          'print(re.match(r"Grace", text))\n'
+          '\n'
+          'scoreline = re.compile(pattern)\n'
+          'print(scoreline.findall(text))\n'
+          '\n'
+          'casey = "ADA: 11"\n'
+          'print(re.search(r"ada", casey, flags=re.IGNORECASE).group(0))\n'
+          '\n'
+          'print(re.sub(r"\\d+", "?", text))\n',
   'doc_path': '/library/re.html',
   'doc_url': 'https://docs.python.org/3.13/library/re.html',
-  'expected_output': 'Ada 10\nGrace 9\n9\nTrue\n',
+  'expected_output': 'Ada 10\n'
+                     'Grace 9\n'
+                     '9\n'
+                     'True\n'
+                     'True\n'
+                     'None\n'
+                     "[('Ada', '10'), ('Grace', '9')]\n"
+                     'ADA\n'
+                     'Ada: ?, Grace: ?\n',
   'explanation': ['Regular expressions are a compact language for searching and extracting text '
-                  "patterns. Python's `re` module provides the standard interface.",
+                  "patterns. Python's `re` module provides the standard interface: `re.match` "
+                  'anchors at the start of the string, `re.search` finds the first occurrence '
+                  'anywhere, `re.findall` collects every match, `re.sub` rewrites matches, and '
+                  '`re.compile` reuses a pattern.',
                   'Use regex when the pattern has structure: repeated records, alternatives, '
                   'optional parts, or pieces you want to capture. Prefer ordinary string methods '
                   'for simple substring checks because simpler code is easier to maintain.',
-                  'This page is a first regex pass, not the whole language. It focuses on raw '
-                  'pattern strings, capturing groups, repeated matches, and the boundary where a '
-                  'string method is enough.'],
+                  'Flags such as `re.IGNORECASE` adjust matching behavior without rewriting the '
+                  'pattern. Pair them with `re.compile` when the same pattern is used repeatedly.'],
   'min_python': None,
   'notes': ['Use raw strings for regex patterns so backslashes are easier to read.',
             'Use capturing groups when the point is extraction, not just matching.',
+            '`re.match` anchors at the start; `re.search` finds the first match anywhere.',
+            '`re.compile` saves work when the pattern runs more than once.',
+            '`re.sub` rewrites matches; flags like `re.IGNORECASE` change matching behavior '
+            'without rewriting the pattern.',
             'Reach for string methods before regex when the pattern is simple.'],
   'section': 'Text',
   'see_also': ['strings', 'string-formatting'],
@@ -9042,7 +9546,24 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                             'groups by position.'},
                   {'code': 'print("Grace" in text)',
                    'prose': 'For a simple substring check, ordinary string membership is clearer '
-                            'than regex.'}]},
+                            'than regex.'},
+                  {'code': 'start = re.match(r"Ada", text)\n'
+                           'print(start is not None)\n'
+                           'print(re.match(r"Grace", text))',
+                   'prose': '`re.match` only matches at the start of the string; `re.search` finds '
+                            'the first match anywhere. Picking the right one keeps anchoring '
+                            'intent visible without an explicit `^`.'},
+                  {'code': 'scoreline = re.compile(pattern)\nprint(scoreline.findall(text))',
+                   'prose': '`re.compile` produces a reusable pattern object whose methods skip '
+                            'the parser on each call. Reach for it when the same pattern runs in a '
+                            'loop.'},
+                  {'code': 'casey = "ADA: 11"\n'
+                           'print(re.search(r"ada", casey, flags=re.IGNORECASE).group(0))\n'
+                           '\n'
+                           'print(re.sub(r"\\d+", "?", text))',
+                   'prose': 'Flags such as `re.IGNORECASE` adjust matching without changing the '
+                            'pattern. `re.sub` replaces every match with a replacement string and '
+                            'returns the rewritten text.'}]},
  {'cells': [{'code': 'print(int("42"))\nprint(float("3.5"))',
              'kind': 'cell',
              'line': 17,
@@ -9352,26 +9873,42 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                    'prose': 'Loggers name where an event came from.'}]},
  {'cells': [{'code': 'def add(left, right):\n    return left + right\n\nprint(add(2, 3))',
              'kind': 'cell',
-             'line': 23,
+             'line': 22,
              'output': '5',
              'prose': ['A test starts with behavior small enough to name. The function can be '
                        'ordinary code; the test supplies a representative input and expected '
                        'result.']},
             {'code': 'import unittest\n'
                      '\n'
+                     '\n'
+                     'def divide(left, right):\n'
+                     '    if right == 0:\n'
+                     '        raise ZeroDivisionError("denominator is zero")\n'
+                     '    return left / right\n'
+                     '\n'
+                     '\n'
                      'class AddTests(unittest.TestCase):\n'
+                     '    def setUp(self):\n'
+                     '        self.zero = 0\n'
+                     '\n'
                      '    def test_adds_numbers(self):\n'
-                     '        self.assertEqual(add(2, 3), 5)\n'
+                     '        self.assertEqual(add(self.zero + 2, 3), 5)\n'
                      '\n'
                      '    def test_adds_empty_strings(self):\n'
                      '        self.assertEqual(add("", "py"), "py")\n'
                      '\n'
+                     '    def test_divide_by_zero_raises(self):\n'
+                     '        with self.assertRaises(ZeroDivisionError):\n'
+                     '            divide(1, 0)\n'
+                     '\n'
                      'print([name for name in dir(AddTests) if name.startswith("test_")])',
              'kind': 'cell',
-             'line': 38,
-             'output': "['test_adds_empty_strings', 'test_adds_numbers']",
-             'prose': ['`unittest.TestCase` groups test methods. Assertion methods such as '
-                       '`assertEqual` make the expected behavior explicit.']},
+             'line': 37,
+             'output': "['test_adds_empty_strings', 'test_adds_numbers', "
+                       "'test_divide_by_zero_raises']",
+             'prose': ['`unittest.TestCase` groups test methods. `setUp` runs before each test '
+                       'method to build per-test fixtures, `assertEqual` checks values, and '
+                       '`assertRaises` asserts that a block raises the expected exception type.']},
             {'code': 'import io\n'
                      '\n'
                      'suite = unittest.defaultTestLoader.loadTestsFromTestCase(AddTests)\n'
@@ -9380,8 +9917,8 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'print(result.testsRun)\n'
                      'print(result.wasSuccessful())',
              'kind': 'cell',
-             'line': 59,
-             'output': '2\nTrue',
+             'line': 72,
+             'output': '3\nTrue',
              'prose': ['A runner executes the suite and records whether every assertion passed. '
                        "Capturing the runner stream keeps this page's output deterministic."]}],
   'code': 'import io\n'
@@ -9391,12 +9928,26 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           'def add(left, right):\n'
           '    return left + right\n'
           '\n'
+          '\n'
+          'def divide(left, right):\n'
+          '    if right == 0:\n'
+          '        raise ZeroDivisionError("denominator is zero")\n'
+          '    return left / right\n'
+          '\n'
+          '\n'
           'class AddTests(unittest.TestCase):\n'
+          '    def setUp(self):\n'
+          '        self.zero = 0\n'
+          '\n'
           '    def test_adds_numbers(self):\n'
-          '        self.assertEqual(add(2, 3), 5)\n'
+          '        self.assertEqual(add(self.zero + 2, 3), 5)\n'
           '\n'
           '    def test_adds_empty_strings(self):\n'
           '        self.assertEqual(add("", "py"), "py")\n'
+          '\n'
+          '    def test_divide_by_zero_raises(self):\n'
+          '        with self.assertRaises(ZeroDivisionError):\n'
+          '            divide(1, 0)\n'
           '\n'
           'suite = unittest.defaultTestLoader.loadTestsFromTestCase(AddTests)\n'
           'stream = io.StringIO()\n'
@@ -9405,7 +9956,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           'print(result.wasSuccessful())\n',
   'doc_path': '/library/unittest.html',
   'doc_url': 'https://docs.python.org/3.13/library/unittest.html',
-  'expected_output': '2\nTrue\n',
+  'expected_output': '3\nTrue\n',
   'explanation': ['Tests turn expected behavior into code that can be run again. The useful unit '
                   'is usually a small example of behavior with clear input, action, and assertion.',
                   "Python's `unittest` library provides test cases, assertions, suites, and "
@@ -9432,16 +9983,32 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                             'result.'},
                   {'code': 'import unittest\n'
                            '\n'
+                           '\n'
+                           'def divide(left, right):\n'
+                           '    if right == 0:\n'
+                           '        raise ZeroDivisionError("denominator is zero")\n'
+                           '    return left / right\n'
+                           '\n'
+                           '\n'
                            'class AddTests(unittest.TestCase):\n'
+                           '    def setUp(self):\n'
+                           '        self.zero = 0\n'
+                           '\n'
                            '    def test_adds_numbers(self):\n'
-                           '        self.assertEqual(add(2, 3), 5)\n'
+                           '        self.assertEqual(add(self.zero + 2, 3), 5)\n'
                            '\n'
                            '    def test_adds_empty_strings(self):\n'
                            '        self.assertEqual(add("", "py"), "py")\n'
                            '\n'
+                           '    def test_divide_by_zero_raises(self):\n'
+                           '        with self.assertRaises(ZeroDivisionError):\n'
+                           '            divide(1, 0)\n'
+                           '\n'
                            'print([name for name in dir(AddTests) if name.startswith("test_")])',
-                   'prose': '`unittest.TestCase` groups test methods. Assertion methods such as '
-                            '`assertEqual` make the expected behavior explicit.'},
+                   'prose': '`unittest.TestCase` groups test methods. `setUp` runs before each '
+                            'test method to build per-test fixtures, `assertEqual` checks values, '
+                            'and `assertRaises` asserts that a block raises the expected exception '
+                            'type.'},
                   {'code': 'import io\n'
                            '\n'
                            'suite = unittest.defaultTestLoader.loadTestsFromTestCase(AddTests)\n'
@@ -9890,7 +10457,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'print(coroutine.__class__.__name__)\n'
                      'coroutine.close()',
              'kind': 'cell',
-             'line': 25,
+             'line': 24,
              'output': 'coroutine',
              'prose': ['An `async def` function returns a coroutine object when called. The '
                        'function body has not produced its final result yet.']},
@@ -9900,7 +10467,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      '\n'
                      'asyncio.run(main())',
              'kind': 'cell',
-             'line': 45,
+             'line': 44,
              'output': 'Async Await',
              'prose': ['Use `await` inside another coroutine to get the eventual result. '
                        '`asyncio.run()` starts an event loop for the top-level coroutine.']},
@@ -9911,11 +10478,42 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      '\n'
                      'asyncio.run(main())',
              'kind': 'cell',
-             'line': 61,
+             'line': 60,
              'output': "['Json', 'Datetime']",
              'prose': ['`asyncio.gather()` awaits several awaitables and returns their results in '
                        'order. This is the shape used when independent I/O operations can progress '
-                       'together.']}],
+                       'together.']},
+            {'code': 'class Session:\n'
+                     '    async def __aenter__(self):\n'
+                     '        print("open")\n'
+                     '        return self\n'
+                     '\n'
+                     '    async def __aexit__(self, *_):\n'
+                     '        print("close")\n'
+                     '        return False\n'
+                     '\n'
+                     '\n'
+                     'async def stream():\n'
+                     '    for slug in ["json", "datetime"]:\n'
+                     '        await asyncio.sleep(0)\n'
+                     '        yield slug\n'
+                     '\n'
+                     '\n'
+                     'async def driver():\n'
+                     '    async with Session():\n'
+                     '        async for slug in stream():\n'
+                     '            print(slug)\n'
+                     '\n'
+                     'asyncio.run(driver())',
+             'kind': 'cell',
+             'line': 76,
+             'output': 'open\njson\ndatetime\nclose',
+             'prose': ['`async with` and `async for` are the asynchronous forms of context '
+                       'managers and iteration. A class implements `__aenter__`/`__aexit__` to act '
+                       'as an async context manager; an `async def` function with `yield` becomes '
+                       'an async generator. The dedicated [async iteration and '
+                       'context](/iteration/async-iteration-and-context) page explains the '
+                       'protocols in depth.']}],
   'code': 'import asyncio\n'
           '\n'
           'async def fetch_title(slug):\n'
@@ -9928,10 +10526,34 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           '    titles = await asyncio.gather(fetch_title("json"), fetch_title("datetime"))\n'
           '    print(titles)\n'
           '\n'
-          'asyncio.run(main())\n',
+          'asyncio.run(main())\n'
+          '\n'
+          '\n'
+          'class Session:\n'
+          '    async def __aenter__(self):\n'
+          '        print("open")\n'
+          '        return self\n'
+          '\n'
+          '    async def __aexit__(self, *_):\n'
+          '        print("close")\n'
+          '        return False\n'
+          '\n'
+          '\n'
+          'async def stream():\n'
+          '    for slug in ["json", "datetime"]:\n'
+          '        await asyncio.sleep(0)\n'
+          '        yield slug\n'
+          '\n'
+          '\n'
+          'async def driver():\n'
+          '    async with Session():\n'
+          '        async for slug in stream():\n'
+          '            print(slug)\n'
+          '\n'
+          'asyncio.run(driver())\n',
   'doc_path': '/library/asyncio-task.html',
   'doc_url': 'https://docs.python.org/3.13/library/asyncio-task.html',
-  'expected_output': "Async Await\n['Json', 'Datetime']\n",
+  'expected_output': "Async Await\n['Json', 'Datetime']\nopen\njson\ndatetime\nclose\n",
   'explanation': ['`async def` creates a coroutine function. Calling it creates a coroutine '
                   'object; the body runs when an event loop awaits or schedules it.',
                   '`await` pauses the current coroutine until another awaitable completes. This '
@@ -9981,7 +10603,35 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                            'asyncio.run(main())',
                    'prose': '`asyncio.gather()` awaits several awaitables and returns their '
                             'results in order. This is the shape used when independent I/O '
-                            'operations can progress together.'}]},
+                            'operations can progress together.'},
+                  {'code': 'class Session:\n'
+                           '    async def __aenter__(self):\n'
+                           '        print("open")\n'
+                           '        return self\n'
+                           '\n'
+                           '    async def __aexit__(self, *_):\n'
+                           '        print("close")\n'
+                           '        return False\n'
+                           '\n'
+                           '\n'
+                           'async def stream():\n'
+                           '    for slug in ["json", "datetime"]:\n'
+                           '        await asyncio.sleep(0)\n'
+                           '        yield slug\n'
+                           '\n'
+                           '\n'
+                           'async def driver():\n'
+                           '    async with Session():\n'
+                           '        async for slug in stream():\n'
+                           '            print(slug)\n'
+                           '\n'
+                           'asyncio.run(driver())',
+                   'prose': '`async with` and `async for` are the asynchronous forms of context '
+                            'managers and iteration. A class implements `__aenter__`/`__aexit__` '
+                            'to act as an async context manager; an `async def` function with '
+                            '`yield` becomes an async generator. The dedicated [async iteration '
+                            'and context](/iteration/async-iteration-and-context) page explains '
+                            'the protocols in depth.'}]},
  {'cells': [{'code': 'import asyncio\n'
                      '\n'
                      'async def titles():\n'

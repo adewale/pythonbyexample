@@ -4,7 +4,6 @@ title = "Async Await"
 section = "Async"
 summary = "async def creates coroutines, and await pauses until awaitable work completes."
 doc_path = "/library/asyncio-task.html"
-scope_first_pass = true
 see_also = [
   "async-iteration-and-context",
   "functions",
@@ -35,6 +34,30 @@ async def main():
     print(titles)
 
 asyncio.run(main())
+
+
+class Session:
+    async def __aenter__(self):
+        print("open")
+        return self
+
+    async def __aexit__(self, *_):
+        print("close")
+        return False
+
+
+async def stream():
+    for slug in ["json", "datetime"]:
+        await asyncio.sleep(0)
+        yield slug
+
+
+async def driver():
+    async with Session():
+        async for slug in stream():
+            print(slug)
+
+asyncio.run(driver())
 ```
 :::
 
@@ -87,6 +110,42 @@ asyncio.run(main())
 
 ```output
 ['Json', 'Datetime']
+```
+:::
+
+:::cell
+`async with` and `async for` are the asynchronous forms of context managers and iteration. A class implements `__aenter__`/`__aexit__` to act as an async context manager; an `async def` function with `yield` becomes an async generator. The dedicated [async iteration and context](/iteration/async-iteration-and-context) page explains the protocols in depth.
+
+```python
+class Session:
+    async def __aenter__(self):
+        print("open")
+        return self
+
+    async def __aexit__(self, *_):
+        print("close")
+        return False
+
+
+async def stream():
+    for slug in ["json", "datetime"]:
+        await asyncio.sleep(0)
+        yield slug
+
+
+async def driver():
+    async with Session():
+        async for slug in stream():
+            print(slug)
+
+asyncio.run(driver())
+```
+
+```output
+open
+json
+datetime
+close
 ```
 :::
 

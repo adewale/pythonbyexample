@@ -4,14 +4,11 @@ title = "Special Methods"
 section = "Data Model"
 summary = "Special methods connect your objects to Python syntax and built-ins."
 doc_path = "/reference/datamodel.html#special-method-names"
-scope_first_pass = true
 see_also = [
-  "operator-overloading",
-  "attribute-access",
-  "callable-objects",
   "container-protocols",
+  "operator-overloading",
+  "callable-objects",
   "context-managers",
-  "equality-and-identity",
 ]
 +++
 
@@ -39,11 +36,64 @@ class Bag:
     def __str__(self):
         return ", ".join(self.items)
 
+    def __eq__(self, other):
+        return isinstance(other, Bag) and self.items == other.items
+
+    def __hash__(self):
+        return hash(tuple(self.items))
+
+    def __lt__(self, other):
+        return len(self.items) < len(other.items)
+
+    def __contains__(self, item):
+        return item in self.items
+
+    def __getitem__(self, index):
+        return self.items[index]
+
+    def __setitem__(self, index, value):
+        self.items[index] = value
+
+    def __bool__(self):
+        return bool(self.items)
+
 bag = Bag(["a", "b"])
 print(len(bag))
 print(list(bag))
 print(bag)
 print(repr(bag))
+print(Bag(["a", "b"]) == Bag(["a", "b"]))
+print(Bag(["a"]) < Bag(["a", "b"]))
+print(hash(Bag(["a"])) == hash(Bag(["a"])))
+print("a" in bag)
+print(bag[0])
+bag[1] = "z"
+print(list(bag))
+print(bool(Bag([])))
+
+
+class Multiplier:
+    def __init__(self, factor):
+        self.factor = factor
+
+    def __call__(self, value):
+        return value * self.factor
+
+triple = Multiplier(3)
+print(triple(5))
+
+
+class Trace:
+    def __enter__(self):
+        print("enter")
+        return self
+
+    def __exit__(self, *exc):
+        print("exit")
+        return False
+
+with Trace():
+    print("inside")
 ```
 :::
 
@@ -158,8 +208,112 @@ Bag(['a', 'b'])
 ```
 :::
 
+:::cell
+`__eq__` decides what equality means for the type. Defining `__eq__` removes the default `__hash__`, so add `__hash__` back when instances should work in sets or as dict keys. `__lt__` enables `<` and, with the rest of the order family, `sorted()`.
+
+```python
+class Bag:
+    def __init__(self, items):
+        self.items = list(items)
+
+    def __eq__(self, other):
+        return isinstance(other, Bag) and self.items == other.items
+
+    def __hash__(self):
+        return hash(tuple(self.items))
+
+    def __lt__(self, other):
+        return len(self.items) < len(other.items)
+
+print(Bag(["a", "b"]) == Bag(["a", "b"]))
+print(Bag(["a"]) < Bag(["a", "b"]))
+print(hash(Bag(["a"])) == hash(Bag(["a"])))
+```
+
+```output
+True
+True
+True
+```
+:::
+
+:::cell
+The container protocols make instances behave like built-in containers. `__contains__` powers `in`, `__getitem__`/`__setitem__` power subscription, and `__bool__` decides truthiness for `if` and `while`. See [container-protocols](/data-model/container-protocols) for the full surface.
+
+```python
+class Bag:
+    def __init__(self, items):
+        self.items = list(items)
+
+    def __contains__(self, item):
+        return item in self.items
+
+    def __getitem__(self, index):
+        return self.items[index]
+
+    def __setitem__(self, index, value):
+        self.items[index] = value
+
+    def __bool__(self):
+        return bool(self.items)
+
+bag = Bag(["a", "b"])
+print("a" in bag)
+print(bag[0])
+bag[1] = "z"
+print(bag.items)
+print(bool(Bag([])))
+```
+
+```output
+True
+a
+['a', 'z']
+False
+```
+:::
+
+:::cell
+`__call__` makes an instance callable like a function — useful for stateful operations whose configuration deserves a name. `__enter__` and `__exit__` make a class a context manager so it can be used with `with`. The focused [callable-objects](/data-model/callable-objects) and [context-managers](/data-model/context-managers) pages go deeper.
+
+```python
+class Multiplier:
+    def __init__(self, factor):
+        self.factor = factor
+
+    def __call__(self, value):
+        return value * self.factor
+
+triple = Multiplier(3)
+print(triple(5))
+
+
+class Trace:
+    def __enter__(self):
+        print("enter")
+        return self
+
+    def __exit__(self, *exc):
+        print("exit")
+        return False
+
+with Trace():
+    print("inside")
+```
+
+```output
+15
+enter
+inside
+exit
+```
+:::
+
 :::note
 - Dunder methods are looked up by Python's data model protocols.
 - `__repr__` is the developer-facing form; `__str__` is the user-facing form. `print()` falls back to `__repr__` when `__str__` is missing.
+- Defining `__eq__` removes the default `__hash__`; restore it when the type should be hashable.
+- Container protocols (`__contains__`, `__getitem__`, `__setitem__`, `__bool__`) make instances behave like built-in containers.
+- `__call__` makes instances callable; `__enter__`/`__exit__` make them context managers.
 - Implement the smallest protocol that makes your object feel native.
 :::
