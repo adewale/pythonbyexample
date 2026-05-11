@@ -36,8 +36,8 @@
         .hero { animation: hero-fade linear forwards; animation-timeline: scroll(root); animation-range: 0 280px; }
         .hero h1 { animation: hero-h1-morph linear forwards; animation-timeline: scroll(root); animation-range: 0 240px; }
         .hero p { animation: hero-p-fade linear forwards; animation-timeline: scroll(root); animation-range: 0 140px; }
-        body:has(.hero) header .brand { opacity: 0; filter: blur(4px); transform: scale(0.88); animation: brand-reveal linear forwards; animation-timeline: scroll(root); animation-range: 80px 240px; }
-        header { animation: header-solidify linear forwards; animation-timeline: scroll(root); animation-range: 0 240px; }
+        body:has(.hero) header { opacity: 0; background: rgba(245, 241, 235, 0); box-shadow: none; animation: header-emerge linear forwards; animation-timeline: scroll(root); animation-range: 40px 240px; }
+        body:has(.hero) header .brand { filter: blur(4px); transform: scale(0.88); animation: brand-focus linear forwards; animation-timeline: scroll(root); animation-range: 80px 240px; }
       }
     }
     @keyframes hero-fade {
@@ -49,11 +49,11 @@
     @keyframes hero-p-fade {
       to { opacity: 0; transform: translateY(-4px); }
     }
-    @keyframes brand-reveal {
-      to { opacity: 1; filter: blur(0); transform: scale(1); }
+    @keyframes brand-focus {
+      to { filter: blur(0); transform: scale(1); }
     }
-    @keyframes header-solidify {
-      to { background: rgba(245, 241, 235, 0.95); box-shadow: 0 1px 8px rgba(82, 16, 0, 0.06); }
+    @keyframes header-emerge {
+      to { opacity: 1; background: rgba(245, 241, 235, 0.95); box-shadow: 0 1px 8px rgba(82, 16, 0, 0.06); }
     }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-3); }
     .card { display: block; min-height: 10rem; border: 1px solid var(--hairline); border-radius: .75rem; padding: var(--space-3); background: var(--surface-2); color: inherit; text-decoration: none; box-shadow: 0 1px 3px rgba(82, 16, 0, 0.04), 0 4px 12px rgba(82, 16, 0, 0.02); transition-property: transform, background-color, border-color; transition-duration: 200ms; transition-timing-function: cubic-bezier(0, 0, 0.2, 1); }
