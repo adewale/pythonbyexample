@@ -23,6 +23,28 @@ import unittest
 from src.marginalia import ATTACHMENTS, FIGURES, SCORES
 from src.marginalia_grammar import Canvas
 
+
+def _gestalt_figures() -> dict[str, tuple]:
+    """Paint functions registered in scripts/build_marginalia.py
+    EXAMPLES. They render on the gestalt review pages under
+    /prototyping/* and use the same Canvas grammar as src/marginalia.py
+    FIGURES — so the geometry contracts apply to them too.
+    """
+    import importlib.util
+    from pathlib import Path
+
+    path = Path(__file__).resolve().parents[1] / "scripts" / "build_marginalia.py"
+    spec = importlib.util.spec_from_file_location("build_marginalia", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return {card.slug: (card.figure, card.width, card.height) for card in module.EXAMPLES}
+
+
+# Combined audit surface: production figures + gestalt thumbnails.
+# Tests iterate the union so a gestalt regression fires as loudly
+# as a production one.
+ALL_FIGURES: dict[str, tuple] = {**FIGURES, **_gestalt_figures()}
+
 ATTR = re.compile(r'([\w-]+)="([^"]+)"')
 
 # Padding emitted by Canvas.to_svg(). Must agree with the constants in
@@ -162,7 +184,7 @@ class FigureClippingContract(unittest.TestCase):
 
     def test_every_figure_renders_inside_its_padded_viewbox(self):
         failures: list[str] = []
-        for name, (paint, w, h) in FIGURES.items():
+        for name, (paint, w, h) in ALL_FIGURES.items():
             canvas = Canvas(w=w, h=h)
             paint(canvas)
             viewbox = (-PAD_X, -PAD_TOP, w + 2 * PAD_X, h + PAD_TOP + PAD_BOTTOM)
@@ -191,7 +213,7 @@ class FigureCollisionContract(unittest.TestCase):
 
     def test_no_text_partially_overlaps_a_rect(self):
         failures: list[str] = []
-        for name, (paint, w, h) in FIGURES.items():
+        for name, (paint, w, h) in ALL_FIGURES.items():
             canvas = Canvas(w=w, h=h)
             paint(canvas)
             elements = parse_parts(canvas.parts)
@@ -220,7 +242,7 @@ class FigureTextCollisionContract(unittest.TestCase):
 
     def test_no_two_texts_overlap_in_a_figure(self):
         failures: list[str] = []
-        for name, (paint, w, h) in FIGURES.items():
+        for name, (paint, w, h) in ALL_FIGURES.items():
             canvas = Canvas(w=w, h=h)
             paint(canvas)
             texts = []
@@ -291,7 +313,7 @@ class FigureGrammarContract(unittest.TestCase):
 
         allowed = {INK, INK_SOFT, EMPHASIS, SOFT_FILL, "none"}
         failures: list[str] = []
-        for name, (paint, w, h) in FIGURES.items():
+        for name, (paint, w, h) in ALL_FIGURES.items():
             canvas = Canvas(w=w, h=h)
             paint(canvas)
             for kind, attrs, _ in parse_parts(canvas.parts):
@@ -306,7 +328,7 @@ class FigureGrammarContract(unittest.TestCase):
 
         allowed = {FONT_SERIF, FONT_MONO, FONT_SANS}
         failures: list[str] = []
-        for name, (paint, w, h) in FIGURES.items():
+        for name, (paint, w, h) in ALL_FIGURES.items():
             canvas = Canvas(w=w, h=h)
             paint(canvas)
             for kind, attrs, _ in parse_parts(canvas.parts):
@@ -318,7 +340,7 @@ class FigureGrammarContract(unittest.TestCase):
     def test_every_stroke_width_is_from_the_locked_set(self):
         allowed = {"0.6", "1.0", "1.4", "0.5"}  # W_HAIRLINE, W_STROKE, W_EMPHASIS, W_GHOST
         failures: list[str] = []
-        for name, (paint, w, h) in FIGURES.items():
+        for name, (paint, w, h) in ALL_FIGURES.items():
             canvas = Canvas(w=w, h=h)
             paint(canvas)
             for kind, attrs, _ in parse_parts(canvas.parts):
@@ -404,7 +426,7 @@ class FigureSizeContract(unittest.TestCase):
 
     def test_every_figure_fits_the_banner(self):
         failures: list[str] = []
-        for name, (_, w, _) in FIGURES.items():
+        for name, (_, w, _) in ALL_FIGURES.items():
             intrinsic = w + 2 * PAD_X
             if intrinsic > self.BANNER_MAX_WIDTH:
                 failures.append(
@@ -433,7 +455,7 @@ class FigureEmphasisScarcityContract(unittest.TestCase):
         from src.marginalia_grammar import EMPHASIS
 
         failures: list[str] = []
-        for name, (paint, w, h) in FIGURES.items():
+        for name, (paint, w, h) in ALL_FIGURES.items():
             canvas = Canvas(w=w, h=h)
             paint(canvas)
             accents = 0

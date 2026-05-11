@@ -182,7 +182,7 @@ class Canvas:
             f'stroke="{INK}" stroke-width="{W_STROKE}"/>'
         )
         if type_tag:
-            tag_y = y + SIZE_TAG + 2 if tag_position == "inside" else y - 3
+            tag_y = y + SIZE_TAG + 2 if tag_position == "inside" else y - 5
             self.tag(x + 4, tag_y, type_tag)
         if value:
             self.mono(x + w / 2, y + h / 2 + BASELINE, value)

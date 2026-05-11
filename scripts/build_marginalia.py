@@ -183,7 +183,7 @@ def e_mutability(c: Canvas) -> None:
         ("rebind · new id", "[3,1,4,1]", "id 0x…b7"),
     ]
     for i, (tag, val, idnote) in enumerate(states):
-        y = 14 + i * 60
+        y = 14 + i * 68
         c.tag(20, y, tag)
         c.bind(20, y + 8, "xs", "list", val, object_w=80, gap=20)
         c.label(70, y + 52, idnote)
@@ -234,7 +234,7 @@ def e_for_loops(c: Canvas) -> None:
     for i in range(4):
         y = 8 + i * 32
         c.cells(20, y, items)
-        c.caret(20 + i * CELL + CELL / 2, y)
+        c.caret(20 + i * CELL + CELL / 2, y, emphasis=(i == 3))
         suffix = " — last" if i == 3 else ""
         c.label(124, y + 16, f"next(){suffix}")
 
@@ -242,10 +242,10 @@ def e_for_loops(c: Canvas) -> None:
 def e_break_continue(c: Canvas) -> None:
     c.frame(60, 22, 200, 64, label="loop body")
     c.dashed(160, 22, 160, 86)
-    c.closed_arrow(110, 60, 110, 18, emphasis=True)
-    c.label(110, 14, "continue", anchor="middle")
+    c.closed_arrow(110, 60, 110, 18, emphasis=False)
+    c.label(118, 35, "continue", anchor="start")
     c.closed_arrow(220, 54, 290, 54, emphasis=True)
-    c.label(254, 50, "break", anchor="middle")
+    c.label(218, 47, "break", anchor="end")
 
 
 def e_loop_else(c: Canvas) -> None:
@@ -271,7 +271,7 @@ def e_iterators(c: Canvas) -> None:
     c.node(60, 50, "idle", r=20)
     c.node(160, 50, "next()", r=24)
     c.node(252, 50, "done", r=22, ghost=True)
-    c.connect(60, 50, 20, 160, 50, 24, kind="emphasis", offset=2)
+    c.connect(60, 50, 20, 160, 50, 24, kind="stroke", offset=2)
     c.connect(160, 50, 24, 252, 50, 22, kind="emphasis", offset=2)
     c.label(110, 44, "iter()", anchor="middle")
     c.label(206, 44, "stop", anchor="middle")
@@ -285,7 +285,7 @@ def e_match_statements(c: Canvas) -> None:
         c.cell(40, y, "", w=180, h=18)
         c.mono(50, y + 12, txt, anchor="start", size=9)
     c.dashed(238, 36, 238, 100)
-    c.dot(238, 64, emphasis=True)
+    c.dot(238, 64)
     c.closed_arrow(238, 92, 238, 102, emphasis=True)
     c.label(254, 70, "first match")
 
@@ -570,7 +570,7 @@ def e_dataclasses(c: Canvas) -> None:
     for i, (n, t) in enumerate(fields):
         c.cell(20, 30 + i * 20, f"{n} : {t}", w=120, h=20)
     c.closed_arrow(140, 60, 178, 60)
-    c.object_box(180, 44, "", "__init__(name, age, tags)", w=124, h=32)
+    c.object_box(180, 44, "", "__init__(name, age, tags)", w=170, h=32)
 
 
 def e_properties(c: Canvas) -> None:
@@ -600,11 +600,11 @@ def e_metaclasses(c: Canvas) -> None:
 
 def e_context_managers(c: Canvas) -> None:
     c.node(40, 60, "in", r=14)
-    c.closed_arrow(54, 60, 100, 60, emphasis=False)
+    c.closed_arrow(54, 60, 96, 60, emphasis=False)
     c.cell(100, 44, "body", w=120, h=32)
-    c.closed_arrow(220, 60, 266, 60)
+    c.closed_arrow(220, 60, 262, 60)
     c.node(282, 60, "out", r=14)
-    c.dashed(160, 76, 268, 60)
+    c.dashed(160, 76, 264, 60)
 
 
 def e_delete_statements(c: Canvas) -> None:
@@ -644,10 +644,10 @@ def e_exception_groups(c: Canvas) -> None:
     for x in (30, 50, 70, 90):
         c.ghost(60, 38, x, 60)
     c.dot(30, 64)
-    c.dot(50, 64, emphasis=True)
+    c.dot(50, 64)
     c.dot(70, 64)
-    c.dot(90, 64, emphasis=True)
-    c.closed_arrow(120, 50, 180, 50)
+    c.dot(90, 64)
+    c.closed_arrow(120, 50, 180, 50, emphasis=True)
     c.label(150, 44, "except*", anchor="middle")
     c.tag(240, 16, "after", anchor="middle")
     c.dot(240, 32)
@@ -863,7 +863,7 @@ EXAMPLES = [
     Card("constants", "Constants", "Basics", 8, e_constants, note="UPPER_CASE — convention, not enforcement"),
     Card("truthiness", "Truthiness", "Basics", 9, e_truthiness),
     Card("equality-and-identity", "Equality and Identity", "Basics", 10, e_equality, height=110, note="same object · or two equal objects"),
-    Card("mutability", "Mutability", "Basics", 11, e_mutability, height=200),
+    Card("mutability", "Mutability", "Basics", 11, e_mutability, height=224),
     Card("strings", "Strings", "Basics", 12, e_strings),
     Card("string-formatting", "String Formatting", "Basics", 13, e_string_formatting, height=100),
     Card("conditionals", "Conditionals", "Control Flow", 14, e_conditionals, height=110),
@@ -901,7 +901,7 @@ EXAMPLES = [
     Card("decorators", "Decorators", "Functions", 46, e_decorators, height=130),
     Card("classes", "Classes", "Classes", 47, e_classes, height=110),
     Card("inheritance-and-super", "Inheritance and Super", "Classes", 48, e_inheritance, height=130),
-    Card("dataclasses", "Dataclasses", "Classes", 49, e_dataclasses, height=120),
+    Card("dataclasses", "Dataclasses", "Classes", 49, e_dataclasses, height=120, width=360),
     Card("properties", "Properties", "Classes", 50, e_properties, height=120),
     Card("special-methods", "Special Methods", "Data Model", 51, e_special_methods),
     Card("metaclasses", "Metaclasses", "Classes", 52, e_metaclasses, height=110),
