@@ -110,8 +110,7 @@
     .runner-panel { min-height: 18rem; display: flex; flex-direction: column; border: 1px dashed var(--hairline); border-radius: .75rem; padding: var(--space-3); background: var(--surface); }
     .runner-panel h2 { margin: 0 0 var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--hairline-soft); font-size: 1.05rem; letter-spacing: -0.02em; }
     .runner-panel pre { flex: 1; min-height: 0; overflow: visible; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
-    .runner-editor { border: 1px solid var(--hairline); border-left: 2px solid var(--accent); background: var(--surface-2); cursor: text; transition-property: border-color, box-shadow, background-color; transition-duration: 160ms; transition-timing-function: cubic-bezier(0.2, 0, 0, 1); }
-    .runner-editor:hover { background: var(--surface-3); }
+    .runner-editor { border-style: solid; background: var(--surface-2); cursor: text; transition: box-shadow 160ms cubic-bezier(0.2, 0, 0, 1); }
     .runner-editor:focus-within { box-shadow: 0 0 0 3px rgba(255, 72, 1, 0.12); }
     .execution-time { min-height: 1.5rem; margin: var(--space-2) 0 0; padding-top: var(--space-2); border-top: 1px solid var(--hairline-soft); color: var(--muted); font-size: .88rem; font-variant-numeric: tabular-nums; }
     .playground-toolbar { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin: .8rem 0 1rem; }
