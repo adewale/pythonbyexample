@@ -576,7 +576,7 @@ def render_journey_page(journey):
         sections.append(f'<section class="journey-section"><h2>{html.escape(section["title"])}</h2><p class="meta">{html.escape(section["summary"])}</p>{figure_html}<ul class="journey-list">{"".join(rows)}</ul></section>')
     content = f'''
 <article class="example-shell journey-page">
-  <div class="example-top"><a class="text-link" href="/">← All examples</a><a class="text-link" href="{html.escape(REFERENCE_URL)}">Python docs reference</a></div>
+  <div class="example-top"><a class="text-link" href="/">↑ All examples</a><a class="text-link" href="{html.escape(REFERENCE_URL)}">Python docs reference</a></div>
   <section class="example-intro">
     <p class="eyebrow">Journey</p>
     <h1>{html.escape(journey["title"])}</h1>
