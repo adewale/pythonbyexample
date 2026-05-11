@@ -160,22 +160,6 @@ PROTOTYPES = [
      "Same grammar with two figures in the banner — a Tufte small-multiple. The mutable list and the immutable tuple side by side, captioned, between the same pair of cells."),
     ("layout-banner-trio.html", "Layout · multiple banners across the walkthrough",
      "The grammar at scale: a single-figure banner before the walkthrough, a pair-banner between two cells, a single-figure summary after the last cell. Multiple diagrams; cells never displaced."),
-    ("journey-runtime.html", "Journey · Runtime",
-     "Programs run statements, names refer to objects, expressions become method calls."),
-    ("journey-control-flow.html", "Journey · Control Flow",
-     "Branches choose paths; the figure depicts a value flowing through a predicate to one of several branches."),
-    ("journey-iteration.html", "Journey · Iteration",
-     "Loops repeat; the protocol behind for is iter() then next() until exhausted."),
-    ("journey-shapes.html", "Journey · Shapes",
-     "Containers answer different questions; reshaping is the everyday move; text becomes structured data."),
-    ("journey-interfaces.html", "Journey · Interfaces",
-     "Functions are named behavior; functions are values; classes bundle state with behavior."),
-    ("journey-types.html", "Journey · Types",
-     "Annotations describe but don't enforce; unions cover alternatives; generics preserve shape across calls."),
-    ("journey-reliability.html", "Journey · Reliability",
-     "Failure is explicit; resources have boundaries; concurrency outlives single expressions."),
-    ("journey-workers.html", "Journey · Workers",
-     "Workers-specific journey added on main; section figures pending design."),
 ]
 
 
@@ -238,75 +222,6 @@ BANNER_CSS = """
   .cell-banner--1 figure { max-width: 440px; }
 """
 
-
-# ─── Journey prototype ─────────────────────────────────────────────────
-
-
-JOURNEY_STYLE = """
-  .journey-section { display: grid; grid-template-columns: minmax(0, 1fr); gap: var(--space-4); }
-  @media (min-width: 900px) {
-    .journey-section { grid-template-columns: minmax(0, 1.4fr) minmax(220px, 320px); align-items: start; }
-  }
-  .journey-figure { margin: 0; padding: 0; }
-  .journey-figure svg { max-width: 100%; height: auto; display: block; }
-  .journey-figure figcaption { margin-top: var(--space-2); color: var(--muted); font-size: .85rem; font-style: italic; }
-"""
-
-
-
-
-def build_journey(slug: str) -> None:
-    journey = JOURNEYS_BY_SLUG[slug]
-    sections_html = []
-    for section in journey["sections"]:
-        items = []
-        for item in section["items"]:
-            if item[0] == "example":
-                _, ex_slug, sentence = item
-                ex = get_example(ex_slug)
-                items.append(
-                    f'<li><a class="text-link journey-item-title" href="/examples/{html.escape(ex_slug)}">{html.escape(ex["title"]) if ex else ex_slug}</a><p class="meta">{html.escape(sentence)}</p></li>'
-                )
-            else:
-                _, label, sentence = item
-                items.append(
-                    f'<li><p class="journey-gap-label">Gap · {html.escape(label)}</p><p class="meta">{html.escape(sentence)}</p></li>'
-                )
-        figure_entry = JOURNEY_SECTION_FIGURES.get(section["title"])
-        fig_html = ""
-        if figure_entry is not None:
-            fig_name, caption = figure_entry
-            fig_html = (
-                f'<figure class="journey-figure">{_render_svg(fig_name)}'
-                f'<figcaption>{html.escape(caption)}</figcaption></figure>'
-            )
-        sections_html.append(
-            f'<section class="journey-section">'
-            f'<div><h2>{html.escape(section["title"])}</h2>'
-            f'<p class="meta">{html.escape(section["summary"])}</p>'
-            f'<ul class="journey-list">{"".join(items)}</ul></div>'
-            f"{fig_html}"
-            f"</section>"
-        )
-    body = f"""
-<article class="example-shell journey-page">
-  <div class="example-top"><a class="text-link" href="/">← Home</a></div>
-  <section class="example-intro">
-    <p class="eyebrow">Journey</p>
-    <h1>{html.escape(journey['title'])}</h1>
-    <p class="meta">{html.escape(journey['summary'])}</p>
-  </section>
-  {''.join(sections_html)}
-</article>
-"""
-    (OUT_DIR / f"journey-{slug}.html").write_text(
-        page(
-            f"Journey · {journey['title']}",
-            f"{journey['title']} journey with one section-faithful figure per section. Each figure captures the conceptual shift the section introduces.",
-            JOURNEY_STYLE,
-            body,
-        )
-    )
 
 
 # ─── Journey-figures gestalt (all 18 section figures on one page) ──────
@@ -541,17 +456,6 @@ def main() -> None:
         )
     )
 
-    for journey_slug in (
-        "runtime",
-        "control-flow",
-        "iteration",
-        "shapes",
-        "interfaces",
-        "types",
-        "reliability",
-        "workers",
-    ):
-        build_journey(journey_slug)
     build_journey_figures_gestalt()
     build_production_figures_gestalt()
     written = sorted(p.name for p in OUT_DIR.iterdir() if p.is_file() and p.suffix == ".html")
