@@ -5,16 +5,14 @@ named figures here and attaches them to cells via slug + anchor.
 
 Anchors today:
     "cell-0", "cell-1", … each literate-program cell, zero-indexed.
+    The figure renders in a banner row AFTER the named cell.
 
-(Reserved for future positions: `intro`, `notes`, `playground`. Banner
-positions `before` / `after-cell-N` / `after-walkthrough` are documented
-in the spec but currently exercised only by scripts/build_prototypes.py.)
-
-The renderer in app.py emits each attached figure inline inside its cell
-as `<figure class="cell-figure">`. The cell switches to single-column
-stacking (prose, figure, code) via the `has-figure` class so the figure
-sits between prose and code-stack without disturbing cells without
-figures, which keep today's prose|code 2-column grid.
+The renderer in app.py interleaves cells and banners: every cell keeps
+its prose|code 2-column grid intact, and a banner row spanning both
+columns sits between cells (or after the only cell on single-cell
+examples). Multiple figures attached to the same cell share one
+banner as a small multiple. Cells without an attached figure render
+exactly as before.
 
 See docs/visual-explainer-spec.md for the full design and
 docs/journey-visualisation-rubric.md for the figure-quality rubric.
@@ -1845,19 +1843,20 @@ def _render_svg(figure_name: str) -> str:
 
 
 def render_for_anchor(slug: str, anchor: str) -> str:
-    """HTML for inline figures inside an anchor block. Empty if none.
+    """HTML for a banner row sitting AFTER the named cell. Empty if none.
 
-    Returns one or more `<figure class="cell-figure">` elements. The cell
-    that hosts the figure switches to single-column layout via the
-    has-figure class added by the renderer, so prose, figure, and code
-    stack vertically.
+    Cells always keep their prose|code 2-column grid. Figures live in
+    banner rows that span both columns BETWEEN cells (and after the
+    walkthrough for single-cell examples). Multiple figures attached to
+    the same cell share one banner as a small multiple.
     """
     attachments = ATTACHMENTS.get(slug, [])
     matched = [(name, caption) for (a, name, caption) in attachments if a == anchor]
     if not matched:
         return ""
-    parts = []
+    figures: list[str] = []
     for name, caption in matched:
         cap = f"<figcaption>{html.escape(caption)}</figcaption>" if caption else ""
-        parts.append(f'<figure class="cell-figure">{_render_svg(name)}{cap}</figure>')
-    return "".join(parts)
+        figures.append(f"<figure>{_render_svg(name)}{cap}</figure>")
+    count_class = f" cell-banner--{len(matched)}"
+    return f'<div class="cell-banner{count_class}">{"".join(figures)}</div>'

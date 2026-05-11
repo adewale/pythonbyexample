@@ -723,14 +723,12 @@ const field = editor(); if (field) field.addEventListener('input', resizeEditor)
     return _layout(f'{example["title"]} literate cells option', content, description=f'Prototype layout for the {example["title"]} Python example.', path='/layout-options/cell-output-flow', include_editor=True)
 
 
-def _render_cell(step, *, slug=None, index=None):
+def _render_cell(step):
     prose_html = "".join(f"<p>{render_inline(prose)}</p>" for prose in step["prose"])
     source = html.escape(step["code"])
     if step.get("kind") == "unsupported":
         return f'<section class="lesson-step lp-cell unsupported-cell"><div class="lp-prose">{prose_html}</div><div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Standard Python</p><pre><code class="language-python">{source}</code></pre></div></div></section>'
-    figure_html = render_for_anchor(slug, f"cell-{index}") if slug is not None and index is not None else ""
-    css_class = "lesson-step lp-cell" + (" has-figure" if figure_html else "")
-    return f'<section class="{css_class}"><div class="lp-prose">{prose_html}</div>{figure_html}<div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">{source}</code></pre></div><div class="cell-output"><p class="cell-label">Output</p><pre><code>{html.escape(step["output"])}</code></pre></div></div></section>'
+    return f'<section class="lesson-step lp-cell"><div class="lp-prose">{prose_html}</div><div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">{source}</code></pre></div><div class="cell-output"><p class="cell-label">Output</p><pre><code>{html.escape(step["output"])}</code></pre></div></div></section>'
 
 
 def render_example_page(example, output=None, code=None, execution_time_ms=None):
@@ -751,7 +749,13 @@ def render_example_page(example, output=None, code=None, execution_time_ms=None)
         if next_example
         else "<span></span>"
     )
-    walkthrough_html = "".join(_render_cell(step, slug=example["slug"], index=i) for i, step in enumerate(walkthrough))
+    walkthrough_parts: list[str] = []
+    for i, step in enumerate(walkthrough):
+        walkthrough_parts.append(_render_cell(step))
+        banner_html = render_for_anchor(example["slug"], f"cell-{i}")
+        if banner_html:
+            walkthrough_parts.append(banner_html)
+    walkthrough_html = "".join(walkthrough_parts)
     notes_html = "".join(f"<li>{note}</li>" for note in notes)
     see_also_examples = [get_example(slug) for slug in example.get("see_also", [])]
     see_also_links = "".join(

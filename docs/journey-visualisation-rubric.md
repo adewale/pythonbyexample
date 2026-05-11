@@ -52,7 +52,7 @@ Score each section figure on a 10-point scale.
 
 9. **Independence from lesson figures (0-1.0)** — distinct framing
    from any single lesson's diagram. If the section figure is
-   identical to a `cell-figure` in one of the section's lessons,
+   identical to the banner figure in one of the section's lessons,
    one of them is wrong. Usually the section figure should be the
    *more abstract* one.
 10. **Layout fit (0-0.5)** — renders comfortably at the journey

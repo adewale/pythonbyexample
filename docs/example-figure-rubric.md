@@ -53,16 +53,16 @@ Score each example figure on a 10-point scale.
 
 ## Context (1.5)
 
-9. **Cell-column fit (0-1.0)** — the figure's intrinsic width sits
-   comfortably inside `.cell-figure`'s `max-width: 360px`. Wider
-   intrinsic widths are clamped (good — figures shrink, never grow);
-   much narrower widths leave whitespace on either side. Aim for an
-   intrinsic viewBox between 200 and 360 px wide.
-10. **Pairs with the code, not the title (0-0.5)** — when the figure
-    sits next to its source block (cell-figure layout), the eye reads
-    prose → figure → source as one move. The figure should make the
-    *source* easier to read, not stand alone as a generic
-    illustration of the example title.
+9. **Banner-row fit (0-1.0)** — the figure's intrinsic width sits
+   comfortably inside `.cell-banner`'s auto-fit grid. Intrinsic widths
+   beyond ~360 px clamp to the column without growing past it; much
+   narrower viewBoxes leave whitespace either side of the centred
+   figure. Aim for an intrinsic viewBox between 200 and 360 px wide.
+10. **Pairs with the surrounding cell (0-0.5)** — the banner sits
+    AFTER the named cell, so the eye reads cell-prose → cell-code →
+    banner. The figure should summarise the move the surrounding
+    cell just made, not stand alone as a generic illustration of the
+    example title.
 
 ## Topic gates (cell-shape specific)
 

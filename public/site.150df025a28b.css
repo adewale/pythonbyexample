@@ -105,11 +105,12 @@
     .site-footer-note { font-size: .82rem; }
     @media (max-width: 860px) { .lesson-step, .runner-grid { grid-template-columns: 1fr; } body { padding: .875rem; } header { margin-inline: -.875rem; padding-inline: .875rem; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 1ms !important; } }
-    /* Inline cell figure: a figure attached to a cell sits between prose
-       and code-stack. The cell drops to single-column so prose, figure,
-       and code stack vertically. Cells without a figure keep the
-       prose|code 2-column grid unchanged. See docs/visual-explainer-spec.md. */
-    .lp-cell.has-figure { grid-template-columns: 1fr; }
-    .cell-figure { margin: 0; padding: 0; }
-    .cell-figure svg { max-width: min(100%, 360px); height: auto; display: block; }
-    .cell-figure figcaption { margin-top: var(--space-2); color: var(--muted); font-size: .92rem; font-style: italic; max-width: 56ch; }
+    /* Cell banner: a figure attached to a cell renders in a banner row
+       AFTER that cell, spanning the full content width. Cells always
+       keep their prose|code 2-column grid; banners between cells hold
+       one or many figures (small multiples). See docs/visual-explainer-spec.md. */
+    .cell-banner { margin: var(--space-5) 0; padding: var(--space-4) 0; border-block: 1px dashed var(--hairline-soft); display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); justify-items: center; }
+    .cell-banner figure { margin: 0; padding: 0; max-width: 360px; }
+    .cell-banner svg { max-width: 100%; height: auto; display: block; }
+    .cell-banner figcaption { margin-top: var(--space-2); color: var(--muted); font-size: .92rem; font-style: italic; max-width: 44ch; }
+    .cell-banner--1 figure { max-width: 440px; }

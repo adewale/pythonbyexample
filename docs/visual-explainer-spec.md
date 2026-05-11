@@ -248,9 +248,9 @@ explicitly. Re-introducing either is a defect.
 - `src/app.py` — `_render_walkthrough_cell` is the current rendering
   helper; the banner-between rollout will rename or replace it with a
   walkthrough-level renderer that interleaves cells and banners.
-- `public/site.css` — currently `.lp-cell.has-figure` and `.cell-figure`
-  rules; will gain `.cell-banner` rules when the banner grammar ships
-  in production.
+- `public/site.css` — `.cell-banner` rules. Production uses the
+  banner-between grammar; cells always render with the prose|code
+  2-column grid and never receive a `has-figure` class.
 - `scripts/build_prototypes.py` — already implements the banner grammar
   and journey-section grammar so prototypes can validate it before
   production migration.
