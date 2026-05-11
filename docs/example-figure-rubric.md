@@ -99,6 +99,12 @@ per-figure scoring.
 
 ## Release gates outside the score
 
+These are not scored; a figure that violates any of them does not
+ship. The geometry, palette, font, stroke, emphasis, registration,
+and caption gates are now enforced by automated contracts in
+`tests/test_marginalia_geometry.py` (Contracts 1-9). CI fails before
+the figure can merge.
+
 - **One figure per cell, at most.** Two figures on one cell signal
   the cell is doing two things; split the cell instead.
 - **figcaption present and declarative.** Captions in the form
@@ -108,10 +114,55 @@ per-figure scoring.
 - **figcaption agrees with the cell's prose.** The cell's prose
   paragraph in the markdown and the figure's figcaption assert the
   same thing in different words. If they disagree, one is wrong.
+- **figcaption is unique across slugs.** A reused figure can serve
+  multiple lessons (`iter-protocol` attaches to four), but each
+  lesson must frame the figure in its own voice. Verbatim caption
+  reuse copies the lesson voice the same way verbatim code reuse
+  copies the example. *Contract 5b — FigureCaptionContract.*
+- **No clipping.** Every `<rect>`, `<text>`, `<line>`, `<circle>`,
+  `<path>` lives inside the padded viewBox. Text width counts: a
+  long mono string in a too-narrow box clips even if the geometry
+  looks right at first glance. *Contract 1.*
+- **No element collision.** Text that overlaps a rect must be
+  fully contained by that rect. A type tag sitting on top of the
+  box above it (the `/examples/values` STR-LIST-DICT bug) is the
+  canonical violation. *Contract 2.*
+- **No text-text overlap.** Two text elements may not occupy
+  overlapping bounding boxes (the `itertools-chain` "ITER A" /
+  "1 · 2" collision in a too-narrow box). *Contract 3.*
 - **Palette discipline.** Only `INK`, `INK_SOFT`, `EMPHASIS`,
-  `SOFT_FILL`. No literal hex codes, no `rgba(0,0,0,…)` neutrals.
+  `SOFT_FILL`, or `"none"` may appear as fill or stroke. *Contract
+  5a — FigureGrammarContract.*
+- **Font discipline.** Only `FONT_SERIF`, `FONT_MONO`, `FONT_SANS`
+  may appear as `font-family`. *Contract 5b.*
+- **Stroke-weight discipline.** Only `W_HAIRLINE`, `W_STROKE`,
+  `W_EMPHASIS`, `W_GHOST`. *Contract 5c.*
+- **Emphasis scarcity, enforced.** At most ONE accent mark
+  (`EMPHASIS`-coloured arrowhead, caret, dot, or rect stroke) per
+  figure. Was a soft v1 criterion; now hard. *Contract 9.*
+- **Banner-fit, enforced.** Every figure's intrinsic width
+  (Canvas.w + 2 · PAD_X) must fit `.cell-banner--1`'s 440px max
+  ceiling. *Contract 8.*
+- **Twin consistency.** When two figures depict parallel concepts
+  (`kw-only-separator` ↔ `positional-only-separator`,
+  `class-triangle` ↔ `metaclass-triangle`), their metrics must
+  match coordinate-for-coordinate where the concepts coincide. A
+  fix to one is a fix to both, in the same commit.
+- **Geometric termination.** Lines that connect to dots, circles,
+  or rects must terminate AT the element's edge — not 1-2px short
+  (looks disconnected) and not inside the glyph (looks broken).
+  When in doubt, end the line at the centre and let the dot draw
+  on top.
+- **Mono character alignment.** When a vertical divider marks a
+  position in mono text, its x must match the character's actual
+  centre. JetBrains Mono advances ~6px per char at fs=10. A
+  visually-similar `82` and `75` are not interchangeable.
 - **Pipeline invariants** (see spec) hold: SVG renders at intrinsic
   size; SVG contains no prose duplicating the caption.
+- **Gestalt = production.** Review pages under `/prototyping/*`
+  must render the same paint code as the production attachments.
+  Parallel `e_*` paint functions for "gestalt versions" drift from
+  production and hide bugs; we eliminated 76 of them in May 2026.
 
 ## Page-level coherence (per slug, multi-figure)
 
