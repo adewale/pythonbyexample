@@ -892,12 +892,14 @@ def set_buckets(c: Canvas) -> None:
 
 
 def tuple_frozen(c: Canvas) -> None:
-    """Tuples · ordered, immutable sequence; positions matter, contents do not change."""
-    c.tag(0, 0, "immutable sequence")
+    """Tuples · ordered, immutable sequence; .append doesn't exist."""
+    c.tag(0, 0, "frozen sequence")
     c.cell(0, 12, "(3, 1, 4, 1)", w=180, h=26)
     c.dashed(45, 8, 45, 42)
     c.dashed(90, 8, 90, 42)
     c.dashed(135, 8, 135, 42)
+    c.cell(196, 12, ".append", w=70, h=26, ghost=True)
+    c.dashed(196, 24, 266, 24)
 
 
 def value_types(c: Canvas) -> None:
@@ -906,6 +908,32 @@ def value_types(c: Canvas) -> None:
     for i, (t, v) in enumerate(rows):
         y = i * 28
         c.object_box(0, y, t, v, w=160, h=24)
+
+
+def literal_forms(c: Canvas) -> None:
+    """Literals · each type has its own literal spellings; the source spelling determines the value type."""
+    rows = [
+        ("int", "42  ·  0x2a  ·  0b101"),
+        ("float", "3.14  ·  1e-3"),
+        ("str", '"hi"  ·  \'hi\''),
+        ("list", "[1, 2, 3]"),
+        ("dict", "{k: v}"),
+        ("set", "{1, 2, 3}"),
+    ]
+    for i, (t, spellings) in enumerate(rows):
+        y = i * 22
+        c.cell(0, y, t, w=50, h=20, soft=True)
+        c.cell(52, y, spellings, w=200, h=20)
+
+
+def function_with_body(c: Canvas) -> None:
+    """Functions · `def greet(name): return "Hello, " + name` takes input, computes, returns output."""
+    c.closed_arrow(0, 36, 30, 36, emphasis=False)
+    c.label(15, 28, "name", anchor="middle")
+    c.frame(32, 18, 150, 44, label="def greet(name):")
+    c.mono(107, 44, '"Hello, " + name')
+    c.closed_arrow(182, 36, 212, 36, emphasis=True)
+    c.cell(214, 24, '"Hello, Ada"', w=120, h=24, soft=True)
 
 
 def yield_delegation(c: Canvas) -> None:
@@ -1341,6 +1369,9 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "match-dispatch-ladder": (match_dispatch_ladder, 220, 130),
     "match-pattern-variants": (match_pattern_variants, 272, 96),
     "loop-else-gate": (loop_else_gate, 312, 76),
+    # Sixth pass: lift the lingering 8.0-band figures with slug-specific paint
+    "literal-forms": (literal_forms, 252, 132),
+    "function-with-body": (function_with_body, 334, 68),
 }
 
 
@@ -1733,8 +1764,8 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "Container protocols share the iter/next backbone; __iter__ + __next__ make any object iterable.",
     )],
     "functions": [(
-        "cell-0", "function-signature",
-        "A function packages parameters, a body, and a return value behind a name.",
+        "cell-0", "function-with-body",
+        "A function takes inputs, evaluates a body, and returns a value: `greet('Ada')` produces `'Hello, Ada'`.",
     )],
     "constants": [(
         "cell-0", "variables-bind",
@@ -1749,8 +1780,8 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "Capture, alternative, guard, and class patterns each name a different way a value can match a case.",
     )],
     "literals": [(
-        "cell-0", "value-types",
-        "Each literal form constructs an object of a specific type; the source spelling and the value type stay in sync.",
+        "cell-0", "literal-forms",
+        "Each Python type has its own literal spellings; ints accept decimal, hex, and binary; strings accept either quote.",
     )],
     # Fourth coverage push: constraint-shaped examples
     "packages": [(
