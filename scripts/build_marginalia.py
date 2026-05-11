@@ -24,7 +24,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
 from marginalia import ATTACHMENTS, FIGURES, SCORES  # noqa: E402  (sys.path set above)
-from marginalia_grammar import Canvas, Card  # noqa: E402
+from marginalia_grammar import Card  # noqa: E402
 from example_loader import load_examples  # noqa: E402
 
 OUT = ROOT / "public" / "prototyping" / "marginalia-gestalt.html"
