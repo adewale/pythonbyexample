@@ -152,8 +152,6 @@ PROTOTYPES = [
      "All journey section figures on one page, grouped by journey, for uniform rubric review."),
     ("production-figures-gestalt.html", "Production figures gestalt",
      "Every figure currently registered in src/marginalia.py FIGURES, with a tag showing where it renders (example attachment, journey section, or unattached)."),
-    ("operators-polish-comparison.html", "Operators alignment polish",
-     "Side-by-side before/after for the tree-edge alignment fix; demonstrates Canvas.connect()."),
     ("layout-banner-single.html", "Layout · banner between cells",
      "The grammar: cells stay 2-column always; figures live in banner rows BETWEEN cells. Holds one figure here. The intended union of Tufte/Knuth/algebrica."),
     ("layout-banner-pair.html", "Layout · banner with small-multiples pair",
