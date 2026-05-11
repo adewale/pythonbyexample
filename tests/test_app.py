@@ -321,7 +321,7 @@ class AppTests(unittest.TestCase):
         self.assertNotIn('data-share', html)
         self.assertIn('output-panel', html)
         self.assertIn(".runner-panel", css)
-        self.assertIn(".runner-panel h2", css)
+        self.assertIn(".runner-panel h3", css)
         self.assertIn("text-underline-offset", css)
         self.assertIn('aria-live="polite"', html)
         self.assertIn('min-height: 18rem', css)

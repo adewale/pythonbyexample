@@ -115,10 +115,10 @@ def render_article(example: dict, *, banners: dict[str, str] | None = None) -> s
     <h2>Run the complete example</h2>
     <div class="runner-grid">
       <div class="runner-panel runner-editor">
-        <h2>Example code</h2>
+        <h3>Example code</h3>
         <pre><code class="language-python">{code}</code></pre>
       </div>
-      <section class="runner-panel output-panel"><h2>Expected output</h2><pre><code>{output}</code></pre></section>
+      <section class="runner-panel output-panel"><h3>Expected output</h3><pre><code>{output}</code></pre></section>
     </div>
   </section>
 </article>
