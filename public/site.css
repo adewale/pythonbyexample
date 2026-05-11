@@ -28,8 +28,21 @@
     .brand { font-weight: 800; }
     .nav-links { display: flex; gap: .35rem; }
     .nav-links a { padding: 0 .9rem; color: var(--muted); }
-    .hero { overflow: hidden; border: 1px solid var(--hairline); border-radius: 1rem; padding: clamp(1.5rem, 5vw, 4rem); margin-bottom: 1.25rem; background: linear-gradient(135deg, var(--surface), var(--surface-3)); box-shadow: 0 1px 3px rgba(82, 16, 0, 0.04), 0 4px 12px rgba(82, 16, 0, 0.02); }
-    .hero p { max-width: 66ch; color: var(--muted); font-size: 1.08rem; }
+    .hero { overflow: hidden; border: 1px solid var(--hairline); border-radius: 1rem; padding: clamp(1.25rem, 3.5vw, 2.5rem); margin-bottom: 1.25rem; background: linear-gradient(135deg, var(--surface), var(--surface-3)); box-shadow: 0 1px 3px rgba(82, 16, 0, 0.04), 0 4px 12px rgba(82, 16, 0, 0.02); transform-origin: top center; }
+    .hero h1 { font-size: clamp(2rem, 4vw, 3rem); margin-bottom: var(--space-3); }
+    .hero p { max-width: 60ch; color: var(--muted); font-size: 1rem; }
+    @supports (animation-timeline: scroll()) {
+      @media (prefers-reduced-motion: no-preference) {
+        .hero { animation: hero-collapse linear forwards; animation-timeline: scroll(root); animation-range: 0 320px; }
+        header { animation: header-solidify linear forwards; animation-timeline: scroll(root); animation-range: 0 240px; }
+      }
+    }
+    @keyframes hero-collapse {
+      to { transform: scale(0.55) translateY(-32px); opacity: 0; }
+    }
+    @keyframes header-solidify {
+      to { background: rgba(245, 241, 235, 0.95); box-shadow: 0 1px 8px rgba(82, 16, 0, 0.06); }
+    }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-3); }
     .card { display: block; min-height: 10rem; border: 1px solid var(--hairline); border-radius: .75rem; padding: var(--space-3); background: var(--surface-2); color: inherit; text-decoration: none; box-shadow: 0 1px 3px rgba(82, 16, 0, 0.04), 0 4px 12px rgba(82, 16, 0, 0.02); transition-property: transform, background-color, border-color; transition-duration: 200ms; transition-timing-function: cubic-bezier(0, 0, 0.2, 1); }
     .card:hover { transform: translateY(-2px); background: var(--surface-3); border-color: var(--accent); }
