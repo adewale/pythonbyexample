@@ -317,8 +317,20 @@ class Canvas:
         # narrow columns. Without these attributes, browsers stretch the SVG
         # to fit width: 100% containers, magnifying text inside small
         # viewBoxes (a 156-wide viewBox in a 320-wide column ran at 2x).
+        #
+        # The PAD_* offsets give every figure a small margin around its
+        # registered canvas. Most figures place a type-tag at y - 3 above
+        # the topmost box, which without padding renders outside the
+        # viewBox and gets clipped. PAD_TOP=14 covers the SIZE_TAG=8 font
+        # plus its baseline offset. PAD_X handles the rare paint function
+        # that draws slightly negative x. PAD_BOTTOM absorbs small
+        # accidental overflows.
+        pad_top, pad_x, pad_bottom = 14, 8, 14
+        vb_w = self.w + 2 * pad_x
+        vb_h = self.h + pad_top + pad_bottom
         return (
-            f'<svg viewBox="0 0 {self.w} {self.h}" width="{self.w}" height="{self.h}" '
+            f'<svg viewBox="-{pad_x} -{pad_top} {vb_w} {vb_h}" '
+            f'width="{vb_w}" height="{vb_h}" '
             f'xmlns="http://www.w3.org/2000/svg">'
             + "".join(self.parts)
             + "</svg>"

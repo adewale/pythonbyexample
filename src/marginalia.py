@@ -1288,7 +1288,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     # Workers journey (constraint-shaped sections; tightened designs)
     "workers-portable-evidence": (workers_portable_evidence, 222, 84),
     "workers-protocol-local": (workers_protocol_local, 144, 110),
-    "workers-lesson-runtime": (workers_lesson_runtime, 200, 46),
+    "workers-lesson-runtime": (workers_lesson_runtime, 200, 80),
     # Newly designed paint code for examples that lacked a figure
     "number-lines": (number_lines, 260, 78),
     "expression-tree": (expression_tree, 220, 92),
@@ -1326,7 +1326,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "truthy-check": (truthy_check, 240, 70),
     "boolean-truth-table": (boolean_truth_table, 132, 64),
     "set-buckets": (set_buckets, 156, 90),
-    "tuple-frozen": (tuple_frozen, 180, 48),
+    "tuple-frozen": (tuple_frozen, 220, 48),
     "value-types": (value_types, 160, 100),
     "yield-delegation": (yield_delegation, 240, 84),
     "itertools-chain": (itertools_chain, 246, 60),
