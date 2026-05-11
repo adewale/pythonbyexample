@@ -542,7 +542,7 @@ def render_journeys_index():
 <section class="hero">
   <p class="eyebrow">Journeys</p>
   <h1>Python learning journeys</h1>
-  <p>These paths compose individual examples into larger mental maps. They are inspired by the way Apprenticeship Patterns treats small patterns as material for longer learning journeys.</p>
+  <p>These paths compose individual examples into larger mental maps. They are inspired by the way <a class="text-link" href="https://www.oreilly.com/library/view/apprenticeship-patterns/9780596806842/">Apprenticeship Patterns</a> treats small patterns as material for longer learning journeys.</p>
 </section>
 <section class="grid journey-grid">{"".join(cards)}</section>
 '''
