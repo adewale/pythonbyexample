@@ -24,26 +24,10 @@ from src.marginalia import ATTACHMENTS, FIGURES, SCORES
 from src.marginalia_grammar import Canvas
 
 
-def _gestalt_figures() -> dict[str, tuple]:
-    """Paint functions registered in scripts/build_marginalia.py
-    EXAMPLES. They render on the gestalt review pages under
-    /prototyping/* and use the same Canvas grammar as src/marginalia.py
-    FIGURES — so the geometry contracts apply to them too.
-    """
-    import importlib.util
-    from pathlib import Path
-
-    path = Path(__file__).resolve().parents[1] / "scripts" / "build_marginalia.py"
-    spec = importlib.util.spec_from_file_location("build_marginalia", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return {card.slug: (card.figure, card.width, card.height) for card in module.EXAMPLES}
-
-
-# Combined audit surface: production figures + gestalt thumbnails.
-# Tests iterate the union so a gestalt regression fires as loudly
-# as a production one.
-ALL_FIGURES: dict[str, tuple] = {**FIGURES, **_gestalt_figures()}
+# The gestalt review pages under /prototyping/* render the same paint
+# functions that ship on /examples/<slug>, so auditing FIGURES is
+# sufficient — there is no separate gestalt registry to walk.
+ALL_FIGURES: dict[str, tuple] = FIGURES
 
 ATTR = re.compile(r'([\w-]+)="([^"]+)"')
 
