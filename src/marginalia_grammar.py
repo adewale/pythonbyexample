@@ -205,9 +205,17 @@ class Canvas:
             self.cell(x + i * w, y, c, w=w, h=h)
         return (x, y, x + len(items) * w, y + h)
 
-    def caret(self, x, y_top):
-        """Triangular caret pointing down into the cell whose top is at y_top."""
-        self._add(f'<polygon points="{x},{y_top - 1} {x - 4},{y_top - 7} {x + 4},{y_top - 7}" fill="{EMPHASIS}"/>')
+    def caret(self, x, y_top, *, emphasis=True):
+        """Triangular caret pointing down into the cell whose top is at y_top.
+
+        Defaults to the orange emphasis colour because a caret typically
+        marks the live position. Set emphasis=False when multiple carets
+        appear in the same figure (small multiples) and the surrounding
+        prose only names one of them — the others paint in ink so the
+        scarce-emphasis rule still holds.
+        """
+        fill = EMPHASIS if emphasis else INK
+        self._add(f'<polygon points="{x},{y_top - 1} {x - 4},{y_top - 7} {x + 4},{y_top - 7}" fill="{fill}"/>')
 
     def register(self, x, y, w, *, divisions=None, between=False):
         """Hairline with regular ticks."""

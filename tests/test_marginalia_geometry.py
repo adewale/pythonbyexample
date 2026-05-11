@@ -414,5 +414,44 @@ class FigureSizeContract(unittest.TestCase):
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
 
+class FigureEmphasisScarcityContract(unittest.TestCase):
+    """Contract 9: at most one accent mark (EMPHASIS-colored) per figure.
+
+    From docs/example-figure-rubric.md criterion 7: "at most one accent
+    mark per figure. The accent goes on the single element the cell
+    prose names (the live mutation, the captured cell, the dispatch
+    arrow). Three accent marks competing for attention is no emphasis
+    at all."
+
+    An accent mark is counted as one whole arrow (the line + polygon
+    pair that `closed_arrow(emphasis=True)` emits), one orange caret,
+    or one element whose fill or stroke is the EMPHASIS colour and
+    isn't part of those compound shapes.
+    """
+
+    def test_at_most_one_accent_per_figure(self):
+        from src.marginalia_grammar import EMPHASIS
+
+        failures: list[str] = []
+        for name, (paint, w, h) in FIGURES.items():
+            canvas = Canvas(w=w, h=h)
+            paint(canvas)
+            accents = 0
+            for part in canvas.parts:
+                attrs = dict(ATTR.findall(part))
+                # The closed_arrow primitive emits BOTH a coloured <line>
+                # and a coloured <polygon> for one arrow head; count the
+                # polygon and ignore the line to avoid double-counting.
+                if part.startswith("<polygon") and attrs.get("fill") == EMPHASIS:
+                    accents += 1
+                elif part.startswith("<circle") and attrs.get("fill") == EMPHASIS:
+                    accents += 1
+                elif part.startswith("<rect") and attrs.get("stroke") == EMPHASIS:
+                    accents += 1
+            if accents > 1:
+                failures.append(f"{name}: {accents} accent marks (rubric allows at most 1)")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -73,7 +73,7 @@ def iterator_unroll(c: Canvas) -> None:
     for i in range(4):
         y = 8 + i * 30
         c.cells(20, y, items)
-        c.caret(20 + i * 24 + 12, y)
+        c.caret(20 + i * 24 + 12, y, emphasis=(i == 3))
         suffix = " — last" if i == 3 else ""
         c.label(124, y + 16, f"next(){suffix}")
 
@@ -137,7 +137,7 @@ def branch_fork(c: Canvas) -> None:
 def loop_repetition(c: Canvas) -> None:
     """The shape of a loop: walk the sequence, run the body, return."""
     c.cells(0, 28, ["a", "b", "c", "d"], w=28)
-    c.caret(0 + 14, 28)
+    c.caret(0 + 14, 28, emphasis=False)
     c.closed_arrow(116, 40, 142, 40, emphasis=False)
     c.cell(144, 28, "body", w=56, h=24)
     c.dashed(172, 54, 172, 76)
@@ -282,7 +282,7 @@ def union_types(c: Canvas) -> None:
 def generic_preservation(c: Canvas) -> None:
     """Types · Scale annotations: a generic preserves the input type through the call."""
     c.cell(0, 30, "T", w=36, h=28, soft=True)
-    c.closed_arrow(36, 44, 72, 44, emphasis=True)
+    c.closed_arrow(36, 44, 72, 44, emphasis=False)
     c.frame(74, 26, 100, 36, label="fn[T]")
     c.closed_arrow(174, 44, 210, 44, emphasis=True)
     c.cell(212, 30, "T", w=36, h=28, soft=True)
@@ -339,7 +339,7 @@ def naming_decisions(c: Canvas) -> None:
 def early_exit(c: Canvas) -> None:
     """Control flow · Stop as soon as the answer is known: the loop exits on first match."""
     c.cells(0, 28, ["a", "b", "c", "d", "e"], w=28)
-    c.dot(70, 40, emphasis=True)
+    c.dot(70, 40)
     c.closed_arrow(70, 56, 70, 78, emphasis=True)
     c.cell(40, 80, "found · break", w=80, h=24, soft=True)
     c.label(70, 14, "first match", anchor="middle")
@@ -969,9 +969,9 @@ def exception_group_peel(c: Canvas) -> None:
     for x in (20, 36, 52, 68):
         c.ghost(40, 18, x, 40)
     c.dot(20, 44)
-    c.dot(36, 44, emphasis=True)
+    c.dot(36, 44)
     c.dot(52, 44)
-    c.dot(68, 44, emphasis=True)
+    c.dot(68, 44)
     c.closed_arrow(90, 30, 140, 30, emphasis=True)
     c.label(115, 22, "except*", anchor="middle")
     c.tag(160, 0, "after")
@@ -1094,7 +1094,7 @@ def overload_signatures(c: Canvas) -> None:
 def paramspec_preserve(c: Canvas) -> None:
     """ParamSpec · the decorator preserves the wrapped function's full signature, parameter for parameter."""
     c.cell(0, 22, "f(P)", w=50, h=24)
-    c.closed_arrow(50, 34, 80, 34, emphasis=True)
+    c.closed_arrow(50, 34, 80, 34, emphasis=False)
     c.frame(82, 12, 100, 44, label="@dec")
     c.mono(132, 36, "P preserved")
     c.closed_arrow(182, 34, 212, 34, emphasis=True)
@@ -1194,7 +1194,7 @@ def match_dispatch_ladder(c: Canvas) -> None:
     for i, txt in enumerate(cases):
         c.cell(0, 30 + i * 22, txt, w=170, h=20)
     c.dashed(186, 32, 186, 122)
-    c.dot(186, 74, emphasis=True)
+    c.dot(186, 74)
     c.closed_arrow(186, 110, 186, 124, emphasis=True)
     c.label(196, 76, "first match", anchor="start")
 
