@@ -167,15 +167,23 @@ class Canvas:
         self.ident(x + NAME_W / 2, y + NAME_H / 2 + BASELINE, name)
         return (x + NAME_W, y + NAME_H / 2)
 
-    def object_box(self, x, y, type_tag, value, *, w=OBJECT_W, h=OBJECT_H, soft=True):
-        """Filled rect with type tag upper-left and value centered. Returns left-edge midpoint."""
+    def object_box(self, x, y, type_tag, value, *, w=OBJECT_W, h=OBJECT_H, soft=True, tag_position="above"):
+        """Filled rect with type tag and value centered. Returns left-edge midpoint.
+
+        tag_position="above" (default) places the type tag at y - 3, just
+        above the box — natural for an isolated box. Pass
+        tag_position="inside" when callers stack object_boxes vertically:
+        the tag then sits in the box's top-left corner instead of
+        colliding with the box above it.
+        """
         fill = SOFT_FILL if soft else "none"
         self._add(
             f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{fill}" '
             f'stroke="{INK}" stroke-width="{W_STROKE}"/>'
         )
         if type_tag:
-            self.tag(x + 4, y - 3, type_tag)
+            tag_y = y + SIZE_TAG + 2 if tag_position == "inside" else y - 3
+            self.tag(x + 4, tag_y, type_tag)
         if value:
             self.mono(x + w / 2, y + h / 2 + BASELINE, value)
         return (x, y + h / 2)

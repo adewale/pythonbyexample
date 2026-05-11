@@ -189,7 +189,7 @@ def operator_dispatch(c: Canvas) -> None:
     """Runtime · Read expressions as object operations: syntax becomes a method call."""
     c.cell(0, 30, "a + b", w=70, h=28)
     c.closed_arrow(70, 44, 116, 44, emphasis=True)
-    c.label(93, 36, "dispatches", anchor="middle")
+    c.label(93, 22, "dispatches", anchor="middle")
     c.cell(118, 30, "a.__add__(b)", w=140, h=28, soft=True)
 
 
@@ -269,7 +269,7 @@ def annotation_ghost(c: Canvas) -> None:
 
 def union_types(c: Canvas) -> None:
     """Types · Describe realistic shapes: a slot accepting one of several types."""
-    c.tag(0, 14, "x: int | str | None")
+    c.tag(0, 14, "x: int|str|None")
     c.cell(0, 22, "x", w=44, h=28)
     c.closed_arrow(44, 36, 80, 14, emphasis=False)
     c.closed_arrow(44, 36, 80, 36, emphasis=False)
@@ -409,7 +409,7 @@ def dataclass_fields(c: Canvas) -> None:
     for i, (n, t) in enumerate(fields):
         c.cell(0, 18 + i * 20, f"{n} : {t}", w=110, h=20)
     c.closed_arrow(110, 48, 146, 48, emphasis=True)
-    c.object_box(148, 32, "", "__init__(name, age, tags)", w=128, h=32)
+    c.object_box(148, 32, "", "__init__(name, age, tags)", w=160, h=32)
 
 
 def class_triangle(c: Canvas) -> None:
@@ -495,10 +495,10 @@ def workers_portable_evidence(c: Canvas) -> None:
 def workers_protocol_local(c: Canvas) -> None:
     """Workers · the protocol shape is the lesson; no real socket is opened."""
     c.tag(0, 4, "request shape")
-    c.cell(0, 12, "GET /resource", w=140, h=22)
-    c.closed_arrow(70, 38, 70, 56, emphasis=True)
+    c.cell(0, 12, "GET /resource", w=160, h=22)
+    c.closed_arrow(80, 38, 80, 56, emphasis=True)
     c.tag(0, 76, "response shape · asserted locally")
-    c.cell(0, 84, "200 OK · { … }", w=140, h=22)
+    c.cell(0, 84, "200 OK · { … }", w=160, h=22)
 
 
 # ─── Examples promoted from the gestalt: new paint code ──────────────
@@ -615,10 +615,10 @@ def bound_unbound(c: Canvas) -> None:
     """Bound vs unbound methods · instance.method binds self; Class.method does not."""
     c.cell(0, 0, "obj.method", w=110, h=22)
     c.closed_arrow(110, 11, 140, 11, emphasis=True)
-    c.cell(142, 0, "bound · self filled", w=130, h=22, soft=True)
+    c.cell(142, 0, "bound · self filled", w=152, h=22, soft=True)
     c.cell(0, 32, "Class.method", w=110, h=22)
     c.closed_arrow(110, 43, 140, 43, emphasis=False)
-    c.cell(142, 32, "function · self required", w=130, h=22)
+    c.cell(142, 32, "function · self required", w=152, h=22)
 
 
 def method_kinds(c: Canvas) -> None:
@@ -699,11 +699,11 @@ def partial_functions(c: Canvas) -> None:
 
 def args_kwargs(c: Canvas) -> None:
     """Args and kwargs · *args gathers extra positionals; **kwargs gathers extra keywords."""
-    c.mono(0, 22, "def f(*args, **kwargs): …", anchor="start")
-    c.dashed(60, 26, 60, 44)
-    c.dashed(132, 26, 132, 44)
-    c.label(40, 56, "extra positionals → tuple", anchor="middle")
-    c.label(170, 56, "extra keywords → dict", anchor="middle")
+    c.mono(20, 22, "def f(*args, **kwargs): …", anchor="start")
+    c.dashed(80, 26, 80, 44)
+    c.dashed(152, 26, 152, 44)
+    c.label(80, 56, "extra positionals → tuple", anchor="middle")
+    c.label(210, 56, "extra keywords → dict", anchor="middle")
 
 
 def multiple_return(c: Canvas) -> None:
@@ -752,7 +752,7 @@ def sys_path_resolution(c: Canvas) -> None:
     for i, p in enumerate(paths):
         c.cell(0, 14 + i * 20, p, w=120, h=20)
     c.closed_arrow(120, 46, 156, 46, emphasis=True)
-    c.label(138, 38, "first hit", anchor="middle")
+    c.label(145, 30, "first hit", anchor="middle")
     c.cell(158, 34, "mymod.py", w=100, h=24, soft=True)
 
 
@@ -771,7 +771,7 @@ def protocol_check(c: Canvas) -> None:
     c.mono(50, 36, "write()")
     c.mono(50, 52, "close()")
     c.closed_arrow(100, 38, 138, 38, emphasis=True)
-    c.label(118, 30, "structural", anchor="middle")
+    c.label(119, 0, "structural", anchor="middle")
     c.frame(140, 4, 80, 70, label="protocol", ghost=True)
     c.mono(180, 28, "read()")
     c.mono(180, 46, "close()")
@@ -888,16 +888,16 @@ def tuple_frozen(c: Canvas) -> None:
     c.dashed(45, 8, 45, 42)
     c.dashed(90, 8, 90, 42)
     c.dashed(135, 8, 135, 42)
-    c.cell(196, 12, ".append", w=70, h=26, ghost=True)
-    c.dashed(196, 24, 266, 24)
+    c.cell(190, 12, ".append", w=80, h=26, ghost=True)
+    c.dashed(190, 24, 270, 24)
 
 
 def value_types(c: Canvas) -> None:
     """Values · every literal is a typed object: int, str, list, dict each carry their behaviour."""
     rows = [("int", "42"), ("str", '"hi"'), ("list", "[1,2,3]"), ("dict", "{k:v}")]
     for i, (t, v) in enumerate(rows):
-        y = i * 28
-        c.object_box(0, y, t, v, w=160, h=24)
+        y = i * 30
+        c.object_box(0, y, t, v, w=160, h=26, tag_position="inside")
 
 
 def literal_forms(c: Canvas) -> None:
@@ -938,11 +938,11 @@ def yield_delegation(c: Canvas) -> None:
 
 def itertools_chain(c: Canvas) -> None:
     """Itertools · chain joins two iterables into one stream without materialising either."""
-    c.object_box(0, 0, "iter A", "1 · 2", w=70, h=24)
-    c.object_box(0, 32, "iter B", "3 · 4", w=70, h=24)
+    c.object_box(0, 0, "iter A", "1 · 2", w=70, h=24, tag_position="inside")
+    c.object_box(0, 34, "iter B", "3 · 4", w=70, h=24, tag_position="inside")
     c.closed_arrow(70, 12, 100, 22, emphasis=False)
-    c.closed_arrow(70, 44, 100, 34, emphasis=False)
-    c.object_box(102, 16, "chain", "1 · 2 · 3 · 4", w=140, h=28)
+    c.closed_arrow(70, 46, 100, 36, emphasis=False)
+    c.object_box(102, 16, "chain", "1 · 2 · 3 · 4", w=140, h=28, tag_position="inside")
 
 
 def assertion_check(c: Canvas) -> None:
@@ -1057,20 +1057,20 @@ def protocol_layers(c: Canvas) -> None:
 
 def gil_lanes(c: Canvas) -> None:
     """Threads and processes · the GIL serialises Python bytecode across threads; processes run in parallel."""
-    c.lane(20, x0=0, x1=240, label="GIL")
-    c.lane(50, x0=0, x1=240, label="thread A")
-    c.lane(80, x0=0, x1=240, label="thread B")
-    c.cell(10, 44, "", w=30, h=12)
-    c.cell(70, 74, "", w=30, h=12)
-    c.cell(130, 44, "", w=30, h=12)
-    c.cell(190, 74, "", w=30, h=12)
+    c.lane(20, x0=54, x1=294, label="GIL")
+    c.lane(50, x0=54, x1=294, label="thread A")
+    c.lane(80, x0=54, x1=294, label="thread B")
+    c.cell(64, 44, "", w=30, h=12)
+    c.cell(124, 74, "", w=30, h=12)
+    c.cell(184, 44, "", w=30, h=12)
+    c.cell(244, 74, "", w=30, h=12)
 
 
 def cast_escape(c: Canvas) -> None:
     """Casts and any · cast(T, x) tells the type checker to treat x as T; runtime is unaffected."""
     c.cell(0, 22, "Any", w=70, h=24, ghost=True)
     c.closed_arrow(70, 34, 110, 34, emphasis=True)
-    c.label(90, 26, "cast(T, x)", anchor="middle")
+    c.label(90, 12, "cast(T, x)", anchor="middle")
     c.cell(112, 22, "T", w=70, h=24, soft=True)
 
 
@@ -1103,7 +1103,7 @@ def paramspec_preserve(c: Canvas) -> None:
 
 def literal_constrained(c: Canvas) -> None:
     """Literal · the type narrows the slot to a fixed set of constant values."""
-    c.tag(0, 0, "Literal['red', 'green', 'blue']")
+    c.tag(0, 0, "Literal[…]")
     c.cell(0, 12, "x", w=40, h=24)
     c.closed_arrow(40, 24, 70, 4, emphasis=False)
     c.closed_arrow(40, 24, 70, 24, emphasis=False)
@@ -1183,7 +1183,7 @@ def type_alias_name(c: Canvas) -> None:
     """Type aliases · complex annotation collapses to a single readable name."""
     c.cell(0, 30, "dict[str, list[tuple[int, str]]]", w=240, h=24, ghost=True)
     c.closed_arrow(120, 54, 120, 70, emphasis=True)
-    c.label(96, 62, "type Index = …", anchor="middle")
+    c.label(96, 66, "type Index = …", anchor="middle")
     c.cell(80, 76, "Index", w=80, h=24, soft=True)
 
 
@@ -1278,7 +1278,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "call-stack": (call_stack, 200, 100),
     "decorator-rebind": (decorator_rebind, 232, 110),
     "mro-chain": (mro_chain, 200, 152),
-    "dataclass-fields": (dataclass_fields, 280, 76),
+    "dataclass-fields": (dataclass_fields, 312, 76),
     "class-triangle": (class_triangle, 274, 60),
     "exception-cause-context": (exception_cause_context, 282, 70),
     "unpacking-bind": (unpacking_bind, 152, 80),
@@ -1287,8 +1287,8 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "dict-buckets": (dict_buckets, 270, 88),
     # Workers journey (constraint-shaped sections; tightened designs)
     "workers-portable-evidence": (workers_portable_evidence, 222, 84),
-    "workers-protocol-local": (workers_protocol_local, 144, 110),
-    "workers-lesson-runtime": (workers_lesson_runtime, 200, 80),
+    "workers-protocol-local": (workers_protocol_local, 162, 110),
+    "workers-lesson-runtime": (workers_lesson_runtime, 300, 80),
     # Newly designed paint code for examples that lacked a figure
     "number-lines": (number_lines, 260, 78),
     "expression-tree": (expression_tree, 220, 92),
@@ -1300,7 +1300,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "generator-ribbon": (generator_ribbon, 260, 50),
     "truth-and-size": (truth_and_size, 232, 70),
     "descriptor-protocol": (descriptor_protocol, 222, 76),
-    "bound-unbound": (bound_unbound, 272, 56),
+    "bound-unbound": (bound_unbound, 296, 56),
     "method-kinds": (method_kinds, 272, 70),
     "callable-objects": (callable_objects, 220, 44),
     "attribute-lookup": (attribute_lookup, 242, 70),
@@ -1309,7 +1309,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "sentinel-iteration": (sentinel_iteration, 300, 92),
     "partial-functions": (partial_functions, 334, 36),
     # Third coverage push: 24 more figures
-    "args-kwargs": (args_kwargs, 240, 68),
+    "args-kwargs": (args_kwargs, 280, 68),
     "multiple-return": (multiple_return, 180, 110),
     "lambda-expression": (lambda_expression, 170, 76),
     "property-fork": (property_fork, 232, 72),
@@ -1326,10 +1326,10 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "truthy-check": (truthy_check, 240, 70),
     "boolean-truth-table": (boolean_truth_table, 132, 64),
     "set-buckets": (set_buckets, 156, 90),
-    "tuple-frozen": (tuple_frozen, 220, 48),
-    "value-types": (value_types, 160, 100),
+    "tuple-frozen": (tuple_frozen, 280, 48),
+    "value-types": (value_types, 160, 116),
     "yield-delegation": (yield_delegation, 240, 84),
-    "itertools-chain": (itertools_chain, 246, 60),
+    "itertools-chain": (itertools_chain, 246, 64),
     "assertion-check": (assertion_check, 304, 76),
     "custom-exception-chain": (custom_exception_chain, 220, 90),
     "exception-group-peel": (exception_group_peel, 240, 50),
@@ -1341,7 +1341,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "logging-levels": (logging_levels, 164, 124),
     "aaa-pattern": (aaa_pattern, 250, 80),
     "protocol-layers": (protocol_layers, 200, 100),
-    "gil-lanes": (gil_lanes, 244, 100),
+    "gil-lanes": (gil_lanes, 300, 100),
     "cast-escape": (cast_escape, 184, 56),
     "newtype-phantom": (newtype_phantom, 96, 92),
     "overload-signatures": (overload_signatures, 304, 64),
@@ -1356,7 +1356,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "object-lifecycle": (object_lifecycle, 366, 60),
     # Fifth pass: slug-specific figures lifting attached scores off the 8.0 floor
     "type-alias-name": (type_alias_name, 240, 104),
-    "match-dispatch-ladder": (match_dispatch_ladder, 220, 130),
+    "match-dispatch-ladder": (match_dispatch_ladder, 260, 130),
     "match-pattern-variants": (match_pattern_variants, 272, 96),
     "loop-else-gate": (loop_else_gate, 312, 76),
     # Sixth pass: lift the lingering 8.0-band figures with slug-specific paint
