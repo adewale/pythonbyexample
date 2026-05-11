@@ -20,7 +20,7 @@ from __future__ import annotations
 import re
 import unittest
 
-from src.marginalia import FIGURES
+from src.marginalia import ATTACHMENTS, FIGURES, SCORES
 from src.marginalia_grammar import Canvas
 
 ATTR = re.compile(r'([\w-]+)="([^"]+)"')
@@ -206,6 +206,125 @@ class FigureCollisionContract(unittest.TestCase):
                             f"{name}: text {content!r} {tbox} partially overlaps rect {rbox}"
                         )
                         break
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
+class FigureTextCollisionContract(unittest.TestCase):
+    """Contract 3: no two text elements in the same figure overlap.
+
+    Two text bounding boxes that overlap render on top of each other
+    and become unreadable. This catches narrow object_boxes whose tag
+    and value compete for horizontal space (the itertools-chain bug
+    where "ITER A" and "1 · 2" couldn't both fit in a 70px box).
+    """
+
+    def test_no_two_texts_overlap_in_a_figure(self):
+        failures: list[str] = []
+        for name, (paint, w, h) in FIGURES.items():
+            canvas = Canvas(w=w, h=h)
+            paint(canvas)
+            texts = []
+            for kind, attrs, content in parse_parts(canvas.parts):
+                if kind == "text":
+                    texts.append((element_bbox(kind, attrs, content), content))
+            for i, (abox, ac) in enumerate(texts):
+                for j in range(i + 1, len(texts)):
+                    bbox, bc = texts[j]
+                    if overlaps(abox, bbox):
+                        failures.append(f"{name}: texts {ac!r} and {bc!r} overlap at {abox} ∩ {bbox}")
+                        break
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
+class FigureRegistrationContract(unittest.TestCase):
+    """Contract 4: FIGURES, ATTACHMENTS, SCORES stay in sync.
+
+    Every slug in ATTACHMENTS must be in SCORES, and vice versa.
+    Every figure name an attachment points to must exist in FIGURES.
+    Every paint function in FIGURES must be attached to at least one
+    slug — orphan paint functions accumulate as dead code and silently
+    fail to ship the design they encode.
+    """
+
+    def test_every_attached_slug_is_scored(self):
+        unscored = set(ATTACHMENTS) - set(SCORES)
+        self.assertEqual(unscored, set(), f"attached but unscored: {sorted(unscored)}")
+
+    def test_every_scored_slug_is_attached(self):
+        unattached = set(SCORES) - set(ATTACHMENTS)
+        self.assertEqual(unattached, set(), f"scored but unattached: {sorted(unattached)}")
+
+    def test_every_attachment_points_to_a_real_figure(self):
+        names = {name for items in ATTACHMENTS.values() for _, name, _ in items}
+        orphan_refs = names - set(FIGURES)
+        self.assertEqual(orphan_refs, set(), f"attachments reference unknown figures: {sorted(orphan_refs)}")
+
+    def test_no_unused_figure_paint_functions(self):
+        # A figure name counts as "used" if it appears in ATTACHMENTS
+        # (example-page wiring) or anywhere in scripts/build_prototypes.py
+        # (journey-section figures, banner prototypes, gestalt galleries).
+        from pathlib import Path
+
+        prototype_src = (
+            Path(__file__).resolve().parents[1] / "scripts" / "build_prototypes.py"
+        ).read_text()
+        used = {name for items in ATTACHMENTS.values() for _, name, _ in items}
+        used |= {name for name in FIGURES if f'"{name}"' in prototype_src or f"'{name}'" in prototype_src}
+        unused = set(FIGURES) - used
+        self.assertEqual(
+            unused, set(),
+            f"figures defined but never rendered (orphan paint functions): {sorted(unused)}",
+        )
+
+
+class FigureGrammarContract(unittest.TestCase):
+    """Contract 5: every emitted SVG element uses only the locked
+    palette, font set, and stroke weights from marginalia_grammar.py.
+
+    Drift here is how the design system erodes — one cardinal red
+    here, one Inter font there, and suddenly the library reads as
+    independently authored.
+    """
+
+    def test_every_emitted_color_is_from_the_locked_palette(self):
+        from src.marginalia_grammar import INK, INK_SOFT, EMPHASIS, SOFT_FILL
+
+        allowed = {INK, INK_SOFT, EMPHASIS, SOFT_FILL, "none"}
+        failures: list[str] = []
+        for name, (paint, w, h) in FIGURES.items():
+            canvas = Canvas(w=w, h=h)
+            paint(canvas)
+            for kind, attrs, _ in parse_parts(canvas.parts):
+                for key in ("fill", "stroke"):
+                    color = attrs.get(key, "")
+                    if color and color not in allowed:
+                        failures.append(f"{name}: {kind} {key}={color!r}")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+    def test_every_emitted_font_is_from_the_locked_set(self):
+        from src.marginalia_grammar import FONT_SERIF, FONT_MONO, FONT_SANS
+
+        allowed = {FONT_SERIF, FONT_MONO, FONT_SANS}
+        failures: list[str] = []
+        for name, (paint, w, h) in FIGURES.items():
+            canvas = Canvas(w=w, h=h)
+            paint(canvas)
+            for kind, attrs, _ in parse_parts(canvas.parts):
+                family = attrs.get("font-family", "")
+                if family and family not in allowed:
+                    failures.append(f"{name}: {kind} font-family={family!r}")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+    def test_every_stroke_width_is_from_the_locked_set(self):
+        allowed = {"0.6", "1.0", "1.4", "0.5"}  # W_HAIRLINE, W_STROKE, W_EMPHASIS, W_GHOST
+        failures: list[str] = []
+        for name, (paint, w, h) in FIGURES.items():
+            canvas = Canvas(w=w, h=h)
+            paint(canvas)
+            for kind, attrs, _ in parse_parts(canvas.parts):
+                weight = attrs.get("stroke-width", "")
+                if weight and weight not in allowed:
+                    failures.append(f"{name}: {kind} stroke-width={weight!r}")
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
 

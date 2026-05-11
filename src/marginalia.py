@@ -938,11 +938,11 @@ def yield_delegation(c: Canvas) -> None:
 
 def itertools_chain(c: Canvas) -> None:
     """Itertools · chain joins two iterables into one stream without materialising either."""
-    c.object_box(0, 0, "iter A", "1 · 2", w=70, h=24, tag_position="inside")
-    c.object_box(0, 34, "iter B", "3 · 4", w=70, h=24, tag_position="inside")
-    c.closed_arrow(70, 12, 100, 22, emphasis=False)
-    c.closed_arrow(70, 46, 100, 36, emphasis=False)
-    c.object_box(102, 16, "chain", "1 · 2 · 3 · 4", w=140, h=28, tag_position="inside")
+    c.object_box(0, 14, "iter A", "1 · 2", w=70, h=24)
+    c.object_box(0, 52, "iter B", "3 · 4", w=70, h=24)
+    c.closed_arrow(70, 26, 100, 36, emphasis=False)
+    c.closed_arrow(70, 64, 100, 54, emphasis=False)
+    c.object_box(102, 30, "chain", "1 · 2 · 3 · 4", w=140, h=28)
 
 
 def assertion_check(c: Canvas) -> None:
@@ -1329,7 +1329,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "tuple-frozen": (tuple_frozen, 280, 48),
     "value-types": (value_types, 160, 116),
     "yield-delegation": (yield_delegation, 240, 84),
-    "itertools-chain": (itertools_chain, 246, 64),
+    "itertools-chain": (itertools_chain, 246, 82),
     "assertion-check": (assertion_check, 304, 76),
     "custom-exception-chain": (custom_exception_chain, 220, 90),
     "exception-group-peel": (exception_group_peel, 240, 50),
