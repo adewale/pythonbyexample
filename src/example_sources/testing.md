@@ -47,9 +47,11 @@ class AddTests(unittest.TestCase):
         with self.assertRaises(ZeroDivisionError):
             divide(1, 0)
 
-suite = unittest.defaultTestLoader.loadTestsFromTestCase(AddTests)
+loader = unittest.defaultTestLoader
+suite = loader.loadTestsFromTestCase(AddTests)
 stream = io.StringIO()
-result = unittest.TextTestRunner(stream=stream, verbosity=0).run(suite)
+runner = unittest.TextTestRunner(stream=stream, verbosity=0)
+result = runner.run(suite)
 print(result.testsRun)
 print(result.wasSuccessful())
 ```
@@ -111,9 +113,11 @@ A runner executes the suite and records whether every assertion passed. Capturin
 ```python
 import io
 
-suite = unittest.defaultTestLoader.loadTestsFromTestCase(AddTests)
+loader = unittest.defaultTestLoader
+suite = loader.loadTestsFromTestCase(AddTests)
 stream = io.StringIO()
-result = unittest.TextTestRunner(stream=stream, verbosity=0).run(suite)
+runner = unittest.TextTestRunner(stream=stream, verbosity=0)
+result = runner.run(suite)
 print(result.testsRun)
 print(result.wasSuccessful())
 ```

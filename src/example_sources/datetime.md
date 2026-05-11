@@ -28,7 +28,8 @@ expires_at = created_at + timedelta(days=7, hours=2)
 print(expires_at.isoformat())
 
 print(created_at.strftime("%Y-%m-%d %H:%M %Z"))
-parsed = datetime.fromisoformat("2026-05-04T12:30:00+00:00")
+iso_text = "2026-05-04T12:30:00+00:00"
+parsed = datetime.fromisoformat(iso_text)
 print(parsed == created_at)
 ```
 :::
@@ -77,7 +78,8 @@ Use `strftime()` for human-facing formatting and `fromisoformat()` when reading 
 
 ```python
 print(created_at.strftime("%Y-%m-%d %H:%M %Z"))
-parsed = datetime.fromisoformat("2026-05-04T12:30:00+00:00")
+iso_text = "2026-05-04T12:30:00+00:00"
+parsed = datetime.fromisoformat(iso_text)
 print(parsed == created_at)
 ```
 

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Visual explainer prototypes · Prototype</title>
+<link rel="stylesheet" href="/site.css">
+<style>
+  .prototype-banner {
+    margin: 0 0 var(--space-4);
+    padding: var(--space-2) var(--space-3);
+    background: var(--accent-soft);
+    border: 1px dashed var(--hairline);
+    border-radius: .5rem;
+    color: var(--muted);
+    font-size: .85rem;
+  }
+  .prototype-banner strong { color: var(--text); font-weight: 600; }
+  .prototype-banner a { color: inherit; }
+
+  .prototype-list { list-style: none; padding: 0; margin: var(--space-4) 0 0; }
+  .prototype-list li { padding: var(--space-3) 0; border-bottom: 1px dashed var(--hairline-soft); }
+  .prototype-list li:first-child { border-top: 1px dashed var(--hairline-soft); }
+  .prototype-list strong { font-weight: 600; font-size: 1.05rem; }
+  .prototype-list .meta { margin: .25rem 0 0; max-width: 60ch; }
+
+</style>
+</head>
+<body>
+<div class="prototype-banner"><strong>Prototype</strong> · All prototypes · <a href="/prototyping/">all prototypes</a></div>
+
+<article class="example-shell">
+  <section class="example-intro">
+    <p class="eyebrow">Prototypes · cache: no-cache, must-revalidate</p>
+    <h1>Visual explainer prototypes</h1>
+    <p class="meta">Real example pages with their attached figures, plus the design-review pages. The example pages all use the production layout: a cell with an attached figure stacks prose, figure, and code vertically; cells without figures keep today's prose|code grid.</p>
+  </section>
+  <ul class="prototype-list"><li><a class="text-link" href="/prototyping/marginalia-gestalt.html"><strong>Marginalia gestalt</strong></a><p class="meta">Every journey and example as a card, drawn from the shared grammar. Pure design review.</p></li><li><a class="text-link" href="/prototyping/journey-figures-gestalt.html"><strong>Journey-figures gestalt</strong></a><p class="meta">All journey section figures on one page, grouped by journey, for uniform rubric review.</p></li><li><a class="text-link" href="/prototyping/production-figures-gestalt.html"><strong>Production figures gestalt</strong></a><p class="meta">Every figure currently registered in src/marginalia.py FIGURES, with a tag showing where it renders (example attachment, journey section, or unattached).</p></li><li><a class="text-link" href="/prototyping/layout-banner-single.html"><strong>Layout · banner between cells</strong></a><p class="meta">The grammar: cells stay 2-column always; figures live in banner rows BETWEEN cells. Holds one figure here. The intended union of Tufte/Knuth/algebrica.</p></li><li><a class="text-link" href="/prototyping/layout-banner-pair.html"><strong>Layout · banner with small-multiples pair</strong></a><p class="meta">Same grammar with two figures in the banner — a Tufte small-multiple. The mutable list and the immutable tuple side by side, captioned, between the same pair of cells.</p></li><li><a class="text-link" href="/prototyping/layout-banner-trio.html"><strong>Layout · multiple banners across the walkthrough</strong></a><p class="meta">The grammar at scale: a single-figure banner before the walkthrough, a pair-banner between two cells, a single-figure summary after the last cell. Multiple diagrams; cells never displaced.</p></li></ul>
+</article>
+
+</body>
+</html>

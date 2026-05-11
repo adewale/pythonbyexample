@@ -31,7 +31,7 @@ print(result.returncode)
 :::
 
 :::unsupported
-Dynamic Workers do not provide child processes.
+`subprocess.run` spawns a child Python interpreter, captures its stdout and stderr (`capture_output=True`), decodes them as text (`text=True`), and raises `CalledProcessError` if the child exits non-zero (`check=True`). The returned `result` holds the captured streams and exit code as portable evidence the child ran. (This fragment runs in standard Python only — Dynamic Workers don't provide child processes.)
 
 ```python
 result = subprocess.run(

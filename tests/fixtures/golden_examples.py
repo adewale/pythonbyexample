@@ -1252,19 +1252,22 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                    'prose': 'Use `is` and `id()` to observe identity while two names refer to the '
                             'same object.'}]},
  {'cells': [{'code': 'english = "hello"\n'
+                     'french = "café"\n'
                      'thai = "สวัสดี"\n'
                      '\n'
-                     'for label, word in [("English", english), ("Thai", thai)]:\n'
+                     'for label, word in [("English", english), ("French", french), ("Thai", '
+                     'thai)]:\n'
                      '    print(label, word, len(word), len(word.encode("utf-8")))',
              'kind': 'cell',
              'line': 17,
-             'output': 'English hello 5 5\nThai สวัสดี 6 18',
-             'prose': ['Compare an English greeting with a Thai greeting. Both are Python `str` '
-                       'values, but UTF-8 uses one byte for each ASCII code point and multiple '
-                       'bytes for many non-ASCII code points.']},
+             'output': 'English hello 5 5\nFrench café 4 5\nThai สวัสดี 6 18',
+             'prose': ['Compare three words by code-point count and UTF-8 byte count. ASCII '
+                       'characters take one byte each (`hello` → 5 bytes); the `é` in `café` is '
+                       'one code point but two UTF-8 bytes; each Thai character takes three. The '
+                       '`str` type abstracts over all three.']},
             {'code': 'print(thai[0])\nprint([hex(ord(char)) for char in thai[:2]])',
              'kind': 'cell',
-             'line': 34,
+             'line': 36,
              'output': "ส\n['0xe2a', '0xe27']",
              'prose': ['Indexing and iteration work with Unicode code points, not encoded bytes. '
                        '`ord()` returns the integer code point, which is often displayed in '
@@ -1275,14 +1278,15 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'print(clean.upper())\n'
                      'print(clean.encode("utf-8"))',
              'kind': 'cell',
-             'line': 48,
+             'line': 50,
              'output': "café\nCAFÉ\nb'caf\\xc3\\xa9'",
              'prose': ['String methods return new strings because strings are immutable. Encoding '
                        'turns text into bytes when another system needs a byte representation.']}],
   'code': 'english = "hello"\n'
+          'french = "café"\n'
           'thai = "สวัสดี"\n'
           '\n'
-          'for label, word in [("English", english), ("Thai", thai)]:\n'
+          'for label, word in [("English", english), ("French", french), ("Thai", thai)]:\n'
           '    print(label, word, len(word), len(word.encode("utf-8")))\n'
           '\n'
           'print(thai[0])\n'
@@ -1296,6 +1300,7 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
   'doc_path': '/library/stdtypes.html#text-sequence-type-str',
   'doc_url': 'https://docs.python.org/3.13/library/stdtypes.html#text-sequence-type-str',
   'expected_output': 'English hello 5 5\n'
+                     'French café 4 5\n'
                      'Thai สวัสดี 6 18\n'
                      'ส\n'
                      "['0xe2a', '0xe27']\n"
@@ -1328,13 +1333,16 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
   'version_notes': None,
   'version_sensitive': False,
   'walkthrough': [{'code': 'english = "hello"\n'
+                           'french = "café"\n'
                            'thai = "สวัสดี"\n'
                            '\n'
-                           'for label, word in [("English", english), ("Thai", thai)]:\n'
+                           'for label, word in [("English", english), ("French", french), ("Thai", '
+                           'thai)]:\n'
                            '    print(label, word, len(word), len(word.encode("utf-8")))',
-                   'prose': 'Compare an English greeting with a Thai greeting. Both are Python '
-                            '`str` values, but UTF-8 uses one byte for each ASCII code point and '
-                            'multiple bytes for many non-ASCII code points.'},
+                   'prose': 'Compare three words by code-point count and UTF-8 byte count. ASCII '
+                            'characters take one byte each (`hello` → 5 bytes); the `é` in `café` '
+                            'is one code point but two UTF-8 bytes; each Thai character takes '
+                            'three. The `str` type abstracts over all three.'},
                   {'code': 'print(thai[0])\nprint([hex(ord(char)) for char in thai[:2]])',
                    'prose': 'Indexing and iteration work with Unicode code points, not encoded '
                             'bytes. `ord()` returns the integer code point, which is often '
@@ -7679,8 +7687,13 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
              'kind': 'unsupported',
              'line': 18,
              'output': '',
-             'prose': ['Dynamic Workers do not provide the `venv` module or a project environment '
-                       'workflow.']},
+             'prose': ['`venv.EnvBuilder` configures the description of a new environment, then '
+                       '`create(".venv")` materialises it on disk as a directory containing its '
+                       'own interpreter and `site-packages`. `with_pip=False` skips bootstrapping '
+                       "pip — useful when the venv is for an isolated tool that doesn't need to "
+                       'install third-party packages. (This fragment runs in standard Python only '
+                       "— Dynamic Workers don't provide the `venv` module or a project environment "
+                       'workflow.)']},
             {'code': 'import pathlib\n'
                      'import tempfile\n'
                      'import venv\n'
@@ -9812,7 +9825,8 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                      'logger = logging.getLogger("example")\n'
                      'logger.setLevel(logging.INFO)\n'
                      'handler = logging.StreamHandler(sys.stdout)\n'
-                     'handler.setFormatter(logging.Formatter("%(levelname)s:%(message)s"))\n'
+                     'formatter = logging.Formatter("%(levelname)s:%(message)s")\n'
+                     'handler.setFormatter(formatter)\n'
                      'logger.handlers[:] = [handler]\n'
                      '\n'
                      'logger.debug("hidden")\n'
@@ -9828,7 +9842,8 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           'logger = logging.getLogger("example")\n'
           'logger.setLevel(logging.INFO)\n'
           'handler = logging.StreamHandler(sys.stdout)\n'
-          'handler.setFormatter(logging.Formatter("%(levelname)s:%(message)s"))\n'
+          'formatter = logging.Formatter("%(levelname)s:%(message)s")\n'
+          'handler.setFormatter(formatter)\n'
           'logger.handlers[:] = [handler]\n'
           '\n'
           'logger.debug("hidden")\n'
@@ -9864,7 +9879,8 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                            'logger = logging.getLogger("example")\n'
                            'logger.setLevel(logging.INFO)\n'
                            'handler = logging.StreamHandler(sys.stdout)\n'
-                           'handler.setFormatter(logging.Formatter("%(levelname)s:%(message)s"))\n'
+                           'formatter = logging.Formatter("%(levelname)s:%(message)s")\n'
+                           'handler.setFormatter(formatter)\n'
                            'logger.handlers[:] = [handler]\n'
                            '\n'
                            'logger.debug("hidden")\n'
@@ -9911,9 +9927,11 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                        '`assertRaises` asserts that a block raises the expected exception type.']},
             {'code': 'import io\n'
                      '\n'
-                     'suite = unittest.defaultTestLoader.loadTestsFromTestCase(AddTests)\n'
+                     'loader = unittest.defaultTestLoader\n'
+                     'suite = loader.loadTestsFromTestCase(AddTests)\n'
                      'stream = io.StringIO()\n'
-                     'result = unittest.TextTestRunner(stream=stream, verbosity=0).run(suite)\n'
+                     'runner = unittest.TextTestRunner(stream=stream, verbosity=0)\n'
+                     'result = runner.run(suite)\n'
                      'print(result.testsRun)\n'
                      'print(result.wasSuccessful())',
              'kind': 'cell',
@@ -9949,9 +9967,11 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           '        with self.assertRaises(ZeroDivisionError):\n'
           '            divide(1, 0)\n'
           '\n'
-          'suite = unittest.defaultTestLoader.loadTestsFromTestCase(AddTests)\n'
+          'loader = unittest.defaultTestLoader\n'
+          'suite = loader.loadTestsFromTestCase(AddTests)\n'
           'stream = io.StringIO()\n'
-          'result = unittest.TextTestRunner(stream=stream, verbosity=0).run(suite)\n'
+          'runner = unittest.TextTestRunner(stream=stream, verbosity=0)\n'
+          'result = runner.run(suite)\n'
           'print(result.testsRun)\n'
           'print(result.wasSuccessful())\n',
   'doc_path': '/library/unittest.html',
@@ -10011,10 +10031,11 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                             'type.'},
                   {'code': 'import io\n'
                            '\n'
-                           'suite = unittest.defaultTestLoader.loadTestsFromTestCase(AddTests)\n'
+                           'loader = unittest.defaultTestLoader\n'
+                           'suite = loader.loadTestsFromTestCase(AddTests)\n'
                            'stream = io.StringIO()\n'
-                           'result = unittest.TextTestRunner(stream=stream, '
-                           'verbosity=0).run(suite)\n'
+                           'runner = unittest.TextTestRunner(stream=stream, verbosity=0)\n'
+                           'result = runner.run(suite)\n'
                            'print(result.testsRun)\n'
                            'print(result.wasSuccessful())',
                    'prose': 'A runner executes the suite and records whether every assertion '
@@ -10029,7 +10050,12 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
              'kind': 'unsupported',
              'line': 18,
              'output': '',
-             'prose': ['Dynamic Workers do not provide child processes.']},
+             'prose': ['`subprocess.run` spawns a child Python interpreter, captures its stdout '
+                       'and stderr (`capture_output=True`), decodes them as text (`text=True`), '
+                       'and raises `CalledProcessError` if the child exits non-zero '
+                       '(`check=True`). The returned `result` holds the captured streams and exit '
+                       'code as portable evidence the child ran. (This fragment runs in standard '
+                       "Python only — Dynamic Workers don't provide child processes.)"]},
             {'code': 'import subprocess\n'
                      'import sys\n'
                      '\n'
@@ -10108,7 +10134,13 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
              'kind': 'unsupported',
              'line': 18,
              'output': '',
-             'prose': ['Dynamic Workers do not provide native threads or child processes.']},
+             'prose': ['`ThreadPoolExecutor` runs `square` across two worker threads sharing the '
+                       'same interpreter (and the GIL); `ProcessPoolExecutor` runs `pow` across '
+                       'two child processes with isolated memory. Each `pool.map` returns an '
+                       'iterator over results in input order, and the surrounding `with` block '
+                       'joins the workers when the body exits. (This fragment runs in standard '
+                       "Python only — Dynamic Workers don't provide native threads or child "
+                       'processes.)']},
             {'code': 'from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor\n'
                      '\n'
                      '\n'
@@ -10184,8 +10216,12 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
              'kind': 'unsupported',
              'line': 18,
              'output': '',
-             'prose': ['Dynamic Workers do not provide arbitrary low-level sockets, and this app '
-                       'disables Dynamic Worker outbound access.']},
+             'prose': ['`socketpair()` returns two connected endpoints. `sendall` writes encoded '
+                       'bytes into one end, and `recv` reads up to 16 bytes off the other. The '
+                       'byte boundary is the whole point: `"ping".encode("utf-8")` produces '
+                       "`b'ping'`, which is what the socket actually moves. (This fragment runs in "
+                       "standard Python only — Dynamic Workers don't expose arbitrary sockets and "
+                       'this app disables Worker outbound access.)']},
             {'code': 'import socket\n'
                      '\n'
                      'left, right = socket.socketpair()\n'
@@ -10201,8 +10237,11 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
              'kind': 'cell',
              'line': 28,
              'output': "b'ping'\nping",
-             'prose': ['Sockets exchange bytes. Encoding and decoding make the boundary between '
-                       'Python text and network data visible.']}],
+             'prose': ['The complete version adds two things: a `try`/`finally` so both endpoints '
+                       'close even if `recv` or the surrounding work raises, and a second `print` '
+                       'that `decode`s the received bytes back into a Python `str` for display. '
+                       "The first `print` shows the raw bytes `b'ping'`; the second shows the "
+                       'decoded text `ping`.']}],
   'code': 'import socket\n'
           '\n'
           'left, right = socket.socketpair()\n'
@@ -10251,8 +10290,11 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                            'finally:\n'
                            '    left.close()\n'
                            '    right.close()',
-                   'prose': 'Sockets exchange bytes. Encoding and decoding make the boundary '
-                            'between Python text and network data visible.'}]},
+                   'prose': 'The complete version adds two things: a `try`/`finally` so both '
+                            'endpoints close even if `recv` or the surrounding work raises, and a '
+                            'second `print` that `decode`s the received bytes back into a Python '
+                            "`str` for display. The first `print` shows the raw bytes `b'ping'`; "
+                            'the second shows the decoded text `ping`.'}]},
  {'cells': [{'code': 'from datetime import date, datetime, time, timedelta, timezone\n'
                      '\n'
                      'release_day = date(2026, 5, 4)\n'
@@ -10280,7 +10322,8 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
              'prose': ['Use `timedelta` for durations. Adding one to a `datetime` produces another '
                        '`datetime` without manually changing calendar fields.']},
             {'code': 'print(created_at.strftime("%Y-%m-%d %H:%M %Z"))\n'
-                     'parsed = datetime.fromisoformat("2026-05-04T12:30:00+00:00")\n'
+                     'iso_text = "2026-05-04T12:30:00+00:00"\n'
+                     'parsed = datetime.fromisoformat(iso_text)\n'
                      'print(parsed == created_at)',
              'kind': 'cell',
              'line': 56,
@@ -10301,7 +10344,8 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
           'print(expires_at.isoformat())\n'
           '\n'
           'print(created_at.strftime("%Y-%m-%d %H:%M %Z"))\n'
-          'parsed = datetime.fromisoformat("2026-05-04T12:30:00+00:00")\n'
+          'iso_text = "2026-05-04T12:30:00+00:00"\n'
+          'parsed = datetime.fromisoformat(iso_text)\n'
           'print(parsed == created_at)\n',
   'doc_path': '/library/datetime.html',
   'doc_url': 'https://docs.python.org/3.13/library/datetime.html',
@@ -10371,7 +10415,8 @@ EXAMPLES = [{'cells': [{'code': 'print("hello world")',
                    'prose': 'Use `timedelta` for durations. Adding one to a `datetime` produces '
                             'another `datetime` without manually changing calendar fields.'},
                   {'code': 'print(created_at.strftime("%Y-%m-%d %H:%M %Z"))\n'
-                           'parsed = datetime.fromisoformat("2026-05-04T12:30:00+00:00")\n'
+                           'iso_text = "2026-05-04T12:30:00+00:00"\n'
+                           'parsed = datetime.fromisoformat(iso_text)\n'
                            'print(parsed == created_at)',
                    'prose': 'Use `strftime()` for human-facing formatting and `fromisoformat()` '
                             'when reading ISO 8601 text back into a `datetime`.'}]},

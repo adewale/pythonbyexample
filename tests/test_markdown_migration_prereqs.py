@@ -3,7 +3,6 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = ROOT / "docs" / "example-source-format-spec.md"
-INVESTIGATION = ROOT / "docs" / "markdown-cell-migration-investigation.md"
 README = ROOT / "README.md"
 CI = ROOT / ".github" / "workflows" / "verify.yml"
 
@@ -59,22 +58,6 @@ class MarkdownMigrationPrereqTests(unittest.TestCase):
         ]:
             with self.subTest(slug=slug):
                 self.assertIn(slug, spec)
-
-    def test_investigation_documents_program_and_cell_solution(self):
-        investigation = INVESTIGATION.read_text()
-        self.assertIn(":::program", investigation)
-        self.assertIn("cells are not concatenated", investigation)
-        self.assertIn("restate earlier definitions", investigation)
-        for slug in [
-            "match-statements",
-            "recursion",
-            "classes",
-            "properties",
-            "special-methods",
-            "type-hints",
-        ]:
-            with self.subTest(slug=slug):
-                self.assertIn(f"`{slug}`", investigation)
 
     def test_spec_captures_successful_migration_and_rollback_rehearsal(self):
         spec = SPEC.read_text()

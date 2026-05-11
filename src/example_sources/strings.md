@@ -15,9 +15,10 @@ Use `str` when you mean text, and encode to `bytes` only at boundaries such as f
 :::program
 ```python
 english = "hello"
+french = "café"
 thai = "สวัสดี"
 
-for label, word in [("English", english), ("Thai", thai)]:
+for label, word in [("English", english), ("French", french), ("Thai", thai)]:
     print(label, word, len(word), len(word.encode("utf-8")))
 
 print(thai[0])
@@ -32,18 +33,20 @@ print(clean.encode("utf-8"))
 :::
 
 :::cell
-Compare an English greeting with a Thai greeting. Both are Python `str` values, but UTF-8 uses one byte for each ASCII code point and multiple bytes for many non-ASCII code points.
+Compare three words by code-point count and UTF-8 byte count. ASCII characters take one byte each (`hello` → 5 bytes); the `é` in `café` is one code point but two UTF-8 bytes; each Thai character takes three. The `str` type abstracts over all three.
 
 ```python
 english = "hello"
+french = "café"
 thai = "สวัสดี"
 
-for label, word in [("English", english), ("Thai", thai)]:
+for label, word in [("English", english), ("French", french), ("Thai", thai)]:
     print(label, word, len(word), len(word.encode("utf-8")))
 ```
 
 ```output
 English hello 5 5
+French café 4 5
 Thai สวัสดี 6 18
 ```
 :::

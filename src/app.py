@@ -10,9 +10,11 @@ from pathlib import Path
 try:
     from .asset_manifest import ASSET_PATHS
     from .examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
+    from .marginalia import render_for_anchor, render_for_section
 except ImportError:  # Cloudflare Python Workers import sibling modules from main's directory.
     from asset_manifest import ASSET_PATHS
     from examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
+    from marginalia import render_for_anchor, render_for_section
 
 
 class AppResponse:
@@ -570,7 +572,8 @@ def render_journey_page(journey):
             else:
                 sentence = f"This gap should {description}."
                 rows.append(f'<li><p class="journey-gap-label">Gap · {html.escape(value)}</p><p class="meta">{html.escape(sentence)}</p></li>')
-        sections.append(f'<section class="journey-section"><h2>{html.escape(section["title"])}</h2><p class="meta">{html.escape(section["summary"])}</p><ul class="journey-list">{"".join(rows)}</ul></section>')
+        figure_html = render_for_section(section["title"])
+        sections.append(f'<section class="journey-section"><h2>{html.escape(section["title"])}</h2><p class="meta">{html.escape(section["summary"])}</p>{figure_html}<ul class="journey-list">{"".join(rows)}</ul></section>')
     content = f'''
 <article class="example-shell journey-page">
   <div class="example-top"><a class="text-link" href="/">← All examples</a><a class="text-link" href="{html.escape(REFERENCE_URL)}">Python docs reference</a></div>
@@ -747,7 +750,13 @@ def render_example_page(example, output=None, code=None, execution_time_ms=None)
         if next_example
         else "<span></span>"
     )
-    walkthrough_html = "".join(_render_cell(step) for step in walkthrough)
+    walkthrough_parts: list[str] = []
+    for i, step in enumerate(walkthrough):
+        walkthrough_parts.append(_render_cell(step))
+        banner_html = render_for_anchor(example["slug"], f"cell-{i}")
+        if banner_html:
+            walkthrough_parts.append(banner_html)
+    walkthrough_html = "".join(walkthrough_parts)
     notes_html = "".join(f"<li>{note}</li>" for note in notes)
     see_also_examples = [get_example(slug) for slug in example.get("see_also", [])]
     see_also_links = "".join(
