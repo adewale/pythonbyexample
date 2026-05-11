@@ -31,7 +31,7 @@ finally:
 :::
 
 :::unsupported
-Dynamic Workers do not provide arbitrary low-level sockets, and this app disables Dynamic Worker outbound access.
+`socketpair()` returns two connected endpoints. `sendall` writes encoded bytes into one end, and `recv` reads up to 16 bytes off the other. The byte boundary is the whole point: `"ping".encode("utf-8")` produces `b'ping'`, which is what the socket actually moves. (This fragment runs in standard Python only — Dynamic Workers don't expose arbitrary sockets and this app disables Worker outbound access.)
 
 ```python
 left, right = socket.socketpair()
@@ -41,7 +41,7 @@ data = right.recv(16)
 :::
 
 :::cell
-Sockets exchange bytes. Encoding and decoding make the boundary between Python text and network data visible.
+The complete version adds two things: a `try`/`finally` so both endpoints close even if `recv` or the surrounding work raises, and a second `print` that `decode`s the received bytes back into a Python `str` for display. The first `print` shows the raw bytes `b'ping'`; the second shows the decoded text `ping`.
 
 ```python
 import socket

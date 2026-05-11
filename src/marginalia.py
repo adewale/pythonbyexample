@@ -1055,11 +1055,18 @@ def aaa_pattern(c: Canvas) -> None:
         c.cell(110, i * 24, body, w=140, h=22)
 
 
-def protocol_layers(c: Canvas) -> None:
-    """Networking · each layer in the stack hides the next; HTTP rests on TCP on IP on the link."""
-    layers = ["application · HTTP", "transport · TCP", "network · IP", "link"]
-    for i, name in enumerate(layers):
-        c.cell(0, i * 22, name, w=200, h=20)
+def socket_byte_boundary(c: Canvas) -> None:
+    """Networking · sockets carry bytes; encode marks the python → wire boundary, decode the wire → python boundary."""
+    c.object_box(0, 18, "str", '"ping"', w=64, h=22)
+    c.closed_arrow(64, 29, 96, 29, emphasis=False)
+    c.label(80, 23, "encode", anchor="middle")
+    c.object_box(98, 18, "bytes", "b'ping'", w=70, h=22, soft=True)
+    c.dashed(168, 29, 192, 29)
+    c.tag(180, 8, "socket", anchor="middle")
+    c.object_box(194, 18, "bytes", "b'ping'", w=70, h=22, soft=True)
+    c.closed_arrow(264, 29, 296, 29, emphasis=False)
+    c.label(280, 23, "decode", anchor="middle")
+    c.object_box(298, 18, "str", '"ping"', w=64, h=22)
 
 
 def gil_lanes(c: Canvas) -> None:
@@ -1347,7 +1354,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "subprocess-spawn": (subprocess_spawn, 324, 60),
     "logging-levels": (logging_levels, 164, 124),
     "aaa-pattern": (aaa_pattern, 250, 80),
-    "protocol-layers": (protocol_layers, 200, 100),
+    "socket-byte-boundary": (socket_byte_boundary, 364, 46),
     "gil-lanes": (gil_lanes, 300, 100),
     "cast-escape": (cast_escape, 184, 56),
     "newtype-phantom": (newtype_phantom, 96, 92),
@@ -1802,8 +1809,8 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "arrange-act-assert: set up the state, perform the behavior under test, compare the result to expectations.",
     )],
     "networking": [(
-        "cell-0", "protocol-layers",
-        "Network protocols stack: HTTP rests on TCP, which rests on IP, which rests on the link layer.",
+        "cell-0", "socket-byte-boundary",
+        "Text crosses the socket as bytes — `encode` marks the python → wire boundary, `decode` brings the bytes back to a Python `str`.",
     )],
     "threads-and-processes": [(
         "cell-0", "gil-lanes",
@@ -2119,7 +2126,7 @@ SCORES: dict[str, tuple[float, str]] = {
     "subprocesses": (9.0, "spawn → child → captured output"),
     "logging": (9.0, "five thresholded levels"),
     "testing": (9.0, "arrange-act-assert three-row pattern"),
-    "networking": (9.0, "HTTP / TCP / IP / link stack"),
+    "networking": (9.0, "text ↔ bytes across the socket boundary"),
     "casts-and-any": (9.0, "Any → cast(T, x) → T, runtime unchanged"),
     "newtype": (9.0, "same runtime, distinct static identity"),
     "paramspec": (9.0, "P preserved through decorator"),
