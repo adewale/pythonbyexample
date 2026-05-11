@@ -98,7 +98,7 @@
     .journey-section { margin-block: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--hairline); }
     .journey-section h2 { margin-bottom: var(--space-2); }
     .journey-section > .meta { max-width: 58ch; }
-    .journey-section-figure { margin: var(--space-4) auto; padding: 0; max-width: 440px; }
+    .journey-section-figure { margin: var(--space-4) auto; padding: 0; width: 100%; max-width: clamp(280px, 70vw, 640px); }
     .journey-section-figure svg { max-width: 100%; height: auto; display: block; }
     .journey-section-figure figcaption { margin-top: var(--space-2); color: var(--muted); font-size: .92rem; font-style: italic; max-width: 44ch; }
     .journey-list { display: grid; gap: 0; margin-top: var(--space-3); padding-left: 0; list-style: none; }
@@ -121,9 +121,9 @@
        keep their prose|code 2-column grid; banners between cells hold
        one or many figures (small multiples). See docs/visual-explainer-spec.md. */
     .cell-banner { margin: var(--space-5) 0; padding: var(--space-4) 0; border-block: 1px dashed var(--hairline-soft); display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); justify-items: center; }
-    .cell-banner figure { margin: 0; padding: 0; max-width: 360px; }
+    .cell-banner figure { margin: 0; padding: 0; width: 100%; max-width: clamp(240px, 45vw, 480px); }
     .cell-banner svg { max-width: 100%; height: auto; display: block; }
     .cell-banner figcaption { margin-top: var(--space-2); color: var(--muted); font-size: .92rem; font-style: italic; max-width: 44ch; }
     .cell-banner--1 { margin-block: var(--space-6); }
-    .cell-banner--1 figure { max-width: 440px; }
+    .cell-banner--1 figure { width: 100%; max-width: clamp(280px, 65vw, 640px); }
     .cell-banner--1 figcaption { max-width: 42ch; }

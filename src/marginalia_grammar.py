@@ -327,26 +327,33 @@ class Canvas:
             self.dot(path[-1][0], path[-1][1], emphasis=True)
 
     # ── render ────────────────────────────────────────────────────────
+    # Figures render at INTRINSIC_SCALE × their viewBox dimensions. The
+    # viewBox preserves the geometry (so paint coords, contracts, and
+    # collision math don't change); the explicit width/height grow so
+    # browsers render the figure larger by default. CSS max-width on the
+    # banner container clamps the upper bound; CSS max-width: 100% on
+    # the SVG scales it down for narrow viewports. The net effect:
+    # figures fill ~1.6× more horizontal space on desktop and still
+    # shrink cleanly to mobile widths.
+    #
+    # The PAD_* offsets give every figure a small margin around its
+    # registered canvas. Most figures place a type-tag at y - 5 above
+    # the topmost box, which without padding renders outside the
+    # viewBox and gets clipped. PAD_TOP=14 covers the SIZE_TAG=8 font
+    # plus its baseline offset. PAD_X handles the rare paint function
+    # that draws slightly negative x. PAD_BOTTOM absorbs small
+    # accidental overflows.
+    INTRINSIC_SCALE = 1.6
+
     def to_svg(self) -> str:
-        # Emit explicit width/height so the SVG renders at intrinsic CSS-pixel
-        # size by default. CSS `max-width: 100%` then clamps the figure on
-        # narrow columns. Without these attributes, browsers stretch the SVG
-        # to fit width: 100% containers, magnifying text inside small
-        # viewBoxes (a 156-wide viewBox in a 320-wide column ran at 2x).
-        #
-        # The PAD_* offsets give every figure a small margin around its
-        # registered canvas. Most figures place a type-tag at y - 3 above
-        # the topmost box, which without padding renders outside the
-        # viewBox and gets clipped. PAD_TOP=14 covers the SIZE_TAG=8 font
-        # plus its baseline offset. PAD_X handles the rare paint function
-        # that draws slightly negative x. PAD_BOTTOM absorbs small
-        # accidental overflows.
         pad_top, pad_x, pad_bottom = 14, 8, 14
         vb_w = self.w + 2 * pad_x
         vb_h = self.h + pad_top + pad_bottom
+        out_w = round(vb_w * self.INTRINSIC_SCALE)
+        out_h = round(vb_h * self.INTRINSIC_SCALE)
         return (
             f'<svg viewBox="-{pad_x} -{pad_top} {vb_w} {vb_h}" '
-            f'width="{vb_w}" height="{vb_h}" '
+            f'width="{out_w}" height="{out_h}" '
             f'xmlns="http://www.w3.org/2000/svg">'
             + "".join(self.parts)
             + "</svg>"

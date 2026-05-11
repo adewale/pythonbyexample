@@ -463,26 +463,31 @@ class FigureScoreContract(unittest.TestCase):
 
 
 class FigureSizeContract(unittest.TestCase):
-    """Contract 8: every figure's intrinsic width fits the banner.
+    """Contract 8: every figure's RENDERED width fits the banner ceiling.
 
-    .cell-banner figure { max-width: 360px } and
-    .cell-banner--1 figure { max-width: 440px } in public/site.css.
-    A figure whose intrinsic width exceeds 440px will scale down on
-    every page, magnifying or shrinking text in a way the paint code
-    didn't plan for. Better to flag and adjust the canvas.
+    Canvas.to_svg emits explicit width/height attributes scaled by
+    Canvas.INTRINSIC_SCALE so figures fill more of the available
+    column on desktop. The largest banner cap in public/site.css is
+    640px (.cell-banner--1 and .journey-section-figure use
+    clamp(280px, 65vw/70vw, 640px)). A figure whose rendered width
+    exceeds 640px scales down on every viewport above the clamp's
+    middle term, shrinking text in ways the paint code didn't plan
+    for.
 
-    The "intrinsic width" is Canvas.w plus the to_svg padding (2 * PAD_X).
+    Rendered width = INTRINSIC_SCALE * (Canvas.w + 2 * PAD_X).
     """
 
-    BANNER_MAX_WIDTH = 440  # cell-banner--1 max-width, the larger of the two
+    BANNER_MAX_WIDTH = 640  # cell-banner--1 / journey-section-figure max-width
 
     def test_every_figure_fits_the_banner(self):
+        from src.marginalia_grammar import Canvas as _C
+
         failures: list[str] = []
         for name, (_, w, _) in ALL_FIGURES.items():
-            intrinsic = w + 2 * PAD_X
-            if intrinsic > self.BANNER_MAX_WIDTH:
+            rendered = round((w + 2 * PAD_X) * _C.INTRINSIC_SCALE)
+            if rendered > self.BANNER_MAX_WIDTH:
                 failures.append(
-                    f"{name}: intrinsic width {intrinsic}px exceeds "
+                    f"{name}: rendered width {rendered}px exceeds "
                     f"{self.BANNER_MAX_WIDTH}px banner ceiling"
                 )
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
