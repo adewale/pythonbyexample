@@ -499,19 +499,26 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
 
 
 def render_home() -> str:
-    cards = []
+    # Group examples by section in the order each section first appears
+    # in the manifest, then emit one eyebrow divider per section followed
+    # by every example in that section.
+    by_section: dict[str, list[dict]] = {}
     for example in list_examples():
-        cards.append(
-            _replace(
-                '<a class="card" href="/examples/__SLUG__"><p class="eyebrow">__SECTION__</p><h2>__TITLE__</h2><p class="meta">__SUMMARY__</p></a>',
-                {
-                    "SECTION": html.escape(example["section"]),
-                    "SLUG": html.escape(example["slug"]),
-                    "TITLE": html.escape(example["title"]),
-                    "SUMMARY": html.escape(example["summary"]),
-                },
+        by_section.setdefault(example["section"], []).append(example)
+    cards = []
+    for section, examples in by_section.items():
+        cards.append(f'<p class="eyebrow grid-section">{html.escape(section)}</p>')
+        for example in examples:
+            cards.append(
+                _replace(
+                    '<a class="card" href="/examples/__SLUG__"><h2>__TITLE__</h2><p class="meta">__SUMMARY__</p></a>',
+                    {
+                        "SLUG": html.escape(example["slug"]),
+                        "TITLE": html.escape(example["title"]),
+                        "SUMMARY": html.escape(example["summary"]),
+                    },
+                )
             )
-        )
     content = _replace(
         _template("home.html"),
         {"PYTHON_VERSION": html.escape(PYTHON_VERSION), "CARDS": "".join(cards)},
