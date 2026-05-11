@@ -440,6 +440,10 @@ JOURNEY_FIGURES_GESTALT_STYLE = """
     margin-top: var(--space-2); color: var(--muted);
     font-size: .9rem; font-style: italic; max-width: 44ch;
   }
+  .section-grid figure .score-line {
+    margin: var(--space-1) 0 0; color: var(--muted);
+    font-size: .82rem; font-family: -apple-system, 'Source Sans Pro', sans-serif;
+  }
 """
 
 
@@ -510,7 +514,7 @@ def build_production_figures_gestalt() -> None:
     ship-vs-design gap visible: any figure shown here is wired through to
     production attachments OR available for attachment.
     """
-    from marginalia import ATTACHMENTS, FIGURES  # noqa: PLC0415
+    from marginalia import ATTACHMENTS, FIGURES, SCORES  # noqa: PLC0415
 
     # Build a slug→figure_names index of attached figures so we can mark
     # figures that already render somewhere on a real page.
@@ -519,6 +523,14 @@ def build_production_figures_gestalt() -> None:
         for _, fig_name, _ in attachments:
             attached_to_slug.setdefault(fig_name, []).append(slug)
     journey_section_figs = {n for n, _ in JOURNEY_SECTION_FIGURES.values()}
+
+    def score_summary(slugs: list[str]) -> str:
+        scores = [SCORES.get(s) for s in slugs]
+        present = [(s, sc) for s, sc in zip(slugs, scores) if sc is not None]
+        if not present:
+            return ""
+        pieces = [f"{s} {score:.1f}" for s, (score, _note) in present]
+        return " · ".join(pieces)
 
     cards: list[str] = []
     for name, (_, w, h) in FIGURES.items():
@@ -531,11 +543,17 @@ def build_production_figures_gestalt() -> None:
         if not kind:
             kind.append("registered, not yet attached")
         kind_html = " · ".join(html.escape(k) for k in kind)
+        score_html = ""
+        if name in attached_to_slug:
+            summary = score_summary(attached_to_slug[name])
+            if summary:
+                score_html = f'<p class="score-line">v2 scores: {html.escape(summary)}</p>'
         cards.append(
             f"<figure>"
             f'<h3>{html.escape(name)}</h3>'
             f"{_render_svg(name)}"
             f'<figcaption>{kind_html} · viewBox {w}×{h}</figcaption>'
+            f"{score_html}"
             f"</figure>"
         )
     body = f"""

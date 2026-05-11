@@ -12,7 +12,12 @@ task differ. A journey-section figure depicts the *conceptual shift*
 unifying multiple lessons; an example figure depicts the *single move*
 the surrounding cell discusses.
 
-Score each example figure on a 10-point scale.
+Score each example figure on a 10-point scale. Version 2 of this
+rubric, applied 2026-05; see `docs/rubric-saturation.md` for the
+reasoning that produced these upgrades. The previous criterion 2
+("match the running variables") and criterion 5 ("caption asserts")
+have been replaced; a new page-level coherence rubric joins the
+per-figure scoring.
 
 ## Content (5.5)
 
@@ -21,22 +26,30 @@ Score each example figure on a 10-point scale.
    "Mutability" but cell 1 is about immutable strings, a figure on
    cell 1 must depict immutability, not aliasing. Wrong cell, wrong
    figure.
-2. **Match the running variables (0-1.0)** — names, values, and shapes
-   in the figure match the cell's source. If the cell uses `first` and
-   `second` on a list, the figure says `first` and `second`. Generic
-   placeholders (`a`, `b`, `xs`) are fine *only* when the cell itself
-   is generic; specific names earn their place when the cell uses them.
+2. **The figure earns its place (0-1.0)** — the figure surfaces
+   something the prose cannot show in the same word count: a
+   relationship, a before/after, a hidden mechanism, an invariant.
+   A figure that merely restates the prose in diagram form earns
+   0.5; a figure that adds nothing the prose hasn't already said
+   earns 0. Generic placeholders (`a`, `b`, `xs`) are fine; what
+   matters is whether the figure carries pedagogical weight beyond
+   the prose. (Replaces v1's "match the running variables", which
+   punished honest reuse of library figures across multiple cells.)
 3. **One conceptual move (0-1.0)** — exactly one shift, before-state
    to after-state, or one mechanism. Squint test: a reader should
    identify the figure's single point in two seconds.
 4. **Mechanism over metaphor (0-1.0)** — the figure shows the actual
    machinery (the cell, the binding, the dispatch, the iterator),
    not a cartoon of it. Knuth's rule.
-5. **Caption asserts; figure depicts (0-1.0)** — `figcaption` is a
-   declarative sentence about what the figure shows. The SVG itself
-   contains no prose duplicating the caption — only diagrammatic
-   labels (`stdout`, `iter()`, panel tags, type signatures). See
-   pipeline invariant 2 in the spec.
+5. **Caption quality (0-1.0)** — `figcaption` declares what is true,
+   in the section summary's voice; it does not narrate what the
+   figure does. "Two names share one mutable list — appending
+   through one name changes the object visible through both."
+   earns 1.0. "The figure shows two names pointing at one list."
+   earns 0 (narration, not assertion). Mixed-voice captions earn
+   0.5. The SVG itself contains no prose duplicating the caption;
+   only diagrammatic labels (`stdout`, `iter()`, panel tags, type
+   signatures). See pipeline invariant 2 in the spec.
 
 ## Craft (3.0)
 
@@ -99,6 +112,26 @@ Score each example figure on a 10-point scale.
   `SOFT_FILL`. No literal hex codes, no `rgba(0,0,0,…)` neutrals.
 - **Pipeline invariants** (see spec) hold: SVG renders at intrinsic
   size; SVG contains no prose duplicating the caption.
+
+## Page-level coherence (per slug, multi-figure)
+
+A separate 0-1.0 score applied to slugs whose `ATTACHMENTS[slug]`
+list contains more than one figure. Multi-figure pages must form a
+coherent set, not three angles on the same point.
+
+- **1.0** — figures show distinct aspects of the lesson in a
+  natural reading order (intro picture, mid-walkthrough mechanism,
+  summary). Each banner earns its placement.
+- **0.5** — figures are individually fine but redundant; one would
+  do the work of two. The page reads as cluttered.
+- **0** — figures contradict each other, or one figure is on the
+  wrong cell, or the page has three figures where one would teach
+  better.
+
+For single-figure slugs (today, all 109 of them), page coherence is
+trivially 1.0 and does not enter the per-figure score. As multi-
+figure attachments grow this criterion will become the discriminator
+that prevents the "more figures is better" failure mode.
 
 ## Quality bands
 

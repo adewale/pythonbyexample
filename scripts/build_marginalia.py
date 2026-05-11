@@ -766,9 +766,19 @@ def e_async_iteration(c: Canvas) -> None:
     c.mono(264, 50, "await yield")
 
 
-# Scores against docs/example-figure-rubric.md. Bands: 9.0+ ship-ready,
-# 8.0-8.9 ship after minor tightening, 7.0-7.9 redesign before promoting.
+# Scores against docs/example-figure-rubric.md v2. The production scoring
+# lives in src/marginalia.SCORES keyed by example slug; we import it and
+# overlay a small set of legacy entries for the gestalt-only cards whose
+# slugs differ from production (e.g. "operators-and-literals" split into
+# "operators" + "literals" on main).
+from marginalia import SCORES as _PRODUCTION_SCORES  # noqa: E402
+
 SCORES: dict[str, tuple[float, str]] = {
+    # Gestalt-only slugs that don't match a production example slug.
+    "operators-and-literals": (9.0, "expression tree mechanism"),
+}
+SCORES.update(_PRODUCTION_SCORES)
+_LEGACY_SCORES: dict[str, tuple[float, str]] = {
     "hello-world": (9.0, "program → output, smallest mechanism"),
     "values": (8.0, "three typed boxes; static enumeration"),
     "numbers": (9.0, "int register + float thinning"),
