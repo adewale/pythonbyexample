@@ -76,5 +76,41 @@ class UnsupportedCellProseContract(unittest.TestCase):
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
 
+class CellCodeWrappingContract(unittest.TestCase):
+    """Contract 12: walkthrough cell code wraps inside the narrow
+    prose|code column without horizontal scroll.
+
+    The cells render in a column whose mono font fits roughly 55-60
+    characters at desktop widths and narrower on tablets. CSS sets
+    `white-space: pre-wrap` so lines wrap at SPACES, but a continuous
+    run with no space (a long dotted call, an import chain, a string
+    literal) overflows even after pre-wrap and triggers a horizontal
+    scrollbar inside the code block.
+
+    Heuristic: no \\S-run in any cell may exceed 50 characters. Hits
+    must be either shortened (introduce a temporary name and split
+    the call) or accepted with `overflow-wrap: anywhere` in CSS as a
+    safety net.
+    """
+
+    MAX_UNBREAKABLE_RUN = 50
+
+    def test_no_unwrappable_run_in_cell_code(self):
+        import re as _re
+
+        failures: list[str] = []
+        for ex in EXAMPLES:
+            for i, cell in enumerate(ex.get("cells", [])):
+                for j, line in enumerate(cell.get("code", "").splitlines()):
+                    longest = max(_re.findall(r"\S+", line) or [""], key=len)
+                    if len(longest) > self.MAX_UNBREAKABLE_RUN:
+                        failures.append(
+                            f"{ex['slug']} cell {i} line {j}: "
+                            f"{len(longest)}-char unbreakable run will overflow "
+                            f"the prose|code column → {longest[:60]!r}"
+                        )
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
 if __name__ == "__main__":
     unittest.main()
