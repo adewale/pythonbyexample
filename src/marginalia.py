@@ -1160,6 +1160,57 @@ def object_lifecycle(c: Canvas) -> None:
     c.cell(284, 22, "__del__", w=80, h=24)
 
 
+# ─── Fifth pass: tightened figures for slugs that were on reuse-floors ─
+
+
+def type_alias_name(c: Canvas) -> None:
+    """Type aliases · complex annotation collapses to a single readable name."""
+    c.cell(0, 30, "dict[str, list[tuple[int, str]]]", w=240, h=24, ghost=True)
+    c.closed_arrow(120, 54, 120, 70, emphasis=True)
+    c.label(96, 62, "type Index = …", anchor="middle")
+    c.cell(80, 76, "Index", w=80, h=24, soft=True)
+
+
+def match_dispatch_ladder(c: Canvas) -> None:
+    """Match statements · the value flows down the patterns; the first match wins."""
+    c.cell(0, 0, "match value", w=170, h=22)
+    cases = ["case 0:", "case [x, y]:", "case Point(0, _):", "case _:"]
+    for i, txt in enumerate(cases):
+        c.cell(0, 30 + i * 22, txt, w=170, h=20)
+    c.dashed(186, 32, 186, 122)
+    c.dot(186, 74, emphasis=True)
+    c.closed_arrow(186, 110, 186, 124, emphasis=True)
+    c.label(196, 76, "first match", anchor="start")
+
+
+def match_pattern_variants(c: Canvas) -> None:
+    """Advanced match patterns · capture, alternative, guard, class — four pattern shapes."""
+    rows = [("capture", "[x, y]"), ("alternative", "P() | Q()"), ("guard", "[x] if x > 0"), ("class", "Point(x=0, y=_)")]
+    for i, (kind, shape) in enumerate(rows):
+        y = i * 22
+        c.cell(0, y, kind, w=90, h=20)
+        c.cell(92, y, shape, w=180, h=20, soft=(kind == "class"))
+
+
+def loop_else_gate(c: Canvas) -> None:
+    """Loop else · runs when the loop falls through naturally; break skips it."""
+    c.cell(0, 20, "loop body", w=110, h=24)
+    c.closed_arrow(110, 20, 150, 0, emphasis=True)
+    c.cell(152, 0, "fell through · else runs", w=160, h=20, soft=True)
+    c.closed_arrow(110, 44, 150, 56, emphasis=False)
+    c.cell(152, 50, "broke · else skipped", w=160, h=20)
+
+
+def workers_lesson_runtime(c: Canvas) -> None:
+    """Workers · lesson uses captured output as evidence when the runtime forbids the process API."""
+    c.cell(0, 22, "lesson question", w=130, h=24)
+    c.closed_arrow(130, 22, 160, 0, emphasis=False)
+    c.cell(162, 0, "process API", w=130, h=20, ghost=True)
+    c.dashed(162, 10, 292, 10)
+    c.closed_arrow(130, 46, 160, 56, emphasis=True)
+    c.cell(162, 50, "captured output", w=130, h=20, soft=True)
+
+
 def lazy_stream(c: Canvas) -> None:
     """Iteration · Compose lazy value streams: filter and map flow values without materialising."""
     c.object_box(0, 26, "source", "[a,b,c]", w=78, h=24)
@@ -1287,6 +1338,11 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "csv-records": (csv_records, 212, 96),
     "warning-signal": (warning_signal, 292, 80),
     "object-lifecycle": (object_lifecycle, 366, 60),
+    # Fifth pass: slug-specific figures lifting attached scores off the 8.0 floor
+    "type-alias-name": (type_alias_name, 240, 104),
+    "match-dispatch-ladder": (match_dispatch_ladder, 220, 130),
+    "match-pattern-variants": (match_pattern_variants, 272, 96),
+    "loop-else-gate": (loop_else_gate, 312, 76),
 }
 
 
@@ -1472,11 +1528,11 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "An iterable knows how to produce an iterator (via iter()); the iterator knows how to produce values (via next()).",
     )],
     "type-aliases": [(
-        "cell-0", "annotation-ghost",
-        "A type alias names a complex annotation once so call sites read as their domain meaning, not their type composition.",
+        "cell-0", "type-alias-name",
+        "A type alias names a complex annotation once so call sites read as the domain meaning, not the type composition.",
     )],
     "typed-dicts": [(
-        "cell-0", "union-types",
+        "cell-0", "typed-dict-shape",
         "TypedDict gives each key a typed value, so `obj['x']` is checked against the declared shape.",
     )],
     "union-and-optional-types": [(
@@ -1643,8 +1699,8 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "A predicate sorts a value into one of several branches; if/elif/else is the explicit spelling.",
     )],
     "match-statements": [(
-        "cell-0", "branch-fork",
-        "match dispatches on the shape of a value to one of several branches; richer than if-elif.",
+        "cell-0", "match-dispatch-ladder",
+        "match dispatches by pattern shape; the value flows down the patterns and the first match wins.",
     )],
     "assignment-expressions": [(
         "cell-0", "naming-decisions",
@@ -1663,7 +1719,7 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "async iteration and async with both rest on the same loop-vs-coroutine handoff as await.",
     )],
     "loop-else": [(
-        "cell-0", "early-exit",
+        "cell-0", "loop-else-gate",
         "The loop's else branch runs only when the loop falls through naturally; break skips it.",
     )],
     "break-and-continue": [(
@@ -1691,8 +1747,8 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "while repeats the body until the condition becomes false; the back-edge returns to the test each pass.",
     )],
     "advanced-match-patterns": [(
-        "cell-0", "branch-fork",
-        "Capture, guard, OR-pattern, and class patterns each refine how a value sorts into one of several branches.",
+        "cell-0", "match-pattern-variants",
+        "Capture, alternative, guard, and class patterns each name a different way a value can match a case.",
     )],
     "literals": [(
         "cell-0", "value-types",
