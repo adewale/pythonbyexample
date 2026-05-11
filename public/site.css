@@ -8,7 +8,7 @@
     nav a:hover { color: var(--accent); text-decoration-color: var(--accent); }
     .button:active { transform: scale(0.96); }
     h1, h2 { letter-spacing: -0.04em; line-height: 1.05; text-wrap: balance; }
-    h1 { font-size: clamp(2.4rem, 7vw, 5.75rem); margin: 0 0 1rem; }
+    h1 { font-size: clamp(2.4rem, 4.5vw, 3.75rem); margin: 0 0 1rem; }
     h2 { margin-top: 0; }
     p, li { text-wrap: pretty; }
     pre { overflow: auto; padding: 1rem; border-radius: 1rem; background: #0b1020; color: #f9fafb; box-shadow: 0 1px 1px rgba(0,0,0,.12), 0 12px 42px rgba(0,0,0,.18); }
@@ -73,6 +73,7 @@
     .notebook-notes { margin-top: var(--space-5); }
     @media (max-width: 980px) { .lp-cell { grid-template-columns: 1fr; } .cell-output { max-width: none; } }
     .playground { margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--hairline); }
+    .playground > h2 { font-size: clamp(1.5rem, 2.5vw, 2rem); letter-spacing: -0.03em; margin-bottom: var(--space-3); }
     .runner-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(18rem, .75fr); gap: var(--space-4); align-items: stretch; }
     .runner-panel { min-height: 18rem; display: flex; flex-direction: column; border: 1px dashed var(--hairline); border-radius: .75rem; padding: var(--space-3); background: var(--surface); }
     .runner-panel h2 { margin: 0 0 var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--hairline-soft); font-size: 1.05rem; letter-spacing: -0.02em; }
@@ -99,6 +100,8 @@
     .journey-item-title { font-weight: 750; }
     .journey-gap, .journey-gap-label { color: var(--muted); font-weight: 750; }
     .journey-gap-label { margin: 0; color: var(--muted); font-size: .86rem; letter-spacing: 0; text-transform: none; }
+    .notes-list { margin: 0 0 var(--space-5); padding-left: 1.2rem; color: var(--muted); max-width: 58ch; }
+    .notes-list li { margin-bottom: var(--space-1); text-wrap: pretty; }
     .example-top, .example-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
     .example-nav { margin-top: var(--space-5); padding-top: var(--space-3); border-top: 1px solid var(--hairline); }
     footer { margin-block: 2rem; color: var(--muted); }
@@ -113,4 +116,6 @@
     .cell-banner figure { margin: 0; padding: 0; max-width: 360px; }
     .cell-banner svg { max-width: 100%; height: auto; display: block; }
     .cell-banner figcaption { margin-top: var(--space-2); color: var(--muted); font-size: .92rem; font-style: italic; max-width: 44ch; }
+    .cell-banner--1 { margin-block: var(--space-6); }
     .cell-banner--1 figure { max-width: 440px; }
+    .cell-banner--1 figcaption { max-width: 42ch; }

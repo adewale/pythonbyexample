@@ -108,8 +108,8 @@ def render_article(example: dict, *, banners: dict[str, str] | None = None) -> s
     <p class="meta">{html.escape(example['summary'])}</p>
   </section>
   <section class="literate-program" aria-label="Annotated code walkthrough">{walkthrough}</section>
-  <h2>Notes</h2>
-  <ul>{notes}</ul>
+  <p class="eyebrow">Notes</p>
+  <ul class="notes-list">{notes}</ul>
   <section class="playground" aria-label="Editable runnable example">
     <h2>Run the complete example</h2>
     <div class="runner-grid">
