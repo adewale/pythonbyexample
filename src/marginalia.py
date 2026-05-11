@@ -973,7 +973,7 @@ def exception_group_peel(c: Canvas) -> None:
     c.tag(0, 0, "before")
     c.dot(40, 14)
     for x in (20, 36, 52, 68):
-        c.ghost(40, 18, x, 40)
+        c.ghost(40, 14, x, 44)
     c.dot(20, 44)
     c.dot(36, 44)
     c.dot(52, 44)
@@ -982,8 +982,8 @@ def exception_group_peel(c: Canvas) -> None:
     c.label(115, 22, "except*", anchor="middle")
     c.tag(160, 0, "after")
     c.dot(200, 14)
-    c.ghost(200, 18, 180, 40)
-    c.ghost(200, 18, 220, 40)
+    c.ghost(200, 14, 180, 44)
+    c.ghost(200, 14, 220, 44)
     c.dot(180, 44)
     c.dot(220, 44)
 
