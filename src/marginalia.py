@@ -271,12 +271,12 @@ def union_types(c: Canvas) -> None:
     """Types · Describe realistic shapes: a slot accepting one of several types."""
     c.tag(0, 14, "x: int|str|None")
     c.cell(0, 22, "x", w=44, h=28)
-    c.closed_arrow(44, 36, 80, 14, emphasis=False)
-    c.closed_arrow(44, 36, 80, 36, emphasis=False)
-    c.closed_arrow(44, 36, 80, 58, emphasis=False)
-    c.cell(82, 4, "int", w=70, h=22, soft=True)
-    c.cell(82, 26, "str", w=70, h=22, soft=True)
-    c.cell(82, 48, "None", w=70, h=22, soft=True)
+    c.closed_arrow(44, 36, 90, 14, emphasis=False)
+    c.closed_arrow(44, 36, 90, 36, emphasis=False)
+    c.closed_arrow(44, 36, 90, 58, emphasis=False)
+    c.cell(92, 4, "int", w=70, h=22, soft=True)
+    c.cell(92, 26, "str", w=70, h=22, soft=True)
+    c.cell(92, 48, "None", w=70, h=22, soft=True)
 
 
 def generic_preservation(c: Canvas) -> None:
@@ -1270,7 +1270,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "class-with-state": (class_with_state, 152, 108),
     # Types
     "annotation-ghost": (annotation_ghost, 220, 52),
-    "union-types": (union_types, 156, 80),
+    "union-types": (union_types, 166, 80),
     "generic-preservation": (generic_preservation, 250, 70),
     # Reliability
     "exception-lanes": (exception_lanes, 320, 100),
@@ -1294,7 +1294,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "dict-buckets": (dict_buckets, 270, 88),
     # Workers journey (constraint-shaped sections; tightened designs)
     "workers-portable-evidence": (workers_portable_evidence, 222, 84),
-    "workers-protocol-local": (workers_protocol_local, 162, 110),
+    "workers-protocol-local": (workers_protocol_local, 200, 110),
     "workers-lesson-runtime": (workers_lesson_runtime, 300, 80),
     # Newly designed paint code for examples that lacked a figure
     "number-lines": (number_lines, 260, 78),
@@ -1313,7 +1313,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "attribute-lookup": (attribute_lookup, 242, 70),
     "guard-clauses": (guard_clauses, 264, 104),
     "bytes-vs-bytearray": (bytes_vs_bytearray, 308, 86),
-    "sentinel-iteration": (sentinel_iteration, 300, 92),
+    "sentinel-iteration": (sentinel_iteration, 320, 92),
     "partial-functions": (partial_functions, 334, 36),
     # Third coverage push: 24 more figures
     "args-kwargs": (args_kwargs, 280, 68),

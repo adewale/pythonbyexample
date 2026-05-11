@@ -35,22 +35,28 @@ ATTR = re.compile(r'([\w-]+)="([^"]+)"')
 # src/marginalia_grammar.py.
 PAD_TOP, PAD_X, PAD_BOTTOM = 14, 14, 14
 
-# Approximate character widths as a multiple of font-size. These are
-# conservative upper bounds for the fonts the grammar emits; the audit
-# would rather flag a borderline-clean figure than miss a real overflow.
-# Sans uppercase (tag font) is wider than mixed case — the tag()
-# primitive upper-cases its argument, so the conservative bound for
-# sans must cover uppercase letters like L, O, P with tracking 0.5.
+# Approximate character widths as a multiple of font-size. Sans-serif
+# glyph advance varies sharply by case: uppercase letters (L, O, P)
+# average ~0.65 of font-size, mixed-case ~0.55, narrow lowercase
+# (l, i) ~0.40. The tag() primitive upper-cases its argument; label()
+# uses mixed case. Different bounds catch both: too-loose missed the
+# async-swimlane "LOOP" clip; too-tight over-flags every mixed-case
+# label kissing a sibling rect.
 CHAR_WIDTH = {
-    "mono": 0.62,    # JetBrains Mono / IBM Plex Mono
-    "sans": 0.65,    # Source Sans Pro / system sans, uppercase + tracking
-    "serif": 0.52,   # Iowan Old Style / Charter italic
+    "mono": 0.62,           # JetBrains Mono / IBM Plex Mono
+    "sans_upper": 0.65,     # Source Sans Pro uppercase (tag font)
+    "sans": 0.55,           # Source Sans Pro mixed-case (label font)
+    "serif": 0.52,          # Iowan Old Style / Charter italic
 }
 
 
 def font_class(family: str) -> str:
     if "Mono" in family or "monospace" in family:
         return "mono"
+    # "sans-serif" contains "serif" as a substring; check sans first
+    # so the system-sans fallback string doesn't misclassify.
+    if "sans" in family.lower():
+        return "sans"
     if "serif" in family or "Iowan" in family or "Charter" in family:
         return "serif"
     return "sans"
@@ -64,7 +70,15 @@ def text_bbox(d: dict, content: str) -> tuple[float, float, float, float]:
     anchor = d.get("text-anchor", "start")
     family = d.get("font-family", "sans-serif")
     tracking = float(d.get("letter-spacing", 0))
-    width = (CHAR_WIDTH[font_class(family)] * fs + tracking) * len(content)
+    klass = font_class(family)
+    # Differentiate uppercase sans (tag font: LOOP, INT, …) from
+    # mixed-case sans (label font: next(), stdout, …); upper-cased
+    # glyphs are ~18 % wider per advance.
+    if klass == "sans" and content == content.upper() and any(ch.isalpha() for ch in content):
+        per_char = CHAR_WIDTH["sans_upper"] * fs
+    else:
+        per_char = CHAR_WIDTH[klass] * fs
+    width = (per_char + tracking) * len(content)
     if anchor == "middle":
         x -= width / 2
     elif anchor == "end":
