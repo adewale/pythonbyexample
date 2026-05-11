@@ -334,6 +334,31 @@ class FigureGrammarContract(unittest.TestCase):
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
 
+class FigureCaptionContract(unittest.TestCase):
+    """Contract 5b: every attachment caption is unique.
+
+    A figure can legitimately be reused across slugs (iter-protocol
+    serves four iteration examples). But each lesson should frame the
+    figure in its own voice — copying the caption verbatim means two
+    lessons share the same prose, which is the same anti-pattern as
+    two examples sharing the same code.
+    """
+
+    def test_no_caption_is_used_on_more_than_one_slug(self):
+        from collections import defaultdict
+
+        caption_to_slugs: dict[str, list[str]] = defaultdict(list)
+        for slug, items in ATTACHMENTS.items():
+            for _, _, caption in items:
+                if caption:
+                    caption_to_slugs[caption].append(slug)
+        duplicates = {cap: slugs for cap, slugs in caption_to_slugs.items() if len(slugs) > 1}
+        message_lines = [
+            f"{slugs!r} share caption {cap!r}" for cap, slugs in duplicates.items()
+        ]
+        self.assertEqual(duplicates, {}, "\n  " + "\n  ".join(message_lines))
+
+
 class FigureAnchorContract(unittest.TestCase):
     """Contract 6: every cell-N attachment anchor points to a real cell.
 

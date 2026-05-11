@@ -572,9 +572,10 @@ def sort_stability(c: Canvas) -> None:
 def kw_only_separator(c: Canvas) -> None:
     """Keyword-only arguments · `*` divides positional from keyword-only."""
     c.mono(0, 18, "def f(a, b, *, c, d): …", anchor="start")
-    c.dashed(82, 22, 82, 38)
-    c.label(40, 50, "positional or kw", anchor="middle")
-    c.label(140, 50, "keyword only", anchor="middle")
+    # JetBrains Mono advances ~6px per char at fs=10; '*' sits at index 12.
+    c.dashed(75, 22, 75, 38)
+    c.label(33, 50, "positional or kw", anchor="middle")
+    c.label(120, 50, "keyword only", anchor="middle")
 
 
 def positional_only_separator(c: Canvas) -> None:
@@ -1733,7 +1734,7 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
     )],
     "iterating-over-iterables": [(
         "cell-0", "iter-protocol",
-        "iter() exposes the iterator behind for; next() pulls one value at a time until exhausted.",
+        "`for` desugars to iter()+next(): one iter() call, then next() until StopIteration ends the loop.",
     )],
     "generator-expressions": [(
         "cell-0", "lazy-stream",
