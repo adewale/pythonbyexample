@@ -63,6 +63,12 @@ Install dependencies with `uv`, then run:
 python3 -m unittest discover -s tests -v
 ```
 
+After cloning, install the local git hooks once so merges and rebases regenerate `src/asset_manifest.py` instead of producing conflicts:
+
+```bash
+./scripts/install-git-hooks.sh
+```
+
 Run locally on Workers:
 
 ```bash
