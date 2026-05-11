@@ -30,7 +30,7 @@ with tempfile.TemporaryDirectory() as directory:
 :::
 
 :::unsupported
-Dynamic Workers do not provide the `venv` module or a project environment workflow.
+`venv.EnvBuilder` configures the description of a new environment, then `create(".venv")` materialises it on disk as a directory containing its own interpreter and `site-packages`. `with_pip=False` skips bootstrapping pip — useful when the venv is for an isolated tool that doesn't need to install third-party packages. (This fragment runs in standard Python only — Dynamic Workers don't provide the `venv` module or a project environment workflow.)
 
 ```python
 builder = venv.EnvBuilder(with_pip=False)

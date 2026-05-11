@@ -29,7 +29,7 @@ print(ProcessPoolExecutor.__name__)
 :::
 
 :::unsupported
-Dynamic Workers do not provide native threads or child processes.
+`ThreadPoolExecutor` runs `square` across two worker threads sharing the same interpreter (and the GIL); `ProcessPoolExecutor` runs `pow` across two child processes with isolated memory. Each `pool.map` returns an iterator over results in input order, and the surrounding `with` block joins the workers when the body exits. (This fragment runs in standard Python only — Dynamic Workers don't provide native threads or child processes.)
 
 ```python
 with ThreadPoolExecutor(max_workers=2) as pool:
