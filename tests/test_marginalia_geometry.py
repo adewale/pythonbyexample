@@ -33,14 +33,17 @@ ATTR = re.compile(r'([\w-]+)="([^"]+)"')
 
 # Padding emitted by Canvas.to_svg(). Must agree with the constants in
 # src/marginalia_grammar.py.
-PAD_TOP, PAD_X, PAD_BOTTOM = 14, 8, 14
+PAD_TOP, PAD_X, PAD_BOTTOM = 14, 14, 14
 
 # Approximate character widths as a multiple of font-size. These are
 # conservative upper bounds for the fonts the grammar emits; the audit
 # would rather flag a borderline-clean figure than miss a real overflow.
+# Sans uppercase (tag font) is wider than mixed case — the tag()
+# primitive upper-cases its argument, so the conservative bound for
+# sans must cover uppercase letters like L, O, P with tracking 0.5.
 CHAR_WIDTH = {
     "mono": 0.62,    # JetBrains Mono / IBM Plex Mono
-    "sans": 0.58,    # Source Sans Pro / system sans
+    "sans": 0.65,    # Source Sans Pro / system sans, uppercase + tracking
     "serif": 0.52,   # Iowan Old Style / Charter italic
 }
 

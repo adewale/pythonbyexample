@@ -346,7 +346,7 @@ class Canvas:
     INTRINSIC_SCALE = 1.6
 
     def to_svg(self) -> str:
-        pad_top, pad_x, pad_bottom = 14, 8, 14
+        pad_top, pad_x, pad_bottom = 14, 14, 14
         vb_w = self.w + 2 * pad_x
         vb_h = self.h + pad_top + pad_bottom
         out_w = round(vb_w * self.INTRINSIC_SCALE)
