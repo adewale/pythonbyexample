@@ -328,5 +328,91 @@ class FigureGrammarContract(unittest.TestCase):
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
 
+class FigureAnchorContract(unittest.TestCase):
+    """Contract 6: every cell-N attachment anchor points to a real cell.
+
+    Adding an attachment that points past the end of an example's
+    walkthrough leaves the figure orphan — `render_for_anchor` returns
+    empty and the figure never ships. Catches a typo or a stale
+    attachment after a markdown example loses a cell.
+    """
+
+    def test_every_attachment_anchor_resolves_to_a_real_cell(self):
+        # Imported lazily to avoid pulling the example loader for every
+        # test in this file.
+        import re as _re
+        from src.example_loader import load_examples
+
+        _, examples = load_examples()
+        by_slug = {ex["slug"]: ex for ex in examples}
+
+        failures: list[str] = []
+        for slug, items in ATTACHMENTS.items():
+            ex = by_slug.get(slug)
+            if ex is None:
+                failures.append(f"{slug}: ATTACHMENT exists but no markdown example matches")
+                continue
+            cells = ex.get("walkthrough", [])
+            for anchor, name, _ in items:
+                match = _re.match(r"cell-(\d+)$", anchor)
+                if not match:
+                    failures.append(f"{slug}: anchor {anchor!r} is not cell-N")
+                    continue
+                if int(match.group(1)) >= len(cells):
+                    failures.append(
+                        f"{slug}: anchor {anchor!r} → figure {name!r}, "
+                        f"but example has only {len(cells)} cell(s)"
+                    )
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
+class FigureScoreContract(unittest.TestCase):
+    """Contract 7: every SCORES entry is a real assessment.
+
+    A score must be a number in [0, 10] (the rubric's range) with a
+    non-empty short commentary. Catches typos where a comma slips and
+    a tuple turns into something else.
+    """
+
+    def test_every_score_is_in_range_with_commentary(self):
+        failures: list[str] = []
+        for slug, entry in SCORES.items():
+            if not isinstance(entry, tuple) or len(entry) != 2:
+                failures.append(f"{slug}: not a (score, commentary) tuple")
+                continue
+            score, commentary = entry
+            if not isinstance(score, (int, float)) or not 0 <= score <= 10:
+                failures.append(f"{slug}: score {score!r} outside [0, 10]")
+            if not isinstance(commentary, str) or not commentary.strip():
+                failures.append(f"{slug}: empty commentary")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
+class FigureSizeContract(unittest.TestCase):
+    """Contract 8: every figure's intrinsic width fits the banner.
+
+    .cell-banner figure { max-width: 360px } and
+    .cell-banner--1 figure { max-width: 440px } in public/site.css.
+    A figure whose intrinsic width exceeds 440px will scale down on
+    every page, magnifying or shrinking text in a way the paint code
+    didn't plan for. Better to flag and adjust the canvas.
+
+    The "intrinsic width" is Canvas.w plus the to_svg padding (2 * PAD_X).
+    """
+
+    BANNER_MAX_WIDTH = 440  # cell-banner--1 max-width, the larger of the two
+
+    def test_every_figure_fits_the_banner(self):
+        failures: list[str] = []
+        for name, (_, w, _) in FIGURES.items():
+            intrinsic = w + 2 * PAD_X
+            if intrinsic > self.BANNER_MAX_WIDTH:
+                failures.append(
+                    f"{name}: intrinsic width {intrinsic}px exceeds "
+                    f"{self.BANNER_MAX_WIDTH}px banner ceiling"
+                )
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
 if __name__ == "__main__":
     unittest.main()
