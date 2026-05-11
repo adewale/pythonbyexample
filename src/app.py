@@ -10,11 +10,11 @@ from pathlib import Path
 try:
     from .asset_manifest import ASSET_PATHS
     from .examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
-    from .marginalia import render_for_anchor
+    from .marginalia import render_for_anchor, render_for_section
 except ImportError:  # Cloudflare Python Workers import sibling modules from main's directory.
     from asset_manifest import ASSET_PATHS
     from examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
-    from marginalia import render_for_anchor
+    from marginalia import render_for_anchor, render_for_section
 
 
 class AppResponse:
@@ -572,7 +572,8 @@ def render_journey_page(journey):
             else:
                 sentence = f"This gap should {description}."
                 rows.append(f'<li><p class="journey-gap-label">Gap · {html.escape(value)}</p><p class="meta">{html.escape(sentence)}</p></li>')
-        sections.append(f'<section class="journey-section"><h2>{html.escape(section["title"])}</h2><p class="meta">{html.escape(section["summary"])}</p><ul class="journey-list">{"".join(rows)}</ul></section>')
+        figure_html = render_for_section(section["title"])
+        sections.append(f'<section class="journey-section"><h2>{html.escape(section["title"])}</h2><p class="meta">{html.escape(section["summary"])}</p>{figure_html}<ul class="journey-list">{"".join(rows)}</ul></section>')
     content = f'''
 <article class="example-shell journey-page">
   <div class="example-top"><a class="text-link" href="/">← All examples</a><a class="text-link" href="{html.escape(REFERENCE_URL)}">Python docs reference</a></div>

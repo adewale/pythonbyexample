@@ -266,15 +266,20 @@ class FigureRegistrationContract(unittest.TestCase):
         self.assertEqual(orphan_refs, set(), f"attachments reference unknown figures: {sorted(orphan_refs)}")
 
     def test_no_unused_figure_paint_functions(self):
-        # A figure name counts as "used" if it appears in ATTACHMENTS
-        # (example-page wiring) or anywhere in scripts/build_prototypes.py
-        # (journey-section figures, banner prototypes, gestalt galleries).
+        # A figure name counts as "used" if it ships on an example page
+        # (ATTACHMENTS), a journey section (SECTION_FIGURES), or appears
+        # anywhere in scripts/build_prototypes.py (banner layouts and
+        # gestalt galleries that aren't covered by the structured
+        # registries).
         from pathlib import Path
+
+        from src.marginalia import SECTION_FIGURES
 
         prototype_src = (
             Path(__file__).resolve().parents[1] / "scripts" / "build_prototypes.py"
         ).read_text()
         used = {name for items in ATTACHMENTS.values() for _, name, _ in items}
+        used |= {name for name, _ in SECTION_FIGURES.values()}
         used |= {name for name in FIGURES if f'"{name}"' in prototype_src or f"'{name}'" in prototype_src}
         unused = set(FIGURES) - used
         self.assertEqual(
@@ -332,6 +337,44 @@ class FigureGrammarContract(unittest.TestCase):
                 if weight and weight not in allowed:
                     failures.append(f"{name}: {kind} stroke-width={weight!r}")
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
+class SectionFigureContract(unittest.TestCase):
+    """Contract 10: every journey section in app.py JOURNEYS has a
+    figure in SECTION_FIGURES, and every SECTION_FIGURES entry maps
+    to a real FIGURES paint function.
+    """
+
+    def test_every_journey_section_has_a_figure(self):
+        from src.app import JOURNEYS
+        from src.marginalia import SECTION_FIGURES
+
+        section_titles = {s["title"] for j in JOURNEYS for s in j["sections"]}
+        missing = section_titles - set(SECTION_FIGURES)
+        self.assertEqual(
+            missing, set(),
+            f"journey sections without a figure: {sorted(missing)}",
+        )
+
+    def test_every_section_figure_points_to_a_real_paint_function(self):
+        from src.marginalia import SECTION_FIGURES
+
+        orphan_refs = {name for name, _ in SECTION_FIGURES.values()} - set(FIGURES)
+        self.assertEqual(
+            orphan_refs, set(),
+            f"SECTION_FIGURES references unknown figures: {sorted(orphan_refs)}",
+        )
+
+    def test_every_section_figure_caption_is_unique(self):
+        from collections import defaultdict
+        from src.marginalia import SECTION_FIGURES
+
+        caption_to_titles: dict[str, list[str]] = defaultdict(list)
+        for title, (_, caption) in SECTION_FIGURES.items():
+            if caption:
+                caption_to_titles[caption].append(title)
+        duplicates = {c: t for c, t in caption_to_titles.items() if len(t) > 1}
+        self.assertEqual(duplicates, {}, f"duplicate section captions: {duplicates}")
 
 
 class FigureCaptionContract(unittest.TestCase):

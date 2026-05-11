@@ -22,6 +22,7 @@ from app import (  # noqa: E402  (sys.path set above)
     get_example,
     render_inline,
 )
+from marginalia import SECTION_FIGURES as JOURNEY_SECTION_FIGURES  # noqa: E402
 from marginalia import _render_svg  # noqa: E402
 
 OUT_DIR = ROOT / "public" / "prototyping"
@@ -252,115 +253,6 @@ JOURNEY_STYLE = """
 """
 
 
-# Each journey section maps to ONE figure that captures the section's
-# conceptual shift. Keys are section titles exactly as they appear in
-# JOURNEYS in app.py. Each value is (figure_name, caption).
-JOURNEY_SECTION_FIGURES: dict[str, tuple[str, str]] = {
-    # Runtime
-    "Start with executable evidence.": (
-        "program-output",
-        "Every page is a runnable program. The smallest mental model: source produces visible output.",
-    ),
-    "Separate value, identity, and absence.": (
-        "identity-and-equality",
-        "Two names can share one object (left, both `is` and `==` true) or hold two equal-but-distinct objects (right, only `==` true).",
-    ),
-    "Read expressions as object operations.": (
-        "operator-dispatch",
-        "Operators are method calls. `a + b` dispatches to `a.__add__(b)`; the data model exposes the syntax.",
-    ),
-    # Control Flow
-    "Choose between paths.": (
-        "branch-fork",
-        "A value flows through a predicate to one of several branches.",
-    ),
-    "Name and shape decisions.": (
-        "naming-decisions",
-        "The walrus binds a name while the surrounding expression uses its value: one expression, two outputs.",
-    ),
-    "Stop as soon as the answer is known.": (
-        "early-exit",
-        "The loop exits at the first match — break short-circuits the rest of the sequence.",
-    ),
-    # Iteration
-    "Choose the right loop shape.": (
-        "loop-repetition",
-        "Walk the sequence, run the body, return; the shape behind for and while.",
-    ),
-    "See the protocol behind `for`.": (
-        "iter-protocol",
-        "iter() exposes the iterator behind for; next() pulls one value at a time until exhausted.",
-    ),
-    "Compose lazy value streams.": (
-        "lazy-stream",
-        "Filters and maps compose without materialising intermediate lists; values flow through the pipeline only when next() pulls them.",
-    ),
-    # Workers — constraint-shaped sections; figures tentative.
-    "Replace unavailable process boundaries with portable evidence.": (
-        "workers-portable-evidence",
-        "Worker isolation breaks the usual cross-process pathways; the lesson preserves a captured value as portable evidence instead.",
-    ),
-    "Keep network lessons local to the protocol boundary.": (
-        "workers-protocol-local",
-        "Demonstrate the protocol shape (request and response) rather than calling out over the network.",
-    ),
-    "Preserve the lesson while respecting the runtime.": (
-        "workers-lesson-runtime",
-        "The lesson's evidence survives across the boundary that the worker runtime enforces.",
-    ),
-    # Shapes
-    "Pick the container that matches the question.": (
-        "container-questions",
-        "Each container answers a different question: ordered, fixed, lookup, unique.",
-    ),
-    "Move between shapes deliberately.": (
-        "reshape-pipeline",
-        "Most everyday code reshapes data: one input, one transform, one new value.",
-    ),
-    "Cross text and data boundaries.": (
-        "text-data-boundary",
-        "Programs receive text and produce structured data; parsing makes the boundary explicit.",
-    ),
-    # Interfaces
-    "Start with functions as named behavior.": (
-        "function-signature",
-        "A function is the first abstraction boundary: arguments in, body, return value out.",
-    ),
-    "Use functions as values.": (
-        "function-as-value",
-        "Functions are first-class values. A second name binds to the same function object.",
-    ),
-    "Bundle behavior with state.": (
-        "class-with-state",
-        "Classes group fields and methods so data and behavior move together behind one interface.",
-    ),
-    # Types
-    "Keep runtime and static analysis separate.": (
-        "annotation-ghost",
-        "Annotations describe expected types for tools; the runtime accepts any object regardless.",
-    ),
-    "Describe realistic data shapes.": (
-        "union-types",
-        "A typed slot can accept one of several shapes — `int | str | None` covers expected absence and alternatives.",
-    ),
-    "Scale annotations for reusable libraries.": (
-        "generic-preservation",
-        "A generic type variable preserves shape across a call: the same T flows in and out.",
-    ),
-    # Reliability
-    "Make failure explicit.": (
-        "exception-lanes",
-        "try, except, else, and finally as parallel lanes; the path traced through them is the actual control flow.",
-    ),
-    "Control resource and module boundaries.": (
-        "context-bowtie",
-        "A context manager pairs setup with reliable cleanup; the raise path still routes through __exit__.",
-    ),
-    "Handle operations that outlive one expression.": (
-        "async-swimlane",
-        "On await, the coroutine yields to the loop; the loop runs other work and resumes when the awaitable is ready.",
-    ),
-}
 
 
 def build_journey(slug: str) -> None:

@@ -98,6 +98,9 @@
     .journey-section { margin-block: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--hairline); }
     .journey-section h2 { margin-bottom: var(--space-2); }
     .journey-section > .meta { max-width: 58ch; }
+    .journey-section-figure { margin: var(--space-4) auto; padding: 0; max-width: 440px; }
+    .journey-section-figure svg { max-width: 100%; height: auto; display: block; }
+    .journey-section-figure figcaption { margin-top: var(--space-2); color: var(--muted); font-size: .92rem; font-style: italic; max-width: 44ch; }
     .journey-list { display: grid; gap: 0; margin-top: var(--space-3); padding-left: 0; list-style: none; }
     .journey-list li { position: relative; margin-left: .45rem; padding: var(--space-3) 0 var(--space-3) var(--space-4); border-left: 2px solid var(--hairline); }
     .journey-list li::before { content: ""; position: absolute; left: -.42rem; top: 1.45rem; width: .7rem; height: .7rem; border: 1px solid var(--accent); border-radius: 999px; background: radial-gradient(circle, var(--accent) 0 .16rem, var(--surface) .17rem); box-shadow: 0 0 0 5px var(--page); }

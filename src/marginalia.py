@@ -1890,6 +1890,134 @@ def render_for_anchor(slug: str, anchor: str) -> str:
     return f'<div class="cell-banner{count_class}">{"".join(figures)}</div>'
 
 
+# ─── Journey-section figures ──────────────────────────────────────────
+# One figure per journey section, keyed by section title. The figure
+# depicts the conceptual shift the section's examples share — the
+# journey-section rubric (docs/journey-visualisation-rubric.md) scores
+# these. Rendered inline on /journeys/<slug> between the section
+# heading and the example list. Reviewed all together on
+# /prototyping/journey-figures-gestalt.
+
+SECTION_FIGURES: dict[str, tuple[str, str]] = {
+    # Runtime
+    "Start with executable evidence.": (
+        "program-output",
+        "Every page is a runnable program. The smallest mental model: source produces visible output.",
+    ),
+    "Separate value, identity, and absence.": (
+        "identity-and-equality",
+        "Two names can share one object (left, both `is` and `==` true) or hold two equal-but-distinct objects (right, only `==` true).",
+    ),
+    "Read expressions as object operations.": (
+        "operator-dispatch",
+        "Operators are method calls. `a + b` dispatches to `a.__add__(b)`; the data model exposes the syntax.",
+    ),
+    # Control Flow
+    "Choose between paths.": (
+        "branch-fork",
+        "A value flows through a predicate to one of several branches.",
+    ),
+    "Name and shape decisions.": (
+        "naming-decisions",
+        "The walrus binds a name while the surrounding expression uses its value: one expression, two outputs.",
+    ),
+    "Stop as soon as the answer is known.": (
+        "early-exit",
+        "The loop exits at the first match — break short-circuits the rest of the sequence.",
+    ),
+    # Iteration
+    "Choose the right loop shape.": (
+        "loop-repetition",
+        "Walk the sequence, run the body, return; the shape behind for and while.",
+    ),
+    "See the protocol behind `for`.": (
+        "iter-protocol",
+        "iter() exposes the iterator behind for; next() pulls one value at a time until exhausted.",
+    ),
+    "Compose lazy value streams.": (
+        "lazy-stream",
+        "Filters and maps compose without materialising intermediate lists; values flow through the pipeline only when next() pulls them.",
+    ),
+    # Shapes
+    "Pick the container that matches the question.": (
+        "container-questions",
+        "Each container answers a different question: ordered, fixed, lookup, unique.",
+    ),
+    "Move between shapes deliberately.": (
+        "reshape-pipeline",
+        "Most everyday code reshapes data: one input, one transform, one new value.",
+    ),
+    "Cross text and data boundaries.": (
+        "text-data-boundary",
+        "Programs receive text and produce structured data; parsing makes the boundary explicit.",
+    ),
+    # Interfaces
+    "Start with functions as named behavior.": (
+        "function-signature",
+        "A function is the first abstraction boundary: arguments in, body, return value out.",
+    ),
+    "Use functions as values.": (
+        "function-as-value",
+        "Functions are first-class values. A second name binds to the same function object.",
+    ),
+    "Bundle behavior with state.": (
+        "class-with-state",
+        "Classes group fields and methods so data and behavior move together behind one interface.",
+    ),
+    # Types
+    "Keep runtime and static analysis separate.": (
+        "annotation-ghost",
+        "Annotations describe expected types for tools; the runtime accepts any object regardless.",
+    ),
+    "Describe realistic data shapes.": (
+        "union-types",
+        "A typed slot can accept one of several shapes — `int | str | None` covers expected absence and alternatives.",
+    ),
+    "Scale annotations for reusable libraries.": (
+        "generic-preservation",
+        "A generic type variable preserves shape across a call: the same T flows in and out.",
+    ),
+    # Reliability
+    "Make failure explicit.": (
+        "exception-lanes",
+        "try, except, else, and finally as parallel lanes; the path traced through them is the actual control flow.",
+    ),
+    "Control resource and module boundaries.": (
+        "context-bowtie",
+        "A context manager pairs setup with reliable cleanup; the raise path still routes through __exit__.",
+    ),
+    "Handle operations that outlive one expression.": (
+        "async-swimlane",
+        "On await, the coroutine yields to the loop; the loop runs other work and resumes when the awaitable is ready.",
+    ),
+    # Workers — constraint-shaped sections.
+    "Replace unavailable process boundaries with portable evidence.": (
+        "workers-portable-evidence",
+        "Worker isolation breaks the usual cross-process pathways; the lesson preserves a captured value as portable evidence instead.",
+    ),
+    "Keep network lessons local to the protocol boundary.": (
+        "workers-protocol-local",
+        "Demonstrate the protocol shape (request and response) rather than calling out over the network.",
+    ),
+    "Preserve the lesson while respecting the runtime.": (
+        "workers-lesson-runtime",
+        "The lesson's evidence survives across the boundary that the worker runtime enforces.",
+    ),
+}
+
+
+def render_for_section(section_title: str) -> str:
+    """HTML for a section figure on a journey page. Empty if no
+    figure is registered for this section title.
+    """
+    entry = SECTION_FIGURES.get(section_title)
+    if not entry:
+        return ""
+    name, caption = entry
+    cap = f"<figcaption>{html.escape(caption)}</figcaption>" if caption else ""
+    return f'<figure class="journey-section-figure">{_render_svg(name)}{cap}</figure>'
+
+
 # ─── Scores (v2 rubric — see docs/example-figure-rubric.md) ────────────
 # Score every attached example figure against the v2 rubric. The dict is
 # the single source of truth for both the gestalt review pages
