@@ -110,6 +110,10 @@
     .runner-panel { min-height: 18rem; display: flex; flex-direction: column; border: 1px dashed var(--hairline); border-radius: .75rem; padding: var(--space-3); background: var(--surface); }
     .runner-panel h2 { margin: 0 0 var(--space-3); padding-bottom: var(--space-2); border-bottom: 1px solid var(--hairline-soft); font-size: 1.05rem; letter-spacing: -0.02em; }
     .runner-panel pre { flex: 1; min-height: 0; overflow: visible; white-space: pre-wrap; overflow-wrap: anywhere; margin: 0; }
+    .runner-editor { border-style: solid; border-color: var(--hairline); background: var(--surface-2); cursor: text; transition-property: border-color, box-shadow; transition-duration: 160ms; transition-timing-function: cubic-bezier(0.2, 0, 0, 1); }
+    .runner-editor:hover { border-color: var(--accent); }
+    .runner-editor:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(255, 72, 1, 0.12); }
+    .runner-editor h2::before { content: "✎ "; color: var(--accent); font-weight: 400; }
     .execution-time { min-height: 1.5rem; margin: var(--space-2) 0 0; padding-top: var(--space-2); border-top: 1px solid var(--hairline-soft); color: var(--muted); font-size: .88rem; font-variant-numeric: tabular-nums; }
     .playground-toolbar { display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; margin: .8rem 0 1rem; }
     .tool-button { min-height: 40px; border: 1px solid var(--hairline); border-radius: 9999px; padding: .62rem .9rem; background: var(--surface-2); color: var(--text); cursor: pointer; transition-property: transform, background-color, border-style; transition-duration: 150ms; }
