@@ -71,7 +71,13 @@
     .cell-output { margin-top: var(--space-3); padding: var(--space-3) 0 0; border-top: 1px solid var(--hairline-soft); background: transparent; }
     .unsupported-cell .cell-code-stack { border-left-style: dashed; }
     .notebook-notes { margin-top: var(--space-5); }
-    @media (max-width: 980px) { .lp-cell { grid-template-columns: 1fr; } .cell-output { max-width: none; } }
+    @media (max-width: 780px) {
+      .lp-cell, .lesson-step, .runner-grid { grid-template-columns: 1fr; }
+      .lp-cell .cell-code-stack { max-width: 72ch; }
+      .cell-output { max-width: none; }
+      body { padding: .875rem; }
+      header { margin-inline: -.875rem; padding-inline: .875rem; }
+    }
     .playground { margin-top: var(--space-6); padding-top: var(--space-4); border-top: 1px solid var(--hairline); }
     .playground > h2 { font-size: clamp(1.5rem, 2.5vw, 2rem); letter-spacing: -0.03em; margin-bottom: var(--space-3); }
     .runner-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(18rem, .75fr); gap: var(--space-4); align-items: stretch; }
@@ -106,7 +112,6 @@
     .example-nav { margin-top: var(--space-5); padding-top: var(--space-3); border-top: 1px solid var(--hairline); }
     footer { margin-block: 2rem; color: var(--muted); }
     .site-footer-note { font-size: .82rem; }
-    @media (max-width: 860px) { .lesson-step, .runner-grid { grid-template-columns: 1fr; } body { padding: .875rem; } header { margin-inline: -.875rem; padding-inline: .875rem; } }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 1ms !important; } }
     /* Cell banner: a figure attached to a cell renders in a banner row
        AFTER that cell, spanning the full content width. Cells always
