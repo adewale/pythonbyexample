@@ -305,7 +305,10 @@ def context_bowtie(c: Canvas) -> None:
     c.cell(78, 36, "body", w=86, h=24)
     c.closed_arrow(164, 48, 206, 48, emphasis=False)
     c.node(220, 48, "out", r=14)
-    c.dashed(122, 60, 210, 48)
+    # Land the dashed exit path on the circle's left-side tangent so it
+    # doesn't terminate inside the "out" glyph. With body bottom-mid at
+    # (122, 60) → circle (220, 48) of r=14, the tangent meets at ≈(206, 50).
+    c.dashed(122, 60, 206, 50)
 
 
 def async_swimlane(c: Canvas) -> None:
@@ -577,9 +580,10 @@ def kw_only_separator(c: Canvas) -> None:
 def positional_only_separator(c: Canvas) -> None:
     """Positional-only parameters · `/` divides positional-only from positional-or-kw."""
     c.mono(0, 18, "def f(a, b, /, c, d): …", anchor="start")
-    c.dashed(82, 22, 82, 38)
-    c.label(40, 50, "positional only", anchor="middle")
-    c.label(140, 50, "positional or kw", anchor="middle")
+    # JetBrains Mono advances ~6px per char at fs=10; '/' sits at index 12.
+    c.dashed(75, 22, 75, 38)
+    c.label(33, 50, "positional only", anchor="middle")
+    c.label(120, 50, "positional or kw", anchor="middle")
 
 
 def generator_ribbon(c: Canvas) -> None:
@@ -700,10 +704,12 @@ def partial_functions(c: Canvas) -> None:
 def args_kwargs(c: Canvas) -> None:
     """Args and kwargs · *args gathers extra positionals; **kwargs gathers extra keywords."""
     c.mono(20, 22, "def f(*args, **kwargs): …", anchor="start")
-    c.dashed(80, 26, 80, 44)
-    c.dashed(152, 26, 152, 44)
-    c.label(80, 56, "extra positionals → tuple", anchor="middle")
-    c.label(210, 56, "extra keywords → dict", anchor="middle")
+    # *args occupies signature indices 6-10 (center x≈20+8*6=68 with mono advance ≈6);
+    # **kwargs occupies indices 13-20 (center x≈20+17*6=122).
+    c.dashed(68, 26, 68, 44)
+    c.dashed(122, 26, 122, 44)
+    c.label(68, 56, "→ tuple", anchor="middle")
+    c.label(122, 56, "→ dict", anchor="middle")
 
 
 def multiple_return(c: Canvas) -> None:
