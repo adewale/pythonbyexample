@@ -22,7 +22,7 @@ from app import (  # noqa: E402  (sys.path set above)
     get_example,
     render_inline,
 )
-from marginalia import _render_svg
+from marginalia import _render_svg  # noqa: E402
 
 OUT_DIR = ROOT / "public" / "prototyping"
 

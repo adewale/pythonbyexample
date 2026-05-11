@@ -501,16 +501,6 @@ def workers_protocol_local(c: Canvas) -> None:
     c.cell(0, 84, "200 OK · { … }", w=140, h=22)
 
 
-def workers_lesson_runtime(c: Canvas) -> None:
-    """Workers · lesson and runtime meet at a boundary; evidence carries across."""
-    c.frame(0, 4, 80, 36, label="lesson")
-    c.mono(40, 26, "shape")
-    c.frame(120, 4, 80, 36, label="runtime")
-    c.mono(160, 26, "limits")
-    c.closed_arrow(80, 22, 120, 22, emphasis=True)
-    c.label(100, 22, "value", anchor="middle")
-
-
 # ─── Examples promoted from the gestalt: new paint code ──────────────
 
 

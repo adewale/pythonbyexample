@@ -14,19 +14,7 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
 from marginalia_grammar import (  # noqa: E402  (sys.path set above)
-    BASELINE,
     CELL,
-    EMPHASIS,
-    GAP_L,
-    GAP_S,
-    INK,
-    INK_SOFT,
-    NAME_H,
-    NAME_W,
-    OBJECT_H,
-    OBJECT_W,
-    SOFT_FILL,
-    TICK_LEN,
     Canvas,
     Card,
 )
@@ -655,14 +643,18 @@ def e_exception_groups(c: Canvas) -> None:
     c.dot(60, 32)
     for x in (30, 50, 70, 90):
         c.ghost(60, 38, x, 60)
-    c.dot(30, 64); c.dot(50, 64, emphasis=True); c.dot(70, 64); c.dot(90, 64, emphasis=True)
+    c.dot(30, 64)
+    c.dot(50, 64, emphasis=True)
+    c.dot(70, 64)
+    c.dot(90, 64, emphasis=True)
     c.closed_arrow(120, 50, 180, 50)
     c.label(150, 44, "except*", anchor="middle")
     c.tag(240, 16, "after", anchor="middle")
     c.dot(240, 32)
     c.ghost(240, 38, 220, 60)
     c.ghost(240, 38, 260, 60)
-    c.dot(220, 64); c.dot(260, 64)
+    c.dot(220, 64)
+    c.dot(260, 64)
 
 
 def e_modules(c: Canvas) -> None:
