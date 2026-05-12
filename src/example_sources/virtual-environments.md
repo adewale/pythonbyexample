@@ -4,14 +4,19 @@ title = "Virtual Environments"
 section = "Modules"
 summary = "Virtual environments isolate a project's Python packages."
 doc_path = "/library/venv.html"
+see_also = [
+  "packages",
+  "modules",
+  "import-aliases",
+]
 expected_output = ".venv\nTrue\n"
 +++
 
-Virtual environments isolate a project's Python packages. They exist so one project can install dependencies without changing another project's environment.
+Virtual environments isolate a project's installed packages from the global Python installation and from other projects. The usual workflow is a command-line one: create `.venv`, activate it, then install project dependencies there.
 
-The usual command-line workflow is `python -m venv .venv`, but Python also exposes the same feature through the `venv` module. This example creates a temporary environment so the example cleans up after itself.
+In standard Python, `python -m venv .venv` is the everyday command. Dynamic Workers do not provide a project-local environment workflow, so this page teaches the proper standard-Python boundary and keeps the runnable evidence limited to what can be observed deterministically.
 
-A virtual environment changes where Python looks for installed packages. It does not change the language, and it is separate from package layout, imports, and module names.
+A virtual environment changes installation and import paths. It does not change the Python language, package layout rules, or module names.
 
 :::program
 ```python
@@ -24,22 +29,26 @@ with tempfile.TemporaryDirectory() as directory:
     builder = venv.EnvBuilder(with_pip=False)
     builder.create(env_path)
 
+    config = (env_path / "pyvenv.cfg").read_text()
     print(env_path.name)
-    print((env_path / "pyvenv.cfg").exists())
+    print("home" in config)
 ```
 :::
 
 :::unsupported
-`venv.EnvBuilder` configures the description of a new environment, then `create(".venv")` materialises it on disk as a directory containing its own interpreter and `site-packages`. `with_pip=False` skips bootstrapping pip — useful when the venv is for an isolated tool that doesn't need to install third-party packages. (This fragment runs in standard Python only — Dynamic Workers don't provide the `venv` module or a project environment workflow.)
+The standard project setup command is `python -m venv .venv`. It creates a directory with its own interpreter entry points and package install location. After activation, `python -m pip install ...` installs into that environment rather than into another project. (This workflow is for standard Python projects — Dynamic Workers are built from declared dependencies instead of an activated shell environment.)
 
 ```python
-builder = venv.EnvBuilder(with_pip=False)
-builder.create(".venv")
+import subprocess
+import sys
+
+subprocess.run([sys.executable, "-m", "venv", ".venv"], check=True)
+subprocess.run([".venv/bin/python", "-m", "pip", "install", "requests"], check=True)
 ```
 :::
 
 :::cell
-`venv.EnvBuilder` creates the same kind of isolated environment as `python -m venv`. A temporary directory keeps the example from leaving project files behind.
+`venv.EnvBuilder` exposes the same environment-creation mechanism as `python -m venv`. A temporary directory keeps the example from leaving project files behind.
 
 ```python
 import pathlib
@@ -51,8 +60,9 @@ with tempfile.TemporaryDirectory() as directory:
     builder = venv.EnvBuilder(with_pip=False)
     builder.create(env_path)
 
+    config = (env_path / "pyvenv.cfg").read_text()
     print(env_path.name)
-    print((env_path / "pyvenv.cfg").exists())
+    print("home" in config)
 ```
 
 ```output
@@ -62,7 +72,7 @@ True
 :::
 
 :::note
-- A virtual environment gives a project its own install location.
-- Inside a venv, `sys.prefix` usually differs from `sys.base_prefix`.
-- Use `python -m venv .venv` at the command line for everyday project setup.
+- Use `python -m venv .venv` for everyday standard-Python project setup.
+- A venv isolates installed packages; it does not change how imports are written.
+- Dynamic Workers use a deployment dependency model, not an activated shell environment.
 :::

@@ -2,7 +2,7 @@
 slug = "constants"
 title = "Constants"
 section = "Basics"
-summary = "Python uses naming conventions for values that should not change."
+summary = "Python uses naming conventions and optional types for values that should not change."
 doc_path = "/tutorial/classes.html#python-scopes-and-namespaces"
 see_also = [
   "variables",
@@ -11,32 +11,34 @@ see_also = [
 ]
 +++
 
-Python has no `const` keyword for ordinary variables. Instead, modules use all-caps names to mark values that should be treated as constants by convention.
+Python has no `const` keyword for ordinary names. Modules use all-caps names such as `MAX_RETRIES` to say “treat this as fixed configuration, not changing state.”
 
-The interpreter will not stop rebinding, but the convention is important API communication. Readers understand that `MAX_RETRIES` is configuration, not loop state.
+The interpreter will still let code rebind the name. That is why constants are primarily an API and readability convention. If a project also uses static typing, `Final` can make the convention machine-checkable.
 
 Named constants remove magic values from code and give repeated literals one place to change.
 
 :::program
 ```python
-MAX_RETRIES = 3
+from typing import Final
+
+MAX_RETRIES: Final = 3
 API_VERSION = "2026-05"
 
 for attempt in range(1, MAX_RETRIES + 1):
     print(f"attempt {attempt} of {MAX_RETRIES}")
 
 print(API_VERSION)
+
+MAX_RETRIES = 5
+print(MAX_RETRIES)
 ```
 :::
 
 :::cell
-Python does not have a `const` declaration like Go or Rust. Instead, modules use all-caps names for values callers should treat as fixed.
-
-The interpreter will still let you rebind the name, but the convention is strong enough that readers understand the design intent.
+All-caps names communicate design intent: this value is configuration that callers should treat as fixed.
 
 ```python
 MAX_RETRIES = 3
-API_VERSION = "2026-05"
 
 for attempt in range(1, MAX_RETRIES + 1):
     print(f"attempt {attempt} of {MAX_RETRIES}")
@@ -50,9 +52,10 @@ attempt 3 of 3
 :::
 
 :::cell
-Constants are useful for configuration values that should be named once and reused instead of repeated as magic literals.
+Constants are useful when a repeated literal deserves a name at the domain boundary.
 
 ```python
+API_VERSION = "2026-05"
 print(API_VERSION)
 ```
 
@@ -61,7 +64,24 @@ print(API_VERSION)
 ```
 :::
 
+:::cell
+`Final` lets type checkers reject reassignment, but Python still runs ordinary rebinding at runtime.
+
+```python
+from typing import Final
+
+MAX_RETRIES: Final = 3
+MAX_RETRIES = 5
+print(MAX_RETRIES)
+```
+
+```output
+5
+```
+:::
+
 :::note
-- Python has no `const` keyword for ordinary names.
-- All-caps names such as `MAX_RETRIES` communicate that a value is intended to stay fixed.
+- Python constants are a convention, not a runtime lock.
+- Use all-caps names for fixed module-level configuration.
+- Add `Final` when static tooling should flag accidental rebinding.
 :::

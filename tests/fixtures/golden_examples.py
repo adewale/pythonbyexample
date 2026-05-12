@@ -838,65 +838,75 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'constants',
   'title': 'Constants',
   'section': 'Basics',
-  'summary': 'Python uses naming conventions for values that should not change.',
+  'summary': 'Python uses naming conventions and optional types for values that should not change.',
   'doc_path': '/tutorial/classes.html#python-scopes-and-namespaces',
   'doc_url': 'https://docs.python.org/3.13/tutorial/classes.html#python-scopes-and-namespaces',
-  'explanation': ['Python has no `const` keyword for ordinary variables. Instead, modules use '
-                  'all-caps names to mark values that should be treated as constants by '
-                  'convention.',
-                  'The interpreter will not stop rebinding, but the convention is important API '
-                  'communication. Readers understand that `MAX_RETRIES` is configuration, not loop '
-                  'state.',
+  'explanation': ['Python has no `const` keyword for ordinary names. Modules use all-caps names '
+                  'such as `MAX_RETRIES` to say “treat this as fixed configuration, not changing '
+                  'state.”',
+                  'The interpreter will still let code rebind the name. That is why constants are '
+                  'primarily an API and readability convention. If a project also uses static '
+                  'typing, `Final` can make the convention machine-checkable.',
                   'Named constants remove magic values from code and give repeated literals one '
                   'place to change.'],
-  'notes': ['Python has no `const` keyword for ordinary names.',
-            'All-caps names such as `MAX_RETRIES` communicate that a value is intended to stay '
-            'fixed.'],
+  'notes': ['Python constants are a convention, not a runtime lock.',
+            'Use all-caps names for fixed module-level configuration.',
+            'Add `Final` when static tooling should flag accidental rebinding.'],
   'see_also': ['variables', 'literal-and-final', 'type-hints'],
-  'walkthrough': [{'prose': 'Python does not have a `const` declaration like Go or Rust. Instead, '
-                            'modules use all-caps names for values callers should treat as fixed.',
+  'walkthrough': [{'prose': 'All-caps names communicate design intent: this value is configuration '
+                            'that callers should treat as fixed.',
                    'code': 'MAX_RETRIES = 3\n'
-                           'API_VERSION = "2026-05"\n'
                            '\n'
                            'for attempt in range(1, MAX_RETRIES + 1):\n'
                            '    print(f"attempt {attempt} of {MAX_RETRIES}")'},
-                  {'prose': 'The interpreter will still let you rebind the name, but the '
-                            'convention is strong enough that readers understand the design '
-                            'intent.',
-                   'code': 'MAX_RETRIES = 3\n'
-                           'API_VERSION = "2026-05"\n'
+                  {'prose': 'Constants are useful when a repeated literal deserves a name at the '
+                            'domain boundary.',
+                   'code': 'API_VERSION = "2026-05"\nprint(API_VERSION)'},
+                  {'prose': '`Final` lets type checkers reject reassignment, but Python still runs '
+                            'ordinary rebinding at runtime.',
+                   'code': 'from typing import Final\n'
                            '\n'
-                           'for attempt in range(1, MAX_RETRIES + 1):\n'
-                           '    print(f"attempt {attempt} of {MAX_RETRIES}")'},
-                  {'prose': 'Constants are useful for configuration values that should be named '
-                            'once and reused instead of repeated as magic literals.',
-                   'code': 'print(API_VERSION)'}],
-  'cells': [{'prose': ['Python does not have a `const` declaration like Go or Rust. Instead, '
-                       'modules use all-caps names for values callers should treat as fixed.',
-                       'The interpreter will still let you rebind the name, but the convention is '
-                       'strong enough that readers understand the design intent.'],
+                           'MAX_RETRIES: Final = 3\n'
+                           'MAX_RETRIES = 5\n'
+                           'print(MAX_RETRIES)'}],
+  'cells': [{'prose': ['All-caps names communicate design intent: this value is configuration that '
+                       'callers should treat as fixed.'],
              'code': 'MAX_RETRIES = 3\n'
-                     'API_VERSION = "2026-05"\n'
                      '\n'
                      'for attempt in range(1, MAX_RETRIES + 1):\n'
                      '    print(f"attempt {attempt} of {MAX_RETRIES}")',
              'output': 'attempt 1 of 3\nattempt 2 of 3\nattempt 3 of 3',
              'line': 22,
              'kind': 'cell'},
-            {'prose': ['Constants are useful for configuration values that should be named once '
-                       'and reused instead of repeated as magic literals.'],
-             'code': 'print(API_VERSION)',
+            {'prose': ['Constants are useful when a repeated literal deserves a name at the domain '
+                       'boundary.'],
+             'code': 'API_VERSION = "2026-05"\nprint(API_VERSION)',
              'output': '2026-05',
-             'line': 42,
+             'line': 39,
+             'kind': 'cell'},
+            {'prose': ['`Final` lets type checkers reject reassignment, but Python still runs '
+                       'ordinary rebinding at runtime.'],
+             'code': 'from typing import Final\n'
+                     '\n'
+                     'MAX_RETRIES: Final = 3\n'
+                     'MAX_RETRIES = 5\n'
+                     'print(MAX_RETRIES)',
+             'output': '5',
+             'line': 52,
              'kind': 'cell'}],
-  'code': 'MAX_RETRIES = 3\n'
+  'code': 'from typing import Final\n'
+          '\n'
+          'MAX_RETRIES: Final = 3\n'
           'API_VERSION = "2026-05"\n'
           '\n'
           'for attempt in range(1, MAX_RETRIES + 1):\n'
           '    print(f"attempt {attempt} of {MAX_RETRIES}")\n'
           '\n'
-          'print(API_VERSION)\n',
-  'expected_output': 'attempt 1 of 3\nattempt 2 of 3\nattempt 3 of 3\n2026-05\n',
+          'print(API_VERSION)\n'
+          '\n'
+          'MAX_RETRIES = 5\n'
+          'print(MAX_RETRIES)\n',
+  'expected_output': 'attempt 1 of 3\nattempt 2 of 3\nattempt 3 of 3\n2026-05\n5\n',
   'min_python': None,
   'version_sensitive': False,
   'version_notes': None},
@@ -914,7 +924,7 @@ EXAMPLES = [{'slug': 'hello-world',
                   'the distinction matters, such as checking whether a value is exactly None.'],
   'notes': ['Empty containers and zero-like numbers are false in conditions.',
             'Use explicit comparisons when they communicate intent better than truthiness.'],
-  'see_also': [],
+  'see_also': ['booleans', 'none', 'conditionals', 'special-methods'],
   'walkthrough': [{'prose': "Truthiness is one of Python's most important conveniences: conditions "
                             'can test objects directly instead of requiring explicit boolean '
                             'comparisons everywhere.',
@@ -939,21 +949,21 @@ EXAMPLES = [{'slug': 'hello-world',
                        'idiomatic.'],
              'code': 'items = []\nname = "Ada"\n\nif not items:\n    print("no items")',
              'output': 'no items',
-             'line': 17,
+             'line': 23,
              'kind': 'cell'},
             {'prose': ['Use truthiness when it reads naturally, but choose explicit comparisons '
                        'when the distinction matters, such as checking whether a value is exactly '
                        'None.'],
              'code': 'if name:\n    print("has a name")',
              'output': 'has a name',
-             'line': 35,
+             'line': 41,
              'kind': 'cell'},
             {'prose': ['Use truthiness when it reads naturally, but choose explicit comparisons '
                        'when the distinction matters, such as checking whether a value is exactly '
                        'None.'],
              'code': 'print(bool(0))\nprint(bool(42))',
              'output': 'False\nTrue',
-             'line': 48,
+             'line': 54,
              'kind': 'cell'}],
   'code': 'items = []\n'
           'name = "Ada"\n'
@@ -2538,7 +2548,7 @@ EXAMPLES = [{'slug': 'hello-world',
             'Update loop state inside the body so the condition can become false.',
             'Prefer `for` when you already have a collection, range, iterator, or generator to '
             'consume.'],
-  'see_also': [],
+  'see_also': ['for-loops', 'sentinel-iteration', 'break-and-continue'],
   'walkthrough': [{'prose': 'Use `while` when the condition, not an iterable, controls repetition. '
                             'Here the loop owns the countdown state and updates it each time '
                             'through the body.',
@@ -2565,7 +2575,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    remaining -= 1\n'
                      'print("liftoff")',
              'output': 'launch in 3\nlaunch in 2\nlaunch in 1\nliftoff',
-             'line': 17,
+             'line': 22,
              'kind': 'cell'},
             {'prose': ['A sentinel loop stops when a special value appears. The loop does not know '
                        'in advance how many retries it will need; it keeps going until the state '
@@ -2577,7 +2587,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    status = next(responses)\n'
                      'print(f"status: {status}")',
              'output': 'status: retry\nstatus: retry\nstatus: ok',
-             'line': 36,
+             'line': 41,
              'kind': 'cell'}],
   'code': 'remaining = 3\n'
           'while remaining > 0:\n'
@@ -7890,20 +7900,22 @@ EXAMPLES = [{'slug': 'hello-world',
   'summary': "Virtual environments isolate a project's Python packages.",
   'doc_path': '/library/venv.html',
   'doc_url': 'https://docs.python.org/3.13/library/venv.html',
-  'explanation': ["Virtual environments isolate a project's Python packages. They exist so one "
-                  "project can install dependencies without changing another project's "
-                  'environment.',
-                  'The usual command-line workflow is `python -m venv .venv`, but Python also '
-                  'exposes the same feature through the `venv` module. This example creates a '
-                  'temporary environment so the example cleans up after itself.',
-                  'A virtual environment changes where Python looks for installed packages. It '
-                  'does not change the language, and it is separate from package layout, imports, '
-                  'and module names.'],
-  'notes': ['A virtual environment gives a project its own install location.',
-            'Inside a venv, `sys.prefix` usually differs from `sys.base_prefix`.',
-            'Use `python -m venv .venv` at the command line for everyday project setup.'],
-  'see_also': [],
-  'walkthrough': [{'prose': '`venv.EnvBuilder` creates the same kind of isolated environment as '
+  'explanation': ["Virtual environments isolate a project's installed packages from the global "
+                  'Python installation and from other projects. The usual workflow is a '
+                  'command-line one: create `.venv`, activate it, then install project '
+                  'dependencies there.',
+                  'In standard Python, `python -m venv .venv` is the everyday command. Dynamic '
+                  'Workers do not provide a project-local environment workflow, so this page '
+                  'teaches the proper standard-Python boundary and keeps the runnable evidence '
+                  'limited to what can be observed deterministically.',
+                  'A virtual environment changes installation and import paths. It does not change '
+                  'the Python language, package layout rules, or module names.'],
+  'notes': ['Use `python -m venv .venv` for everyday standard-Python project setup.',
+            'A venv isolates installed packages; it does not change how imports are written.',
+            'Dynamic Workers use a deployment dependency model, not an activated shell '
+            'environment.'],
+  'see_also': ['packages', 'modules', 'import-aliases'],
+  'walkthrough': [{'prose': '`venv.EnvBuilder` exposes the same environment-creation mechanism as '
                             '`python -m venv`. A temporary directory keeps the example from '
                             'leaving project files behind.',
                    'code': 'import pathlib\n'
@@ -7915,22 +7927,27 @@ EXAMPLES = [{'slug': 'hello-world',
                            '    builder = venv.EnvBuilder(with_pip=False)\n'
                            '    builder.create(env_path)\n'
                            '\n'
+                           '    config = (env_path / "pyvenv.cfg").read_text()\n'
                            '    print(env_path.name)\n'
-                           '    print((env_path / "pyvenv.cfg").exists())'}],
-  'cells': [{'prose': ['`venv.EnvBuilder` configures the description of a new environment, then '
-                       '`create(".venv")` materialises it on disk as a directory containing its '
-                       'own interpreter and `site-packages`. `with_pip=False` skips bootstrapping '
-                       "pip — useful when the venv is for an isolated tool that doesn't need to "
-                       'install third-party packages. (This fragment runs in standard Python only '
-                       "— Dynamic Workers don't provide the `venv` module or a project environment "
-                       'workflow.)'],
-             'code': 'builder = venv.EnvBuilder(with_pip=False)\nbuilder.create(".venv")',
+                           '    print("home" in config)'}],
+  'cells': [{'prose': ['The standard project setup command is `python -m venv .venv`. It creates a '
+                       'directory with its own interpreter entry points and package install '
+                       'location. After activation, `python -m pip install ...` installs into that '
+                       'environment rather than into another project. (This workflow is for '
+                       'standard Python projects — Dynamic Workers are built from declared '
+                       'dependencies instead of an activated shell environment.)'],
+             'code': 'import subprocess\n'
+                     'import sys\n'
+                     '\n'
+                     'subprocess.run([sys.executable, "-m", "venv", ".venv"], check=True)\n'
+                     'subprocess.run([".venv/bin/python", "-m", "pip", "install", "requests"], '
+                     'check=True)',
              'output': '',
-             'line': 18,
+             'line': 23,
              'kind': 'unsupported'},
-            {'prose': ['`venv.EnvBuilder` creates the same kind of isolated environment as `python '
-                       '-m venv`. A temporary directory keeps the example from leaving project '
-                       'files behind.'],
+            {'prose': ['`venv.EnvBuilder` exposes the same environment-creation mechanism as '
+                       '`python -m venv`. A temporary directory keeps the example from leaving '
+                       'project files behind.'],
              'code': 'import pathlib\n'
                      'import tempfile\n'
                      'import venv\n'
@@ -7940,10 +7957,11 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    builder = venv.EnvBuilder(with_pip=False)\n'
                      '    builder.create(env_path)\n'
                      '\n'
+                     '    config = (env_path / "pyvenv.cfg").read_text()\n'
                      '    print(env_path.name)\n'
-                     '    print((env_path / "pyvenv.cfg").exists())',
+                     '    print("home" in config)',
              'output': '.venv\nTrue',
-             'line': 27,
+             'line': 35,
              'kind': 'cell'}],
   'code': 'import pathlib\n'
           'import tempfile\n'
@@ -7954,8 +7972,9 @@ EXAMPLES = [{'slug': 'hello-world',
           '    builder = venv.EnvBuilder(with_pip=False)\n'
           '    builder.create(env_path)\n'
           '\n'
+          '    config = (env_path / "pyvenv.cfg").read_text()\n'
           '    print(env_path.name)\n'
-          '    print((env_path / "pyvenv.cfg").exists())\n',
+          '    print("home" in config)\n',
   'expected_output': '.venv\nTrue\n',
   'min_python': None,
   'version_sensitive': False,
@@ -8671,52 +8690,69 @@ EXAMPLES = [{'slug': 'hello-world',
  {'slug': 'literal-and-final',
   'title': 'Literal and Final',
   'section': 'Types',
-  'summary': 'Literal restricts values, while Final marks names that should not be rebound.',
+  'summary': 'Literal restricts exact values, while Final marks names that should not be rebound.',
   'doc_path': '/library/typing.html#typing.Literal',
   'doc_url': 'https://docs.python.org/3.13/library/typing.html#typing.Literal',
-  'explanation': ['`Literal` restricts a value to one of a small set of exact options, and `Final` '
-                  'tells the type checker that a name should not be rebound. Both are static '
-                  "promises that type checkers enforce; Python's runtime assignment rules still "
-                  'permit any value through if a program ignores the annotation.',
-                  'Use them when an annotation makes a constant or a small option set explicit at '
-                  'the API boundary. Prefer simpler neighboring tools when the extra machinery '
-                  'would hide the intent.',
-                  '`Literal` pairs naturally with type aliases and overloads when a function '
-                  'should accept only a known set of strings or numbers. `Final` is most useful '
-                  'for module-level constants and class attributes that the rest of the codebase '
-                  'should treat as immutable.'],
-  'notes': ['`Literal` describes a small set of exact allowed values.',
-            '`Final` tells type checkers that a name should not be rebound.',
-            'Both are static promises; ordinary runtime assignment rules still apply.'],
-  'see_also': ['type-hints', 'constants', 'union-and-optional-types'],
-  'walkthrough': [{'prose': '`Literal` describes a small set of exact allowed values.',
+  'explanation': ['`Literal` and `Final` make two different static promises. `Literal` narrows a '
+                  'value to exact allowed options. `Final` tells a type checker that a name should '
+                  'not be rebound after its first assignment.',
+                  'Both annotations help at API boundaries: a function can accept only known '
+                  'modes, and a module can publish a constant that other code should treat as '
+                  'fixed. Python still runs the same assignment rules at runtime, so these are '
+                  'promises for tools and readers rather than runtime locks.',
+                  'Use `Literal` when a small closed set is clearer than a broad `str` or `int`. '
+                  'Use `Final` when rebinding would be a bug in the design, especially for module '
+                  'constants and class attributes.'],
+  'notes': ['`Literal` narrows values to a small exact set.',
+            '`Final` prevents rebinding in static analysis, not at runtime.',
+            'Use enums when the option set needs names, behavior, or iteration over members.'],
+  'see_also': ['type-hints', 'constants', 'union-and-optional-types', 'overloads'],
+  'walkthrough': [{'prose': '`Literal` describes exact allowed values. A type checker can reject '
+                            '`"debug"` as a `Mode` even though it is an ordinary string at '
+                            'runtime.',
                    'code': 'from typing import Final, Literal\n'
                            '\n'
                            'Mode = Literal["read", "write"]\n'
-                           'DEFAULT_MODE: Final[Mode] = "read"\n'
                            '\n'
                            '\n'
                            'def open_label(mode: Mode) -> str:\n'
                            '    return f"opening for {mode}"\n'
                            '\n'
-                           'print(open_label(DEFAULT_MODE))\n'
-                           'print(open_label("write"))\n'
-                           'print(DEFAULT_MODE)'}],
-  'cells': [{'prose': ['`Literal` describes a small set of exact allowed values.'],
+                           'print(open_label("write"))'},
+                  {'prose': '`Final` marks a name that should not be rebound. It is stronger '
+                            'documentation than the all-caps constant convention because static '
+                            'tools can flag reassignment.',
+                   'code': 'DEFAULT_MODE: Final[Mode] = "read"\nprint(open_label(DEFAULT_MODE))'},
+                  {'prose': 'The annotation is not a runtime lock. Python still rebinds the name; '
+                            'the mistake is that a type checker and human reader should reject the '
+                            'design.',
+                   'code': 'DEFAULT_MODE = "debug"\nprint(DEFAULT_MODE)'}],
+  'cells': [{'prose': ['`Literal` describes exact allowed values. A type checker can reject '
+                       '`"debug"` as a `Mode` even though it is an ordinary string at runtime.'],
              'code': 'from typing import Final, Literal\n'
                      '\n'
                      'Mode = Literal["read", "write"]\n'
-                     'DEFAULT_MODE: Final[Mode] = "read"\n'
                      '\n'
                      '\n'
                      'def open_label(mode: Mode) -> str:\n'
                      '    return f"opening for {mode}"\n'
                      '\n'
-                     'print(open_label(DEFAULT_MODE))\n'
-                     'print(open_label("write"))\n'
-                     'print(DEFAULT_MODE)',
-             'output': 'opening for read\nopening for write\nread',
-             'line': 22,
+                     'print(open_label("write"))',
+             'output': 'opening for write',
+             'line': 23,
+             'kind': 'cell'},
+            {'prose': ['`Final` marks a name that should not be rebound. It is stronger '
+                       'documentation than the all-caps constant convention because static tools '
+                       'can flag reassignment.'],
+             'code': 'DEFAULT_MODE: Final[Mode] = "read"\nprint(open_label(DEFAULT_MODE))',
+             'output': 'opening for read',
+             'line': 43,
+             'kind': 'cell'},
+            {'prose': ['The annotation is not a runtime lock. Python still rebinds the name; the '
+                       'mistake is that a type checker and human reader should reject the design.'],
+             'code': 'DEFAULT_MODE = "debug"\nprint(DEFAULT_MODE)',
+             'output': 'debug',
+             'line': 56,
              'kind': 'cell'}],
   'code': 'from typing import Final, Literal\n'
           '\n'
@@ -8729,8 +8765,10 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(open_label(DEFAULT_MODE))\n'
           'print(open_label("write"))\n'
+          '\n'
+          'DEFAULT_MODE = "debug"\n'
           'print(DEFAULT_MODE)\n',
-  'expected_output': 'opening for read\nopening for write\nread\n',
+  'expected_output': 'opening for read\nopening for write\ndebug\n',
   'min_python': None,
   'version_sensitive': False,
   'version_notes': None},
@@ -8923,28 +8961,36 @@ EXAMPLES = [{'slug': 'hello-world',
   'summary': 'ParamSpec preserves callable parameter types through wrappers.',
   'doc_path': '/library/typing.html#typing.ParamSpec',
   'doc_url': 'https://docs.python.org/3.13/library/typing.html#typing.ParamSpec',
-  'explanation': ['`ParamSpec` lets a wrapper preserve the parameter types of the function it '
-                  'wraps. The pressure that justifies it is decorators: a generic decorator that '
-                  "returns `Callable[..., R]` erases the wrapped function's argument types, so "
-                  'callers lose type-checker help on every call.',
-                  'Use `ParamSpec` when a decorator should be transparent to type checkers — the '
-                  'wrapped function and the decorated name should accept the same arguments. Reach '
-                  'for plain `Callable` when the wrapper deliberately changes the signature.',
-                  '`P.args` and `P.kwargs` annotate the `*args` and `**kwargs` of the inner '
-                  'wrapper, which is how the parameter spec gets bound. Pair `ParamSpec` with a '
-                  '`TypeVar` for the return type when the wrapper should also stay generic over '
-                  'what the wrapped function returns.'],
-  'notes': ['`ParamSpec` captures the parameters of a callable.',
-            'Wrappers can forward `*args` and `**kwargs` without erasing the original signature '
-            'for type checkers.',
-            'This matters most for decorators.'],
+  'explanation': ['`ParamSpec` is for decorators and wrapper functions that should keep the '
+                  "wrapped callable's parameter shape. Without it, a generic decorator often falls "
+                  'back to `Callable[..., R]`, which says “this returns the right type, but I no '
+                  'longer know what arguments are valid.”',
+                  'Use `ParamSpec` when the wrapper forwards `*args` and `**kwargs` to the '
+                  'original function without changing the signature. Use a plain `Callable` when '
+                  'the wrapper deliberately accepts a different set of parameters.',
+                  "`P.args` and `P.kwargs` annotate the wrapper's forwarded arguments. A separate "
+                  "`TypeVar` keeps the return type tied to the wrapped function's return type."],
+  'notes': ["`ParamSpec` preserves a callable's parameter list through transparent wrappers.",
+            'Pair `ParamSpec` with a `TypeVar` when the return type should also be preserved.',
+            'If the wrapper changes the public signature, write that new signature directly '
+            'instead.'],
   'see_also': ['callable-types', 'decorators', 'generics-and-typevar'],
-  'walkthrough': [{'prose': '`ParamSpec` captures the parameters of a callable.',
+  'walkthrough': [{'prose': '`Callable[..., R]` is sometimes too broad. It preserves the return '
+                            'type, but the ellipsis means the callable accepts any argument list '
+                            'as far as the type checker can tell.',
                    'code': 'from collections.abc import Callable\n'
                            'from typing import ParamSpec, TypeVar\n'
                            '\n'
-                           'P = ParamSpec("P")\n'
                            'R = TypeVar("R")\n'
+                           '\n'
+                           '\n'
+                           'def erased(func: Callable[..., R]) -> Callable[..., R]:\n'
+                           '    return func\n'
+                           '\n'
+                           'print(erased.__name__)'},
+                  {'prose': '`ParamSpec` captures the original parameters and lets the wrapper '
+                            'forward exactly that shape.',
+                   'code': 'P = ParamSpec("P")\n'
                            '\n'
                            '\n'
                            'def logged(func: Callable[P, R]) -> Callable[P, R]:\n'
@@ -8953,17 +8999,34 @@ EXAMPLES = [{'slug': 'hello-world',
                            '        return func(*args, **kwargs)\n'
                            '    return wrapper\n'
                            '\n'
-                           '@logged\n'
+                           'print(logged.__name__)'},
+                  {'prose': 'The decorated function still runs normally. The benefit is static: '
+                            'tools can keep checking that `add` receives two integers.',
+                   'code': '@logged\n'
                            'def add(left: int, right: int) -> int:\n'
                            '    return left + right\n'
                            '\n'
+                           'print(erased(add)(2, 3))\n'
                            'print(add(2, 3))'}],
-  'cells': [{'prose': ['`ParamSpec` captures the parameters of a callable.'],
+  'cells': [{'prose': ['`Callable[..., R]` is sometimes too broad. It preserves the return type, '
+                       'but the ellipsis means the callable accepts any argument list as far as '
+                       'the type checker can tell.'],
              'code': 'from collections.abc import Callable\n'
                      'from typing import ParamSpec, TypeVar\n'
                      '\n'
-                     'P = ParamSpec("P")\n'
                      'R = TypeVar("R")\n'
+                     '\n'
+                     '\n'
+                     'def erased(func: Callable[..., R]) -> Callable[..., R]:\n'
+                     '    return func\n'
+                     '\n'
+                     'print(erased.__name__)',
+             'output': 'erased',
+             'line': 22,
+             'kind': 'cell'},
+            {'prose': ['`ParamSpec` captures the original parameters and lets the wrapper forward '
+                       'exactly that shape.'],
+             'code': 'P = ParamSpec("P")\n'
                      '\n'
                      '\n'
                      'def logged(func: Callable[P, R]) -> Callable[P, R]:\n'
@@ -8972,19 +9035,30 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        return func(*args, **kwargs)\n'
                      '    return wrapper\n'
                      '\n'
-                     '@logged\n'
+                     'print(logged.__name__)',
+             'output': 'logged',
+             'line': 43,
+             'kind': 'cell'},
+            {'prose': ['The decorated function still runs normally. The benefit is static: tools '
+                       'can keep checking that `add` receives two integers.'],
+             'code': '@logged\n'
                      'def add(left: int, right: int) -> int:\n'
                      '    return left + right\n'
                      '\n'
+                     'print(erased(add)(2, 3))\n'
                      'print(add(2, 3))',
-             'output': 'calling add\n5',
-             'line': 22,
+             'output': 'calling add\n5\ncalling add\n5',
+             'line': 64,
              'kind': 'cell'}],
   'code': 'from collections.abc import Callable\n'
           'from typing import ParamSpec, TypeVar\n'
           '\n'
           'P = ParamSpec("P")\n'
           'R = TypeVar("R")\n'
+          '\n'
+          '\n'
+          'def erased(func: Callable[..., R]) -> Callable[..., R]:\n'
+          '    return func\n'
           '\n'
           '\n'
           'def logged(func: Callable[P, R]) -> Callable[P, R]:\n'
@@ -8997,8 +9071,9 @@ EXAMPLES = [{'slug': 'hello-world',
           'def add(left: int, right: int) -> int:\n'
           '    return left + right\n'
           '\n'
+          'print(erased(add)(2, 3))\n'
           'print(add(2, 3))\n',
-  'expected_output': 'calling add\n5\n',
+  'expected_output': 'calling add\n5\ncalling add\n5\n',
   'min_python': None,
   'version_sensitive': False,
   'version_notes': None},
@@ -9801,47 +9876,65 @@ EXAMPLES = [{'slug': 'hello-world',
   'summary': 'int() and float() parse text into numbers and raise ValueError on bad input.',
   'doc_path': '/library/functions.html#int',
   'doc_url': 'https://docs.python.org/3.13/library/functions.html#int',
-  'explanation': ['Parsing turns text into numeric values. `int()` parses whole-number text and '
-                  '`float()` parses decimal or scientific-notation text.',
-                  'Invalid numeric text raises `ValueError`. Catching that specific exception '
-                  'makes it clear that bad input is expected and recoverable.',
-                  'After parsing, the result is a number and can participate in arithmetic; before '
-                  'parsing, it is just text.'],
+  'explanation': ['Parsing turns text from files, forms, command lines, or network messages into '
+                  'numeric objects. `int()` parses whole-number text, and `float()` parses decimal '
+                  'or scientific-notation text.',
+                  'Invalid numeric text raises `ValueError`. Catch that specific exception when '
+                  'bad user input is expected and recoverable; let it fail loudly when the string '
+                  'is supposed to be trusted program data.',
+                  '`int()` also accepts a base, which is useful at protocol boundaries where '
+                  'numbers are written in hexadecimal, binary, or another explicit notation.'],
   'notes': ['`int()` and `float()` are constructors that also parse strings.',
-            'Catch `ValueError` when bad user input is expected and recoverable.'],
+            '`int(text, base)` makes non-decimal input explicit.',
+            'Catch `ValueError` for recoverable user input; do not hide unexpected data '
+            'corruption.'],
   'see_also': ['exceptions', 'strings', 'numbers'],
   'walkthrough': [{'prose': 'Use `int()` for whole numbers and `float()` for decimal text. Parsed '
                             'values are real numbers, not strings.',
                    'code': 'print(int("42"))\nprint(float("3.5"))'},
-                  {'prose': 'Bad numeric text raises `ValueError`. Catch that specific exception '
-                            'when invalid input is part of the normal flow.',
-                   'code': 'try:\n'
-                           '    int("python")\n'
-                           'except ValueError as error:\n'
-                           '    print(type(error).__name__)'}],
+                  {'prose': 'Pass a base when the text format says the number is not decimal.',
+                   'code': 'print(int("ff", 16))'},
+                  {'prose': 'Catch `ValueError` at the input boundary when invalid text is normal '
+                            'and recoverable.',
+                   'code': 'texts = ["10", "python", "20"]\n'
+                           'for text in texts:\n'
+                           '    try:\n'
+                           '        print(int(text) * 2)\n'
+                           '    except ValueError:\n'
+                           '        print(f"skip {text!r}")'}],
   'cells': [{'prose': ['Use `int()` for whole numbers and `float()` for decimal text. Parsed '
                        'values are real numbers, not strings.'],
              'code': 'print(int("42"))\nprint(float("3.5"))',
              'output': '42\n3.5',
              'line': 22,
              'kind': 'cell'},
-            {'prose': ['Bad numeric text raises `ValueError`. Catch that specific exception when '
-                       'invalid input is part of the normal flow.'],
-             'code': 'try:\n'
-                     '    int("python")\n'
-                     'except ValueError as error:\n'
-                     '    print(type(error).__name__)',
-             'output': 'ValueError',
+            {'prose': ['Pass a base when the text format says the number is not decimal.'],
+             'code': 'print(int("ff", 16))',
+             'output': '255',
              'line': 36,
+             'kind': 'cell'},
+            {'prose': ['Catch `ValueError` at the input boundary when invalid text is normal and '
+                       'recoverable.'],
+             'code': 'texts = ["10", "python", "20"]\n'
+                     'for text in texts:\n'
+                     '    try:\n'
+                     '        print(int(text) * 2)\n'
+                     '    except ValueError:\n'
+                     '        print(f"skip {text!r}")',
+             'output': "20\nskip 'python'\n40",
+             'line': 48,
              'kind': 'cell'}],
   'code': 'print(int("42"))\n'
           'print(float("3.5"))\n'
+          'print(int("ff", 16))\n'
           '\n'
-          'try:\n'
-          '    int("python")\n'
-          'except ValueError as error:\n'
-          '    print(type(error).__name__)\n',
-  'expected_output': '42\n3.5\nValueError\n',
+          'texts = ["10", "python", "20"]\n'
+          'for text in texts:\n'
+          '    try:\n'
+          '        print(int(text) * 2)\n'
+          '    except ValueError:\n'
+          '        print(f"skip {text!r}")\n',
+  'expected_output': "42\n3.5\n255\n20\nskip 'python'\n40\n",
   'min_python': None,
   'version_sensitive': False,
   'version_notes': None},

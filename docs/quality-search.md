@@ -1,0 +1,52 @@
+# Rubric-driven quality search
+
+Python By Example now has two complementary scoring loops:
+
+1. `scripts/check_quality_scores.py` is the editorial gate. It enforces the curated score registry, hard-minimum waivers, stale backlog cleanup, weak journey-section tracking, and the 10-point rubric weight model.
+2. `scripts/score_example_criteria.py` is the search aid. It breaks each page into rubric criteria so rewrite work can target the weakest axis instead of treating the score as one opaque number.
+
+The criterion report is deliberately heuristic. It should suggest candidates, not replace editorial review.
+
+## Hill-climbing move types
+
+Use these moves when a page is already close and the weakest criterion is clear:
+
+- **Decompose one compressed cell** into setup, boundary, and payoff cells.
+- **Add a before/after contrast** when the feature exists to remove boilerplate or clarify a shape.
+- **Add a runtime/static boundary cell** for typing pages where runtime behavior differs from type-checker behavior.
+- **Add a failure/recovery cell** for parsing, exceptions, warnings, and validation examples.
+- **Add a standard-Python/Worker-boundary unsupported cell** for runtime features constrained by Dynamic Workers.
+- **Strengthen graph edges** with prerequisite, neighboring, and next-depth `see_also` links.
+- **Replace generic prose** with a concrete domain pressure: user input, package setup, protocol bytes, record shape, service logging, or state transition.
+
+## Escaping local maxima with simulated annealing
+
+Greedy hill-climbing tends to overfit the current page shape: it adds one more note or one more small cell even when the page needs a different structure. For pages stuck around 8.2-8.8, use a simulated-annealing review loop:
+
+1. **State**: the page markdown plus metadata, figure rationale, and graph edges.
+2. **Energy**: `10 - curated_score`, with penalties for weak criterion scores, unsupported runtime ambiguity, graph isolation, empty output evidence, and overlong code runs.
+3. **Neighbor moves**:
+   - split a cell;
+   - merge two repetitive cells;
+   - swap the first example domain;
+   - introduce a contrasting failure case;
+   - move from toy data to realistic data;
+   - convert a figure requirement into a no-figure rationale when the page is constraint-shaped;
+   - add/remove a `see_also` edge;
+   - rewrite the intro around “when to use this”.
+4. **Temperature**: start high enough to accept occasional worse rewrites, especially when they introduce a new structure. Cool after tests, verification, and rubric review pass.
+5. **Acceptance rule**: accept improvements always; accept a worse intermediate with probability based on score loss and temperature only if executable correctness and docs links remain valid.
+6. **Refinement**: after cooling, run `make verify`, the criterion report, and a manual rubric pass before updating the curated score.
+
+This gives the project permission to try non-local changes — different domains, different cell order, or a no-figure rationale — without normalizing failed experiments into production.
+
+## Wider-system unlocks
+
+Future improvements that create new quality headroom:
+
+- Store criterion-level editorial subscores in TOML once the heuristic report stabilizes.
+- Add an authoring command that proposes the top three rewrite moves for a slug from the criterion deficits.
+- Add browser snapshots for representative low-score shapes, not only layout smoke.
+- Track page archetypes (`foundational`, `protocol-boundary`, `static-typing`, `aggregator`, `runtime-constrained`) so rubrics can apply the right expectations.
+- Add a no-figure review path to avoid weak diagrams for constraint-shaped pages.
+- Let CI post a quality delta comment for PRs: scores changed, graph edges changed, weak criteria changed.

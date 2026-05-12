@@ -4,6 +4,12 @@ title = "Truthiness"
 section = "Basics"
 summary = "Python conditions use truthiness, not only explicit booleans."
 doc_path = "/library/stdtypes.html#truth-value-testing"
+see_also = [
+  "booleans",
+  "none",
+  "conditionals",
+  "special-methods",
+]
 +++
 
 Truthiness is one of Python's most important conveniences: conditions can test objects directly instead of requiring explicit boolean comparisons everywhere.

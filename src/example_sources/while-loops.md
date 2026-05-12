@@ -4,6 +4,11 @@ title = "While Loops"
 section = "Control Flow"
 summary = "while repeats until changing state makes a condition false."
 doc_path = "/reference/compound_stmts.html#while"
+see_also = [
+  "for-loops",
+  "sentinel-iteration",
+  "break-and-continue",
+]
 +++
 
 A `while` loop repeats while a condition remains true. Unlike `for`, which consumes an existing iterable, `while` is for state-driven repetition where the next step depends on what happened so far.

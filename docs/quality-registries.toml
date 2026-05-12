@@ -196,30 +196,6 @@ expires = "never"
 # figure would distort the lesson. Current production attaches figures
 # to every example, so this registry is intentionally empty.
 
-[quality_improvement_backlog.constants]
-cause = "convention page needs stronger boundary against Final and ordinary variables"
-next_action = "add a cell contrasting naming convention with typing.Final and runtime rebinding"
-
-[quality_improvement_backlog.truthiness]
-cause = "truth-value protocol is under-linked to booleans and special methods"
-next_action = "add a boundary cell that predicts bool() for empty containers, None, and custom __bool__"
-
-[quality_improvement_backlog.virtual-environments]
-cause = "runtime-boundary page is constrained by Dynamic Workers and needs stronger standard-Python path"
-next_action = "teach venv creation/activation as unsupported Standard Python, then show local dependency evidence"
-
-[quality_improvement_backlog.literal-and-final]
-cause = "advanced type page compresses Literal and Final into one cell"
-next_action = "split value restriction from rebinding restriction and show runtime annotations boundary"
-
-[quality_improvement_backlog.paramspec]
-cause = "single-cell advanced typing page hides why ordinary Callable loses parameter shape"
-next_action = "add a decorator typed with Callable[..., T] before the ParamSpec-preserving version"
-
-[quality_improvement_backlog.number-parsing]
-cause = "parsing page lacks enough failure/recovery shape"
-next_action = "add cells for int base handling, ValueError recovery, and validation boundary"
-
 [quality_improvement_backlog.values]
 cause = "foundational page is graph-linked now but still needs a sharper object/type mental model"
 next_action = "add or revise a cell that connects value, type, and operation with a nearby See also path"
@@ -260,10 +236,6 @@ next_action = "add a cell that chooses a branch from a non-bool value and points
 cause = "match syntax is shown but shape-dispatch vs if/elif boundary could be clearer"
 next_action = "add a comparable if/elif or data-shape cell that makes match's payoff visible"
 
-[quality_improvement_backlog.while-loops]
-cause = "loop shape is shown but for-vs-while decision boundary is thin"
-next_action = "add a state-changing while cell beside an iterable for-loop alternative"
-
 [quality_improvement_backlog.lists]
 cause = "list operations are shown but sequence vs set/dict and mutation boundaries need sharpening"
 next_action = "add a cell contrasting append/index order with set membership or tuple immutability"
@@ -279,10 +251,6 @@ next_action = "add or sharpen cells for get/default, key membership, and safe de
 [quality_improvement_backlog.sets]
 cause = "set uniqueness is shown but list-vs-set tradeoff and ordering boundary need emphasis"
 next_action = "add a cell comparing membership/duplicates with a list"
-
-[quality_improvement_backlog.slices]
-cause = "slice syntax is shown but off-by-one and copy-vs-view boundaries need stronger evidence"
-next_action = "add a cell showing adjacent slices meeting at the same boundary index"
 
 [quality_improvement_backlog.comprehensions]
 cause = "map/filter shape is shown but eager vs lazy and loop equivalence need stronger progression"
@@ -304,17 +272,9 @@ next_action = "add a call-site contrast where unnamed booleans are ambiguous"
 cause = "collection of extra arguments is shown but forwarding boundary is underdeveloped"
 next_action = "add a wrapper cell that forwards *args and **kwargs to another callable"
 
-[quality_improvement_backlog.multiple-return-values]
-cause = "tuple return is shown but tuple/unpacking relationship needs a stronger explicit link"
-next_action = "add a cell showing the returned value is a tuple before unpacking"
-
 [quality_improvement_backlog.closures]
 cause = "closure memory is shown but late-binding footgun deserves more adjacent evidence"
 next_action = "add or sharpen loop-closure broken/fixed cells"
-
-[quality_improvement_backlog.recursion]
-cause = "recursive shape is shown but base-case and failure boundaries need more evidence"
-next_action = "add a base-case-first cell and a note on RecursionError/iteration alternative"
 
 [quality_improvement_backlog.lambdas]
 cause = "lambda syntax is shown but def-vs-lambda boundary is too light"
@@ -335,10 +295,6 @@ next_action = "add a before/after cell changing a public attribute into a proper
 [quality_improvement_backlog.exceptions]
 cause = "try/except structure is shown but bare-except and cleanup boundaries need sharper evidence"
 next_action = "add a cell contrasting specific exception handling with overbroad catching"
-
-[quality_improvement_backlog.enums]
-cause = "enum values are shown but raw constants/string alternatives need stronger contrast"
-next_action = "add a cell comparing Enum identity/name/value with plain strings"
 
 [quality_improvement_backlog.custom-exceptions]
 cause = "custom exception class is shown but when not to create one is underdeveloped"

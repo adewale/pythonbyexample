@@ -57,6 +57,11 @@ class CheckScriptSmokeTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn("Quality score gate OK", result.stdout)
 
+    def test_criterion_scoring_report_passes(self):
+        result = run("score_example_criteria.py")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn("criterion heuristic", result.stdout)
+
     def test_no_figure_rationales_pass(self):
         result = run("check_no_figure_rationales.py")
         self.assertEqual(result.returncode, 0, msg=result.stderr)
