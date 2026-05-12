@@ -4,6 +4,12 @@ title = "Generator Expressions"
 section = "Iteration"
 summary = "Generator expressions use comprehension-like syntax to stream values lazily."
 doc_path = "/tutorial/classes.html#generator-expressions"
+see_also = [
+  "comprehensions",
+  "generators",
+  "itertools",
+  "yield-from",
+]
 +++
 
 Generator expressions look like list comprehensions with parentheses, but they produce an iterator instead of building a concrete collection immediately.

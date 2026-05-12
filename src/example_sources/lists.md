@@ -4,6 +4,12 @@ title = "Lists"
 section = "Collections"
 summary = "Lists are ordered, mutable collections."
 doc_path = "/tutorial/datastructures.html#more-on-lists"
+see_also = [
+  "tuples",
+  "sets",
+  "slices",
+  "copying-collections",
+]
 +++
 
 Lists are Python's general-purpose mutable sequence type. Use them when order matters and the collection may grow, shrink, or be rearranged.

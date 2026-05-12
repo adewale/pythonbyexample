@@ -4,6 +4,12 @@ title = "Unpacking"
 section = "Collections"
 summary = "Unpacking binds names from sequences and mappings concisely."
 doc_path = "/tutorial/datastructures.html#tuples-and-sequences"
+see_also = [
+  "tuples",
+  "multiple-return-values",
+  "args-and-kwargs",
+  "dicts",
+]
 +++
 
 Unpacking binds multiple names from one iterable or mapping. It makes the structure of data visible at the point where values are introduced.

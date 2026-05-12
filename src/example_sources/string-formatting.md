@@ -4,6 +4,12 @@ title = "String Formatting"
 section = "Text"
 summary = "f-strings turn values into readable text at the point of use."
 doc_path = "/tutorial/inputoutput.html#formatted-string-literals"
+see_also = [
+  "strings",
+  "logging",
+  "csv-data",
+  "values",
+]
 +++
 
 Formatted string literals, or f-strings, exist because programs constantly need to turn values into human-readable text. They keep the expression next to the words it explains.

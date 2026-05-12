@@ -40,6 +40,16 @@ Greedy hill-climbing tends to overfit the current page shape: it adds one more n
 
 This gives the project permission to try non-local changes — different domains, different cell order, or a no-figure rationale — without normalizing failed experiments into production.
 
+## Techniques learned from the bottom-28 pass
+
+The low-score pages mostly needed the same repair pattern rather than more prose:
+
+- **Name the boundary in the page graph.** Pages that were otherwise good still looked weak when they had no prerequisite/neighbor/next-depth `see_also` edges. Adding edges made the intended learning path inspectable.
+- **Use a three-cell spine.** Strong pages usually have setup, contrast/boundary, and payoff evidence. One compressed cell hides too many teaching jobs.
+- **Show the neighboring tool.** `for` vs `while`, `lambda` vs `def`, `list` vs `set`, `None` vs exception/default, and eager vs lazy examples score better because learners see when not to use the feature.
+- **Keep runtime/static distinctions explicit.** Typing pages improved when a cell showed the runtime caveat instead of leaving the type-checker promise implicit.
+- **Let criterion scoring detect stale editorial labels.** Several pages had already gained cells, notes, and graph edges, but the curated comment still said `isolated`. The criterion report is useful for finding those stale labels.
+
 ## Wider-system unlocks
 
 Future improvements that create new quality headroom:

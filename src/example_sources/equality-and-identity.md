@@ -4,6 +4,12 @@ title = "Equality and Identity"
 section = "Data Model"
 summary = "== compares values, while is compares object identity."
 doc_path = "/reference/expressions.html#is-not"
+see_also = [
+  "none",
+  "values",
+  "object-lifecycle",
+  "mutability",
+]
 +++
 
 Python separates equality from identity. Equality asks whether two objects should be considered the same value, while identity asks whether two names point to the same object.

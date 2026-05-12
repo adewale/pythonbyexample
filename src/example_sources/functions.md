@@ -4,6 +4,12 @@ title = "Functions"
 section = "Functions"
 summary = "Use def to name reusable behavior and return results."
 doc_path = "/tutorial/controlflow.html#defining-functions"
+see_also = [
+  "variables",
+  "args-and-kwargs",
+  "keyword-only-arguments",
+  "closures",
+]
 +++
 
 Functions package behavior behind a name. `def` creates a function object that can accept arguments, compute values, and return a result.

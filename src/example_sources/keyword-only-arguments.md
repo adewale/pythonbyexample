@@ -4,6 +4,12 @@ title = "Keyword-only Arguments"
 section = "Functions"
 summary = "Use * to require selected function arguments to be named."
 doc_path = "/tutorial/controlflow.html#special-parameters"
+see_also = [
+  "functions",
+  "args-and-kwargs",
+  "positional-only-parameters",
+  "partial-functions",
+]
 +++
 
 A bare `*` in a function signature marks the following parameters as keyword-only. Callers must name those arguments explicitly.

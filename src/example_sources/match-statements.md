@@ -4,6 +4,12 @@ title = "Match Statements"
 section = "Control Flow"
 summary = "match selects cases using structural pattern matching."
 doc_path = "/tutorial/controlflow.html#match-statements"
+see_also = [
+  "conditionals",
+  "advanced-match-patterns",
+  "structured-data-shapes",
+  "dicts",
+]
 +++
 
 Structural pattern matching lets a program choose a branch based on the shape of data. It is especially useful when commands, messages, or parsed data have a few known forms.

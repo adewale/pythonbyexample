@@ -4,6 +4,12 @@ title = "Comprehensions"
 section = "Collections"
 summary = "Comprehensions build collections by mapping and filtering iterables."
 doc_path = "/tutorial/datastructures.html#list-comprehensions"
+see_also = [
+  "for-loops",
+  "generator-expressions",
+  "comprehension-patterns",
+  "lists",
+]
 +++
 
 Comprehensions are expression forms for building concrete collections from iterables. Read them from left to right: produce this value, for each item, optionally only when a condition is true.

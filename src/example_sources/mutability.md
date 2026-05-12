@@ -4,6 +4,12 @@ title = "Mutability"
 section = "Data Model"
 summary = "Some objects change in place, while others return new values."
 doc_path = "/reference/datamodel.html#objects-values-and-types"
+see_also = [
+  "variables",
+  "object-lifecycle",
+  "copying-collections",
+  "lists",
+]
 +++
 
 Objects in Python can be mutable or immutable. Mutable objects such as lists and dictionaries can change in place, while immutable objects such as strings and tuples produce new values instead.

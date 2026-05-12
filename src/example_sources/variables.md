@@ -4,6 +4,12 @@ title = "Variables"
 section = "Basics"
 summary = "Names are bound to values with assignment."
 doc_path = "/reference/simple_stmts.html#assignment-statements"
+see_also = [
+  "values",
+  "mutability",
+  "object-lifecycle",
+  "constants",
+]
 +++
 
 Python variables are names bound to objects. Assignment creates or rebinds a name; it does not require a declaration and it does not permanently attach a type to the name.

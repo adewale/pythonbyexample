@@ -4,6 +4,12 @@ title = "None"
 section = "Basics"
 summary = "None represents expected absence, distinct from missing keys and errors."
 doc_path = "/library/constants.html#None"
+see_also = [
+  "values",
+  "truthiness",
+  "exceptions",
+  "dicts",
+]
 +++
 
 `None` represents the absence of a value. It is the usual sentinel when a function has no result to return but the absence itself is meaningful.

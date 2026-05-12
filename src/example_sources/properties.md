@@ -4,6 +4,12 @@ title = "Properties"
 section = "Classes"
 summary = "@property keeps attribute syntax while adding computation or validation."
 doc_path = "/library/functions.html#property"
+see_also = [
+  "classes",
+  "attribute-access",
+  "descriptors",
+  "dataclasses",
+]
 +++
 
 Properties let a class keep a simple attribute-style API while running code behind the scenes. Callers write `box.area`, but the class can compute the value from current state.

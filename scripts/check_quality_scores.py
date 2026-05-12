@@ -81,15 +81,17 @@ def main() -> int:
     for slug, (score, _comment) in sorted(EXAMPLE_QUALITY_SCORES.items()):
         if score < target:
             below_target.append(slug)
-        if score < hard_min:
             if slug in waivers:
                 accepted = float(waivers[slug].get("accepted_min", hard_min))
                 if score < accepted:
                     errors.append(f"{slug}: score {score:.1f} below waiver floor {accepted:.1f}")
-            elif slug in backlog:
-                below_hard_min.append(slug)
+            elif score < hard_min:
+                if slug in backlog:
+                    below_hard_min.append(slug)
+                else:
+                    errors.append(f"{slug}: score {score:.1f} below hard minimum {hard_min:.1f} without backlog entry")
             else:
-                errors.append(f"{slug}: score {score:.1f} below hard minimum {hard_min:.1f} without backlog entry")
+                errors.append(f"{slug}: score {score:.1f} below target {target:.1f} without waiver")
 
     for title in sorted(section_backlog):
         if title not in SECTION_FIGURE_SCORES:

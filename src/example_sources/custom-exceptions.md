@@ -4,6 +4,12 @@ title = "Custom Exceptions"
 section = "Errors"
 summary = "Custom exception classes name failures that belong to your domain."
 doc_path = "/tutorial/errors.html#user-defined-exceptions"
+see_also = [
+  "exceptions",
+  "exception-chaining",
+  "warnings",
+  "logging",
+]
 +++
 
 Custom exceptions give names to failures in your problem domain. A named exception is easier to catch and explain than a generic error with only a string message.

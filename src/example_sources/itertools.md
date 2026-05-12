@@ -4,6 +4,12 @@ title = "Itertools"
 section = "Iteration"
 summary = "itertools composes lazy iterator streams."
 doc_path = "/library/itertools.html"
+see_also = [
+  "iterators",
+  "generator-expressions",
+  "sentinel-iteration",
+  "comprehension-patterns",
+]
 +++
 
 The `itertools` module contains tools for composing iterator streams: combining, slicing, grouping, and repeating values without changing the consumer protocol.

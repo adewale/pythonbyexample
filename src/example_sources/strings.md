@@ -4,6 +4,12 @@ title = "Strings"
 section = "Text"
 summary = "Strings are immutable Unicode text sequences."
 doc_path = "/library/stdtypes.html#text-sequence-type-str"
+see_also = [
+  "values",
+  "string-formatting",
+  "bytes-and-bytearray",
+  "regular-expressions",
+]
 +++
 
 Python strings are immutable Unicode text sequences. A `str` stores text as Unicode code points, so it can represent English, Thai, accented letters, emoji, and ordinary ASCII with the same type.

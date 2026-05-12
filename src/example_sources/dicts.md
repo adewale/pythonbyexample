@@ -4,6 +4,12 @@ title = "Dictionaries"
 section = "Collections"
 summary = "Dictionaries map keys to values for records, lookup, and structured data."
 doc_path = "/tutorial/datastructures.html#dictionaries"
+see_also = [
+  "lists",
+  "sets",
+  "typed-dicts",
+  "json",
+]
 +++
 
 Dictionaries are Python's built-in mapping type. They exist for data where names or keys are more meaningful than numeric positions: records, lookup tables, counters, and JSON-like payloads.

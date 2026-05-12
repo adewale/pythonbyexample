@@ -4,6 +4,12 @@ title = "Closures"
 section = "Functions"
 summary = "Inner functions can remember values from an enclosing scope."
 doc_path = "/reference/executionmodel.html#binding-of-names"
+see_also = [
+  "functions",
+  "lambdas",
+  "decorators",
+  "partial-functions",
+]
 +++
 
 A closure is a function that remembers names from the scope where it was created. This lets you configure behavior once and call it later.

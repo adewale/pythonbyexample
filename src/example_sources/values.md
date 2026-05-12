@@ -4,6 +4,12 @@ title = "Values"
 section = "Basics"
 summary = "Python programs evaluate expressions into objects such as text, numbers, booleans, and None."
 doc_path = "/library/stdtypes.html"
+see_also = [
+  "variables",
+  "booleans",
+  "none",
+  "literals",
+]
 +++
 
 A Python program works by evaluating expressions into values. Values are objects: text, integers, floats, booleans, `None`, and many richer types introduced later.

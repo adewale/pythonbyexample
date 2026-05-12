@@ -4,6 +4,12 @@ title = "Args and Kwargs"
 section = "Functions"
 summary = "*args collects extra positional arguments and **kwargs collects named ones."
 doc_path = "/tutorial/controlflow.html#arbitrary-argument-lists"
+see_also = [
+  "functions",
+  "keyword-only-arguments",
+  "partial-functions",
+  "paramspec",
+]
 +++
 
 `*args` and `**kwargs` let a function accept flexible positional and keyword arguments. They are the function-definition counterpart to unpacking at a call site.

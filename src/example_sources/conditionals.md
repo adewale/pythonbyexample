@@ -4,6 +4,12 @@ title = "Conditionals"
 section = "Control Flow"
 summary = "if, elif, and else choose which block runs."
 doc_path = "/tutorial/controlflow.html#if-statements"
+see_also = [
+  "booleans",
+  "truthiness",
+  "guard-clauses",
+  "match-statements",
+]
 +++
 
 `if`, `elif`, and `else` let a program choose one path based on a condition. Python uses indentation to show which statements belong to each branch.
