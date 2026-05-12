@@ -500,28 +500,37 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
 
 def render_home() -> str:
     # Group examples by section in the order each section first appears
-    # in the manifest, then emit one eyebrow divider per section followed
-    # by every example in that section.
+    # in the manifest. Each section gets its own .home-section wrapper
+    # holding an eyebrow (tight, ~12px above its cards) and the
+    # section's grid; sections are spaced ~48px apart for clear
+    # separation. The shared outer .grid is gone — using one grid
+    # per section gives explicit control over the eyebrow's vertical
+    # relationship to its own cards vs the previous section.
     by_section: dict[str, list[dict]] = {}
     for example in list_examples():
         by_section.setdefault(example["section"], []).append(example)
-    cards = []
+    sections_html = []
     for section, examples in by_section.items():
-        cards.append(f'<p class="eyebrow grid-section">{html.escape(section)}</p>')
-        for example in examples:
-            cards.append(
-                _replace(
-                    '<a class="card" href="/examples/__SLUG__"><h2>__TITLE__</h2><p class="meta">__SUMMARY__</p></a>',
-                    {
-                        "SLUG": html.escape(example["slug"]),
-                        "TITLE": html.escape(example["title"]),
-                        "SUMMARY": html.escape(example["summary"]),
-                    },
-                )
+        card_markup = "".join(
+            _replace(
+                '<a class="card" href="/examples/__SLUG__"><h2>__TITLE__</h2><p class="meta">__SUMMARY__</p></a>',
+                {
+                    "SLUG": html.escape(example["slug"]),
+                    "TITLE": html.escape(example["title"]),
+                    "SUMMARY": html.escape(example["summary"]),
+                },
             )
+            for example in examples
+        )
+        sections_html.append(
+            f'<section class="home-section">'
+            f'<p class="eyebrow">{html.escape(section)}</p>'
+            f'<div class="grid">{card_markup}</div>'
+            f'</section>'
+        )
     content = _replace(
         _template("home.html"),
-        {"PYTHON_VERSION": html.escape(PYTHON_VERSION), "CARDS": "".join(cards)},
+        {"PYTHON_VERSION": html.escape(PYTHON_VERSION), "CARDS": "".join(sections_html)},
     )
     return _layout(
         "Python By Example",
