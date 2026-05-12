@@ -65,7 +65,7 @@ def assert_asset_manifest(failures: list[str]) -> None:
 def assert_worker_cache_policy(failures: list[str]) -> None:
     source = (ROOT / "src" / "main.py").read_text()
     required = [
-        "def html_cache_key_url(url: str) -> str:",
+        "def html_cache_key_url(url: str, turnstile_site_key: str = \"\") -> str:",
         "__html_v={HTML_CACHE_VERSION}",
         "caches.default.match(cache_key)",
         "caches.default.put(cache_key, response.clone())",

@@ -305,6 +305,26 @@ class AppTests(unittest.TestCase):
         self.assertNotIn('<article class="card"', home)
         self.assertIn('class="example-shell"', html)
 
+    def test_turnstile_widget_is_optional_and_form_bound(self):
+        html = render_example_page(get_example("hello-world"))
+        self.assertNotIn("cf-turnstile", html)
+        self.assertNotIn("challenges.cloudflare.com/turnstile", html)
+
+        protected = render_example_page(get_example("hello-world"), turnstile_site_key="site-key-123")
+        self.assertIn("https://challenges.cloudflare.com/turnstile/v0/api.js", protected)
+        self.assertIn('class="cf-turnstile"', protected)
+        self.assertIn('data-sitekey="site-key-123"', protected)
+        self.assertIn("window.turnstile", protected)
+        self.assertIn("turnstile.reset", protected)
+
+    def test_turnstile_verification_is_secret_gated_in_worker(self):
+        main_source = (ROOT / "src" / "main.py").read_text()
+        self.assertIn("TURNSTILE_SECRET_KEY", main_source)
+        self.assertIn("cf-turnstile-response", main_source)
+        self.assertIn("/turnstile/v0/siteverify", main_source)
+        self.assertIn("PBE_SMOKE_BYPASS_SECRET", main_source)
+        self.assertIn("x-pythonbyexample-smoke-secret", main_source)
+
     def test_cf_workers_design_system_and_playground_lessons(self):
         html = render_example_page(get_example("hello-world"), output="hello world\n")
         css = (ROOT / "public" / "site.css").read_text()

@@ -7,6 +7,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 import urllib.error
 import urllib.parse
@@ -39,15 +40,18 @@ def fetch(url: str) -> tuple[int, str]:
         return response.status, body
 
 
-def post_code(url: str, code: str) -> tuple[int, str]:
+def post_code(url: str, code: str, smoke_bypass_secret: str = "") -> tuple[int, str]:
     data = urllib.parse.urlencode({"code": code}).encode()
+    headers = {
+        "User-Agent": "pythonbyexample-smoke/1.0",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    if smoke_bypass_secret:
+        headers["x-pythonbyexample-smoke-secret"] = smoke_bypass_secret
     request = urllib.request.Request(
         url,
         data=data,
-        headers={
-            "User-Agent": "pythonbyexample-smoke/1.0",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
+        headers=headers,
         method="POST",
     )
     with urllib.request.urlopen(request, timeout=30) as response:
@@ -91,11 +95,13 @@ def main() -> int:
             failures.append(f"{url}: rendered exception marker {marker!r}")
         print(f"GET {status} {url}")
 
+    smoke_bypass_secret = os.environ.get("PBE_SMOKE_BYPASS_SECRET", "")
+
     if not args.skip_post:
         for slug, code, expected in POST_SMOKES:
             url = urljoin(base, f"examples/{slug}")
             try:
-                status, body = post_code(url, code)
+                status, body = post_code(url, code, smoke_bypass_secret)
             except urllib.error.HTTPError as exc:
                 failures.append(f"POST {url}: HTTP {exc.code}")
                 continue

@@ -16,6 +16,7 @@
       <form class="runner-panel runner-editor" method="post" action="/examples/__SLUG__">
         <h3>Example code</h3>
         <textarea name="code" id="code-editor" spellcheck="false" rows="__EDITOR_ROWS__">__EDITABLE_CODE__</textarea>
+        __TURNSTILE_WIDGET__
         <div class="playground-toolbar">
           <button class="button" type="submit">Run</button>
           <button class="tool-button" type="button" data-reset onclick="resetCode()">Reset</button>
@@ -52,6 +53,8 @@ form.addEventListener('submit', async (event) => {
     if (nextOutput) outputPanel.innerHTML = nextOutput.innerHTML;
   } catch (error) {
     outputPanel.querySelector('code').textContent = 'Run failed: ' + error.message;
+  } finally {
+    if (window.turnstile) turnstile.reset();
   }
 });
 const hash = new URL(window.location.href).hash;

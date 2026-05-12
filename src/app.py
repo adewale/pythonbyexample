@@ -748,7 +748,17 @@ def _render_cell(step):
     return f'<section class="lesson-step lp-cell"><div class="lp-prose">{prose_html}</div><div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">{source}</code></pre></div><div class="cell-output"><p class="cell-label">Output</p><pre><code>{html.escape(step["output"])}</code></pre></div></div></section>'
 
 
-def render_example_page(example, output=None, code=None, execution_time_ms=None):
+def _turnstile_widget(site_key: str | None) -> str:
+    if not site_key:
+        return ""
+    escaped = html.escape(site_key)
+    return (
+        '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>'
+        f'<div class="cf-turnstile" data-sitekey="{escaped}"></div>'
+    )
+
+
+def render_example_page(example, output=None, code=None, execution_time_ms=None, turnstile_site_key=None):
     notes = [render_inline(note) for note in example.get("notes", [])]
     walkthrough = _walkthrough_cells(example)
     shown_output = output if output is not None else example.get("expected_output", "Run this example to see output here.")
@@ -796,6 +806,7 @@ def render_example_page(example, output=None, code=None, execution_time_ms=None)
             "SLUG": html.escape(example["slug"]),
             "EDITOR_ROWS": str(max(18, editable_code.count("\n") + 2)),
             "EDITABLE_CODE": html.escape(editable_code),
+            "TURNSTILE_WIDGET": _turnstile_widget(turnstile_site_key),
             "OUTPUT_PLACEHOLDER": " data-output-placeholder" if output is None else "",
             "OUTPUT_HEADING": html.escape(output_heading),
             "SHOWN_OUTPUT": html.escape(shown_output),
@@ -813,7 +824,7 @@ def render_example_page(example, output=None, code=None, execution_time_ms=None)
     )
 
 
-def route(url: str, method: str = "GET") -> AppResponse:
+def route(url: str, method: str = "GET", turnstile_site_key: str | None = None) -> AppResponse:
     without_scheme = url.split("://", 1)[-1]
     path_part = without_scheme.split("/", 1)[1] if "/" in without_scheme else ""
     path = ("/" + path_part.split("?", 1)[0]).rstrip("/") or "/"
@@ -850,6 +861,7 @@ def route(url: str, method: str = "GET") -> AppResponse:
             body = f'<h1>Example not found</h1><p class="meta">Try one of these nearby examples.</p><h2>Recommended examples</h2><ul>{recommendations}</ul>'
             return AppResponse(_layout("Not Found", body), status=404)
         return AppResponse(
-            render_example_page(example), headers={"Content-Type": "text/html; charset=utf-8"}
+            render_example_page(example, turnstile_site_key=turnstile_site_key),
+            headers={"Content-Type": "text/html; charset=utf-8"},
         )
     return AppResponse(_layout("Not Found", "<h1>Not found</h1>"), status=404)
