@@ -52,7 +52,7 @@ This snapshot audits the shipped catalog against the example, example-figure, an
 | Mechanism over metaphor | Canvas primitives show protocols, boundaries, lanes, or flows | PASS |
 | Caption alignment | Section figure captions unique and declarative | PASS |
 | Grammar conformance | Shared geometry contracts | PASS |
-| Independence from lesson figures | Section figures compared with example attachments | WATCH (15 reused paint functions) |
+| Independence from lesson figures | Section figures compared with example attachments | WATCH (6 reused paint functions) |
 | Layout fit | Journey figure dimensions within production column | PASS |
 | Outcome support | `check_journey_outcomes.py` over all 24 sections | PASS |
 | Prerequisite order | Journey order reviewed against lesson dependencies | PASS |
@@ -175,15 +175,15 @@ This snapshot audits the shipped catalog against the example, example-figure, an
 
 | Journey | Section | Support examples | Outcomes | Figure | Score | Caption |
 | --- | --- | --- | --- | --- | --- | --- |
-| runtime | Start with executable evidence. | 5 | 4 | program-output | 9.0 | Every page is a runnable program. The smallest mental model: source produces visible output. |
-| runtime | Separate value, identity, and absence. | 6 | 4 | identity-and-equality | 9.0 | Two names can share one object (left, both `is` and `==` true) or hold two equal-but-distinct objects (right, only `==` true). |
-| runtime | Read expressions as object operations. | 5 | 4 | operator-dispatch | 9.0 | Operators are method calls. `a + b` dispatches to `a.__add__(b)`; the data model exposes the syntax. |
-| control-flow | Choose between paths. | 4 | 4 | branch-fork | 9.0 | A value flows through a predicate to one of several branches. |
-| control-flow | Name and shape decisions. | 3 | 3 | naming-decisions | 9.0 | Name an intermediate fact, then dispatch by data shape when a boolean branch is too small. |
-| control-flow | Stop as soon as the answer is known. | 3 | 3 | early-exit | 9.0 | The loop exits at the first match — break short-circuits the rest of the sequence. |
-| iteration | Choose the right loop shape. | 5 | 4 | loop-repetition | 9.0 | Choose the loop whose stopping rule matches the data: exhaustion, condition, or sentinel. |
-| iteration | See the protocol behind `for`. | 3 | 3 | iter-protocol | 9.5 | iter() exposes the iterator behind for; next() pulls one value at a time until exhausted. |
-| iteration | Compose lazy value streams. | 3 | 3 | lazy-stream | 9.0 | Filters and maps compose without materialising intermediate lists; values flow through the pipeline only when next() pulls them. |
+| runtime | Start with executable evidence. | 5 | 4 | runtime-evidence-loop | 9.0 | Examples are evidence loops: source, a run step, and visible output stay together. |
+| runtime | Separate value, identity, and absence. | 6 | 4 | runtime-object-axes | 9.0 | Runtime objects answer separate questions: equal value, same identity, or the singleton that marks absence. |
+| runtime | Read expressions as object operations. | 5 | 4 | runtime-expression-model | 9.0 | Expression syntax enters the data model; object methods produce the result. |
+| control-flow | Choose between paths. | 4 | 4 | control-decision-map | 9.0 | Facts flow into one decision point; exactly one branch owns the next step. |
+| control-flow | Name and shape decisions. | 3 | 3 | control-fact-shape | 9.0 | Name a fact when a condition needs it; match shape when the data structure is the decision. |
+| control-flow | Stop as soon as the answer is known. | 3 | 3 | control-stop-boundary | 9.0 | Early exits draw a boundary: once the answer is found, the tail stays unread. |
+| iteration | Choose the right loop shape. | 5 | 4 | iteration-loop-selector | 9.0 | Choose the loop from its stopping rule: exhaustion, condition, or sentinel marker. |
+| iteration | See the protocol behind `for`. | 3 | 3 | iteration-protocol-map | 9.5 | for is surface syntax; iter() creates an iterator and next() pulls values until StopIteration. |
+| iteration | Compose lazy value streams. | 3 | 3 | iteration-lazy-pull | 9.0 | Lazy pipelines run from the consumer's pull: next() requests one value through each stage. |
 | shapes | Pick the container that matches the question. | 5 | 4 | container-questions | 9.0 | Each container answers a different question: ordered, fixed, lookup, unique. |
 | shapes | Move between shapes deliberately. | 6 | 4 | reshape-pipeline | 9.0 | Most everyday code reshapes data: one input, one transform, one new value. |
 | shapes | Cross text and data boundaries. | 5 | 4 | text-data-boundary | 9.0 | Programs receive text and produce structured data; parsing makes the boundary explicit. |
@@ -202,19 +202,10 @@ This snapshot audits the shipped catalog against the example, example-figure, an
 
 ## Journey figure independence watchlist
 
-These section figures still reuse production example paint functions. They remain above the project gate, but the journey rubric's independence criterion should be the next visual-design frontier.
+6 section figures still reuse production example paint functions. They remain above the project gate, but the journey rubric's independence criterion should be the next visual-design frontier.
 
 | Section | Shared figure | Also attached to example |
 | --- | --- | --- |
-| Start with executable evidence. | program-output | hello-world |
-| Separate value, identity, and absence. | identity-and-equality | equality-and-identity |
-| Read expressions as object operations. | operator-dispatch | operator-overloading, special-methods |
-| Choose between paths. | branch-fork | conditionals |
-| Name and shape decisions. | naming-decisions | assignment-expressions |
-| Stop as soon as the answer is known. | early-exit | break-and-continue |
-| Choose the right loop shape. | loop-repetition | while-loops |
-| See the protocol behind `for`. | iter-protocol | iterating-over-iterables, iterator-vs-iterable, iterators |
-| Compose lazy value streams. | lazy-stream | generator-expressions |
 | Keep runtime and static analysis separate. | annotation-ghost | type-hints |
 | Describe realistic data shapes. | union-types | union-and-optional-types |
 | Scale annotations for reusable libraries. | generic-preservation | generics-and-typevar |
@@ -224,4 +215,4 @@ These section figures still reuse production example paint functions. They remai
 
 ## Audit conclusion
 
-No gate-blocking edits are required by this pass. The only below-target example is the standing `hello-world` waiver; all example diagrams and journey figures are at or above 9.0; every journey section has declared outcomes; and the example graph has no orphaned sources. The main non-gating watch item is journey-figure independence: several section figures intentionally reuse lesson paint functions and should be the next source of bespoke visual-design work.
+No gate-blocking edits are required by this pass. The only below-target example is the standing `hello-world` waiver; all example diagrams and journey figures are at or above 9.0; every journey section has declared outcomes; and the example graph has no orphaned sources. The main non-gating watch item is journey-figure independence: 6 section figures intentionally reuse lesson paint functions and should be the next source of bespoke visual-design work.

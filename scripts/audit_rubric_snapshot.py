@@ -297,7 +297,7 @@ def render_report(date: str) -> str:
         "",
         "## Journey figure independence watchlist",
         "",
-        "These section figures still reuse production example paint functions. They "
+        f"{len(reused_sections)} section figures still reuse production example paint functions. They "
         "remain above the project gate, but the journey rubric's independence "
         "criterion should be the next visual-design frontier.",
         "",
@@ -319,9 +319,9 @@ def render_report(date: str) -> str:
         "example is the standing `hello-world` waiver; all example diagrams and "
         "journey figures are at or above 9.0; every journey section has declared "
         "outcomes; and the example graph has no orphaned sources. The main "
-        "non-gating watch item is journey-figure independence: several section "
-        "figures intentionally reuse lesson paint functions and should be the next "
-        "source of bespoke visual-design work.",
+        f"non-gating watch item is journey-figure independence: {len(reused_sections)} "
+        "section figures intentionally reuse lesson paint functions and should be "
+        "the next source of bespoke visual-design work.",
         "",
     ])
     return "\n".join(lines)

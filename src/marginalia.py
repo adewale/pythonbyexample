@@ -191,6 +191,39 @@ def operator_dispatch(c: Canvas) -> None:
     c.cell(118, 30, "a.__add__(b)", w=140, h=28, soft=True)
 
 
+def runtime_evidence_loop(c: Canvas) -> None:
+    """Runtime journey · source and output form a runnable evidence loop."""
+    c.frame(0, 10, 104, 76, label="page")
+    c.cell(14, 26, "source", w=74, h=22)
+    c.cell(14, 56, "output", w=74, h=22, soft=True)
+    c.closed_arrow(104, 48, 142, 48, emphasis=True)
+    c.node(160, 48, "run", r=16)
+    c.closed_arrow(176, 48, 214, 48, emphasis=False)
+    c.cell(216, 34, "evidence", w=88, h=28, soft=True)
+
+
+def runtime_object_axes(c: Canvas) -> None:
+    """Runtime journey · value, identity, and absence are separate questions."""
+    c.cell(0, 36, "object", w=70, h=28, soft=True)
+    c.closed_arrow(70, 50, 112, 18, emphasis=False)
+    c.cell(114, 6, "== value", w=86, h=22)
+    c.closed_arrow(70, 50, 112, 50, emphasis=True)
+    c.cell(114, 38, "is identity", w=98, h=22, soft=True)
+    c.closed_arrow(70, 50, 112, 82, emphasis=False)
+    c.cell(114, 70, "None", w=86, h=22)
+
+
+def runtime_expression_model(c: Canvas) -> None:
+    """Runtime journey · expression syntax enters the data model, then returns a value."""
+    c.cell(0, 34, "syntax", w=64, h=28)
+    c.closed_arrow(64, 48, 102, 48, emphasis=True)
+    c.frame(104, 12, 128, 72, label="data model")
+    for i, method in enumerate(["__add__", "__len__", "__format__"]):
+        c.cell(116, 24 + i * 18, method, w=104, h=16, soft=(i == 0))
+    c.closed_arrow(232, 48, 270, 48, emphasis=False)
+    c.cell(272, 34, "result", w=70, h=28, soft=True)
+
+
 # ─── Shapes journey ───────────────────────────────────────────────────
 
 
@@ -352,7 +385,80 @@ def early_exit(c: Canvas) -> None:
     c.label(70, 14, "first match", anchor="middle")
 
 
+def control_decision_map(c: Canvas) -> None:
+    """Control-flow journey · facts enter one decision point and choose one branch."""
+    c.cell(0, 38, "facts", w=58, h=24)
+    c.closed_arrow(58, 50, 92, 50, emphasis=False)
+    c.node(110, 50, "?", r=15)
+    branches = [(8, "if", False), (40, "elif", True), (72, "else", False)]
+    for y, label, chosen in branches:
+        c.closed_arrow(123, 50, 174, y + 11, emphasis=chosen)
+        c.cell(176, y, label, w=64, h=22, soft=chosen)
+
+
+def control_fact_shape(c: Canvas) -> None:
+    """Control-flow journey · name facts or match shape before deciding."""
+    c.cell(0, 38, "input", w=62, h=24)
+    c.closed_arrow(62, 50, 98, 28, emphasis=False)
+    c.cell(100, 16, "name fact", w=92, h=22, soft=True)
+    c.closed_arrow(62, 50, 98, 72, emphasis=False)
+    c.cell(100, 60, "match shape", w=104, h=22)
+    c.closed_arrow(204, 27, 246, 50, emphasis=False)
+    c.closed_arrow(204, 71, 246, 50, emphasis=True)
+    c.node(264, 50, "?", r=15)
+
+
+def control_stop_boundary(c: Canvas) -> None:
+    """Control-flow journey · once the answer is found, the tail stays unread."""
+    for i, item in enumerate(["a", "b", "c", "d", "e"]):
+        c.cell(i * 28, 36, item, w=28, h=24, ghost=(i > 2))
+    c.gate(84, 32, 64)
+    c.label(70, 24, "first true", anchor="middle")
+    c.closed_arrow(84, 48, 130, 78, emphasis=False)
+    c.cell(132, 66, "answer", w=74, h=24, soft=True)
+
+
 # ─── Iteration journey ────────────────────────────────────────────────
+
+
+def iteration_loop_selector(c: Canvas) -> None:
+    """Iteration journey · choose the loop shape from the stopping rule."""
+    c.cell(0, 40, "stop rule", w=86, h=24)
+    choices = [(6, "for", "exhausted", False), (40, "while", "condition", False), (74, "sentinel", "marker", True)]
+    for y, loop, rule, chosen in choices:
+        c.closed_arrow(86, 52, 128, y + 11, emphasis=chosen)
+        c.cell(130, y, loop, w=78, h=22, soft=chosen)
+        c.label(218, y + 15, rule)
+
+
+def iteration_protocol_map(c: Canvas) -> None:
+    """Iteration journey · for is surface syntax over iter(), next(), and StopIteration."""
+    c.cell(0, 8, "for", w=54, h=22)
+    c.dashed(27, 30, 27, 52)
+    c.object_box(0, 56, "iterable", "xs", w=70, h=28)
+    c.dashed(72, 70, 106, 70)
+    c.label(89, 64, "iter()", anchor="middle")
+    c.object_box(108, 56, "iterator", "it", w=80, h=28)
+    c.closed_arrow(188, 70, 230, 70, emphasis=True)
+    c.label(209, 64, "next()", anchor="middle")
+    c.cells(232, 58, ["a", "b", "…"], w=24)
+    c.dashed(148, 86, 148, 104)
+    c.cell(108, 106, "StopIteration", w=94, h=22, ghost=True)
+
+
+def iteration_lazy_pull(c: Canvas) -> None:
+    """Iteration journey · the consumer pulls one value through each lazy stage."""
+    c.cell(0, 34, "source", w=68, h=22)
+    c.closed_arrow(68, 45, 100, 45, emphasis=False)
+    c.cell(102, 34, "filter", w=68, h=22)
+    c.closed_arrow(170, 45, 202, 45, emphasis=False)
+    c.cell(204, 34, "map", w=58, h=22)
+    c.closed_arrow(262, 45, 294, 45, emphasis=False)
+    c.cell(296, 34, "value", w=62, h=22, soft=True)
+    c.cell(250, 4, "next()", w=68, h=20, soft=True)
+    c.closed_arrow(284, 24, 232, 34, emphasis=True)
+    c.dashed(136, 64, 136, 78)
+    c.cell(86, 80, "no list", w=100, h=22, ghost=True)
 
 
 # ─── Example figures (promoted from the gestalt) ──────────────────────
@@ -1309,6 +1415,9 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "program-output": (program_output, 240, 80),
     "identity-and-equality": (identity_and_equality, 304, 96),
     "operator-dispatch": (operator_dispatch, 260, 70),
+    "runtime-evidence-loop": (runtime_evidence_loop, 306, 96),
+    "runtime-object-axes": (runtime_object_axes, 214, 104),
+    "runtime-expression-model": (runtime_expression_model, 344, 96),
     # Shapes
     "container-questions": (container_questions, 280, 88),
     "reshape-pipeline": (reshape_pipeline, 204, 80),
@@ -1329,6 +1438,12 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "naming-decisions": (naming_decisions, 310, 98),
     "early-exit": (early_exit, 144, 116),
     "lazy-stream": (lazy_stream, 300, 56),
+    "control-decision-map": (control_decision_map, 244, 104),
+    "control-fact-shape": (control_fact_shape, 286, 104),
+    "control-stop-boundary": (control_stop_boundary, 210, 104),
+    "iteration-loop-selector": (iteration_loop_selector, 276, 104),
+    "iteration-protocol-map": (iteration_protocol_map, 306, 132),
+    "iteration-lazy-pull": (iteration_lazy_pull, 360, 112),
     # Promoted from the gestalt — wired to example pages via ATTACHMENTS
     "variables-bind": (variables_bind, 180, 44),
     "call-stack": (call_stack, 200, 100),
@@ -1952,42 +2067,42 @@ def render_for_anchor(slug: str, anchor: str) -> str:
 SECTION_FIGURES: dict[str, tuple[str, str]] = {
     # Runtime
     "Start with executable evidence.": (
-        "program-output",
-        "Every page is a runnable program. The smallest mental model: source produces visible output.",
+        "runtime-evidence-loop",
+        "Examples are evidence loops: source, a run step, and visible output stay together.",
     ),
     "Separate value, identity, and absence.": (
-        "identity-and-equality",
-        "Two names can share one object (left, both `is` and `==` true) or hold two equal-but-distinct objects (right, only `==` true).",
+        "runtime-object-axes",
+        "Runtime objects answer separate questions: equal value, same identity, or the singleton that marks absence.",
     ),
     "Read expressions as object operations.": (
-        "operator-dispatch",
-        "Operators are method calls. `a + b` dispatches to `a.__add__(b)`; the data model exposes the syntax.",
+        "runtime-expression-model",
+        "Expression syntax enters the data model; object methods produce the result.",
     ),
     # Control Flow
     "Choose between paths.": (
-        "branch-fork",
-        "A value flows through a predicate to one of several branches.",
+        "control-decision-map",
+        "Facts flow into one decision point; exactly one branch owns the next step.",
     ),
     "Name and shape decisions.": (
-        "naming-decisions",
-        "Name an intermediate fact, then dispatch by data shape when a boolean branch is too small.",
+        "control-fact-shape",
+        "Name a fact when a condition needs it; match shape when the data structure is the decision.",
     ),
     "Stop as soon as the answer is known.": (
-        "early-exit",
-        "The loop exits at the first match — break short-circuits the rest of the sequence.",
+        "control-stop-boundary",
+        "Early exits draw a boundary: once the answer is found, the tail stays unread.",
     ),
     # Iteration
     "Choose the right loop shape.": (
-        "loop-repetition",
-        "Choose the loop whose stopping rule matches the data: exhaustion, condition, or sentinel.",
+        "iteration-loop-selector",
+        "Choose the loop from its stopping rule: exhaustion, condition, or sentinel marker.",
     ),
     "See the protocol behind `for`.": (
-        "iter-protocol",
-        "iter() exposes the iterator behind for; next() pulls one value at a time until exhausted.",
+        "iteration-protocol-map",
+        "for is surface syntax; iter() creates an iterator and next() pulls values until StopIteration.",
     ),
     "Compose lazy value streams.": (
-        "lazy-stream",
-        "Filters and maps compose without materialising intermediate lists; values flow through the pipeline only when next() pulls them.",
+        "iteration-lazy-pull",
+        "Lazy pipelines run from the consumer's pull: next() requests one value through each stage.",
     ),
     # Shapes
     "Pick the container that matches the question.": (
@@ -2075,17 +2190,17 @@ def render_for_section(section_title: str) -> str:
 # Keyed by section title to match SECTION_FIGURES.
 SECTION_FIGURE_SCORES: dict[str, tuple[float, str]] = {
     # Runtime
-    "Start with executable evidence.": (9.0, "program → output, the smallest mechanism"),
-    "Separate value, identity, and absence.": (9.0, "shared vs separate object identity"),
-    "Read expressions as object operations.": (9.0, "syntax dispatches to method"),
+    "Start with executable evidence.": (9.0, "journey-native source/run/output evidence loop"),
+    "Separate value, identity, and absence.": (9.0, "three runtime questions separated"),
+    "Read expressions as object operations.": (9.0, "syntax enters the data-model method surface"),
     # Control Flow
-    "Choose between paths.": (9.0, "value flows through predicate to branches"),
-    "Name and shape decisions.": (9.0, "name-binding and shape-dispatch alternatives in one section map"),
-    "Stop as soon as the answer is known.": (9.0, "first match; break short-circuits"),
+    "Choose between paths.": (9.0, "branch map independent of one if-statement example"),
+    "Name and shape decisions.": (9.0, "name-vs-shape decision map"),
+    "Stop as soon as the answer is known.": (9.0, "early boundary leaves tail unread"),
     # Iteration
-    "Choose the right loop shape.": (9.0, "for, while, and sentinel loops separated by stopping rule"),
-    "See the protocol behind `for`.": (9.5, "the canonical iter()/next() picture"),
-    "Compose lazy value streams.": (9.0, "filter → map; values flow lazily"),
+    "Choose the right loop shape.": (9.0, "loop choice by stopping rule"),
+    "See the protocol behind `for`.": (9.5, "for surface mapped to iter()/next()/StopIteration"),
+    "Compose lazy value streams.": (9.0, "consumer pull drives the lazy pipeline"),
     # Workers
     "Replace unavailable process boundaries with portable evidence.": (9.0, "standard process boundary contrasted with Worker-safe evidence"),
     "Keep network lessons local to the protocol boundary.": (9.0, "protocol byte boundary plus local parsed evidence"),
