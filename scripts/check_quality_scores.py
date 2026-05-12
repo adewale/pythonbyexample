@@ -97,6 +97,9 @@ def main() -> int:
         if title not in SECTION_FIGURE_SCORES:
             errors.append(f"journey section backlog for unknown section: {title}")
             continue
+        score = SECTION_FIGURE_SCORES[title][0]
+        if score >= section_min:
+            errors.append(f"journey section backlog {title} is stale because score is now {score:.1f}")
         if not _entry_has_text(section_backlog[title], "cause", "next_action"):
             errors.append(f"journey section backlog {title} must include cause and next_action")
 

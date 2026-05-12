@@ -135,15 +135,13 @@ def branch_fork(c: Canvas) -> None:
 
 
 def loop_repetition(c: Canvas) -> None:
-    """The shape of a loop: walk the sequence, run the body, return."""
-    c.cells(0, 28, ["a", "b", "c", "d"], w=28)
-    c.caret(0 + 14, 28, emphasis=False)
-    c.closed_arrow(116, 40, 142, 40, emphasis=False)
-    c.cell(144, 28, "body", w=56, h=24)
-    c.dashed(172, 54, 172, 76)
-    c.dashed(172, 76, 14, 76)
-    c.dashed(14, 76, 14, 54)
-    c.closed_arrow(14, 56, 14, 40, emphasis=True)
+    """Iteration journey · choose for, while, or sentinel by the stopping rule."""
+    rows = [("for", "iterable exhausted"), ("while", "condition false"), ("sentinel", "marker returned")]
+    for i, (loop, stop) in enumerate(rows):
+        y = 8 + i * 30
+        c.cell(0, y, loop, w=70, h=22)
+        c.closed_arrow(70, y + 11, 104, y + 11, emphasis=(loop == "sentinel"))
+        c.cell(106, y, stop, w=150, h=22, soft=(loop == "sentinel"))
 
 
 def iter_protocol(c: Canvas) -> None:
@@ -231,12 +229,13 @@ def text_data_boundary(c: Canvas) -> None:
 
 
 def function_signature(c: Canvas) -> None:
-    """Interfaces · Functions as named behavior: input → body → output."""
-    c.closed_arrow(0, 44, 32, 44, emphasis=False)
-    c.label(16, 36, "args", anchor="middle")
-    c.frame(34, 26, 110, 36, label="def f(...)")
-    c.closed_arrow(144, 44, 176, 44, emphasis=False)
-    c.label(160, 36, "return", anchor="middle")
+    """Interfaces journey · a named function is an input/body/return boundary."""
+    c.cell(0, 30, "f(2, 3)", w=70, h=34)
+    c.closed_arrow(70, 47, 104, 47, emphasis=False)
+    c.frame(106, 20, 96, 54, label="def f")
+    c.label(154, 50, "body", anchor="middle")
+    c.closed_arrow(202, 47, 236, 47, emphasis=True)
+    c.cell(238, 30, "return 5", w=70, h=34, soft=True)
 
 
 def function_as_value(c: Canvas) -> None:
@@ -328,15 +327,20 @@ def async_swimlane(c: Canvas) -> None:
 
 
 def naming_decisions(c: Canvas) -> None:
-    """Control flow · Name and shape decisions: the walrus binds while comparing."""
-    c.cell(0, 30, "len(xs)", w=80, h=28)
-    c.closed_arrow(80, 44, 110, 44, emphasis=True)
-    c.label(95, 36, ":=", anchor="middle")
-    c.cell(112, 4, "n", w=40, h=22, soft=True)
-    c.tag(112, 0, "name")
-    c.cell(112, 50, "value", w=78, h=22, soft=True)
-    c.dashed(152, 16, 196, 16)
-    c.cell(198, 4, "n > 10", w=72, h=22)
+    """Control flow journey · name a fact, then dispatch by shape when booleans are too small."""
+    c.tag(0, 0, "name fact")
+    c.cell(0, 12, "len(xs)", w=70, h=22)
+    c.closed_arrow(70, 23, 100, 23, emphasis=False)
+    c.label(85, 16, ":=", anchor="middle")
+    c.cell(102, 12, "n", w=34, h=22, soft=True)
+    c.closed_arrow(136, 23, 166, 23, emphasis=False)
+    c.cell(168, 12, "n > 10", w=72, h=22)
+    c.tag(0, 56, "dispatch shape")
+    c.cell(0, 68, "value", w=70, h=22)
+    for i, label in enumerate(["case int", "case [x,y]", "case _"]):
+        x = 96 + i * 70
+        c.closed_arrow(70 if i == 0 else x - 12, 79, x, 79, emphasis=(i == 1))
+        c.cell(x, 68, label, w=62, h=22, soft=(i == 1))
 
 
 def early_exit(c: Canvas) -> None:
@@ -485,23 +489,31 @@ def dict_buckets(c: Canvas) -> None:
 
 
 def workers_portable_evidence(c: Canvas) -> None:
-    """Workers · the process API is unavailable; a captured value crosses instead."""
-    c.tag(0, 4, "unavailable")
-    c.cell(0, 12, "multiprocessing.Process()", w=180, h=22, ghost=True)
-    c.dashed(0, 24, 180, 24)
-    c.tag(0, 50, "portable evidence")
-    c.cell(0, 58, "value", w=60, h=22, soft=True)
-    c.closed_arrow(60, 69, 100, 69, emphasis=True)
-    c.cell(102, 58, "asserted in-process", w=120, h=22)
+    """Workers journey · teach the process boundary, then preserve evidence inside Worker limits."""
+    c.tag(0, 0, "standard Python")
+    c.cell(0, 12, "parent", w=64, h=22)
+    c.closed_arrow(64, 23, 100, 23, emphasis=False)
+    c.cell(102, 12, "child process", w=108, h=22, ghost=True)
+    c.dashed(102, 23, 210, 23)
+    c.tag(0, 52, "Dynamic Worker")
+    c.cell(0, 64, "same lesson", w=92, h=22)
+    c.closed_arrow(92, 75, 128, 75, emphasis=True)
+    c.cell(130, 64, "captured value", w=106, h=22, soft=True)
 
 
 def workers_protocol_local(c: Canvas) -> None:
-    """Workers · the protocol shape is the lesson; no real socket is opened."""
-    c.tag(0, 4, "request shape")
-    c.cell(0, 12, "GET /resource", w=160, h=22)
-    c.closed_arrow(80, 38, 80, 56, emphasis=True)
-    c.tag(0, 76, "response shape · asserted locally")
-    c.cell(0, 84, "200 OK · { … }", w=160, h=22)
+    """Workers journey · keep the bytes/protocol lesson local when sockets are unavailable."""
+    c.tag(0, 0, "protocol boundary")
+    c.cell(0, 12, "str", w=48, h=22)
+    c.closed_arrow(48, 23, 82, 23, emphasis=False)
+    c.label(65, 16, "encode", anchor="middle")
+    c.cell(84, 12, "bytes", w=64, h=22, soft=True)
+    c.dashed(148, 23, 184, 23)
+    c.cell(186, 12, "socket", w=70, h=22, ghost=True)
+    c.tag(0, 66, "local evidence")
+    c.cell(0, 78, "bytes", w=64, h=22, soft=True)
+    c.closed_arrow(64, 89, 100, 89, emphasis=True)
+    c.cell(102, 78, "parsed response", w=118, h=22)
 
 
 # ─── Examples promoted from the gestalt: new paint code ──────────────
@@ -1070,14 +1082,17 @@ def socket_byte_boundary(c: Canvas) -> None:
 
 
 def gil_lanes(c: Canvas) -> None:
-    """Threads and processes · the GIL serialises Python bytecode across threads; processes run in parallel."""
-    c.lane(20, x0=54, x1=294, label="GIL")
-    c.lane(50, x0=54, x1=294, label="thread A")
-    c.lane(80, x0=54, x1=294, label="thread B")
-    c.cell(64, 44, "", w=30, h=12)
-    c.cell(124, 74, "", w=30, h=12)
-    c.cell(184, 44, "", w=30, h=12)
-    c.cell(244, 74, "", w=30, h=12)
+    """Threads and processes · threads share one interpreter lane; processes isolate interpreters."""
+    c.tag(0, 0, "threads: shared interpreter")
+    c.lane(26, x0=84, x1=292, label="GIL")
+    c.lane(50, x0=84, x1=292, label="thread A")
+    c.lane(74, x0=84, x1=292, label="thread B")
+    for x, y in [(94, 44), (142, 68), (190, 44), (238, 68)]:
+        c.cell(x, y, "", w=26, h=10)
+    c.tag(0, 98, "processes: isolated")
+    c.cell(84, 110, "proc A", w=76, h=20)
+    c.cell(184, 110, "proc B", w=76, h=20)
+    c.dashed(172, 104, 172, 134)
 
 
 def cast_escape(c: Canvas) -> None:
@@ -1097,12 +1112,13 @@ def newtype_phantom(c: Canvas) -> None:
 
 
 def overload_signatures(c: Canvas) -> None:
-    """Overloads · @overload declares multiple signatures; one implementation routes to the right return type."""
-    c.tag(0, 0, "@overload")
-    c.cell(0, 12, "def f(x: int) -> str", w=180, h=20)
-    c.cell(0, 36, "def f(x: str) -> int", w=180, h=20)
-    c.closed_arrow(180, 32, 220, 32, emphasis=True)
-    c.cell(222, 22, "one impl", w=80, h=22, soft=True)
+    """Overloads · static call signatures narrow to one runtime implementation."""
+    c.tag(0, 0, "static signatures")
+    c.cell(0, 12, "double(int) -> int", w=150, h=20)
+    c.cell(0, 36, "double(str) -> str", w=150, h=20)
+    c.closed_arrow(150, 32, 190, 32, emphasis=True)
+    c.tag(198, 0, "runtime")
+    c.cell(192, 22, "one double() body", w=112, h=22, soft=True)
 
 
 def paramspec_preserve(c: Canvas) -> None:
@@ -1128,11 +1144,13 @@ def literal_constrained(c: Canvas) -> None:
 
 
 def callable_type(c: Canvas) -> None:
-    """Callable types · the annotation captures the call shape: argument types and return type."""
-    c.tag(0, 0, "Callable[[int, str], bool]")
-    c.cell(0, 12, "(int, str)", w=100, h=22)
-    c.closed_arrow(100, 23, 130, 23, emphasis=False)
-    c.cell(132, 12, "bool", w=60, h=22)
+    """Callable types · a callback slot requires a specific argument list and return type."""
+    c.tag(0, 0, "callback slot")
+    c.cell(0, 12, "Callable[[int, str], bool]", w=170, h=22)
+    c.closed_arrow(170, 23, 202, 23, emphasis=True)
+    c.cell(204, 2, "int,str", w=58, h=34)
+    c.closed_arrow(262, 19, 290, 19, emphasis=False)
+    c.cell(292, 2, "bool", w=58, h=34, soft=True)
 
 
 def isinstance_check(c: Canvas) -> None:
@@ -1182,12 +1200,14 @@ def warning_signal(c: Canvas) -> None:
 
 
 def object_lifecycle(c: Canvas) -> None:
-    """Object lifecycle · __init__ creates; the object lives while refcount > 0; __del__ finalises."""
-    c.cell(0, 22, "__init__", w=80, h=24)
-    c.closed_arrow(80, 34, 110, 34, emphasis=True)
-    c.cell(112, 22, "live · refcount > 0", w=140, h=24, soft=True)
-    c.closed_arrow(252, 34, 282, 34, emphasis=False)
-    c.cell(284, 22, "__del__", w=80, h=24)
+    """Object lifecycle · names keep an object reachable until the last reference disappears."""
+    c.name_box(0, 14, "box")
+    c.name_box(0, 48, "alias")
+    c.closed_arrow(54, 26, 118, 44, emphasis=False)
+    c.closed_arrow(54, 60, 118, 44, emphasis=False)
+    c.object_box(120, 28, "Box", "label='draft'", w=112, h=32, soft=True)
+    c.closed_arrow(232, 44, 276, 44, emphasis=True)
+    c.cell(278, 32, "last ref?", w=88, h=34)
 
 
 # ─── Fifth pass: tightened figures for slugs that were on reuse-floors ─
@@ -1232,13 +1252,14 @@ def loop_else_gate(c: Canvas) -> None:
 
 
 def workers_lesson_runtime(c: Canvas) -> None:
-    """Workers · lesson uses captured output as evidence when the runtime forbids the process API."""
-    c.cell(0, 22, "lesson question", w=130, h=24)
-    c.closed_arrow(130, 22, 160, 0, emphasis=False)
-    c.cell(162, 0, "process API", w=130, h=20, ghost=True)
-    c.dashed(162, 10, 292, 10)
-    c.closed_arrow(130, 46, 160, 56, emphasis=True)
-    c.cell(162, 50, "captured output", w=130, h=20, soft=True)
+    """Workers journey · standard feature, runtime constraint, preserved learner evidence."""
+    c.cell(0, 28, "Python feature", w=106, h=24)
+    c.closed_arrow(106, 40, 140, 18, emphasis=False)
+    c.cell(142, 6, "standard use", w=96, h=20)
+    c.closed_arrow(106, 40, 140, 62, emphasis=True)
+    c.cell(142, 50, "Worker evidence", w=120, h=20, soft=True)
+    c.dashed(238, 16, 266, 16)
+    c.cell(268, 6, "runtime limit", w=88, h=20, ghost=True)
 
 
 def lazy_stream(c: Canvas) -> None:
@@ -1252,6 +1273,27 @@ def lazy_stream(c: Canvas) -> None:
     c.label(278, 30, "next()", anchor="middle")
 
 
+
+
+def container_methods(c: Canvas) -> None:
+    """Container protocols · syntax routes to __setitem__, __contains__, and __getitem__."""
+    rows = [("scores[k] = v", "__setitem__"), ("k in scores", "__contains__"), ("scores[k]", "__getitem__")]
+    for i, (syntax, method) in enumerate(rows):
+        y = i * 28
+        c.cell(0, y, syntax, w=120, h=22)
+        c.closed_arrow(120, y + 11, 158, y + 11, emphasis=(i == 1))
+        c.cell(160, y, method, w=110, h=22, soft=(i == 1))
+
+
+def structured_shapes(c: Canvas) -> None:
+    """Structured data shapes · same record, three runtime trade-offs."""
+    rows = [("dataclass", "mutable attrs"), ("NamedTuple", "tuple + names"), ("TypedDict", "dict at runtime")]
+    for i, (shape, tradeoff) in enumerate(rows):
+        y = i * 28
+        c.cell(0, y, shape, w=100, h=22)
+        c.closed_arrow(100, y + 11, 132, y + 11, emphasis=(i == 2))
+        c.cell(134, y, tradeoff, w=130, h=22, soft=(i == 2))
+
 # Registry: figure_name -> (paint_fn, viewbox_w, viewbox_h)
 FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "aliasing-mutation": (aliasing_mutation, 220, 175),
@@ -1261,7 +1303,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "closure-cell": (closure_cell, 240, 120),
     "slice-ruler": (slice_ruler, 232, 120),
     "branch-fork": (branch_fork, 232, 100),
-    "loop-repetition": (loop_repetition, 204, 90),
+    "loop-repetition": (loop_repetition, 260, 100),
     "iter-protocol": (iter_protocol, 304, 70),
     # Runtime
     "program-output": (program_output, 240, 80),
@@ -1272,7 +1314,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "reshape-pipeline": (reshape_pipeline, 204, 80),
     "text-data-boundary": (text_data_boundary, 172, 70),
     # Interfaces
-    "function-signature": (function_signature, 188, 80),
+    "function-signature": (function_signature, 310, 82),
     "function-as-value": (function_as_value, 200, 66),
     "class-with-state": (class_with_state, 152, 108),
     # Types
@@ -1284,7 +1326,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "context-bowtie": (context_bowtie, 244, 76),
     "async-swimlane": (async_swimlane, 280, 84),
     # Control flow + Iteration coverage gap (see audit)
-    "naming-decisions": (naming_decisions, 274, 80),
+    "naming-decisions": (naming_decisions, 310, 98),
     "early-exit": (early_exit, 144, 116),
     "lazy-stream": (lazy_stream, 300, 56),
     # Promoted from the gestalt — wired to example pages via ATTACHMENTS
@@ -1300,9 +1342,9 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "list-append": (list_append, 220, 36),
     "dict-buckets": (dict_buckets, 270, 88),
     # Workers journey (constraint-shaped sections; tightened designs)
-    "workers-portable-evidence": (workers_portable_evidence, 222, 84),
-    "workers-protocol-local": (workers_protocol_local, 200, 110),
-    "workers-lesson-runtime": (workers_lesson_runtime, 300, 80),
+    "workers-portable-evidence": (workers_portable_evidence, 238, 94),
+    "workers-protocol-local": (workers_protocol_local, 258, 108),
+    "workers-lesson-runtime": (workers_lesson_runtime, 358, 76),
     # Newly designed paint code for examples that lacked a figure
     "number-lines": (number_lines, 260, 78),
     "expression-tree": (expression_tree, 220, 92),
@@ -1355,19 +1397,21 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "logging-levels": (logging_levels, 164, 124),
     "aaa-pattern": (aaa_pattern, 250, 80),
     "socket-byte-boundary": (socket_byte_boundary, 364, 46),
-    "gil-lanes": (gil_lanes, 300, 100),
+    "gil-lanes": (gil_lanes, 300, 138),
     "cast-escape": (cast_escape, 184, 56),
     "newtype-phantom": (newtype_phantom, 96, 92),
     "overload-signatures": (overload_signatures, 304, 64),
     "paramspec-preserve": (paramspec_preserve, 294, 60),
     "literal-constrained": (literal_constrained, 144, 76),
-    "callable-type": (callable_type, 196, 40),
+    "callable-type": (callable_type, 352, 42),
     "isinstance-check": (isinstance_check, 232, 76),
     "collections-containers": (collections_containers, 284, 92),
+    "container-methods": (container_methods, 272, 82),
     "typed-dict-shape": (typed_dict_shape, 200, 92),
+    "structured-shapes": (structured_shapes, 266, 82),
     "csv-records": (csv_records, 212, 96),
     "warning-signal": (warning_signal, 292, 80),
-    "object-lifecycle": (object_lifecycle, 366, 60),
+    "object-lifecycle": (object_lifecycle, 366, 80),
     # Fifth pass: slug-specific figures lifting attached scores off the 8.0 floor
     "type-alias-name": (type_alias_name, 240, 104),
     "match-dispatch-ladder": (match_dispatch_ladder, 260, 130),
@@ -1480,7 +1524,7 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "Every Python program starts as source and produces text on standard output. The smallest mental model.",
     )],
     "numbers": [(
-        "cell-1", "number-lines",
+        "cell-0", "number-lines",
         "Ints have unbounded precision; floats use IEEE doubles whose representable values thin out near the extremes.",
     )],
     "operators": [(
@@ -1679,7 +1723,7 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "int() turns text into a typed number; malformed input raises ValueError instead of guessing.",
     )],
     "string-formatting": [(
-        "cell-0", "format-spec",
+        "cell-1", "format-spec",
         "The format spec is a railroad of named optional fields: alignment, sign, width, precision, type.",
     )],
     "truthiness": [(
@@ -1744,7 +1788,7 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "`for` desugars to iter()+next(): one iter() call, then next() until StopIteration ends the loop.",
     )],
     "generator-expressions": [(
-        "cell-0", "lazy-stream",
+        "cell-1", "lazy-stream",
         "A generator expression composes filter and map lazily; values flow only when next() pulls them.",
     )],
     "async-iteration-and-context": [(
@@ -1764,8 +1808,8 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "Nested clauses compose left to right; the comprehension is still equivalent to a for-loop with append.",
     )],
     "container-protocols": [(
-        "cell-0", "iter-protocol",
-        "Container protocols share the iter/next backbone; __iter__ + __next__ make any object iterable.",
+        "cell-0", "container-methods",
+        "Container syntax routes to narrow protocol methods: assignment to __setitem__, membership to __contains__, lookup to __getitem__.",
     )],
     "functions": [(
         "cell-0", "function-with-body",
@@ -1826,7 +1870,7 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
     )],
     "overloads": [(
         "cell-0", "overload-signatures",
-        "@overload declares multiple call signatures; one underlying implementation routes input shape to return type.",
+        "@overload declares static call signatures for double(int) and double(str); one runtime implementation handles both.",
     )],
     "paramspec": [(
         "cell-0", "paramspec-preserve",
@@ -1838,7 +1882,7 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
     )],
     "callable-types": [(
         "cell-0", "callable-type",
-        "Callable[[A, B], R] captures the call shape: a tuple of argument types and one return type.",
+        "A Callable annotation describes the callback slot: this argument list must produce this return type.",
     )],
     "runtime-type-checks": [(
         "cell-0", "isinstance-check",
@@ -1849,8 +1893,8 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "Four specialised containers for shapes the built-in types don't cover well: deque, Counter, defaultdict, namedtuple.",
     )],
     "structured-data-shapes": [(
-        "cell-0", "typed-dict-shape",
-        "TypedDict names each key's value type; the dict obeys the declared shape at static-check time.",
+        "cell-0", "structured-shapes",
+        "The same record can be a mutable dataclass, an immutable NamedTuple, or a runtime dict described by TypedDict.",
     )],
     "csv-data": [(
         "cell-0", "csv-records",
@@ -1862,7 +1906,7 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
     )],
     "object-lifecycle": [(
         "cell-0", "object-lifecycle",
-        "__init__ constructs the object; it lives while at least one reference holds it; __del__ runs when refcount hits zero.",
+        "Names keep the same object reachable; deleting one name matters only when it removes the last reference.",
     )],
 }
 
@@ -2036,22 +2080,22 @@ SECTION_FIGURE_SCORES: dict[str, tuple[float, str]] = {
     "Read expressions as object operations.": (9.0, "syntax dispatches to method"),
     # Control Flow
     "Choose between paths.": (9.0, "value flows through predicate to branches"),
-    "Name and shape decisions.": (8.5, "walrus name + value; abstract"),
+    "Name and shape decisions.": (9.0, "name-binding and shape-dispatch alternatives in one section map"),
     "Stop as soon as the answer is known.": (9.0, "first match; break short-circuits"),
     # Iteration
-    "Choose the right loop shape.": (8.5, "loop body + back-edge; abstract"),
+    "Choose the right loop shape.": (9.0, "for, while, and sentinel loops separated by stopping rule"),
     "See the protocol behind `for`.": (9.5, "the canonical iter()/next() picture"),
     "Compose lazy value streams.": (9.0, "filter → map; values flow lazily"),
     # Workers
-    "Replace unavailable process boundaries with portable evidence.": (8.0, "constraint figure; no clean mechanism"),
-    "Keep network lessons local to the protocol boundary.": (8.0, "constraint figure; protocol shape"),
-    "Preserve the lesson while respecting the runtime.": (8.0, "constraint figure; lesson survives"),
+    "Replace unavailable process boundaries with portable evidence.": (9.0, "standard process boundary contrasted with Worker-safe evidence"),
+    "Keep network lessons local to the protocol boundary.": (9.0, "protocol byte boundary plus local parsed evidence"),
+    "Preserve the lesson while respecting the runtime.": (9.0, "standard feature, runtime limit, preserved lesson evidence"),
     # Shapes
     "Pick the container that matches the question.": (9.0, "list/tuple/dict/set per question"),
     "Move between shapes deliberately.": (9.0, "input → transform → result"),
     "Cross text and data boundaries.": (9.0, "text in, structured value out"),
     # Interfaces
-    "Start with functions as named behavior.": (8.5, "args → body → return; abstract"),
+    "Start with functions as named behavior.": (9.0, "concrete call, named body, and return boundary"),
     "Use functions as values.": (9.0, "second name binds same function"),
     "Bundle behavior with state.": (9.0, "class groups state + methods"),
     # Types
@@ -2109,7 +2153,7 @@ SCORES: dict[str, tuple[float, str]] = {
     "iterating-over-iterables": (9.0, "iter() exposes the iterator"),
     "iterators": (9.0, "three-state machine"),
     "iterator-vs-iterable": (9.0, "the protocol exposed"),
-    "container-protocols": (9.0, "iter/next backbone"),
+    "container-protocols": (9.0, "syntax routes to __setitem__, __contains__, __getitem__"),
     "operator-overloading": (9.0, "dispatch arrow"),
     "union-and-optional-types": (9.0, "type fork to several shapes"),
     "abstract-base-classes": (9.0, "same triangle as concrete classes"),
@@ -2173,17 +2217,16 @@ SCORES: dict[str, tuple[float, str]] = {
     "literal-and-final": (9.0, "slot narrows to a fixed set"),
     "runtime-type-checks": (9.0, "isinstance returns bool"),
     "collections-module": (9.0, "deque / Counter / defaultdict / namedtuple"),
-    "structured-data-shapes": (9.0, "TypedDict named keys with value types"),
+    "structured-data-shapes": (9.0, "dataclass vs NamedTuple vs TypedDict runtime trade-offs"),
     "csv-data": (9.0, "rows × columns; same shape per line"),
     "warnings": (9.0, "soft signal; execution continues"),
-    "object-lifecycle": (9.0, "__init__ → live → __del__"),
+    "object-lifecycle": (9.0, "names keep object reachable until last reference disappears"),
     "args-and-kwargs": (9.0, "*args tuple, **kwargs dict regions"),
     "multiple-return-values": (9.0, "function returns tuple; caller unpacks"),
     "properties": (9.0, "obj.x routes through fget instead of __dict__"),
-    # 8.5 — abstract by nature; the figure mostly is the diagram itself
-    "overloads": (8.5, "multiple signatures → one impl; abstract"),
-    "callable-types": (8.5, "Callable[[A, B], R] shape; static-only"),
-    "threads-and-processes": (8.5, "GIL lanes; abstract concurrency model"),
+    "overloads": (9.0, "static overload signatures contrasted with one runtime body"),
+    "callable-types": (9.0, "callback slot shows argument list and return type"),
+    "threads-and-processes": (9.0, "thread GIL sharing contrasted with process isolation"),
 }
 
 

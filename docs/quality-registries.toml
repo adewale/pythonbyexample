@@ -597,18 +597,6 @@ outcomes = [
   "show cleanup boundaries that still apply when resources are represented abstractly",
 ]
 
-[journey_section_improvement_backlog."Replace unavailable process boundaries with portable evidence."]
-cause = "Workers section is constraint-shaped; the figure scores 8.0 because the section names an unavailable OS boundary more than a positive mechanism."
-next_action = "Reframe around portable evidence: captured output and in-process assertions preserve the subprocess/thread lesson when OS processes cannot run."
-
-[journey_section_improvement_backlog."Keep network lessons local to the protocol boundary."]
-cause = "Workers section is constraint-shaped; the figure must carry protocol evidence rather than merely saying sockets are unavailable."
-next_action = "Reframe around request/response bytes and local protocol parsing, with standard socket usage shown once as the external boundary."
-
-[journey_section_improvement_backlog."Preserve the lesson while respecting the runtime."]
-cause = "This is a principle rather than a mechanism, which lessons-learned identifies as resistant to strong figures."
-next_action = "Either split into concrete mechanisms or explicitly mark the section as principle-shaped with a no-strong-figure rationale."
-
 [score_model]
 # Criterion weights mirror docs/example-quality-rubric.md. The registry
 # makes the scoring model inspectable even before every example is broken
