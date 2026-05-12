@@ -72,6 +72,13 @@ class CheckScriptSmokeTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn("Journey outcomes OK", result.stdout)
 
+    def test_rubric_audit_snapshot_passes(self):
+        result = run("audit_rubric_snapshot.py")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn("Rubric audit snapshot", result.stdout)
+        self.assertIn("Example and diagram inventory", result.stdout)
+        self.assertIn("Journey section inventory", result.stdout)
+
 
 class RegistryIntegrityTests(unittest.TestCase):
     """The integrity script catches typos before they reach the coverage checks."""

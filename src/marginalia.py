@@ -1970,7 +1970,7 @@ SECTION_FIGURES: dict[str, tuple[str, str]] = {
     ),
     "Name and shape decisions.": (
         "naming-decisions",
-        "The walrus binds a name while the surrounding expression uses its value: one expression, two outputs.",
+        "Name an intermediate fact, then dispatch by data shape when a boolean branch is too small.",
     ),
     "Stop as soon as the answer is known.": (
         "early-exit",
@@ -1979,7 +1979,7 @@ SECTION_FIGURES: dict[str, tuple[str, str]] = {
     # Iteration
     "Choose the right loop shape.": (
         "loop-repetition",
-        "Walk the sequence, run the body, return; the shape behind for and while.",
+        "Choose the loop whose stopping rule matches the data: exhaustion, condition, or sentinel.",
     ),
     "See the protocol behind `for`.": (
         "iter-protocol",

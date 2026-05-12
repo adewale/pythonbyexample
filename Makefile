@@ -1,4 +1,4 @@
-.PHONY: test embed-examples build check-generated fingerprint browser-layout-test seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes quality-checks format-examples verify-python-version verify smoke-deployment dev deploy lint
+.PHONY: test embed-examples build check-generated fingerprint browser-layout-test seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy lint
 
 test:
 	python3 -m unittest discover -s tests -v
@@ -51,6 +51,9 @@ check-journey-outcomes:
 	scripts/check_journey_outcomes.py
 
 quality-checks: check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes
+
+rubric-audit:
+	scripts/audit_rubric_snapshot.py
 
 format-examples:
 	scripts/format_examples.py
