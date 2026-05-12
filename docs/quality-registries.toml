@@ -204,38 +204,6 @@ next_action = "add a cell contrasting naming convention with typing.Final and ru
 cause = "truth-value protocol is under-linked to booleans and special methods"
 next_action = "add a boundary cell that predicts bool() for empty containers, None, and custom __bool__"
 
-[quality_improvement_backlog.object-lifecycle]
-cause = "single-cell page compresses references, identity, and garbage collection"
-next_action = "split into reference lifetime, identity after rebinding, and cleanup boundary cells"
-
-[quality_improvement_backlog.guard-clauses]
-cause = "single-cell page does not show the before/after flattening payoff"
-next_action = "add a nested conditional contrast beside the guard-clause version"
-
-[quality_improvement_backlog.for-loops]
-cause = "foundational loop page lacks enough protocol and alternative framing"
-next_action = "add a cell contrasting direct iteration, range(), and enumerate() with links to iterators"
-
-[quality_improvement_backlog.sentinel-iteration]
-cause = "single-cell page hides the read-until-sentinel problem shape"
-next_action = "add a callable state cell and a while-loop contrast"
-
-[quality_improvement_backlog.collections-module]
-cause = "aggregator page names a broad standard-library surface but has one cell"
-next_action = "turn it into a map cell for Counter, defaultdict, deque, and namedtuple or split pages"
-
-[quality_improvement_backlog.copying-collections]
-cause = "important shallow/deep footgun has one cell despite nested-state boundary"
-next_action = "split into aliasing, shallow copy, and deepcopy cells"
-
-[quality_improvement_backlog.partial-functions]
-cause = "single-cell page does not show the before/after callable API pressure"
-next_action = "add a repeated-argument function call before partial() and a callable-object neighbor"
-
-[quality_improvement_backlog.warnings]
-cause = "single-cell page misses filter/escalate/ignore boundaries"
-next_action = "add cells for warn(), simplefilter('error'), and when logging/exceptions are better"
-
 [quality_improvement_backlog.virtual-environments]
 cause = "runtime-boundary page is constrained by Dynamic Workers and needs stronger standard-Python path"
 next_action = "teach venv creation/activation as unsupported Standard Python, then show local dependency evidence"
@@ -248,29 +216,9 @@ next_action = "split value restriction from rebinding restriction and show runti
 cause = "single-cell advanced typing page hides why ordinary Callable loses parameter shape"
 next_action = "add a decorator typed with Callable[..., T] before the ParamSpec-preserving version"
 
-[quality_improvement_backlog.overloads]
-cause = "single-cell page needs static-only overload declarations vs one runtime implementation"
-next_action = "add cells for overload stubs, implementation, and runtime annotations"
-
 [quality_improvement_backlog.number-parsing]
 cause = "parsing page lacks enough failure/recovery shape"
 next_action = "add cells for int base handling, ValueError recovery, and validation boundary"
-
-[quality_improvement_backlog.subprocesses]
-cause = "runtime-boundary page needs clearer standard subprocess use before portable evidence"
-next_action = "show standard subprocess.run contract once, then Dynamic Worker boundary and captured-output surrogate"
-
-[quality_improvement_backlog.threads-and-processes]
-cause = "runtime-boundary page blends thread/process concepts with environment caveat"
-next_action = "split shared-memory thread idea, process isolation idea, and Worker unsupported boundary"
-
-[quality_improvement_backlog.networking]
-cause = "runtime-boundary page needs stronger protocol-vs-socket contrast"
-next_action = "teach request/response byte protocol, show standard socket form once, then local parser surrogate"
-
-[quality_improvement_backlog.csv-data]
-cause = "single-cell row-shaped data page lacks dialect/header/error boundaries"
-next_action = "add cells for DictReader, writer output, and JSON/regular-expression boundary"
 
 [quality_improvement_backlog.values]
 cause = "foundational page is graph-linked now but still needs a sharper object/type mental model"
@@ -384,10 +332,6 @@ next_action = "add a small pipeline with take/filter/map output proving values a
 cause = "property syntax is shown but method-vs-attribute API boundary needs stronger rationale"
 next_action = "add a before/after cell changing a public attribute into a property without caller changes"
 
-[quality_improvement_backlog.descriptors]
-cause = "descriptor protocol is compressed into one cell despite being a data-model mechanism"
-next_action = "split __get__ lookup from __set__ validation and property relationship"
-
 [quality_improvement_backlog.exceptions]
 cause = "try/except structure is shown but bare-except and cleanup boundaries need sharper evidence"
 next_action = "add a cell contrasting specific exception handling with overbroad catching"
@@ -399,10 +343,6 @@ next_action = "add a cell comparing Enum identity/name/value with plain strings"
 [quality_improvement_backlog.custom-exceptions]
 cause = "custom exception class is shown but when not to create one is underdeveloped"
 next_action = "add a boundary cell contrasting domain error with built-in ValueError"
-
-[quality_improvement_backlog.logging]
-cause = "single-cell infrastructure page misses levels, logger names, and handler/format boundaries"
-next_action = "split logger level, message context, and testing/log-capture shape"
 
 [quality_improvement_backlog.datetime]
 cause = "date/time operations are shown but timezone and naive-aware boundaries need more clarity"

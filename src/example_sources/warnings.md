@@ -11,11 +11,11 @@ see_also = [
 ]
 +++
 
-warnings report soft problems without immediately stopping the program. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.
+A warning reports a problem that callers should know about, but it does not have to stop the current operation. Deprecations are the classic case: the old API can still return a value while telling users to migrate.
 
-Use it when the problem shape matches the example, and prefer simpler neighboring tools when the extra machinery would hide the intent. The notes call out the boundary so the feature stays practical rather than decorative.
+Warnings sit between logging and exceptions. Logging records operational evidence; exceptions stop the current path; warnings make compatibility or correctness concerns visible according to a filter.
 
-The example is small, deterministic, and focused on the semantic point. The complete source is editable below, while the walkthrough pairs the source with its output.
+Tests often capture warnings so deprecations are asserted instead of merely printed. Filters can also turn warnings into errors when a project wants to enforce cleanup.
 
 :::program
 ```python
@@ -26,16 +26,23 @@ def old_name():
     warnings.warn("old_name is deprecated", DeprecationWarning, stacklevel=2)
     return "result"
 
-warnings.simplefilter("always", DeprecationWarning)
 with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter("always", DeprecationWarning)
     print(old_name())
     print(caught[0].category.__name__)
     print(str(caught[0].message))
+
+with warnings.catch_warnings():
+    warnings.simplefilter("error", DeprecationWarning)
+    try:
+        old_name()
+    except DeprecationWarning:
+        print("warning became error")
 ```
 :::
 
 :::cell
-Warnings are useful for deprecations and soft failures.
+Capture warnings in tests when the returned value still matters but the migration notice must be asserted.
 
 ```python
 import warnings
@@ -45,8 +52,8 @@ def old_name():
     warnings.warn("old_name is deprecated", DeprecationWarning, stacklevel=2)
     return "result"
 
-warnings.simplefilter("always", DeprecationWarning)
 with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter("always", DeprecationWarning)
     print(old_name())
     print(caught[0].category.__name__)
     print(str(caught[0].message))
@@ -59,8 +66,25 @@ old_name is deprecated
 ```
 :::
 
+:::cell
+A filter can promote selected warnings to exceptions, which is useful in CI when deprecated calls should fail the build.
+
+```python
+with warnings.catch_warnings():
+    warnings.simplefilter("error", DeprecationWarning)
+    try:
+        old_name()
+    except DeprecationWarning:
+        print("warning became error")
+```
+
+```output
+warning became error
+```
+:::
+
 :::note
-- Warnings are useful for deprecations and soft failures.
-- Filters decide whether warnings are ignored, shown, or turned into errors.
-- Tests often capture warnings to assert migration behavior.
+- Use warnings for soft problems callers can act on later.
+- Use exceptions when the current operation cannot continue.
+- `stacklevel` should point the warning at the caller rather than inside the helper.
 :::

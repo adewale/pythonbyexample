@@ -11,45 +11,72 @@ see_also = [
 ]
 +++
 
-`iter(callable, sentinel)` keeps calling a zero-argument callable and yields each result until the callable returns the sentinel value. It is the right shape for repeated reads from files, sockets, or queues — sources where each call produces the next chunk and a known marker means "no more".
+`iter(callable, sentinel)` calls a zero-argument callable over and over. It yields each result until the callable returns the sentinel value, and the sentinel itself is not yielded.
 
-Reach for it instead of writing `while True:` plus a manual break when the loop body would do nothing else but read and check. The two-argument form turns a polling callable into something that composes with `for` loops, comprehensions, and other iterator helpers.
+This shape is useful for repeated reads: file blocks until `b""`, socket chunks until an empty response, queue items until a stop marker. It removes the common `while True` plus `break` scaffolding when the loop body is otherwise just "read, then process".
 
-The callable must take no arguments. Wrap a parameterized reader in a small lambda or method that closes over the parameters when the underlying API needs them.
+The callable must take no arguments. Wrap a parameterized reader in a `lambda`, `functools.partial`, or object method when the underlying API needs parameters.
 
 :::program
 ```python
-lines = iter(["alpha", "beta", ""])
+chunks = iter(["py", "thon", ""])
 
-def read_line():
-    return next(lines)
 
-for line in iter(read_line, ""):
-    print(line.upper())
+def read_chunk():
+    return next(chunks)
+
+print(list(iter(read_chunk, "")))
+
+chunks = iter(["py", "thon", ""])
+word = ""
+while True:
+    chunk = next(chunks)
+    if chunk == "":
+        break
+    word += chunk
+print(word)
 ```
 :::
 
 :::cell
-A zero-argument callable produces one value at a time.
+The two-argument form turns a polling callable into an iterator. The empty string stops the loop without appearing in the result.
 
 ```python
-lines = iter(["alpha", "beta", ""])
+chunks = iter(["py", "thon", ""])
 
-def read_line():
-    return next(lines)
 
-for line in iter(read_line, ""):
-    print(line.upper())
+def read_chunk():
+    return next(chunks)
+
+print(list(iter(read_chunk, "")))
 ```
 
 ```output
-ALPHA
-BETA
+['py', 'thon']
+```
+:::
+
+:::cell
+The equivalent manual loop needs an explicit read, comparison, and `break`. Use this shape when the stop condition is more complicated than a single sentinel value.
+
+```python
+chunks = iter(["py", "thon", ""])
+word = ""
+while True:
+    chunk = next(chunks)
+    if chunk == "":
+        break
+    word += chunk
+print(word)
+```
+
+```output
+python
 ```
 :::
 
 :::note
-- A zero-argument callable produces one value at a time.
-- The sentinel value stops the loop without appearing in the output.
-- This form is useful for repeated reads from files, sockets, or queues.
+- The callable passed to `iter(callable, sentinel)` must take no arguments.
+- The sentinel stops iteration and is not yielded.
+- When the loop needs richer branching, an explicit `while` loop may be clearer.
 :::

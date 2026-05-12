@@ -2,7 +2,7 @@
 slug = "guard-clauses"
 title = "Guard Clauses"
 section = "Control Flow"
-summary = "Guard clauses handle exceptional cases early so the main path stays flat."
+summary = "Guard clauses handle boundary cases early so the main path stays flat."
 doc_path = "/tutorial/controlflow.html#if-statements"
 see_also = [
   "conditionals",
@@ -11,56 +11,79 @@ see_also = [
 ]
 +++
 
-Guard clauses handle exceptional cases early so the main path stays flat. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.
+A guard clause is an early `return`, `raise`, `break`, or `continue` that handles a case the rest of the function should not process. The point is not new syntax; the point is moving boundaries out of the way so the successful path can be read straight through.
 
-Use it when the problem shape matches the example, and prefer simpler neighboring tools when the extra machinery would hide the intent. The notes call out the boundary so the feature stays practical rather than decorative.
+Use guards when a function has clear invalid, empty, or already-finished cases. If every branch is equally important, an ordinary `if`/`elif` chain may be clearer.
 
-The example is small, deterministic, and focused on the semantic point. The complete source is editable below, while the walkthrough pairs the source with its output.
+The contrast below shows the payoff: the nested version makes the valid path live inside two conditions, while the guard version names the invalid cases first and leaves the calculation at the outer indentation level.
 
 :::program
 ```python
-def price_after_discount(price, percent):
+def nested_discount(price, percent):
+    if price >= 0:
+        if 0 <= percent <= 100:
+            return round(price - price * percent / 100, 2)
+        return "invalid discount"
+    return "invalid price"
+
+
+def guarded_discount(price, percent):
     if price < 0:
         return "invalid price"
     if not 0 <= percent <= 100:
         return "invalid discount"
 
-    discount = price * percent / 100
-    return round(price - discount, 2)
+    return round(price - price * percent / 100, 2)
 
-print(price_after_discount(100, 15))
-print(price_after_discount(-5, 10))
-print(price_after_discount(100, 120))
+print(nested_discount(100, 15))
+print(guarded_discount(-5, 10))
+print(guarded_discount(100, 120))
 ```
 :::
 
 :::cell
-Return early when inputs cannot be handled.
+The nested version is correct, but the useful work is buried inside both tests.
 
 ```python
-def price_after_discount(price, percent):
+def nested_discount(price, percent):
+    if price >= 0:
+        if 0 <= percent <= 100:
+            return round(price - price * percent / 100, 2)
+        return "invalid discount"
+    return "invalid price"
+
+print(nested_discount(100, 15))
+```
+
+```output
+85.0
+```
+:::
+
+:::cell
+The guard-clause version handles impossible inputs first, then lets the ordinary calculation sit at the top level of the function body.
+
+```python
+def guarded_discount(price, percent):
     if price < 0:
         return "invalid price"
     if not 0 <= percent <= 100:
         return "invalid discount"
 
-    discount = price * percent / 100
-    return round(price - discount, 2)
+    return round(price - price * percent / 100, 2)
 
-print(price_after_discount(100, 15))
-print(price_after_discount(-5, 10))
-print(price_after_discount(100, 120))
+print(guarded_discount(-5, 10))
+print(guarded_discount(100, 120))
 ```
 
 ```output
-85.0
 invalid price
 invalid discount
 ```
 :::
 
 :::note
-- Return early when inputs cannot be handled.
-- After the guards, the remaining code can read as the normal path.
-- Guard clauses are a style choice, not new syntax.
+- Guard clauses are a readability pattern, not a separate Python feature.
+- They work best when the early cases are true boundaries.
+- For exceptional failures, raise an exception instead of returning a sentinel string.
 :::

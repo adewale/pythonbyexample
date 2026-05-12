@@ -11,11 +11,11 @@ see_also = [
 ]
 +++
 
-csv reads and writes row-shaped text data. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.
+CSV is row-shaped text: each line is a record, and each comma-separated field arrives as a string. The `csv` module understands quoting, delimiters, and newlines, so it is safer than splitting lines by comma yourself.
 
-Use it when the problem shape matches the example, and prefer simpler neighboring tools when the extra machinery would hide the intent. The notes call out the boundary so the feature stays practical rather than decorative.
+Use `DictReader` when a header row names the columns. Convert fields explicitly after reading, and use `DictWriter` when the program needs to produce the same row shape again.
 
-The example is small, deterministic, and focused on the semantic point. The complete source is editable below, while the walkthrough pairs the source with its output.
+CSV is a good fit for flat tabular data. Use JSON or another structured format when values are nested or when types need to survive the text boundary.
 
 :::program
 ```python
@@ -23,13 +23,11 @@ import csv
 import io
 
 text = "name,score\nAda,98\nGrace,95\n"
-reader = csv.DictReader(io.StringIO(text))
-rows = list(reader)
-
-print(rows[0]["name"])
+rows = list(csv.DictReader(io.StringIO(text)))
+print(rows[0])
 print(sum(int(row["score"]) for row in rows))
 
-output = io.StringIO()
+output = io.StringIO(newline="")
 writer = csv.DictWriter(output, fieldnames=["name", "passed"])
 writer.writeheader()
 writer.writerow({"name": "Ada", "passed": True})
@@ -38,35 +36,56 @@ print(output.getvalue().splitlines()[1])
 :::
 
 :::cell
-Use `DictReader` when column names should become dictionary keys.
+`DictReader` uses the header row as dictionary keys. The values are still strings because CSV is text.
 
 ```python
 import csv
 import io
 
 text = "name,score\nAda,98\nGrace,95\n"
-reader = csv.DictReader(io.StringIO(text))
-rows = list(reader)
+rows = list(csv.DictReader(io.StringIO(text)))
 
-print(rows[0]["name"])
+print(rows[0])
+print(type(rows[0]["score"]).__name__)
+```
+
+```output
+{'name': 'Ada', 'score': '98'}
+str
+```
+:::
+
+:::cell
+Convert numeric fields at the boundary where the program leaves CSV text and starts doing arithmetic.
+
+```python
 print(sum(int(row["score"]) for row in rows))
+```
 
-output = io.StringIO()
+```output
+193
+```
+:::
+
+:::cell
+`DictWriter` turns dictionaries back into row-shaped text with the same column order.
+
+```python
+output = io.StringIO(newline="")
 writer = csv.DictWriter(output, fieldnames=["name", "passed"])
 writer.writeheader()
 writer.writerow({"name": "Ada", "passed": True})
+
 print(output.getvalue().splitlines()[1])
 ```
 
 ```output
-Ada
-193
 Ada,True
 ```
 :::
 
 :::note
-- Use `DictReader` when column names should become dictionary keys.
-- CSV fields arrive as text, so convert numbers explicitly.
-- `DictWriter` writes dictionaries back to row-shaped text.
+- Let `csv` handle quoting and delimiters instead of calling `split(",")`.
+- CSV fields are text until your code converts them.
+- Reach for JSON when records need nested lists, dictionaries, booleans, or numbers that preserve their type.
 :::

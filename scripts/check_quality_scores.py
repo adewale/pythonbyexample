@@ -70,6 +70,9 @@ def main() -> int:
             continue
         if slug in waivers:
             errors.append(f"{slug} cannot be both waiver and improvement backlog")
+        score = EXAMPLE_QUALITY_SCORES.get(slug, (0.0, ""))[0]
+        if score >= hard_min:
+            errors.append(f"quality backlog {slug} is stale because score is now {score:.1f}")
         if not _entry_has_text(backlog[slug], "cause", "next_action"):
             errors.append(f"quality backlog {slug} must include cause and next_action")
 

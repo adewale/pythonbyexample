@@ -49,26 +49,7 @@ jobs:
             --message "${{ github.sha }}" \
             --json
       - name: Smoke test deployed Preview
-        run: |
-          set -euo pipefail
-          base="https://viz-pythonbyexample.adewale-883.workers.dev"
-          for path in \
-            "/" \
-            "/examples/values" \
-            "/examples/async-await" \
-            "/examples/networking" \
-            "/examples/subprocesses" \
-            "/journeys/workers" \
-            "/prototyping/journey-figures-gestalt"; do
-            url="${base}${path}"
-            echo "Checking ${url}"
-            curl --fail --show-error --silent --location --output /tmp/preview-smoke.html --write-out "%{http_code} %{url_effective}\n" "${url}"
-            if grep -qiE "error code: 1101|PythonError|Traceback" /tmp/preview-smoke.html; then
-              echo "Preview rendered an exception for ${url}"
-              head -200 /tmp/preview-smoke.html
-              exit 1
-            fi
-          done
+        run: scripts/smoke_deployment.py https://viz-pythonbyexample.adewale-883.workers.dev
       - name: Dump wrangler logs on failure
         if: failure()
         run: |

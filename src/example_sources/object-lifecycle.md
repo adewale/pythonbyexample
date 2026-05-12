@@ -2,7 +2,7 @@
 slug = "object-lifecycle"
 title = "Object Lifecycle"
 section = "Basics"
-summary = "References keep objects alive until Python can reclaim them."
+summary = "Names keep objects reachable until the last reference goes away."
 doc_path = "/reference/datamodel.html#objects-values-and-types"
 see_also = [
   "variables",
@@ -11,65 +11,75 @@ see_also = [
 ]
 +++
 
-References keep objects alive until Python can reclaim them. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.
+Python objects live independently from the names that refer to them. Assignment adds another reference to an object; rebinding a name points that name somewhere else; `del` removes a name. The object can be reclaimed only after it is no longer reachable.
 
-Use it when the problem shape matches the example, and prefer simpler neighboring tools when the extra machinery would hide the intent. The notes call out the boundary so the feature stays practical rather than decorative.
+Most programs do not manually destroy objects. They control lifetime by controlling which containers, local variables, and object attributes still hold references.
 
-The example is small, deterministic, and focused on the semantic point. The complete source is editable below, while the walkthrough pairs the source with its output.
+This example uses a small class so the object has visible state. The important evidence is that deleting one name does not destroy the object while another name still refers to it.
 
 :::program
 ```python
-import gc
+class Box:
+    def __init__(self, label):
+        self.label = label
 
-names = []
-alias = names
-alias.append("Ada")
+box = Box("draft")
+alias = box
 
-print(names is alias)
-print(names)
+print(box is alias)
+print(alias.label)
 
-object_id = id(names)
+box = Box("published")
+print(alias.label)
+print(box.label)
+
 del alias
-print(id(names) == object_id)
-
-del names
-print("object can be reclaimed")
-gc.collect()
+print("old object unreachable")
 ```
 :::
 
 :::cell
-Use `is` and `id()` to observe identity while two names refer to the same object.
+Two names can refer to the same object. Mutating through one name would affect the object seen through the other.
 
 ```python
-import gc
+class Box:
+    def __init__(self, label):
+        self.label = label
 
-names = []
-alias = names
-alias.append("Ada")
+box = Box("draft")
+alias = box
 
-print(names is alias)
-print(names)
-
-object_id = id(names)
-del alias
-print(id(names) == object_id)
-
-del names
-print("object can be reclaimed")
-gc.collect()
+print(box is alias)
+print(alias.label)
 ```
 
 ```output
 True
-['Ada']
-True
-object can be reclaimed
+draft
+```
+:::
+
+:::cell
+Rebinding `box` does not change the original object. `alias` still reaches the first `Box` until that reference is removed too.
+
+```python
+box = Box("published")
+print(alias.label)
+print(box.label)
+
+del alias
+print("old object unreachable")
+```
+
+```output
+draft
+published
+old object unreachable
 ```
 :::
 
 :::note
-- Use `is` and `id()` to observe identity while two names refer to the same object.
-- Deleting a name removes one reference; it does not directly destroy the object if another reference still exists.
-- Python reclaims unreachable objects automatically, so programs usually manage ownership by controlling references.
+- Assignment binds names to objects; it does not copy the object.
+- `del name` removes one reference, not necessarily the object itself.
+- Python reclaims unreachable objects automatically, so lifetime bugs usually come from keeping references longer than intended.
 :::

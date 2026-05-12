@@ -14,9 +14,9 @@ expected_output = "[1, 4, 9]\nProcessPoolExecutor\n"
 
 Threads and processes are two ways to run work outside the current control path. Threads are useful for overlapping I/O-shaped waits, while processes are useful when CPU-bound work needs separate interpreter processes.
 
-This is different from `asyncio`: threads and processes run callables through executors, while `async` code cooperatively awaits coroutines. Choose the smallest concurrency model that matches the bottleneck.
+In standard Python, `ThreadPoolExecutor` and `ProcessPoolExecutor` are the ordinary tools for this lesson. Dynamic Workers do not expose native threads or child processes, so this page keeps the proper executor model visible and then explains why the full process boundary cannot execute in this runtime.
 
-The executor interface lets callers submit ordinary functions without committing the rest of the code to one scheduling strategy. That makes it easier to compare thread and process boundaries at the call site.
+This is different from `asyncio`: threads and processes run ordinary callables through executors, while `async` code cooperatively awaits coroutines. Choose the smallest concurrency model that matches the bottleneck.
 
 :::program
 ```python

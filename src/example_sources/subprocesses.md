@@ -14,9 +14,9 @@ expected_output = "child process\n0\n"
 
 `subprocess` is the standard boundary for running external commands. It starts another program, waits for it, and gives you a result object with the exit code and captured output.
 
-Use a list of arguments when possible, capture output when the parent program needs to inspect it, and treat a non-zero return code as a failure. The same ideas apply whether the child program is Python, Git, a compiler, or another command-line tool.
+In standard Python this is the right tool for calling Git, compilers, shells, or another Python interpreter. Dynamic Workers do not provide an operating-system process table, so the page teaches the proper `subprocess.run()` contract and labels the runtime boundary instead of pretending the command can run here.
 
-The important boundary is between Python objects and the operating system process table. Python prepares arguments and environment, then the child program runs independently and reports back through streams and an exit status.
+Use a list of arguments when possible, capture output when the parent program needs to inspect it, and treat a non-zero return code as a failure. The important boundary is between Python objects and the operating system: Python prepares arguments and environment, then the child program reports back through streams and an exit status.
 
 :::program
 ```python

@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from urllib.parse import urljoin
 
@@ -21,6 +22,13 @@ SMOKE_PATHS = [
     "/journeys/workers",
     "/prototyping/production-figures-gestalt",
 ]
+POST_SMOKES = [
+    ("values", "print('runtime-smoke-values')\n", "runtime-smoke-values"),
+    ("values", "print('runtime-smoke-values-edited')\n", "runtime-smoke-values-edited"),
+    ("async-await", "import asyncio\n\nasync def main():\n    return 'runtime-smoke-async'\n\nprint(asyncio.run(main()))\n", "runtime-smoke-async"),
+    ("networking", "print('runtime-smoke-networking-boundary')\n", "runtime-smoke-networking-boundary"),
+    ("subprocesses", "print('runtime-smoke-subprocess-boundary')\n", "runtime-smoke-subprocess-boundary"),
+]
 ERROR_MARKERS = ["error code: 1101", "PythonError", "Traceback"]
 
 
@@ -31,10 +39,35 @@ def fetch(url: str) -> tuple[int, str]:
         return response.status, body
 
 
+def post_code(url: str, code: str) -> tuple[int, str]:
+    data = urllib.parse.urlencode({"code": code}).encode()
+    request = urllib.request.Request(
+        url,
+        data=data,
+        headers={
+            "User-Agent": "pythonbyexample-smoke/1.0",
+            "Content-Type": "application/x-www-form-urlencoded",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=30) as response:
+        body = response.read().decode("utf-8", errors="replace")
+        return response.status, body
+
+
+def has_exception_marker(body: str) -> str | None:
+    lowered = body.lower()
+    for marker in ERROR_MARKERS:
+        if marker.lower() in lowered:
+            return marker
+    return None
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("base_url", help="deployment origin, e.g. https://www.pythonbyexample.dev")
     parser.add_argument("--path", action="append", dest="paths", help="additional path to check")
+    parser.add_argument("--skip-post", action="store_true", help="check rendered pages only")
     args = parser.parse_args()
 
     base = args.base_url.rstrip("/") + "/"
@@ -53,18 +86,37 @@ def main() -> int:
             continue
         if status != 200:
             failures.append(f"{url}: HTTP {status}")
-        lowered = body.lower()
-        for marker in ERROR_MARKERS:
-            if marker.lower() in lowered:
-                failures.append(f"{url}: rendered exception marker {marker!r}")
-                break
-        print(f"{status} {url}")
+        marker = has_exception_marker(body)
+        if marker:
+            failures.append(f"{url}: rendered exception marker {marker!r}")
+        print(f"GET {status} {url}")
+
+    if not args.skip_post:
+        for slug, code, expected in POST_SMOKES:
+            url = urljoin(base, f"examples/{slug}")
+            try:
+                status, body = post_code(url, code)
+            except urllib.error.HTTPError as exc:
+                failures.append(f"POST {url}: HTTP {exc.code}")
+                continue
+            except Exception as exc:  # pragma: no cover - diagnostic path
+                failures.append(f"POST {url}: {exc!r}")
+                continue
+            if status != 200:
+                failures.append(f"POST {url}: HTTP {status}")
+            marker = has_exception_marker(body)
+            if marker:
+                failures.append(f"POST {url}: rendered exception marker {marker!r}")
+            if expected not in body:
+                failures.append(f"POST {url}: missing edited-code output {expected!r}")
+            print(f"POST {status} {url} -> {expected}")
 
     if failures:
         for failure in failures:
             print(failure, file=sys.stderr)
         return 1
-    print(f"Deployment smoke OK ({len(paths)} paths).")
+    post_count = 0 if args.skip_post else len(POST_SMOKES)
+    print(f"Deployment smoke OK ({len(paths)} GETs, {post_count} POSTs).")
     return 0
 
 

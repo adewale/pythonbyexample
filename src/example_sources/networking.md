@@ -4,12 +4,17 @@ title = "Networking"
 section = "Standard Library"
 summary = "Networking code exchanges bytes across explicit protocol boundaries."
 doc_path = "/library/socket.html"
+see_also = [
+  "bytes-and-bytearray",
+  "subprocesses",
+  "async-await",
+]
 expected_output = "b'ping'\nping\n"
 +++
 
-Networking code sends and receives bytes. Higher-level HTTP clients hide many details, but the core boundary is still explicit: text must be encoded before sending and decoded after receiving.
+Networking code sends and receives bytes across protocol boundaries. Higher-level HTTP clients hide many details, but the core rule remains: text is encoded before it leaves the process and decoded after bytes come back.
 
-This example uses `socket.socketpair()` so it stays local and deterministic in ordinary Python. Real network clients often use `socket.create_connection()` or a higher-level HTTP library, but the same byte boundary applies.
+In standard Python, the socket version of this lesson uses connected endpoints such as `socket.create_connection()` or, for a local deterministic demonstration, `socket.socketpair()`. Dynamic Workers do not expose arbitrary OS sockets, so this page teaches the proper socket contract while making the runtime constraint explicit.
 
 The useful mental model is endpoint plus bytes plus cleanup. A socket connects two endpoints, transfers byte strings, and must be closed when the conversation is finished.
 

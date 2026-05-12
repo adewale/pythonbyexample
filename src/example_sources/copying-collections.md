@@ -2,7 +2,7 @@
 slug = "copying-collections"
 title = "Copying Collections"
 section = "Collections"
-summary = "Copies can duplicate a container while still sharing nested objects."
+summary = "Copies can duplicate the outer container while nested objects may still be shared."
 doc_path = "/library/copy.html"
 see_also = [
   "mutability",
@@ -11,57 +11,88 @@ see_also = [
 ]
 +++
 
-Copies can duplicate a container while still sharing nested objects. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.
+Copying answers two different questions: do you need a new outer container, or do you also need independent nested objects? A plain assignment gives another name for the same object. A shallow copy duplicates only the outer container. `copy.deepcopy()` recursively copies contained objects.
 
-Use it when the problem shape matches the example, and prefer simpler neighboring tools when the extra machinery would hide the intent. The notes call out the boundary so the feature stays practical rather than decorative.
+Most Python code wants a shallow copy or a deliberate rebuild. Use a deep copy only when shared nested state would be wrong and the objects involved are safe to duplicate.
 
-The example is small, deterministic, and focused on the semantic point. The complete source is editable below, while the walkthrough pairs the source with its output.
+The outputs below show the footgun directly: a shallow copy has a different outer list, but its inner lists are still the same objects.
 
 :::program
 ```python
 import copy
 
 rows = [["Ada"], ["Grace"]]
+alias = rows
 shallow = rows.copy()
 deep = copy.deepcopy(rows)
 
 rows[0].append("Lovelace")
 
-print(shallow)
-print(deep)
+print(alias is rows)
+print(shallow is rows)
 print(rows[0] is shallow[0])
 print(rows[0] is deep[0])
+print(shallow)
+print(deep)
 ```
 :::
 
 :::cell
-A shallow copy makes a new outer container.
+Assignment does not copy a collection. It gives the same list another name.
+
+```python
+rows = [["Ada"], ["Grace"]]
+alias = rows
+
+print(alias is rows)
+```
+
+```output
+True
+```
+:::
+
+:::cell
+A shallow copy creates a new outer list, but nested lists are still shared.
+
+```python
+shallow = rows.copy()
+rows[0].append("Lovelace")
+
+print(shallow is rows)
+print(rows[0] is shallow[0])
+print(shallow)
+```
+
+```output
+False
+True
+[['Ada', 'Lovelace'], ['Grace']]
+```
+:::
+
+:::cell
+A deep copy is independent at the nested level, so later mutation of `rows[0]` does not appear in `deep`.
 
 ```python
 import copy
 
 rows = [["Ada"], ["Grace"]]
-shallow = rows.copy()
 deep = copy.deepcopy(rows)
-
 rows[0].append("Lovelace")
 
-print(shallow)
-print(deep)
-print(rows[0] is shallow[0])
 print(rows[0] is deep[0])
+print(deep)
 ```
 
 ```output
-[['Ada', 'Lovelace'], ['Grace']]
-[['Ada'], ['Grace']]
-True
 False
+[['Ada'], ['Grace']]
 ```
 :::
 
 :::note
-- A shallow copy makes a new outer container.
-- Nested objects are still shared by a shallow copy.
-- Use `copy.deepcopy()` only when nested independence is required.
+- Assignment aliases; it does not copy.
+- Shallow copies duplicate the outer container only.
+- Deep copies are useful for nested independence, but they can be expensive and surprising for objects with external resources.
 :::

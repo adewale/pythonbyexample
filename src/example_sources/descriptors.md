@@ -11,11 +11,11 @@ see_also = [
 ]
 +++
 
-Descriptors customize attribute access through __get__, __set__, or __delete__. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.
+A descriptor is an object stored on a class that defines `__get__`, `__set__`, or `__delete__`. When an instance attribute lookup finds that object on the class, Python calls the descriptor method instead of returning the descriptor object directly.
 
-Use it when the problem shape matches the example, and prefer simpler neighboring tools when the extra machinery would hide the intent. The notes call out the boundary so the feature stays practical rather than decorative.
+Descriptors are the machinery behind methods, `property`, validators, and many ORM fields. Use them when one reusable object should control access for many attributes or classes; use `property` for a single simple managed attribute.
 
-The example is small, deterministic, and focused on the semantic point. The complete source is editable below, while the walkthrough pairs the source with its output.
+This example implements a positive-number validator. `__set_name__` learns the attribute name when the owner class is created, `__set__` validates writes, and `__get__` reads the stored value back from the instance.
 
 :::program
 ```python
@@ -24,6 +24,8 @@ class Positive:
         self.private_name = "_" + name
 
     def __get__(self, obj, owner):
+        if obj is None:
+            return self
         return getattr(obj, self.private_name)
 
     def __set__(self, obj, value):
@@ -39,6 +41,7 @@ class Product:
 
 item = Product(10)
 print(item.price)
+print(Product.price.private_name)
 try:
     item.price = -1
 except ValueError as error:
@@ -47,7 +50,7 @@ except ValueError as error:
 :::
 
 :::cell
-A descriptor object lives on the class.
+A descriptor object lives on the class. `__set_name__` lets it learn which managed attribute it is serving.
 
 ```python
 class Positive:
@@ -55,6 +58,8 @@ class Positive:
         self.private_name = "_" + name
 
     def __get__(self, obj, owner):
+        if obj is None:
+            return self
         return getattr(obj, self.private_name)
 
     def __set__(self, obj, value):
@@ -62,6 +67,21 @@ class Positive:
             raise ValueError("must be positive")
         setattr(obj, self.private_name, value)
 
+class Product:
+    price = Positive()
+
+print(Product.price.private_name)
+```
+
+```output
+_price
+```
+:::
+
+:::cell
+Assigning `item.price` calls `Positive.__set__`, and reading it calls `Positive.__get__`.
+
+```python
 class Product:
     price = Positive()
 
@@ -83,7 +103,7 @@ must be positive
 :::
 
 :::note
-- A descriptor object lives on the class.
-- Attribute access on instances calls descriptor methods.
-- Properties, methods, and many ORMs build on the descriptor protocol.
+- Descriptors are class attributes that participate in instance attribute access.
+- Data descriptors with `__set__` can validate or transform assignments.
+- `property` is usually simpler for one-off managed attributes; descriptors shine when the behavior is reusable.
 :::
