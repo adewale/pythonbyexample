@@ -37,7 +37,8 @@
         .hero { animation: hero-fade linear forwards; animation-timeline: scroll(root); animation-range: 0 280px; }
         .hero h1 { animation: hero-h1-morph linear forwards; animation-timeline: scroll(root); animation-range: 0 240px; }
         .hero p { animation: hero-p-fade linear forwards; animation-timeline: scroll(root); animation-range: 0 140px; }
-        body:has(.hero) header { opacity: 0; background: rgba(245, 241, 235, 0); box-shadow: none; animation: header-emerge linear forwards; animation-timeline: scroll(root); animation-range: 40px 240px; }
+        body:has(.hero) { padding-top: var(--space-2); }
+        body:has(.hero) header { opacity: 0; background: rgba(245, 241, 235, 0); box-shadow: none; margin-bottom: var(--space-2); animation: header-emerge linear forwards; animation-timeline: scroll(root); animation-range: 40px 240px; }
         body:has(.hero) header .brand { filter: blur(4px); transform: scale(0.88); animation: brand-focus linear forwards; animation-timeline: scroll(root); animation-range: 80px 240px; }
       }
     }
