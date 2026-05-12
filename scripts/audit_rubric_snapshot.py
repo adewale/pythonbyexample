@@ -173,6 +173,9 @@ def dimension_ledgers(
         ("Banner-row fit", "Intrinsic-width contract", "PASS"),
         ("Pairs with surrounding cell", "Anchor/cell semantic pass + score registry", "PASS"),
     ]
+    independence_result = (
+        "PASS" if not reused_sections else f"WATCH ({len(reused_sections)} reused paint functions)"
+    )
     journeys = [
         ("Section fidelity", "Section figure keyed by journey section title", "PASS"),
         ("Pedagogical scope", "Section-level captions and score rationales", "PASS"),
@@ -183,7 +186,7 @@ def dimension_ledgers(
         (
             "Independence from lesson figures",
             "Section figures compared with example attachments",
-            f"WATCH ({len(reused_sections)} reused paint functions)",
+            independence_result,
         ),
         ("Layout fit", "Journey figure dimensions within production column", "PASS"),
         ("Outcome support", "`check_journey_outcomes.py` over all 24 sections", "PASS"),
@@ -297,20 +300,25 @@ def render_report(date: str) -> str:
         "",
         "## Journey figure independence watchlist",
         "",
-        f"{len(reused_sections)} section figures still reuse production example paint functions. They "
-        "remain above the project gate, but the journey rubric's independence "
-        "criterion should be the next visual-design frontier.",
-        "",
     ])
-    lines.extend(
-        render_table(
-            ["Section", "Shared figure", "Also attached to example"],
-            [
-                [row["section"], row["figure"], row["example_slugs"]]
-                for row in reused_sections
-            ],
+    if reused_sections:
+        lines.extend([
+            f"{len(reused_sections)} section figures still reuse production example paint functions. They "
+            "remain above the project gate, but the journey rubric's independence "
+            "criterion should be the next visual-design frontier.",
+            "",
+        ])
+        lines.extend(
+            render_table(
+                ["Section", "Shared figure", "Also attached to example"],
+                [
+                    [row["section"], row["figure"], row["example_slugs"]]
+                    for row in reused_sections
+                ],
+            )
         )
-    )
+    else:
+        lines.append("No journey section figures reuse production example paint functions.")
     lines.extend([
         "",
         "## Audit conclusion",
@@ -318,10 +326,8 @@ def render_report(date: str) -> str:
         "No gate-blocking edits are required by this pass. The only below-target "
         "example is the standing `hello-world` waiver; all example diagrams and "
         "journey figures are at or above 9.0; every journey section has declared "
-        "outcomes; and the example graph has no orphaned sources. The main "
-        f"non-gating watch item is journey-figure independence: {len(reused_sections)} "
-        "section figures intentionally reuse lesson paint functions and should be "
-        "the next source of bespoke visual-design work.",
+        "outcomes; the example graph has no orphaned sources; and every journey "
+        "section now uses a journey-native figure rather than a lesson attachment.",
         "",
     ])
     return "\n".join(lines)

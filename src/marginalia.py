@@ -320,6 +320,41 @@ def generic_preservation(c: Canvas) -> None:
     c.cell(212, 30, "T", w=36, h=28, soft=True)
 
 
+def type_runtime_static_split(c: Canvas) -> None:
+    """Types journey · runtime objects and static tool facts travel on separate tracks."""
+    c.frame(0, 10, 210, 46, label="runtime")
+    c.cell(16, 24, "value", w=60, h=22, soft=True)
+    c.closed_arrow(76, 35, 120, 35, emphasis=True)
+    c.cell(122, 24, "runs", w=58, h=22, soft=True)
+    c.frame(0, 76, 220, 46, label="static tools")
+    c.cell(16, 90, "x: int", w=70, h=22, ghost=True)
+    c.closed_arrow(86, 101, 130, 101, emphasis=False)
+    c.cell(132, 90, "checks", w=72, h=22, ghost=True)
+    c.dashed(46, 56, 46, 76)
+
+
+def type_shape_catalog(c: Canvas) -> None:
+    """Types journey · realistic data shapes pick field, variant, and absence contracts."""
+    c.cell(0, 44, "data", w=62, h=24, soft=True)
+    rows = [(8, "fields", "TypedDict"), (42, "variant", "Union"), (76, "absence", "Optional")]
+    for y, question, shape in rows:
+        c.closed_arrow(62, 56, 108, y + 11, emphasis=(shape == "Union"))
+        c.cell(110, y, question, w=78, h=22)
+        c.cell(198, y, shape, w=90, h=22, soft=(shape == "Union"))
+
+
+def type_library_contract(c: Canvas) -> None:
+    """Types journey · reusable APIs preserve caller contracts across the library boundary."""
+    c.cell(0, 40, "caller", w=66, h=24)
+    c.closed_arrow(66, 52, 106, 52, emphasis=False)
+    c.frame(108, 18, 116, 72, label="library API")
+    c.cell(120, 32, "T", w=36, h=20, soft=True)
+    c.cell(166, 32, "P", w=36, h=20)
+    c.cell(120, 62, "overloads", w=84, h=20)
+    c.closed_arrow(224, 52, 264, 52, emphasis=True)
+    c.cell(266, 40, "typed result", w=96, h=24, soft=True)
+
+
 # ─── Reliability journey ──────────────────────────────────────────────
 
 
@@ -354,6 +389,41 @@ def async_swimlane(c: Canvas) -> None:
     c.cell(208, 58, "", w=34, h=12)
     c.label(95, 16, "await", anchor="middle")
     c.label(190, 16, "resume", anchor="middle")
+
+
+def reliability_signal_map(c: Canvas) -> None:
+    """Reliability journey · choose an explicit signal for each failure shape."""
+    c.cell(0, 52, "problem", w=70, h=24)
+    rows = [(4, "assume", "assert"), (36, "recover", "except"), (68, "cause", "chain"), (100, "soft", "warn")]
+    for y, kind, signal in rows:
+        c.closed_arrow(70, 64, 112, y + 11, emphasis=(signal == "except"))
+        c.cell(114, y, kind, w=70, h=22)
+        c.cell(194, y, signal, w=72, h=22, soft=(signal == "except"))
+
+
+def reliability_boundary_map(c: Canvas) -> None:
+    """Reliability journey · resources, modules, and environments are explicit boundaries."""
+    c.cell(0, 44, "code", w=58, h=24)
+    c.closed_arrow(58, 56, 86, 56, emphasis=True)
+    c.frame(88, 8, 194, 96, label="boundaries")
+    rows = [(22, "resource", "cleanup"), (52, "module", "import"), (82, "env", "runtime")]
+    for y, boundary, action in rows:
+        c.cell(102, y, boundary, w=82, h=20, soft=(boundary == "resource"))
+        c.closed_arrow(184, y + 10, 212, y + 10, emphasis=False)
+        c.cell(214, y, action, w=58, h=20)
+
+
+def reliability_operation_boundary(c: Canvas) -> None:
+    """Reliability journey · long-lived operations cross a boundary before evidence returns."""
+    c.cell(0, 44, "call", w=58, h=24)
+    c.closed_arrow(58, 56, 96, 56, emphasis=True)
+    c.frame(98, 18, 128, 76, label="operation")
+    c.cell(110, 32, "await", w=46, h=18)
+    c.cell(164, 32, "thread", w=52, h=18)
+    c.cell(110, 62, "test", w=46, h=18)
+    c.cell(164, 62, "log", w=52, h=18)
+    c.closed_arrow(226, 56, 266, 56, emphasis=False)
+    c.cell(268, 44, "evidence", w=82, h=24, soft=True)
 
 
 # ─── Control flow journey ─────────────────────────────────────────────
@@ -1430,10 +1500,16 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "annotation-ghost": (annotation_ghost, 220, 52),
     "union-types": (union_types, 166, 80),
     "generic-preservation": (generic_preservation, 250, 70),
+    "type-runtime-static-split": (type_runtime_static_split, 224, 126),
+    "type-shape-catalog": (type_shape_catalog, 290, 108),
+    "type-library-contract": (type_library_contract, 364, 104),
     # Reliability
     "exception-lanes": (exception_lanes, 320, 100),
     "context-bowtie": (context_bowtie, 244, 76),
     "async-swimlane": (async_swimlane, 280, 84),
+    "reliability-signal-map": (reliability_signal_map, 270, 128),
+    "reliability-boundary-map": (reliability_boundary_map, 286, 110),
+    "reliability-operation-boundary": (reliability_operation_boundary, 354, 104),
     # Control flow + Iteration coverage gap (see audit)
     "naming-decisions": (naming_decisions, 310, 98),
     "early-exit": (early_exit, 144, 116),
@@ -2132,29 +2208,29 @@ SECTION_FIGURES: dict[str, tuple[str, str]] = {
     ),
     # Types
     "Keep runtime and static analysis separate.": (
-        "annotation-ghost",
-        "Annotations describe expected types for tools; the runtime accepts any object regardless.",
+        "type-runtime-static-split",
+        "Runtime values run the program; static tools inspect separate annotations and report before execution.",
     ),
     "Describe realistic data shapes.": (
-        "union-types",
-        "A typed slot can accept one of several shapes — `int | str | None` covers expected absence and alternatives.",
+        "type-shape-catalog",
+        "Real data contracts combine fields, variants, and expected absence instead of one scalar type.",
     ),
     "Scale annotations for reusable libraries.": (
-        "generic-preservation",
-        "A generic type variable preserves shape across a call: the same T flows in and out.",
+        "type-library-contract",
+        "Reusable APIs carry caller contracts through the library boundary with generics, parameters, and overloads.",
     ),
     # Reliability
     "Make failure explicit.": (
-        "exception-lanes",
-        "try, except, else, and finally as parallel lanes; the path traced through them is the actual control flow.",
+        "reliability-signal-map",
+        "Different failure shapes need explicit signals: assertions, recovery, chained causes, or warnings.",
     ),
     "Control resource and module boundaries.": (
-        "context-bowtie",
-        "A context manager pairs setup with reliable cleanup; the raise path still routes through __exit__.",
+        "reliability-boundary-map",
+        "Reliable programs name their boundaries: resources clean up, modules import, environments constrain runtime.",
     ),
     "Handle operations that outlive one expression.": (
-        "async-swimlane",
-        "On await, the coroutine yields to the loop; the loop runs other work and resumes when the awaitable is ready.",
+        "reliability-operation-boundary",
+        "Async, threaded, test, and logging work cross an operation boundary before evidence comes back.",
     ),
     # Workers — constraint-shaped sections.
     "Replace unavailable process boundaries with portable evidence.": (
@@ -2214,13 +2290,13 @@ SECTION_FIGURE_SCORES: dict[str, tuple[float, str]] = {
     "Use functions as values.": (9.0, "second name binds same function"),
     "Bundle behavior with state.": (9.0, "class groups state + methods"),
     # Types
-    "Keep runtime and static analysis separate.": (9.0, "annotations as ghost over signature"),
-    "Describe realistic data shapes.": (9.0, "x: int|str|None branches"),
-    "Scale annotations for reusable libraries.": (9.0, "T preserved across the call"),
+    "Keep runtime and static analysis separate.": (9.0, "runtime track separated from static-tool track"),
+    "Describe realistic data shapes.": (9.0, "field, variant, and absence contracts in one map"),
+    "Scale annotations for reusable libraries.": (9.0, "caller contracts survive library API boundary"),
     # Reliability
-    "Make failure explicit.": (9.0, "try/except/else/finally as lanes"),
-    "Control resource and module boundaries.": (9.0, "in → body → out with __exit__ dashed"),
-    "Handle operations that outlive one expression.": (9.0, "loop and coroutine swap on await"),
+    "Make failure explicit.": (9.0, "failure shapes mapped to explicit signals"),
+    "Control resource and module boundaries.": (9.0, "resource/module/env boundaries shown together"),
+    "Handle operations that outlive one expression.": (9.0, "operation boundary returns evidence later"),
 }
 
 

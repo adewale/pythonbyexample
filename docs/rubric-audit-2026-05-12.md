@@ -52,7 +52,7 @@ This snapshot audits the shipped catalog against the example, example-figure, an
 | Mechanism over metaphor | Canvas primitives show protocols, boundaries, lanes, or flows | PASS |
 | Caption alignment | Section figure captions unique and declarative | PASS |
 | Grammar conformance | Shared geometry contracts | PASS |
-| Independence from lesson figures | Section figures compared with example attachments | WATCH (6 reused paint functions) |
+| Independence from lesson figures | Section figures compared with example attachments | PASS |
 | Layout fit | Journey figure dimensions within production column | PASS |
 | Outcome support | `check_journey_outcomes.py` over all 24 sections | PASS |
 | Prerequisite order | Journey order reviewed against lesson dependencies | PASS |
@@ -190,29 +190,20 @@ This snapshot audits the shipped catalog against the example, example-figure, an
 | interfaces | Start with functions as named behavior. | 5 | 4 | function-signature | 9.0 | A function is the first abstraction boundary: arguments in, body, return value out. |
 | interfaces | Use functions as values. | 6 | 4 | function-as-value | 9.0 | Functions are first-class values. A second name binds to the same function object. |
 | interfaces | Bundle behavior with state. | 12 | 4 | class-with-state | 9.0 | Classes group fields and methods so data and behavior move together behind one interface. |
-| types | Keep runtime and static analysis separate. | 4 | 4 | annotation-ghost | 9.0 | Annotations describe expected types for tools; the runtime accepts any object regardless. |
-| types | Describe realistic data shapes. | 5 | 4 | union-types | 9.0 | A typed slot can accept one of several shapes — `int \| str \| None` covers expected absence and alternatives. |
-| types | Scale annotations for reusable libraries. | 5 | 4 | generic-preservation | 9.0 | A generic type variable preserves shape across a call: the same T flows in and out. |
-| reliability | Make failure explicit. | 6 | 4 | exception-lanes | 9.0 | try, except, else, and finally as parallel lanes; the path traced through them is the actual control flow. |
-| reliability | Control resource and module boundaries. | 6 | 4 | context-bowtie | 9.0 | A context manager pairs setup with reliable cleanup; the raise path still routes through __exit__. |
-| reliability | Handle operations that outlive one expression. | 7 | 4 | async-swimlane | 9.0 | On await, the coroutine yields to the loop; the loop runs other work and resumes when the awaitable is ready. |
+| types | Keep runtime and static analysis separate. | 4 | 4 | type-runtime-static-split | 9.0 | Runtime values run the program; static tools inspect separate annotations and report before execution. |
+| types | Describe realistic data shapes. | 5 | 4 | type-shape-catalog | 9.0 | Real data contracts combine fields, variants, and expected absence instead of one scalar type. |
+| types | Scale annotations for reusable libraries. | 5 | 4 | type-library-contract | 9.0 | Reusable APIs carry caller contracts through the library boundary with generics, parameters, and overloads. |
+| reliability | Make failure explicit. | 6 | 4 | reliability-signal-map | 9.0 | Different failure shapes need explicit signals: assertions, recovery, chained causes, or warnings. |
+| reliability | Control resource and module boundaries. | 6 | 4 | reliability-boundary-map | 9.0 | Reliable programs name their boundaries: resources clean up, modules import, environments constrain runtime. |
+| reliability | Handle operations that outlive one expression. | 7 | 4 | reliability-operation-boundary | 9.0 | Async, threaded, test, and logging work cross an operation boundary before evidence comes back. |
 | workers | Replace unavailable process boundaries with portable evidence. | 3 | 3 | workers-portable-evidence | 9.0 | Worker isolation breaks the usual cross-process pathways; the lesson preserves a captured value as portable evidence instead. |
 | workers | Keep network lessons local to the protocol boundary. | 3 | 3 | workers-protocol-local | 9.0 | Demonstrate the protocol shape (request and response) rather than calling out over the network. |
 | workers | Preserve the lesson while respecting the runtime. | 3 | 3 | workers-lesson-runtime | 9.0 | The lesson's evidence survives across the boundary that the worker runtime enforces. |
 
 ## Journey figure independence watchlist
 
-6 section figures still reuse production example paint functions. They remain above the project gate, but the journey rubric's independence criterion should be the next visual-design frontier.
-
-| Section | Shared figure | Also attached to example |
-| --- | --- | --- |
-| Keep runtime and static analysis separate. | annotation-ghost | type-hints |
-| Describe realistic data shapes. | union-types | union-and-optional-types |
-| Scale annotations for reusable libraries. | generic-preservation | generics-and-typevar |
-| Make failure explicit. | exception-lanes | exceptions |
-| Control resource and module boundaries. | context-bowtie | context-managers |
-| Handle operations that outlive one expression. | async-swimlane | async-await, async-iteration-and-context |
+No journey section figures reuse production example paint functions.
 
 ## Audit conclusion
 
-No gate-blocking edits are required by this pass. The only below-target example is the standing `hello-world` waiver; all example diagrams and journey figures are at or above 9.0; every journey section has declared outcomes; and the example graph has no orphaned sources. The main non-gating watch item is journey-figure independence: 6 section figures intentionally reuse lesson paint functions and should be the next source of bespoke visual-design work.
+No gate-blocking edits are required by this pass. The only below-target example is the standing `hello-world` waiver; all example diagrams and journey figures are at or above 9.0; every journey section has declared outcomes; the example graph has no orphaned sources; and every journey section now uses a journey-native figure rather than a lesson attachment.
