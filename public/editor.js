@@ -1,5 +1,5 @@
 import { EditorState } from 'https://esm.sh/@codemirror/state@6.5.2';
-import { EditorView } from 'https://esm.sh/@codemirror/view@6.41.1?deps=@codemirror/state@6.5.2';
+import { EditorView, lineNumbers } from 'https://esm.sh/@codemirror/view@6.41.1?deps=@codemirror/state@6.5.2';
 import { defaultHighlightStyle, syntaxHighlighting } from 'https://esm.sh/@codemirror/language@6.12.3?deps=@codemirror/state@6.5.2,@codemirror/view@6.41.1';
 import { python } from 'https://esm.sh/@codemirror/lang-python@6.2.1?deps=@codemirror/state@6.5.2,@codemirror/view@6.41.1,@codemirror/language@6.12.3';
 
@@ -15,6 +15,7 @@ if (textarea && form) {
       extensions: [
         python(),
         syntaxHighlighting(defaultHighlightStyle),
+        lineNumbers(),
         EditorView.lineWrapping,
         EditorView.updateListener.of((update) => {
           if (update.docChanged) textarea.value = update.state.doc.toString();

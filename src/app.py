@@ -499,22 +499,38 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
 
 
 def render_home() -> str:
-    cards = []
+    # Group examples by section in the order each section first appears
+    # in the manifest. Each section gets its own .home-section wrapper
+    # holding an eyebrow (tight, ~12px above its cards) and the
+    # section's grid; sections are spaced ~48px apart for clear
+    # separation. The shared outer .grid is gone — using one grid
+    # per section gives explicit control over the eyebrow's vertical
+    # relationship to its own cards vs the previous section.
+    by_section: dict[str, list[dict]] = {}
     for example in list_examples():
-        cards.append(
+        by_section.setdefault(example["section"], []).append(example)
+    sections_html = []
+    for section, examples in by_section.items():
+        card_markup = "".join(
             _replace(
-                '<a class="card" href="/examples/__SLUG__"><p class="eyebrow">__SECTION__</p><h2>__TITLE__</h2><p class="meta">__SUMMARY__</p></a>',
+                '<a class="card" href="/examples/__SLUG__"><h2>__TITLE__</h2><p class="meta">__SUMMARY__</p></a>',
                 {
-                    "SECTION": html.escape(example["section"]),
                     "SLUG": html.escape(example["slug"]),
                     "TITLE": html.escape(example["title"]),
                     "SUMMARY": html.escape(example["summary"]),
                 },
             )
+            for example in examples
+        )
+        sections_html.append(
+            f'<section class="home-section">'
+            f'<p class="eyebrow">{html.escape(section)}</p>'
+            f'<div class="grid">{card_markup}</div>'
+            f'</section>'
         )
     content = _replace(
         _template("home.html"),
-        {"PYTHON_VERSION": html.escape(PYTHON_VERSION), "CARDS": "".join(cards)},
+        {"PYTHON_VERSION": html.escape(PYTHON_VERSION), "CARDS": "".join(sections_html)},
     )
     return _layout(
         "Python By Example",
@@ -542,7 +558,7 @@ def render_journeys_index():
 <section class="hero">
   <p class="eyebrow">Journeys</p>
   <h1>Python learning journeys</h1>
-  <p>These paths compose individual examples into larger mental maps. They are inspired by the way Apprenticeship Patterns treats small patterns as material for longer learning journeys.</p>
+  <p>These paths compose individual examples into larger mental maps. They are inspired by the way <a class="text-link" href="https://www.oreilly.com/library/view/apprenticeship-patterns/9780596806842/">Apprenticeship Patterns</a> treats small patterns as material for longer learning journeys.</p>
 </section>
 <section class="grid journey-grid">{"".join(cards)}</section>
 '''
@@ -576,7 +592,7 @@ def render_journey_page(journey):
         sections.append(f'<section class="journey-section"><h2>{html.escape(section["title"])}</h2><p class="meta">{html.escape(section["summary"])}</p>{figure_html}<ul class="journey-list">{"".join(rows)}</ul></section>')
     content = f'''
 <article class="example-shell journey-page">
-  <div class="example-top"><a class="text-link" href="/">← All examples</a><a class="text-link" href="{html.escape(REFERENCE_URL)}">Python docs reference</a></div>
+  <div class="example-top"><a class="text-link" href="/">↑ All examples</a><a class="text-link" href="{html.escape(REFERENCE_URL)}">Python docs reference</a></div>
   <section class="example-intro">
     <p class="eyebrow">Journey</p>
     <h1>{html.escape(journey["title"])}</h1>

@@ -2025,6 +2025,46 @@ def render_for_section(section_title: str) -> str:
     return f'<figure class="journey-section-figure">{_render_svg(name)}{cap}</figure>'
 
 
+# ─── Section-figure scores ────────────────────────────────────────────
+# Score every journey-section figure against
+# docs/journey-visualisation-rubric.md (10-point scale).
+# Keyed by section title to match SECTION_FIGURES.
+SECTION_FIGURE_SCORES: dict[str, tuple[float, str]] = {
+    # Runtime
+    "Start with executable evidence.": (9.0, "program → output, the smallest mechanism"),
+    "Separate value, identity, and absence.": (9.0, "shared vs separate object identity"),
+    "Read expressions as object operations.": (9.0, "syntax dispatches to method"),
+    # Control Flow
+    "Choose between paths.": (9.0, "value flows through predicate to branches"),
+    "Name and shape decisions.": (8.5, "walrus name + value; abstract"),
+    "Stop as soon as the answer is known.": (9.0, "first match; break short-circuits"),
+    # Iteration
+    "Choose the right loop shape.": (8.5, "loop body + back-edge; abstract"),
+    "See the protocol behind `for`.": (9.5, "the canonical iter()/next() picture"),
+    "Compose lazy value streams.": (9.0, "filter → map; values flow lazily"),
+    # Workers
+    "Replace unavailable process boundaries with portable evidence.": (8.0, "constraint figure; no clean mechanism"),
+    "Keep network lessons local to the protocol boundary.": (8.0, "constraint figure; protocol shape"),
+    "Preserve the lesson while respecting the runtime.": (8.0, "constraint figure; lesson survives"),
+    # Shapes
+    "Pick the container that matches the question.": (9.0, "list/tuple/dict/set per question"),
+    "Move between shapes deliberately.": (9.0, "input → transform → result"),
+    "Cross text and data boundaries.": (9.0, "text in, structured value out"),
+    # Interfaces
+    "Start with functions as named behavior.": (8.5, "args → body → return; abstract"),
+    "Use functions as values.": (9.0, "second name binds same function"),
+    "Bundle behavior with state.": (9.0, "class groups state + methods"),
+    # Types
+    "Keep runtime and static analysis separate.": (9.0, "annotations as ghost over signature"),
+    "Describe realistic data shapes.": (9.0, "x: int|str|None branches"),
+    "Scale annotations for reusable libraries.": (9.0, "T preserved across the call"),
+    # Reliability
+    "Make failure explicit.": (9.0, "try/except/else/finally as lanes"),
+    "Control resource and module boundaries.": (9.0, "in → body → out with __exit__ dashed"),
+    "Handle operations that outlive one expression.": (9.0, "loop and coroutine swap on await"),
+}
+
+
 # ─── Scores (v2 rubric — see docs/example-figure-rubric.md) ────────────
 # Score every attached example figure against the v2 rubric. The dict is
 # the single source of truth for both the gestalt review pages
@@ -2150,3 +2190,124 @@ SCORES: dict[str, tuple[float, str]] = {
 def figure_score(slug: str) -> tuple[float, str] | None:
     """Return the v2 score and rationale for an attached example slug, if any."""
     return SCORES.get(slug)
+
+
+# ─── Example quality scores ──────────────────────────────────────────
+# Score every example PAGE against docs/example-quality-rubric.md.
+# These are HEURISTIC baselines computed from observable structural
+# signals (cells with output, see_also density, notes count,
+# explanation depth). Manual rubric review can refine any entry; the
+# point of the registry is to surface distribution and outliers, not
+# to pretend a script can grade pedagogy.
+
+EXAMPLE_QUALITY_SCORES: dict[str, tuple[float, str]] = {
+    "hello-world": (7.1, "isolated"),
+    "values": (8.2, "isolated"),
+    "literals": (8.8, "graph-rich, note-heavy, multi-cell"),
+    "numbers": (9.0, "graph-rich, note-heavy"),
+    "booleans": (8.2, "isolated, note-heavy"),
+    "operators": (8.8, "graph-rich, note-heavy, multi-cell"),
+    "none": (8.2, "isolated"),
+    "variables": (8.2, "isolated"),
+    "constants": (7.7, "isolated"),
+    "truthiness": (7.9, "isolated"),
+    "equality-and-identity": (8.4, "isolated, note-heavy"),
+    "mutability": (8.2, "isolated"),
+    "object-lifecycle": (7.4, "isolated"),
+    "strings": (8.2, "isolated, note-heavy"),
+    "bytes-and-bytearray": (9.0, "graph-rich, note-heavy"),
+    "string-formatting": (8.2, "isolated"),
+    "conditionals": (8.2, "isolated"),
+    "guard-clauses": (7.4, "isolated"),
+    "assignment-expressions": (8.5, "graph-rich"),
+    "for-loops": (7.3, "isolated"),
+    "break-and-continue": (8.5, "graph-rich"),
+    "loop-else": (8.5, "graph-rich"),
+    "iterating-over-iterables": (8.8, "graph-rich"),
+    "iterators": (8.8, "graph-rich"),
+    "iterator-vs-iterable": (9.0, "graph-rich"),
+    "sentinel-iteration": (7.4, "isolated"),
+    "match-statements": (8.2, "isolated"),
+    "advanced-match-patterns": (8.8, "graph-rich"),
+    "while-loops": (8.0, "isolated"),
+    "lists": (8.2, "isolated"),
+    "tuples": (9.0, "graph-rich, note-heavy"),
+    "unpacking": (8.2, "isolated"),
+    "dicts": (8.4, "isolated, note-heavy"),
+    "sets": (8.2, "isolated, note-heavy"),
+    "slices": (8.0, "isolated"),
+    "comprehensions": (8.2, "isolated, note-heavy"),
+    "comprehension-patterns": (8.5, "graph-rich"),
+    "sorting": (8.2, "isolated"),
+    "collections-module": (7.4, "isolated"),
+    "copying-collections": (7.4, "isolated"),
+    "functions": (8.4, "isolated, note-heavy"),
+    "keyword-only-arguments": (8.2, "isolated"),
+    "positional-only-parameters": (8.5, "graph-rich"),
+    "args-and-kwargs": (8.2, "isolated"),
+    "multiple-return-values": (8.0, "isolated"),
+    "closures": (8.2, "isolated, note-heavy"),
+    "partial-functions": (7.4, "isolated"),
+    "scope-global-nonlocal": (8.5, "graph-rich"),
+    "recursion": (8.0, "isolated"),
+    "lambdas": (8.2, "isolated"),
+    "generators": (9.0, "graph-rich, note-heavy"),
+    "yield-from": (8.5, "graph-rich"),
+    "generator-expressions": (8.2, "isolated"),
+    "itertools": (8.2, "isolated, note-heavy"),
+    "decorators": (8.8, "graph-rich"),
+    "classes": (9.0, "graph-rich, note-heavy"),
+    "inheritance-and-super": (8.5, "graph-rich"),
+    "classmethods-and-staticmethods": (9.0, "graph-rich, note-heavy"),
+    "dataclasses": (8.8, "graph-rich"),
+    "properties": (8.2, "isolated"),
+    "special-methods": (8.5, "graph-rich, note-heavy, multi-cell"),
+    "truth-and-size": (8.8, "graph-rich"),
+    "container-protocols": (8.8, "graph-rich"),
+    "callable-objects": (8.8, "graph-rich"),
+    "operator-overloading": (8.8, "graph-rich"),
+    "attribute-access": (8.8, "graph-rich"),
+    "bound-and-unbound-methods": (9.0, "graph-rich, note-heavy"),
+    "descriptors": (8.0, "graph-rich"),
+    "metaclasses": (8.5, "graph-rich"),
+    "context-managers": (8.8, "graph-rich, note-heavy"),
+    "delete-statements": (8.8, "graph-rich"),
+    "exceptions": (8.2, "isolated, note-heavy"),
+    "assertions": (8.5, "graph-rich"),
+    "exception-chaining": (8.5, "graph-rich"),
+    "exception-groups": (8.5, "graph-rich"),
+    "warnings": (7.4, "isolated"),
+    "modules": (9.0, "graph-rich, note-heavy"),
+    "import-aliases": (8.5, "graph-rich, note-heavy"),
+    "packages": (9.0, "graph-rich, note-heavy"),
+    "virtual-environments": (7.7, "isolated"),
+    "type-hints": (8.8, "graph-rich, note-heavy, multi-cell"),
+    "runtime-type-checks": (8.8, "graph-rich"),
+    "union-and-optional-types": (8.8, "graph-rich"),
+    "type-aliases": (8.8, "graph-rich"),
+    "typed-dicts": (8.8, "graph-rich"),
+    "structured-data-shapes": (9.0, "graph-rich, note-heavy"),
+    "literal-and-final": (7.4, "isolated"),
+    "callable-types": (8.8, "graph-rich"),
+    "generics-and-typevar": (8.8, "graph-rich"),
+    "paramspec": (7.4, "isolated"),
+    "overloads": (7.4, "isolated"),
+    "casts-and-any": (8.8, "graph-rich"),
+    "newtype": (8.8, "graph-rich"),
+    "protocols": (8.8, "graph-rich"),
+    "abstract-base-classes": (9.0, "graph-rich, note-heavy"),
+    "enums": (8.0, "isolated, note-heavy"),
+    "regular-expressions": (8.8, "graph-rich, note-heavy, multi-cell"),
+    "number-parsing": (7.7, "isolated"),
+    "custom-exceptions": (8.2, "isolated"),
+    "json": (9.0, "graph-rich, note-heavy"),
+    "logging": (7.4, "isolated"),
+    "testing": (8.8, "graph-rich"),
+    "subprocesses": (7.7, "isolated"),
+    "threads-and-processes": (7.9, "isolated"),
+    "networking": (7.7, "isolated"),
+    "datetime": (8.2, "isolated"),
+    "csv-data": (7.4, "isolated"),
+    "async-await": (9.0, "graph-rich, note-heavy"),
+    "async-iteration-and-context": (8.8, "graph-rich"),
+}

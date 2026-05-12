@@ -394,6 +394,57 @@ class SectionFigureContract(unittest.TestCase):
         self.assertEqual(duplicates, {}, f"duplicate section captions: {duplicates}")
 
 
+    def test_every_section_has_a_score(self):
+        from src.marginalia import SECTION_FIGURES, SECTION_FIGURE_SCORES
+
+        unscored = set(SECTION_FIGURES) - set(SECTION_FIGURE_SCORES)
+        unattached = set(SECTION_FIGURE_SCORES) - set(SECTION_FIGURES)
+        self.assertEqual(unscored, set(), f"unscored sections: {sorted(unscored)}")
+        self.assertEqual(unattached, set(), f"scored but unattached: {sorted(unattached)}")
+
+    def test_every_section_score_in_range(self):
+        from src.marginalia import SECTION_FIGURE_SCORES
+
+        failures: list[str] = []
+        for title, entry in SECTION_FIGURE_SCORES.items():
+            if not isinstance(entry, tuple) or len(entry) != 2:
+                failures.append(f"{title!r}: not a (score, commentary) tuple")
+                continue
+            score, commentary = entry
+            if not isinstance(score, (int, float)) or not 0 <= score <= 10:
+                failures.append(f"{title!r}: score {score!r} outside [0, 10]")
+            if not isinstance(commentary, str) or not commentary.strip():
+                failures.append(f"{title!r}: empty commentary")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
+    def test_every_example_has_a_quality_score(self):
+        from src.example_loader import load_examples
+        from src.marginalia import EXAMPLE_QUALITY_SCORES
+
+        _, examples = load_examples()
+        slugs = {ex["slug"] for ex in examples}
+        unscored = slugs - set(EXAMPLE_QUALITY_SCORES)
+        ghost = set(EXAMPLE_QUALITY_SCORES) - slugs
+        self.assertEqual(unscored, set(), f"unscored examples: {sorted(unscored)}")
+        self.assertEqual(ghost, set(), f"scored but no example: {sorted(ghost)}")
+
+    def test_every_example_quality_score_in_range(self):
+        from src.marginalia import EXAMPLE_QUALITY_SCORES
+
+        failures: list[str] = []
+        for slug, entry in EXAMPLE_QUALITY_SCORES.items():
+            if not isinstance(entry, tuple) or len(entry) != 2:
+                failures.append(f"{slug}: not a tuple")
+                continue
+            score, commentary = entry
+            if not isinstance(score, (int, float)) or not 0 <= score <= 10:
+                failures.append(f"{slug}: score {score!r} outside [0, 10]")
+            if not isinstance(commentary, str) or not commentary.strip():
+                failures.append(f"{slug}: empty commentary")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
 class FigureCaptionContract(unittest.TestCase):
     """Contract 5b: every attachment caption is unique.
 

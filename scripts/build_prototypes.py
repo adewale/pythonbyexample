@@ -102,7 +102,7 @@ def render_article(example: dict, *, banners: dict[str, str] | None = None) -> s
     output = html.escape(example.get("expected_output", ""))
     return f"""
 <article class="example-shell">
-  <div class="example-top"><a class="text-link" href="/">← All examples</a><a class="text-link" href="{html.escape(example['doc_url'])}">Python docs reference</a></div>
+  <div class="example-top"><a class="text-link" href="/">↑ All examples</a><a class="text-link" href="{html.escape(example['doc_url'])}">Python docs reference</a></div>
   <section class="example-intro">
     <p class="eyebrow">{html.escape(example['section'])}</p>
     <h1>{html.escape(example['title'])}</h1>
@@ -115,10 +115,10 @@ def render_article(example: dict, *, banners: dict[str, str] | None = None) -> s
     <h2>Run the complete example</h2>
     <div class="runner-grid">
       <div class="runner-panel runner-editor">
-        <h2>Example code</h2>
+        <h3>Example code</h3>
         <pre><code class="language-python">{code}</code></pre>
       </div>
-      <section class="runner-panel output-panel"><h2>Expected output</h2><pre><code>{output}</code></pre></section>
+      <section class="runner-panel output-panel"><h3>Expected output</h3><pre><code>{output}</code></pre></section>
     </div>
   </section>
 </article>
