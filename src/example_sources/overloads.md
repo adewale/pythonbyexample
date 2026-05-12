@@ -4,6 +4,11 @@ title = "Overloads"
 section = "Types"
 summary = "overload describes APIs whose return type depends on argument types."
 doc_path = "/library/typing.html#typing.overload"
+see_also = [
+  "type-hints",
+  "union-and-optional-types",
+  "generics-and-typevar",
+]
 +++
 
 overload describes APIs whose return type depends on argument types. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.

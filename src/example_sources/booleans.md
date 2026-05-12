@@ -4,6 +4,11 @@ title = "Booleans"
 section = "Basics"
 summary = "Booleans represent truth values and combine with logical operators."
 doc_path = "/library/stdtypes.html#boolean-type-bool"
+see_also = [
+  "truthiness",
+  "operators",
+  "conditionals",
+]
 +++
 
 Booleans are the values `True` and `False`. They are produced by comparisons and combined with `and`, `or`, and `not`.

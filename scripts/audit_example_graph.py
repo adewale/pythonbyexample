@@ -59,11 +59,14 @@ def main() -> int:
     if reciprocal:
         print("reciprocal_edges=" + ", ".join(f"{a}<->{b}" for a, b in reciprocal[:20]))
 
+    if args.check and orphaned:
+        errors.append("orphaned examples: " + ", ".join(orphaned))
+
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
         return 1
-    return 0 if not args.check else 0
+    return 0
 
 
 if __name__ == "__main__":

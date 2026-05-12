@@ -4,6 +4,11 @@ title = "Warnings"
 section = "Errors"
 summary = "warnings report soft problems without immediately stopping the program."
 doc_path = "/library/warnings.html"
+see_also = [
+  "exceptions",
+  "logging",
+  "testing",
+]
 +++
 
 warnings report soft problems without immediately stopping the program. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.

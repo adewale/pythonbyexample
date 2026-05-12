@@ -4,6 +4,11 @@ title = "Sorting"
 section = "Collections"
 summary = "sorted returns a new ordered list and key functions choose the sort value."
 doc_path = "/howto/sorting.html"
+see_also = [
+  "lists",
+  "lambdas",
+  "functions",
+]
 +++
 
 `sorted()` accepts any iterable and returns a new list. The original collection is left untouched, which makes `sorted()` useful in expressions and pipelines.

@@ -4,6 +4,11 @@ title = "Number Parsing"
 section = "Standard Library"
 summary = "int() and float() parse text into numbers and raise ValueError on bad input."
 doc_path = "/library/functions.html#int"
+see_also = [
+  "exceptions",
+  "strings",
+  "numbers",
+]
 +++
 
 Parsing turns text into numeric values. `int()` parses whole-number text and `float()` parses decimal or scientific-notation text.

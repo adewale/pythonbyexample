@@ -4,6 +4,11 @@ title = "Enums"
 section = "Types"
 summary = "Enum defines symbolic names for a fixed set of values."
 doc_path = "/library/enum.html"
+see_also = [
+  "literals",
+  "classes",
+  "literal-and-final",
+]
 +++
 
 `Enum` defines a fixed set of named values. This makes states and modes easier to read than raw strings scattered through a program.

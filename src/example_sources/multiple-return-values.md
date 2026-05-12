@@ -4,6 +4,11 @@ title = "Multiple Return Values"
 section = "Functions"
 summary = "Python returns multiple values by returning a tuple and unpacking it."
 doc_path = "/tutorial/datastructures.html#tuples-and-sequences"
+see_also = [
+  "tuples",
+  "unpacking",
+  "functions",
+]
 +++
 
 Python multiple return values are tuple return values with friendly syntax. `return a, b` creates one tuple containing two positions.

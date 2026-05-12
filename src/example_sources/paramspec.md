@@ -4,6 +4,11 @@ title = "ParamSpec"
 section = "Types"
 summary = "ParamSpec preserves callable parameter types through wrappers."
 doc_path = "/library/typing.html#typing.ParamSpec"
+see_also = [
+  "callable-types",
+  "decorators",
+  "generics-and-typevar",
+]
 +++
 
 `ParamSpec` lets a wrapper preserve the parameter types of the function it wraps. The pressure that justifies it is decorators: a generic decorator that returns `Callable[..., R]` erases the wrapped function's argument types, so callers lose type-checker help on every call.

@@ -9,12 +9,12 @@ Score each example on a 10 point scale:
 3. **Alternatives and boundaries (0-0.75)** — the page names nearby choices and shows when to prefer this feature instead: `while` vs `for`, tuple vs list, `None` vs exception, property vs method, eager collection vs lazy stream, and similar alternatives.
 4. **Executable determinism (0-1.0)** — the sample runs as-is, has stable output, avoids network/time/randomness unless that is the lesson, and demonstrates cause and effect.
 5. **Python idiom and accuracy (0-1.0)** — code uses current Python 3.13 idioms, names reflect the concept, and prose is technically precise without distracting caveats.
-6. **Literate programming fit (0-1.0)** — prose and source read as one continuous article; each paragraph explains the adjacent fragment; comments are used only when they clarify the program itself.
-7. **Source/result pairing (0-1.0)** — each important source fragment has nearby output that proves the semantic point, not merely that the code ran.
-8. **Concept decomposition (0-1.0)** — the example breaks the concept into meaningful parts instead of presenting one compressed trick.
+6. **Literate programming fit (0-0.75)** — prose and source read as one continuous article; each paragraph explains the adjacent fragment; comments are used only when they clarify the program itself.
+7. **Source/result pairing (0-0.75)** — each important source fragment has nearby output that proves the semantic point, not merely that the code ran.
+8. **Concept decomposition (0-0.75)** — the example breaks the concept into meaningful parts instead of presenting one compressed trick.
 9. **Progressive walkthrough (0-0.75)** — each cell introduces one new idea, and the sequence builds toward the complete concept. Single-cell examples are acceptable only for intentionally atomic concepts.
 10. **Representative coverage (0-0.75)** — the code covers the forms promised by the title, summary, and prose, and the catalog has an explicit home for every common Python syntax form. Do not claim lists, dictionaries, and sets while showing only two of them; do not let syntax such as `break`, `continue`, `assert`, `nonlocal`, `yield from`, `async for`, or `:=` exist only as untested assumptions.
-11. **Practical usefulness (0-1.0)** — names, data, and outputs resemble simplified real code rather than toy placeholders; the example gives the feature a reason to exist.
+11. **Practical usefulness (0-0.75)** — names, data, and outputs resemble simplified real code rather than toy placeholders; the example gives the feature a reason to exist.
 12. **Editorial progression (0-1.0)** — broad examples move through a deliberate sequence: motivation, smallest concrete form, model/protocol, common operations, boundary or edge case, and neighboring concepts. The page should feel like a guided exposition rather than a sample tray.
 
 Topic-specific gates:

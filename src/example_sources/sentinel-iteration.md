@@ -4,6 +4,11 @@ title = "Sentinel Iteration"
 section = "Iteration"
 summary = "iter(callable, sentinel) repeats calls until a marker value appears."
 doc_path = "/library/functions.html#iter"
+see_also = [
+  "iterators",
+  "while-loops",
+  "break-and-continue",
+]
 +++
 
 `iter(callable, sentinel)` keeps calling a zero-argument callable and yields each result until the callable returns the sentinel value. It is the right shape for repeated reads from files, sockets, or queues — sources where each call produces the next chunk and a known marker means "no more".

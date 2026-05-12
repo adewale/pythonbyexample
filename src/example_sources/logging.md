@@ -4,6 +4,11 @@ title = "Logging"
 section = "Standard Library"
 summary = "logging records operational events without using print as infrastructure."
 doc_path = "/library/logging.html"
+see_also = [
+  "exceptions",
+  "testing",
+  "modules",
+]
 +++
 
 `logging` records operational events without using `print` as infrastructure. Loggers name where each event came from, handlers route records to outputs, and levels (`DEBUG`, `INFO`, `WARNING`, `ERROR`) let operators choose how much detail they want to see.

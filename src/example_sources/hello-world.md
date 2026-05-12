@@ -4,6 +4,10 @@ title = "Hello World"
 section = "Basics"
 summary = "The first Python program prints a line of text."
 doc_path = "/tutorial/introduction.html"
+see_also = [
+  "values",
+  "variables",
+]
 +++
 
 Every Python program starts by executing statements from top to bottom. Calling `print()` is the smallest useful program because it shows how Python evaluates an expression and sends text to standard output.

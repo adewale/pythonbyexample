@@ -4,6 +4,11 @@ title = "Recursion"
 section = "Functions"
 summary = "Recursive functions solve nested problems by calling themselves on smaller pieces."
 doc_path = "/tutorial/controlflow.html#defining-functions"
+see_also = [
+  "functions",
+  "conditionals",
+  "generators",
+]
 +++
 
 A recursive function calls itself to solve a smaller piece of the same problem. Recursion exists for data that is naturally nested: trees, menus, expression nodes, and directory-like structures.

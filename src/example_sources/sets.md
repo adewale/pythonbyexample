@@ -4,6 +4,11 @@ title = "Sets"
 section = "Collections"
 summary = "Sets store unique values and make membership checks explicit."
 doc_path = "/tutorial/datastructures.html#sets"
+see_also = [
+  "lists",
+  "dicts",
+  "comprehensions",
+]
 +++
 
 Sets store unique hashable values. Use them when membership and de-duplication matter more than order.

@@ -4,6 +4,11 @@ title = "CSV Data"
 section = "Standard Library"
 summary = "csv reads and writes row-shaped text data."
 doc_path = "/library/csv.html"
+see_also = [
+  "strings",
+  "dicts",
+  "json",
+]
 +++
 
 csv reads and writes row-shaped text data. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.

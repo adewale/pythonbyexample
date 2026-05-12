@@ -4,6 +4,11 @@ title = "Copying Collections"
 section = "Collections"
 summary = "Copies can duplicate a container while still sharing nested objects."
 doc_path = "/library/copy.html"
+see_also = [
+  "mutability",
+  "lists",
+  "dicts",
+]
 +++
 
 Copies can duplicate a container while still sharing nested objects. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.

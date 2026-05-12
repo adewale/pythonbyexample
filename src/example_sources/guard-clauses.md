@@ -4,6 +4,11 @@ title = "Guard Clauses"
 section = "Control Flow"
 summary = "Guard clauses handle exceptional cases early so the main path stays flat."
 doc_path = "/tutorial/controlflow.html#if-statements"
+see_also = [
+  "conditionals",
+  "exceptions",
+  "functions",
+]
 +++
 
 Guard clauses handle exceptional cases early so the main path stays flat. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.

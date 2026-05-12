@@ -4,6 +4,11 @@ title = "Literal and Final"
 section = "Types"
 summary = "Literal restricts values, while Final marks names that should not be rebound."
 doc_path = "/library/typing.html#typing.Literal"
+see_also = [
+  "type-hints",
+  "constants",
+  "union-and-optional-types",
+]
 +++
 
 `Literal` restricts a value to one of a small set of exact options, and `Final` tells the type checker that a name should not be rebound. Both are static promises that type checkers enforce; Python's runtime assignment rules still permit any value through if a program ignores the annotation.

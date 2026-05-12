@@ -4,6 +4,11 @@ title = "Object Lifecycle"
 section = "Basics"
 summary = "References keep objects alive until Python can reclaim them."
 doc_path = "/reference/datamodel.html#objects-values-and-types"
+see_also = [
+  "variables",
+  "mutability",
+  "classes",
+]
 +++
 
 References keep objects alive until Python can reclaim them. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.

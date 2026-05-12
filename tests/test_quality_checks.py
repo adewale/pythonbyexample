@@ -52,6 +52,21 @@ class CheckScriptSmokeTests(unittest.TestCase):
         self.assertEqual(result.returncode, 0, msg=result.stderr)
         self.assertIn("Notes-supported check OK", result.stdout)
 
+    def test_quality_scores_pass(self):
+        result = run("check_quality_scores.py")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn("Quality score gate OK", result.stdout)
+
+    def test_no_figure_rationales_pass(self):
+        result = run("check_no_figure_rationales.py")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn("No-figure rationale registry OK", result.stdout)
+
+    def test_journey_outcomes_pass(self):
+        result = run("check_journey_outcomes.py")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn("Journey outcomes OK", result.stdout)
+
 
 class RegistryIntegrityTests(unittest.TestCase):
     """The integrity script catches typos before they reach the coverage checks."""

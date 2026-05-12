@@ -4,6 +4,11 @@ title = "Dates and Times"
 section = "Standard Library"
 summary = "datetime represents dates, times, durations, formatting, and parsing."
 doc_path = "/library/datetime.html"
+see_also = [
+  "string-formatting",
+  "json",
+  "number-parsing",
+]
 +++
 
 The `datetime` module covers several related ideas: `date` for calendar days, `time` for clock times, `datetime` for both together, and `timedelta` for durations.

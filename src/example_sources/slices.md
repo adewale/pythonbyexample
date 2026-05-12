@@ -4,6 +4,11 @@ title = "Slices"
 section = "Collections"
 summary = "Slices copy meaningful ranges from ordered sequences."
 doc_path = "/tutorial/introduction.html#lists"
+see_also = [
+  "lists",
+  "tuples",
+  "strings",
+]
 +++
 
 Slicing reads a range from an ordered sequence with `start:stop:step`. It exists because Python code often needs a meaningful piece of a sequence: a page, a prefix, a tail, a stride, or a reversed view.

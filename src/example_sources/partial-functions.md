@@ -4,6 +4,11 @@ title = "Partial Functions"
 section = "Functions"
 summary = "functools.partial pre-fills arguments to make a more specific callable."
 doc_path = "/library/functools.html#functools.partial"
+see_also = [
+  "functions",
+  "args-and-kwargs",
+  "callable-objects",
+]
 +++
 
 functools.partial pre-fills arguments to make a more specific callable. It exists to make a common boundary explicit instead of leaving the behavior implicit in a larger program.

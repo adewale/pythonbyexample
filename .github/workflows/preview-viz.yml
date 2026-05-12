@@ -55,6 +55,10 @@ jobs:
           for path in \
             "/" \
             "/examples/values" \
+            "/examples/async-await" \
+            "/examples/networking" \
+            "/examples/subprocesses" \
+            "/journeys/workers" \
             "/prototyping/journey-figures-gestalt"; do
             url="${base}${path}"
             echo "Checking ${url}"

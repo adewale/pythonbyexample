@@ -4,6 +4,11 @@ title = "Lambdas"
 section = "Functions"
 summary = "lambda creates small anonymous function expressions."
 doc_path = "/tutorial/controlflow.html#lambda-expressions"
+see_also = [
+  "functions",
+  "sorting",
+  "callable-objects",
+]
 +++
 
 `lambda` creates a small anonymous function expression. It is most useful when Python asks for a function and the behavior is short enough to read inline.

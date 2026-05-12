@@ -178,3 +178,662 @@ pairs = [
   ["generators", "generator-expressions"],
   ["comprehensions", "comprehension-patterns"],
 ]
+
+[quality_gates]
+example_target = 9.0
+example_hard_min = 8.5
+journey_section_min = 8.5
+journey_average_min = 8.8
+
+[quality_waivers.hello-world]
+accepted_min = 7.0
+reason = "Traditional first example is intentionally tiny: program -> output is the goal, not a full concept tour."
+expires = "never"
+
+[no_figure_rationales]
+# Slugs may be added here only when the page is constraint-shaped,
+# infrastructure-shaped, or aggregator-shaped and a single mechanism
+# figure would distort the lesson. Current production attaches figures
+# to every example, so this registry is intentionally empty.
+
+[quality_improvement_backlog.constants]
+cause = "convention page needs stronger boundary against Final and ordinary variables"
+next_action = "add a cell contrasting naming convention with typing.Final and runtime rebinding"
+
+[quality_improvement_backlog.truthiness]
+cause = "truth-value protocol is under-linked to booleans and special methods"
+next_action = "add a boundary cell that predicts bool() for empty containers, None, and custom __bool__"
+
+[quality_improvement_backlog.object-lifecycle]
+cause = "single-cell page compresses references, identity, and garbage collection"
+next_action = "split into reference lifetime, identity after rebinding, and cleanup boundary cells"
+
+[quality_improvement_backlog.guard-clauses]
+cause = "single-cell page does not show the before/after flattening payoff"
+next_action = "add a nested conditional contrast beside the guard-clause version"
+
+[quality_improvement_backlog.for-loops]
+cause = "foundational loop page lacks enough protocol and alternative framing"
+next_action = "add a cell contrasting direct iteration, range(), and enumerate() with links to iterators"
+
+[quality_improvement_backlog.sentinel-iteration]
+cause = "single-cell page hides the read-until-sentinel problem shape"
+next_action = "add a callable state cell and a while-loop contrast"
+
+[quality_improvement_backlog.collections-module]
+cause = "aggregator page names a broad standard-library surface but has one cell"
+next_action = "turn it into a map cell for Counter, defaultdict, deque, and namedtuple or split pages"
+
+[quality_improvement_backlog.copying-collections]
+cause = "important shallow/deep footgun has one cell despite nested-state boundary"
+next_action = "split into aliasing, shallow copy, and deepcopy cells"
+
+[quality_improvement_backlog.partial-functions]
+cause = "single-cell page does not show the before/after callable API pressure"
+next_action = "add a repeated-argument function call before partial() and a callable-object neighbor"
+
+[quality_improvement_backlog.warnings]
+cause = "single-cell page misses filter/escalate/ignore boundaries"
+next_action = "add cells for warn(), simplefilter('error'), and when logging/exceptions are better"
+
+[quality_improvement_backlog.virtual-environments]
+cause = "runtime-boundary page is constrained by Dynamic Workers and needs stronger standard-Python path"
+next_action = "teach venv creation/activation as unsupported Standard Python, then show local dependency evidence"
+
+[quality_improvement_backlog.literal-and-final]
+cause = "advanced type page compresses Literal and Final into one cell"
+next_action = "split value restriction from rebinding restriction and show runtime annotations boundary"
+
+[quality_improvement_backlog.paramspec]
+cause = "single-cell advanced typing page hides why ordinary Callable loses parameter shape"
+next_action = "add a decorator typed with Callable[..., T] before the ParamSpec-preserving version"
+
+[quality_improvement_backlog.overloads]
+cause = "single-cell page needs static-only overload declarations vs one runtime implementation"
+next_action = "add cells for overload stubs, implementation, and runtime annotations"
+
+[quality_improvement_backlog.number-parsing]
+cause = "parsing page lacks enough failure/recovery shape"
+next_action = "add cells for int base handling, ValueError recovery, and validation boundary"
+
+[quality_improvement_backlog.subprocesses]
+cause = "runtime-boundary page needs clearer standard subprocess use before portable evidence"
+next_action = "show standard subprocess.run contract once, then Dynamic Worker boundary and captured-output surrogate"
+
+[quality_improvement_backlog.threads-and-processes]
+cause = "runtime-boundary page blends thread/process concepts with environment caveat"
+next_action = "split shared-memory thread idea, process isolation idea, and Worker unsupported boundary"
+
+[quality_improvement_backlog.networking]
+cause = "runtime-boundary page needs stronger protocol-vs-socket contrast"
+next_action = "teach request/response byte protocol, show standard socket form once, then local parser surrogate"
+
+[quality_improvement_backlog.csv-data]
+cause = "single-cell row-shaped data page lacks dialect/header/error boundaries"
+next_action = "add cells for DictReader, writer output, and JSON/regular-expression boundary"
+
+[quality_improvement_backlog.values]
+cause = "foundational page is graph-linked now but still needs a sharper object/type mental model"
+next_action = "add or revise a cell that connects value, type, and operation with a nearby See also path"
+
+[quality_improvement_backlog.booleans]
+cause = "boolean operators are covered but the boundary with truthiness and numeric bool is not prominent enough"
+next_action = "add a contrast cell for bool values, truthy objects, and bool-as-int footgun"
+
+[quality_improvement_backlog.none]
+cause = "absence is shown but not contrasted strongly enough with exceptions and missing mapping keys"
+next_action = "add a boundary cell comparing None, KeyError, and an explicit default"
+
+[quality_improvement_backlog.variables]
+cause = "binding model is shown but rebinding vs mutation is not reinforced enough"
+next_action = "add a rebinding cell and link it directly to mutability/object lifecycle"
+
+[quality_improvement_backlog.equality-and-identity]
+cause = "near the gate but needs a stronger practical warning about using is outside singletons"
+next_action = "add a decision cell for ==, is None, and identity-cache surprises"
+
+[quality_improvement_backlog.mutability]
+cause = "mutation vs rebinding is central enough to deserve a sharper copy/alias boundary"
+next_action = "add a cell that contrasts in-place list mutation with rebinding to a new object"
+
+[quality_improvement_backlog.strings]
+cause = "Unicode coverage is present but graph and boundary framing were previously isolated"
+next_action = "connect string immutability, formatting, and bytes with adjacent cells or links"
+
+[quality_improvement_backlog.string-formatting]
+cause = "f-string page needs clearer format-spec and boundary-to-repr coverage"
+next_action = "add a format-spec cell and a note/cell explaining when repr/debug formatting is better"
+
+[quality_improvement_backlog.conditionals]
+cause = "branching syntax is shown but predicate/truthiness model is under-emphasized"
+next_action = "add a cell that chooses a branch from a non-bool value and points to truthiness"
+
+[quality_improvement_backlog.match-statements]
+cause = "match syntax is shown but shape-dispatch vs if/elif boundary could be clearer"
+next_action = "add a comparable if/elif or data-shape cell that makes match's payoff visible"
+
+[quality_improvement_backlog.while-loops]
+cause = "loop shape is shown but for-vs-while decision boundary is thin"
+next_action = "add a state-changing while cell beside an iterable for-loop alternative"
+
+[quality_improvement_backlog.lists]
+cause = "list operations are shown but sequence vs set/dict and mutation boundaries need sharpening"
+next_action = "add a cell contrasting append/index order with set membership or tuple immutability"
+
+[quality_improvement_backlog.unpacking]
+cause = "unpacking forms are shown but sequence vs mapping and star-target boundaries need clearer outputs"
+next_action = "add a mapping-unpacking or too-many-values boundary cell"
+
+[quality_improvement_backlog.dicts]
+cause = "dictionary page is close but needs stronger mutation-during-iteration and default lookup framing"
+next_action = "add or sharpen cells for get/default, key membership, and safe deletion while iterating"
+
+[quality_improvement_backlog.sets]
+cause = "set uniqueness is shown but list-vs-set tradeoff and ordering boundary need emphasis"
+next_action = "add a cell comparing membership/duplicates with a list"
+
+[quality_improvement_backlog.slices]
+cause = "slice syntax is shown but off-by-one and copy-vs-view boundaries need stronger evidence"
+next_action = "add a cell showing adjacent slices meeting at the same boundary index"
+
+[quality_improvement_backlog.comprehensions]
+cause = "map/filter shape is shown but eager vs lazy and loop equivalence need stronger progression"
+next_action = "add a generator-expression contrast or explicit loop-equivalence cell"
+
+[quality_improvement_backlog.sorting]
+cause = "key functions are shown but stable sort and sorted-vs-list.sort boundary need coverage"
+next_action = "add a cell demonstrating stability or in-place list.sort vs sorted()"
+
+[quality_improvement_backlog.functions]
+cause = "function definition is broad and close to gate but should foreground call/return and default footgun"
+next_action = "add a focused call-frame or mutable-default contrast cell"
+
+[quality_improvement_backlog.keyword-only-arguments]
+cause = "separator syntax is shown but API readability/stability rationale is thin"
+next_action = "add a call-site contrast where unnamed booleans are ambiguous"
+
+[quality_improvement_backlog.args-and-kwargs]
+cause = "collection of extra arguments is shown but forwarding boundary is underdeveloped"
+next_action = "add a wrapper cell that forwards *args and **kwargs to another callable"
+
+[quality_improvement_backlog.multiple-return-values]
+cause = "tuple return is shown but tuple/unpacking relationship needs a stronger explicit link"
+next_action = "add a cell showing the returned value is a tuple before unpacking"
+
+[quality_improvement_backlog.closures]
+cause = "closure memory is shown but late-binding footgun deserves more adjacent evidence"
+next_action = "add or sharpen loop-closure broken/fixed cells"
+
+[quality_improvement_backlog.recursion]
+cause = "recursive shape is shown but base-case and failure boundaries need more evidence"
+next_action = "add a base-case-first cell and a note on RecursionError/iteration alternative"
+
+[quality_improvement_backlog.lambdas]
+cause = "lambda syntax is shown but def-vs-lambda boundary is too light"
+next_action = "add a cell where lambda is useful as an argument and def is clearer for reuse"
+
+[quality_improvement_backlog.generator-expressions]
+cause = "lazy expression is shown but one-pass consumption and list-comprehension contrast need sharpening"
+next_action = "add a cell comparing list comprehension storage with generator expression streaming"
+
+[quality_improvement_backlog.itertools]
+cause = "lazy composition is shown but practical pipeline payoff could be clearer"
+next_action = "add a small pipeline with take/filter/map output proving values are pulled on demand"
+
+[quality_improvement_backlog.properties]
+cause = "property syntax is shown but method-vs-attribute API boundary needs stronger rationale"
+next_action = "add a before/after cell changing a public attribute into a property without caller changes"
+
+[quality_improvement_backlog.descriptors]
+cause = "descriptor protocol is compressed into one cell despite being a data-model mechanism"
+next_action = "split __get__ lookup from __set__ validation and property relationship"
+
+[quality_improvement_backlog.exceptions]
+cause = "try/except structure is shown but bare-except and cleanup boundaries need sharper evidence"
+next_action = "add a cell contrasting specific exception handling with overbroad catching"
+
+[quality_improvement_backlog.enums]
+cause = "enum values are shown but raw constants/string alternatives need stronger contrast"
+next_action = "add a cell comparing Enum identity/name/value with plain strings"
+
+[quality_improvement_backlog.custom-exceptions]
+cause = "custom exception class is shown but when not to create one is underdeveloped"
+next_action = "add a boundary cell contrasting domain error with built-in ValueError"
+
+[quality_improvement_backlog.logging]
+cause = "single-cell infrastructure page misses levels, logger names, and handler/format boundaries"
+next_action = "split logger level, message context, and testing/log-capture shape"
+
+[quality_improvement_backlog.datetime]
+cause = "date/time operations are shown but timezone and naive-aware boundaries need more clarity"
+next_action = "add a timezone-aware datetime cell or explicitly scope the page to naive values"
+
+[journey_outcomes]
+
+[journey_outcomes."runtime::Start with executable evidence."]
+journey = "runtime"
+section = "Start with executable evidence."
+support = [
+  "hello-world",
+  "values",
+  "literals",
+  "variables",
+  "constants",
+]
+outcomes = [
+  "start with a complete program and its output",
+  "see that Python programs manipulate runtime objects",
+  "write small values directly in source code",
+  "understand that names bind to objects rather than storing values themselves",
+]
+
+[journey_outcomes."runtime::Separate value, identity, and absence."]
+journey = "runtime"
+section = "Separate value, identity, and absence."
+support = [
+  "none",
+  "booleans",
+  "truthiness",
+  "equality-and-identity",
+  "mutability",
+  "object-lifecycle",
+]
+outcomes = [
+  "represent expected absence with a singleton object",
+  "combine facts with boolean operators",
+  "predict how objects behave in boolean contexts",
+  "distinguish value equality from object identity",
+]
+
+[journey_outcomes."runtime::Read expressions as object operations."]
+journey = "runtime"
+section = "Read expressions as object operations."
+support = [
+  "numbers",
+  "operators",
+  "strings",
+  "string-formatting",
+  "bytes-and-bytearray",
+]
+outcomes = [
+  "use numeric objects and arithmetic operators",
+  "combine, compare, and test values with expression syntax",
+  "treat text as Unicode rather than raw bytes",
+  "turn objects into readable text at output boundaries",
+]
+
+[journey_outcomes."control-flow::Choose between paths."]
+journey = "control-flow"
+section = "Choose between paths."
+support = [
+  "booleans",
+  "truthiness",
+  "operators",
+  "conditionals",
+]
+outcomes = [
+  "combine facts into readable conditions",
+  "use object truth values without hiding intent",
+  "build comparisons and boolean expressions for conditions",
+  "choose between branches with clear predicates",
+]
+
+[journey_outcomes."control-flow::Name and shape decisions."]
+journey = "control-flow"
+section = "Name and shape decisions."
+support = [
+  "assignment-expressions",
+  "match-statements",
+  "advanced-match-patterns",
+]
+outcomes = [
+  "name an intermediate value inside a condition when it improves clarity",
+  "dispatch on the shape of data rather than only on boolean tests",
+  "combine destructuring, alternatives, and guards in pattern matching",
+]
+
+[journey_outcomes."control-flow::Stop as soon as the answer is known."]
+journey = "control-flow"
+section = "Stop as soon as the answer is known."
+support = [
+  "guard-clauses",
+  "assertions",
+  "exceptions",
+]
+outcomes = [
+  "show how early returns reduce nested conditional code",
+  "state assumptions that should fail loudly while developing",
+  "leave the current path when ordinary return values are not enough",
+]
+
+[journey_outcomes."iteration::Choose the right loop shape."]
+journey = "iteration"
+section = "Choose the right loop shape."
+support = [
+  "for-loops",
+  "while-loops",
+  "break-and-continue",
+  "loop-else",
+  "sentinel-iteration",
+]
+outcomes = [
+  "consume values from an iterable",
+  "repeat while a condition must be rechecked",
+  "interrupt or skip loop work intentionally",
+  "attach completion logic to loops that did not break",
+]
+
+[journey_outcomes."iteration::See the protocol behind `for`."]
+journey = "iteration"
+section = "See the protocol behind `for`."
+support = [
+  "iterating-over-iterables",
+  "iterators",
+  "generators",
+]
+outcomes = [
+  "separate value producers from value consumers",
+  "use `iter()` and `next()` to expose the protocol behind `for`",
+  "write functions that produce values lazily",
+]
+
+[journey_outcomes."iteration::Compose lazy value streams."]
+journey = "iteration"
+section = "Compose lazy value streams."
+support = [
+  "generator-expressions",
+  "itertools",
+  "yield-from",
+]
+outcomes = [
+  "create lazy one-pass streams with expression syntax",
+  "compose iterator streams without materializing every value",
+  "delegate part of a generator to another iterable",
+]
+
+[journey_outcomes."shapes::Pick the container that matches the question."]
+journey = "shapes"
+section = "Pick the container that matches the question."
+support = [
+  "lists",
+  "tuples",
+  "dicts",
+  "sets",
+  "collections-module",
+]
+outcomes = [
+  "store ordered mutable data",
+  "group fixed-position values",
+  "look up values by key",
+  "model uniqueness and membership",
+]
+
+[journey_outcomes."shapes::Move between shapes deliberately."]
+journey = "shapes"
+section = "Move between shapes deliberately."
+support = [
+  "unpacking",
+  "slices",
+  "comprehensions",
+  "comprehension-patterns",
+  "sorting",
+  "copying-collections",
+]
+outcomes = [
+  "bind names from structured values",
+  "select ranges from sequences",
+  "build concrete collections from compact loops",
+  "compose filters and nested transformations",
+]
+
+[journey_outcomes."shapes::Cross text and data boundaries."]
+journey = "shapes"
+section = "Cross text and data boundaries."
+support = [
+  "number-parsing",
+  "json",
+  "regular-expressions",
+  "datetime",
+  "csv-data",
+]
+outcomes = [
+  "turn text into numbers safely",
+  "move structured data across a text boundary",
+  "extract structure from text patterns",
+  "represent dates, times, and durations as typed values",
+]
+
+[journey_outcomes."interfaces::Start with functions as named behavior."]
+journey = "interfaces"
+section = "Start with functions as named behavior."
+support = [
+  "functions",
+  "keyword-only-arguments",
+  "positional-only-parameters",
+  "args-and-kwargs",
+  "multiple-return-values",
+]
+outcomes = [
+  "package behavior behind a name",
+  "make important call-site choices explicit",
+  "hide parameter names that should remain implementation details",
+  "accept flexible call shapes when forwarding or adapting APIs",
+]
+
+[journey_outcomes."interfaces::Use functions as values."]
+journey = "interfaces"
+section = "Use functions as values."
+support = [
+  "scope-global-nonlocal",
+  "closures",
+  "recursion",
+  "lambdas",
+  "decorators",
+  "partial-functions",
+]
+outcomes = [
+  "control where assignment happens",
+  "capture state in nested functions",
+  "solve self-similar problems with a base case",
+  "write small unnamed functions for expression positions",
+]
+
+[journey_outcomes."interfaces::Bundle behavior with state."]
+journey = "interfaces"
+section = "Bundle behavior with state."
+support = [
+  "classes",
+  "inheritance-and-super",
+  "dataclasses",
+  "properties",
+  "special-methods",
+  "truth-and-size",
+  "container-protocols",
+  "callable-objects",
+  "operator-overloading",
+  "attribute-access",
+  "descriptors",
+  "metaclasses",
+]
+outcomes = [
+  "bundle state and behavior into a new object type",
+  "reuse and extend behavior through parent classes",
+  "generate common methods for data containers",
+  "keep attribute syntax while adding computation or validation",
+]
+
+[journey_outcomes."types::Keep runtime and static analysis separate."]
+journey = "types"
+section = "Keep runtime and static analysis separate."
+support = [
+  "type-hints",
+  "protocols",
+  "enums",
+  "runtime-type-checks",
+]
+outcomes = [
+  "document expected types and feed type checkers",
+  "describe required behavior by structural shape",
+  "name a fixed set of symbolic values",
+  "show `type()`, `isinstance()`, and `issubclass()` without turning Python into Java",
+]
+
+[journey_outcomes."types::Describe realistic data shapes."]
+journey = "types"
+section = "Describe realistic data shapes."
+support = [
+  "union-and-optional-types",
+  "type-aliases",
+  "typed-dicts",
+  "literal-and-final",
+  "callable-types",
+]
+outcomes = [
+  "show `X | Y` and `None`-aware APIs",
+  "name complex types with `type` statements or aliases",
+  "type dictionary records that come from JSON",
+  "express constrained values and names that should not be rebound",
+]
+
+[journey_outcomes."types::Scale annotations for reusable libraries."]
+journey = "types"
+section = "Scale annotations for reusable libraries."
+support = [
+  "generics-and-typevar",
+  "paramspec",
+  "overloads",
+  "casts-and-any",
+  "newtype",
+]
+outcomes = [
+  "write reusable typed containers and functions",
+  "preserve callable signatures through decorators",
+  "describe APIs whose return type depends on the input shape",
+  "show escape hatches and their tradeoffs",
+]
+
+[journey_outcomes."reliability::Make failure explicit."]
+journey = "reliability"
+section = "Make failure explicit."
+support = [
+  "exceptions",
+  "assertions",
+  "exception-chaining",
+  "exception-groups",
+  "custom-exceptions",
+  "warnings",
+]
+outcomes = [
+  "signal and recover from errors",
+  "state internal assumptions",
+  "preserve the cause while translating an error",
+  "handle multiple failures together",
+]
+
+[journey_outcomes."reliability::Control resource and module boundaries."]
+journey = "reliability"
+section = "Control resource and module boundaries."
+support = [
+  "context-managers",
+  "delete-statements",
+  "modules",
+  "import-aliases",
+  "packages",
+  "virtual-environments",
+]
+outcomes = [
+  "pair setup with reliable cleanup",
+  "remove names, attributes, and items intentionally",
+  "split code into importable files",
+  "make imported names clear at use sites",
+]
+
+[journey_outcomes."reliability::Handle operations that outlive one expression."]
+journey = "reliability"
+section = "Handle operations that outlive one expression."
+support = [
+  "async-await",
+  "async-iteration-and-context",
+  "logging",
+  "testing",
+  "subprocesses",
+  "threads-and-processes",
+  "networking",
+]
+outcomes = [
+  "await concurrent I/O-shaped work",
+  "consume async streams and cleanup protocols",
+  "record operational events without using `print()`",
+  "write deterministic tests with `unittest` or `pytest`",
+]
+
+[journey_outcomes."workers::Replace unavailable process boundaries with portable evidence."]
+journey = "workers"
+section = "Replace unavailable process boundaries with portable evidence."
+support = [
+  "virtual-environments",
+  "subprocesses",
+  "threads-and-processes",
+]
+outcomes = [
+  "report stable environment facts instead of creating or depending on a local virtual environment",
+  "show the command and `CompletedProcess` result shape",
+  "compare thread and process executor boundaries",
+]
+
+[journey_outcomes."workers::Keep network lessons local to the protocol boundary."]
+journey = "workers"
+section = "Keep network lessons local to the protocol boundary."
+support = [
+  "bytes-and-bytearray",
+  "networking",
+  "async-await",
+]
+outcomes = [
+  "show the text-to-bytes boundary that networking and subprocess APIs usually require",
+  "make endpoint and byte-encoding boundaries visible without opening a socket",
+  "show the supported coroutine model for I/O-shaped work in this environment",
+]
+
+[journey_outcomes."workers::Preserve the lesson while respecting the runtime."]
+journey = "workers"
+section = "Preserve the lesson while respecting the runtime."
+support = [
+  "logging",
+  "testing",
+  "context-managers",
+]
+outcomes = [
+  "show operational output through a configurable Python API rather than shell output",
+  "capture test-runner output so the page remains deterministic",
+  "show cleanup boundaries that still apply when resources are represented abstractly",
+]
+
+[journey_section_improvement_backlog."Replace unavailable process boundaries with portable evidence."]
+cause = "Workers section is constraint-shaped; the figure scores 8.0 because the section names an unavailable OS boundary more than a positive mechanism."
+next_action = "Reframe around portable evidence: captured output and in-process assertions preserve the subprocess/thread lesson when OS processes cannot run."
+
+[journey_section_improvement_backlog."Keep network lessons local to the protocol boundary."]
+cause = "Workers section is constraint-shaped; the figure must carry protocol evidence rather than merely saying sockets are unavailable."
+next_action = "Reframe around request/response bytes and local protocol parsing, with standard socket usage shown once as the external boundary."
+
+[journey_section_improvement_backlog."Preserve the lesson while respecting the runtime."]
+cause = "This is a principle rather than a mechanism, which lessons-learned identifies as resistant to strong figures."
+next_action = "Either split into concrete mechanisms or explicitly mark the section as principle-shaped with a no-strong-figure rationale."
+
+[score_model]
+# Criterion weights mirror docs/example-quality-rubric.md. The registry
+# makes the scoring model inspectable even before every example is broken
+# down into per-criterion subscores.
+conceptual_payoff = 1.0
+rationale = 0.75
+alternatives_and_boundaries = 0.75
+executable_determinism = 1.0
+python_idiom_and_accuracy = 1.0
+literate_fit = 0.75
+source_result_pairing = 0.75
+concept_decomposition = 0.75
+progressive_walkthrough = 0.75
+representative_coverage = 0.75
+practical_usefulness = 0.75
+editorial_progression = 1.0

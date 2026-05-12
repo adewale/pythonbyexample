@@ -4,6 +4,11 @@ title = "Constants"
 section = "Basics"
 summary = "Python uses naming conventions for values that should not change."
 doc_path = "/tutorial/classes.html#python-scopes-and-namespaces"
+see_also = [
+  "variables",
+  "literal-and-final",
+  "type-hints",
+]
 +++
 
 Python has no `const` keyword for ordinary variables. Instead, modules use all-caps names to mark values that should be treated as constants by convention.
