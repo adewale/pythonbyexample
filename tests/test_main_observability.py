@@ -14,8 +14,93 @@ class MainObservabilityTests(unittest.TestCase):
     def setUp(self):
         self.saved_modules = {
             name: sys.modules.get(name)
-            for name in ("workers", "main", "worker_asgi_bridge", "observability")
+            for name in (
+                "fastapi",
+                "fastapi.exception_handlers",
+                "fastapi.exceptions",
+                "fastapi.responses",
+                "main",
+                "observability",
+                "starlette.exceptions",
+                "worker_asgi_bridge",
+                "workers",
+            )
         }
+        fastapi = types.ModuleType("fastapi")
+
+        class FastAPI:
+            def __init__(self, *args, **kwargs):
+                pass
+
+            def add_middleware(self, *args, **kwargs):
+                pass
+
+            def exception_handler(self, *args, **kwargs):
+                def decorator(func):
+                    return func
+
+                return decorator
+
+            def get(self, *args, **kwargs):
+                def decorator(func):
+                    return func
+
+                return decorator
+
+            def post(self, *args, **kwargs):
+                def decorator(func):
+                    return func
+
+                return decorator
+
+        class Request:
+            pass
+
+        fastapi.FastAPI = FastAPI
+        fastapi.Request = Request
+        sys.modules["fastapi"] = fastapi
+
+        exception_handlers = types.ModuleType("fastapi.exception_handlers")
+
+        async def http_exception_handler(request, exc):
+            return None
+
+        async def request_validation_exception_handler(request, exc):
+            return None
+
+        exception_handlers.http_exception_handler = http_exception_handler
+        exception_handlers.request_validation_exception_handler = request_validation_exception_handler
+        sys.modules["fastapi.exception_handlers"] = exception_handlers
+
+        fastapi_exceptions = types.ModuleType("fastapi.exceptions")
+
+        class RequestValidationError(Exception):
+            pass
+
+        fastapi_exceptions.RequestValidationError = RequestValidationError
+        sys.modules["fastapi.exceptions"] = fastapi_exceptions
+
+        fastapi_responses = types.ModuleType("fastapi.responses")
+
+        class Response:
+            def __init__(self, *args, **kwargs):
+                pass
+
+        class HTMLResponse(Response):
+            pass
+
+        fastapi_responses.HTMLResponse = HTMLResponse
+        fastapi_responses.Response = Response
+        sys.modules["fastapi.responses"] = fastapi_responses
+
+        starlette_exceptions = types.ModuleType("starlette.exceptions")
+
+        class HTTPException(Exception):
+            pass
+
+        starlette_exceptions.HTTPException = HTTPException
+        sys.modules["starlette.exceptions"] = starlette_exceptions
+
         workers = types.ModuleType("workers")
 
         class WorkerEntrypoint:
