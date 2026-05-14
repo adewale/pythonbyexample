@@ -5,13 +5,17 @@ import time
 from urllib.parse import parse_qs, urlencode, urlparse
 
 from fastapi import FastAPI, Request
+from fastapi.exception_handlers import http_exception_handler, request_validation_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import HTMLResponse, Response
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from workers import WorkerEntrypoint, python_from_rpc
 
 from app import FAVICON_SVG, build_dynamic_worker_code, get_example, render_example_page, route
 from asset_manifest import HTML_CACHE_VERSION
 from examples import PYTHON_VERSION
 
+import observability
 import worker_asgi_bridge as asgi
 
 TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
@@ -32,13 +36,7 @@ except ImportError:  # Allows editor tooling outside Workers.
     js_fetch = None
 
 app = FastAPI(title="Python By Example")
-_CURRENT_WORKER_REQUEST = None
-
-
-@app.middleware("http")
-async def add_worker_request_to_scope(request: Request, call_next):
-    request.scope["worker_request"] = _CURRENT_WORKER_REQUEST
-    return await call_next(request)
+app.add_middleware(observability.WideEventMiddleware)
 
 
 def _to_js_object(value):
@@ -49,6 +47,31 @@ def _to_js_object(value):
 
 def _html(body, status=200):
     return HTMLResponse(body, status_code=status)
+
+
+def _wide_event(request: Request) -> dict | None:
+    return getattr(request.state, "wide_event", None)
+
+
+@app.exception_handler(RequestValidationError)
+async def _log_validation(request: Request, exc: RequestValidationError):
+    if event := _wide_event(request):
+        event["error"] = {
+            "type": "RequestValidationError",
+            "details": observability.safe_validation_errors(exc),
+        }
+    return await request_validation_exception_handler(request, exc)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def _log_http(request: Request, exc: StarletteHTTPException):
+    if event := _wide_event(request):
+        event["error"] = {
+            "type": "HTTPException",
+            "status_code": exc.status_code,
+            "detail": observability.safe_http_detail(exc.detail),
+        }
+    return await http_exception_handler(request, exc)
 
 
 def should_cache_get_url(url: str) -> bool:
@@ -173,9 +196,21 @@ async def run_example(slug: str, request: Request):
     body = (await request.body()).decode("utf-8")
     form = parse_qs(body)
     submitted = form.get("code", [example["code"]])[0]
+    submitted_bytes = submitted.encode("utf-8")
+    if event := _wide_event(request):
+        event["example"] = {
+            "slug": example["slug"],
+            "code_hash": hashlib.sha256(submitted_bytes).hexdigest()[:12],
+            "code_bytes": len(submitted_bytes),
+            "code_edited": submitted != example["code"],
+        }
     turnstile_token = form.get("cf-turnstile-response", [""])[0]
     needs_turnstile = _requires_turnstile(request)
+    turnstile_verified = False
+
     if needs_turnstile and not turnstile_token:
+        if event := _wide_event(request):
+            event["turnstile"] = {"outcome": "fail"}
         site_key = _turnstile_site_key(request)
         message = "Verification required before running edited code."
         if not site_key:
@@ -190,9 +225,10 @@ async def run_example(slug: str, request: Request):
             )
         )
 
-    turnstile_verified = False
     if needs_turnstile:
-        ok, message = await _verify_turnstile(request, turnstile_token)
+        ok, message, turnstile_outcome = await _verify_turnstile(request, turnstile_token)
+        if event := _wide_event(request):
+            event["turnstile"] = {"outcome": turnstile_outcome}
         if not ok:
             return _html(
                 render_example_page(
@@ -204,9 +240,16 @@ async def run_example(slug: str, request: Request):
                 )
             )
         turnstile_verified = True
+    elif event := _wide_event(request):
+        event["turnstile"] = {"outcome": _turnstile_not_required_outcome(request)}
+
     started = time.perf_counter()
-    output = await _run_example(request, example["slug"], submitted)
-    elapsed_ms = (time.perf_counter() - started) * 1000
+    try:
+        output = await _run_example(request, example["slug"], submitted)
+    finally:
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        if event := _wide_event(request):
+            event["execution_ms"] = round(elapsed_ms, 2)
     response = _html(
         render_example_page(
             example,
@@ -221,18 +264,28 @@ async def run_example(slug: str, request: Request):
     return response
 
 
-async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str]:
+def _turnstile_not_required_outcome(request: Request) -> str:
+    if not _turnstile_secret(request) or _turnstile_challenge_mode(request) == "off":
+        return "disabled"
+    if _smoke_bypass_ok(request):
+        return "bypass"
+    if _clearance_valid(request):
+        return "pass"
+    return "disabled"
+
+
+async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str, str]:
     secret = _turnstile_secret(request)
     if not secret:
-        return True, ""
+        return True, "", "disabled"
 
     if _smoke_bypass_ok(request):
-        return True, ""
+        return True, "", "bypass"
 
     if not token:
-        return False, "Turnstile verification is required before running edited code. Please retry."
+        return False, "Turnstile verification is required before running edited code. Please retry.", "fail"
     if js_fetch is None or JsRequest is None:
-        return False, "Turnstile verification is unavailable outside the Cloudflare runtime."
+        return False, "Turnstile verification is unavailable outside the Cloudflare runtime.", "fail"
 
     payload = {"secret": secret, "response": token}
     remote_ip = request.headers.get("CF-Connecting-IP")
@@ -251,11 +304,19 @@ async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str]:
     response = await js_fetch(verify_request)
     result = json.loads(await response.text())
     if result.get("success") is True:
-        return True, ""
-    return False, "Turnstile verification failed. Please refresh the challenge and try again."
+        return True, "", "pass"
+    return False, "Turnstile verification failed. Please refresh the challenge and try again.", "fail"
 
 
 async def _run_example(request: Request, slug, code):
+    event = _wide_event(request)
+    if event is None:
+        event = {}
+    worker_event = event.setdefault("worker", {})
+    if JsRequest is None or create_once_callable is None:
+        worker_event["outcome"] = "runtime_unavailable"
+        return "Dynamic Workers are only available in the Cloudflare runtime."
+
     module_name = "runner.py"
     worker_code = {
         "compatibilityDate": "2026-05-04",
@@ -270,25 +331,50 @@ async def _run_example(request: Request, slug, code):
         "limits": {"cpuMs": 1000, "subRequests": 0},
         "env": {"PYTHON_VERSION": PYTHON_VERSION, "EXAMPLE_SLUG": slug},
     }
-    env = request.scope["env"]
-    code_hash = hashlib.sha256(code.encode("utf-8")).hexdigest()
-    worker_id = f"pythonbyexample:{PYTHON_VERSION}:{slug}:{code_hash}"
-    js_worker_code = _to_js_object(worker_code)
-    code_callback = create_once_callable(lambda: js_worker_code)
-    worker = env.LOADER.get(worker_id, code_callback)
-    entrypoint = worker.getEntrypoint()
-    if JsRequest is None:
-        return "Dynamic Workers are only available in the Cloudflare runtime."
-    dynamic_request = JsRequest.new(str(request.url), _to_js_object({"method": "GET"}))
+    code_callback = None
     try:
+        env = request.scope["env"]
+        code_hash = hashlib.sha256(code.encode("utf-8")).hexdigest()
+        worker_id = f"pythonbyexample:{PYTHON_VERSION}:{slug}:{code_hash}"
+        js_worker_code = _to_js_object(worker_code)
+        code_callback = create_once_callable(lambda: js_worker_code)
+        worker = env.LOADER.get(worker_id, code_callback)
+        entrypoint = worker.getEntrypoint()
+        dynamic_request = JsRequest.new(
+            str(request.url),
+            _to_js_object(
+                {
+                    "method": "GET",
+                    "headers": {"x-request-id": event.get("request_id", "")},
+                }
+            ),
+        )
         response = python_from_rpc(await entrypoint.fetch(dynamic_request))
-        return await response.text()
+        status_code = int(getattr(response, "status", 200) or 200)
+        worker_event["status_code"] = status_code
+        output = await response.text()
+        if status_code >= 500:
+            worker_event["outcome"] = "error"
+            worker_event["error"] = {
+                "type": "DynamicWorkerHTTPError",
+                "message": f"Dynamic Worker returned HTTP {status_code}",
+            }
+            event["level"] = "error"
+        else:
+            worker_event["outcome"] = "success"
+        return output
+    except Exception as exc:
+        worker_event["outcome"] = "error"
+        worker_event["error"] = observability.error_dict(exc)
+        event["level"] = "error"
+        raise
     finally:
-        if hasattr(code_callback, "destroy"):
+        if code_callback is not None and hasattr(code_callback, "destroy"):
             try:
                 code_callback.destroy()
-            except Exception:
-                pass
+            except Exception as exc:
+                worker_event["cleanup_error"] = observability.error_dict(exc)
+                event["level"] = "error"
 
 
 @app.get("/{path:path}")
@@ -299,25 +385,66 @@ async def not_found(path: str, request: Request):
 
 class Default(WorkerEntrypoint):
     async def fetch(self, request):
-        global _CURRENT_WORKER_REQUEST
-        _CURRENT_WORKER_REQUEST = request
+        started = time.perf_counter()
+        event = observability.event_from_worker_request(
+            request,
+            cache="bypass",
+            html_cache_version=HTML_CACHE_VERSION,
+        )
+        asgi_request = getattr(request, "js_object", request)
 
-        # Cache static GET responses at the Worker edge. Edited example runs are
-        # POST requests and are intentionally never cached.
-        if getattr(request, "method", None) == "GET" and caches is not None:
-            if should_cache_get_url(getattr(request, "url", "")):
-                turnstile_site_key = getattr(self.env, "TURNSTILE_SITE_KEY", "")
-                cache_key = JsRequest.new(html_cache_key_url(getattr(request, "url", ""), turnstile_site_key), _to_js_object({"method": "GET"}))
-                cached = await caches.default.match(cache_key)
-                if cached:
-                    return cached
-                response = await asgi.fetch(app, request.js_object, self.env)
-                if getattr(response, "status", 200) == 200:
-                    response.headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=86400")
-                    await caches.default.put(cache_key, response.clone())
+        try:
+            # Cache static GET responses at the Worker edge. Edited example runs are
+            # POST requests and are intentionally never cached.
+            if getattr(request, "method", None) == "GET" and caches is not None:
+                if should_cache_get_url(getattr(request, "url", "")):
+                    event["cache"] = "miss"
+                    turnstile_site_key = getattr(self.env, "TURNSTILE_SITE_KEY", "")
+                    cache_key = JsRequest.new(
+                        html_cache_key_url(getattr(request, "url", ""), turnstile_site_key),
+                        _to_js_object({"method": "GET"}),
+                    )
+                    cached = await caches.default.match(cache_key)
+                    if cached:
+                        event["cache"] = "hit"
+                        observability.record_status(event, cached.status)
+                        return cached
+                    response = await asgi.fetch(
+                        app,
+                        asgi_request,
+                        self.env,
+                        state={"wide_event": event},
+                    )
+                    if getattr(response, "status", 200) == 200:
+                        response.headers.set(
+                            "Cache-Control",
+                            "public, max-age=300, stale-while-revalidate=86400",
+                        )
+                        await caches.default.put(cache_key, response.clone())
+                    return response
+                event["cache"] = "bypass"
+                response = await asgi.fetch(
+                    app,
+                    asgi_request,
+                    self.env,
+                    state={"wide_event": event},
+                )
+                response.headers.set("Cache-Control", "no-store")
                 return response
-            response = await asgi.fetch(app, request.js_object, self.env)
-            response.headers.set("Cache-Control", "no-store")
-            return response
 
-        return await asgi.fetch(app, request.js_object, self.env)
+            event["cache"] = "bypass"
+            return await asgi.fetch(
+                app,
+                asgi_request,
+                self.env,
+                state={"wide_event": event},
+            )
+        except Exception as exc:
+            event["status_code"] = 500
+            event["outcome"] = "error"
+            event["level"] = "error"
+            event.setdefault("error", observability.error_dict(exc))
+            raise
+        finally:
+            event["duration_ms"] = round((time.perf_counter() - started) * 1000, 2)
+            observability.emit(event, env=self.env)

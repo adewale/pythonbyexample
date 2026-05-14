@@ -41,7 +41,7 @@ def acquire_js_buffer(pybuffer):
         buf.release()
 
 
-def request_to_scope(req, env, ws=False):
+def request_to_scope(req, env, ws=False, *, state=None):
     from js import URL
 
     # @app.get("/example")
@@ -63,7 +63,7 @@ def request_to_scope(req, env, ws=False):
         ty = "websocket"
     else:
         ty = "http"
-    return {
+    scope = {
         "asgi": ASGI,
         "headers": headers,
         "http_version": "1.1",
@@ -73,7 +73,9 @@ def request_to_scope(req, env, ws=False):
         "query_string": query_string,
         "type": ty,
         "env": env,
+        "state": dict(state or {}),
     }
+    return scope
 
 
 async def start_application(app):
@@ -123,6 +125,8 @@ async def process_request(
     # added for waitUntil, but not used anymore
     # TODO(later): remove this parameter after unvendoring Python SDK from workerd
     ctx: Context | None,
+    *,
+    state: dict | None = None,
 ) -> js.Response:
     from js import Object, Response, TransformStream
     from pyodide.ffi import create_proxy
@@ -204,7 +208,7 @@ async def process_request(
     # Run the application in the background
     async def run_app():
         try:
-            await app(request_to_scope(req, env), receive, send)
+            await app(request_to_scope(req, env, state=state), receive, send)
 
             # If we get here and no response has been set yet, the app didn't generate a response
             if not result.done():
@@ -286,12 +290,17 @@ async def process_websocket(app: Any, req: "Request | js.Request") -> js.Respons
 
 
 async def fetch(
-    app: Any, req: "Request | js.Request", env: Any, ctx: Context | None = None
+    app: Any,
+    req: "Request | js.Request",
+    env: Any,
+    ctx: Context | None = None,
+    *,
+    state: dict | None = None,
 ) -> js.Response:
     logger.debug("ASGI request: %s %s", req.method, req.url)
     shutdown = await start_application(app)
     try:
-        result = await process_request(app, req, env, ctx)
+        result = await process_request(app, req, env, ctx, state=state)
     except Exception:
         logger.exception("ASGI request failed")
         raise
