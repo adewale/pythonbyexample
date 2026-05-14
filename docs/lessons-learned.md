@@ -9,6 +9,9 @@ This document records project lessons that should guide future changes to Python
 - Dynamic Workers should be reused by a stable key, but output should not be cached. The key should include Python version, example slug, and a hash of the submitted code.
 - Disable outbound access for Dynamic Workers running user-edited examples. The example runner should not need network access.
 - POST runs must never go through the rendered-page cache path.
+- For Cloudflare request geography, prefer `request.cf.colo` / `request.cf.country` when available. Do not assume the `cf-ray` header includes a colo suffix; `wrangler tail` has shown Ray IDs without `-SJC`-style suffixes.
+- Structured application logs can be privacy-safe while the Cloudflare log envelope is not. `wrangler tail` wraps `console.log` payloads with the raw request URL and headers, including `cf-connecting-ip`, even when invocation logs are disabled. Validate sink-level privacy separately from custom-payload privacy.
+- If `pywrangler deploy` fails fetching Pyodide packages with `invalid peer certificate: UnknownIssuer`, rerun with `UV_NATIVE_TLS=true` so `uv` uses system certificate roots.
 
 ## Cache busting and Worker Cache API
 
@@ -65,6 +68,7 @@ This document records project lessons that should guide future changes to Python
 
 - Unit tests are good for catalog integrity, rendering contracts, Dynamic Worker code generation, and cache-policy source checks.
 - Browser tests are necessary for Shiki/CodeMirror layout behavior and visual regressions.
+- Local `uv run ...` can hide CI import assumptions. GitHub's verify job may invoke `python3 -m unittest` before runtime dependencies such as FastAPI are importable, so tests that import `src/main.py` should either install the dependency explicitly or stub FastAPI/Starlette/Workers modules with purpose-built fakes.
 - SEO and cache-busting deserve a dedicated linter because errors are easy to reintroduce when adding pages or assets.
 - Always run the full pre-push set before publishing. Start `pywrangler dev --port 9696`, then run:
 
@@ -123,4 +127,5 @@ git diff --check
 - **Journey audit is graph audit plus outcome audit.** A journey section is healthy only when its examples form a prerequisite-respecting mental map and its declared outcomes are backed by cells on those examples. A section can have a beautiful figure and still fail if the support list is a catalog slice, if the `See also` graph isolates one example, or if the section caption describes a conceptual shift the examples do not actually make.
 - **A green total can still hide a weak criterion.** The journey-figure audit found every section figure above the project gate while 15 sections still reused a lesson paint function, which weakened the independence-from-lesson-figures dimension. Bespoke runtime, control-flow, iteration, types, and reliability section figures cleared that watchlist; keep tracking criterion-level weakness even when the aggregate score remains shippable.
 - **Deployment smoke belongs beside CI, and POST smoke must assert rendered output.** `scripts/smoke_deployment.py` checks rendered Worker pages, runtime-boundary pages, journey pages, prototype review pages, and representative Dynamic Worker POST runs for HTTP failures, exception markers, and stale edited-code output. Build success is not enough; the deployed Worker must render and execute edited examples. With Turnstile enabled, submitted code can appear in the editor textarea even when it did not run, so POST smoke must inspect the output panel rather than searching the whole HTML document.
+- **Observability smoke should assert the custom event, not the whole tail envelope.** Use unique `x-request-id` values, exercise cache miss/hit/bypass and client-error paths, and assert on the structured payload inside `logs[].message[]`. If Turnstile is enabled, Dynamic Worker error-path probes need the smoke bypass secret; otherwise they only verify the Turnstile-fail path.
 - **Turnstile should be secret-gated, session-scoped, and invisible until needed.** Protect edited-code POST runs only when `TURNSTILE_SECRET_KEY` and an explicit challenge mode are configured, lazy-load/render the Invisible-mode widget only after the server returns a challenge-required marker, and issue a signed clearance cookie so normal session runs skip Siteverify. The Cloudflare widget mode is `Invisible`; the client-side render option is `execution: "execute"`, not `size: "invisible"`. If production smoke must POST through a protected endpoint, use a separate `PBE_SMOKE_BYPASS_SECRET` header so smoke remains a deployment check rather than a CAPTCHA solver. See `docs/turnstile-runner-protection-spec.md` for the full runner-protection design.
