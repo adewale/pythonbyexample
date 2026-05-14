@@ -7,7 +7,9 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import html
 import os
+import re
 import sys
 import urllib.error
 import urllib.parse
@@ -67,6 +69,15 @@ def has_exception_marker(body: str) -> str | None:
     return None
 
 
+def output_panel_text(body: str) -> str:
+    match = re.search(
+        r'<section[^>]*class="[^"]*output-panel[^"]*"[^>]*>.*?<pre><code>(.*?)</code></pre>',
+        body,
+        flags=re.DOTALL,
+    )
+    return html.unescape(match.group(1)) if match else ""
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("base_url", help="deployment origin, e.g. https://www.pythonbyexample.dev")
@@ -113,7 +124,8 @@ def main() -> int:
             marker = has_exception_marker(body)
             if marker:
                 failures.append(f"POST {url}: rendered exception marker {marker!r}")
-            if expected not in body:
+            rendered_output = output_panel_text(body)
+            if expected not in rendered_output:
                 failures.append(f"POST {url}: missing edited-code output {expected!r}")
             print(f"POST {status} {url} -> {expected}")
 
