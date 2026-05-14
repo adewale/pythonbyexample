@@ -332,12 +332,19 @@ async def _run_example(request: Request, slug, code):
         "env": {"PYTHON_VERSION": PYTHON_VERSION, "EXAMPLE_SLUG": slug},
     }
     code_callback = None
+    code_callback_used = False
     try:
         env = request.scope["env"]
         code_hash = hashlib.sha256(code.encode("utf-8")).hexdigest()
         worker_id = f"pythonbyexample:{PYTHON_VERSION}:{slug}:{code_hash}"
         js_worker_code = _to_js_object(worker_code)
-        code_callback = create_once_callable(lambda: js_worker_code)
+
+        def provide_worker_code():
+            nonlocal code_callback_used
+            code_callback_used = True
+            return js_worker_code
+
+        code_callback = create_once_callable(provide_worker_code)
         worker = env.LOADER.get(worker_id, code_callback)
         entrypoint = worker.getEntrypoint()
         dynamic_request = JsRequest.new(
@@ -369,7 +376,10 @@ async def _run_example(request: Request, slug, code):
         event["level"] = "error"
         raise
     finally:
-        if code_callback is not None and hasattr(code_callback, "destroy"):
+        # create_once_callable destroys itself after the Dynamic Loader invokes it.
+        # Destroy only unused callbacks, such as cache-hit callbacks, to avoid
+        # false cleanup errors like "OnceProxy has already been destroyed".
+        if code_callback is not None and not code_callback_used and hasattr(code_callback, "destroy"):
             try:
                 code_callback.destroy()
             except Exception as exc:

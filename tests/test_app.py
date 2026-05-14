@@ -314,7 +314,8 @@ class AppTests(unittest.TestCase):
         self.assertIn('data-turnstile-sitekey="site-key-123"', protected)
         self.assertIn("https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit", protected)
         self.assertIn("turnstile.render", protected)
-        self.assertIn("size: 'invisible'", protected)
+        self.assertIn("execution: 'execute'", protected)
+        self.assertNotIn("size: 'invisible'", protected)
         self.assertIn("turnstile.remove", protected)
         self.assertNotIn('class="cf-turnstile"', protected)
 
@@ -446,6 +447,8 @@ class AppTests(unittest.TestCase):
         self.assertIn('worker_id = f"pythonbyexample:{PYTHON_VERSION}:{slug}:{code_hash}"', main_source)
         self.assertIn("env.LOADER.get(worker_id", main_source)
         self.assertIn("create_once_callable", main_source)
+        self.assertIn("code_callback_used = True", main_source)
+        self.assertIn('if code_callback is not None and not code_callback_used and hasattr(code_callback, "destroy")', main_source)
         self.assertIn('module_name = "runner.py"', main_source)
         self.assertIn("python_from_rpc", main_source)
         self.assertIn("dynamic_request = JsRequest.new(", main_source)

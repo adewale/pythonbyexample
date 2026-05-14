@@ -10,9 +10,14 @@ Grounding docs:
 - Turnstile client-side rendering: <https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/>
 - Turnstile server-side validation / Siteverify: <https://developers.cloudflare.com/turnstile/get-started/server-side-validation/>
 - Turnstile widget concepts and appearance options: <https://developers.cloudflare.com/turnstile/concepts/widget/>
-- Cloudflare Managed Challenge: <https://developers.cloudflare.com/cloudflare-challenges/challenge-types/managed-challenge/>
+- Turnstile widget configuration options: <https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/widget-configurations/>
+- Cloudflare challenge pages and Managed Challenges: <https://developers.cloudflare.com/cloudflare-challenges/challenge-types/challenge-pages/>
+- Ruleset Engine actions, including Managed Challenge and Block: <https://developers.cloudflare.com/ruleset-engine/rules-language/actions/>
 - WAF custom rules: <https://developers.cloudflare.com/waf/custom-rules/>
 - WAF rate limiting rules: <https://developers.cloudflare.com/waf/rate-limiting-rules/>
+- WAF rate limiting parameters: <https://developers.cloudflare.com/waf/rate-limiting-rules/parameters/>
+- WAF rate limiting request-rate calculation: <https://developers.cloudflare.com/waf/rate-limiting-rules/request-rate/>
+- WAF rate limiting dashboard setup: <https://developers.cloudflare.com/waf/rate-limiting-rules/create-zone-dashboard/>
 - Ruleset Engine fields and expressions: <https://developers.cloudflare.com/ruleset-engine/rules-language/fields/reference/>
 - Workers secrets: <https://developers.cloudflare.com/workers/configuration/secrets/>
 - Workers environment variables: <https://developers.cloudflare.com/workers/configuration/environment-variables/>
@@ -37,8 +42,8 @@ Protection desired path:
 
 ```text
 normal learner → no Turnstile visible, no Siteverify call
-new/suspicious/high-rate session → temporary invisible Turnstile → clearance cookie → many normal runs
-high-volume abuse → Cloudflare Rate Limiting / Managed Challenge before Worker execution
+new/suspicious session → temporary Invisible-mode Turnstile → clearance cookie → many normal runs
+high-volume abuse → Cloudflare Rate Limiting Block/429 before Worker execution
 ```
 
 ## Current repository implementation
@@ -91,7 +96,7 @@ If `TURNSTILE_CHALLENGE_MODE=session` and both site/secret keys are configured:
 1. A browser without valid clearance posts edited code.
 2. The server returns the example page with a hidden `data-turnstile-required` marker and does **not** create a Dynamic Worker.
 3. Client JS lazily loads Turnstile using explicit rendering.
-4. It renders an invisible Turnstile widget only for that challenge.
+4. It renders the configured Invisible-mode Turnstile widget only for that challenge.
 5. The Turnstile callback provides a token.
 6. The client removes the widget and retries the POST with `cf-turnstile-response`.
 7. The Worker validates the token through Siteverify.
@@ -144,7 +149,7 @@ x-pythonbyexample-smoke-secret: <secret>
 
 - Turnstile is not visible on initial page load.
 - The Turnstile script is not loaded until a challenge-required response is received.
-- The rendered widget uses invisible mode.
+- The Turnstile widget should be configured in Cloudflare as **Invisible** mode. Client code uses explicit rendering with `execution: "execute"`; `size: "invisible"` is not a valid current Turnstile size option.
 - The widget is removed after callback success or failure.
 - Siteverify is called only when a challenge-required request retries with a token.
 - A valid challenge creates a signed, HttpOnly, Secure, SameSite=Lax clearance cookie scoped to `/examples`.
@@ -176,47 +181,100 @@ This is only an app-level bypass. If Cloudflare Rate Limiting challenges smoke t
 
 ## Recommended Cloudflare layer: Rate Limiting Rules
 
-The best first production protection for Dynamic Worker cost is Cloudflare Rate Limiting, because it runs before the Worker and directly targets repeated POST runs.
+The best first production protection for Dynamic Worker cost is Cloudflare Rate Limiting, because it runs before the Worker and limits repeated runner traffic at the edge.
 
-Docs: <https://developers.cloudflare.com/waf/rate-limiting-rules/>
+Docs:
 
-Suggested rule:
+- Overview: <https://developers.cloudflare.com/waf/rate-limiting-rules/>
+- Parameters and plan limits: <https://developers.cloudflare.com/waf/rate-limiting-rules/parameters/>
+- Request-rate calculation: <https://developers.cloudflare.com/waf/rate-limiting-rules/request-rate/>
+- Dashboard setup: <https://developers.cloudflare.com/waf/rate-limiting-rules/create-zone-dashboard/>
+
+Important Cloudflare details that affect this project:
+
+- Rate limit counters are kept per unique combination of configured characteristics, and Cloudflare implicitly includes the data-center ID (`cf.colo.id`). They are not global counters across the whole Cloudflare network.
+- Available expression fields, characteristics, counting periods, mitigation periods, and rule counts vary by Cloudflare plan.
+- Per Cloudflare's availability table, matching on HTTP method in a rate limiting rule expression is available on Business and Enterprise plans, not Free/Pro.
+- On Free/Pro/Business, challenge actions (`managed_challenge`, `js_challenge`, `challenge`) use request throttling; you do not configure a mitigation duration. After a visitor passes the challenge, that request counter is reset. Enterprise can configure challenge-action duration.
+- Cloudflare Challenge Pages interrupt the request flow and are not ideal for AJAX/fetch API-style calls. The runner POST is submitted by browser JavaScript, so a `Block` action with a `429` response is more predictable for high-rate POST abuse than a Managed Challenge on the POST itself. Use app-level Turnstile, or Cloudflare Turnstile Pre-clearance, when the desired behavior is browser verification rather than a hard edge cap.
+
+### Business/Enterprise precise POST rule
+
+If the zone plan supports the `http.request.method` field in rate limiting expressions, use this precise rule:
 
 ```text
 Rule name:
-  Protect Python By Example runner
+  Protect Python By Example runner POSTs
 
-Expression:
+When incoming requests match:
   http.request.method eq "POST"
   and starts_with(http.request.uri.path, "/examples/")
 
-Threshold:
-  30 requests / 60 seconds / IP
+With the same characteristics:
+  IP
+  # or IP with NAT support, if available and classroom/shared-network false positives matter
 
-Action:
-  Managed Challenge
+When rate exceeds:
+  30 requests / 60 seconds
 
-Mitigation timeout:
+Then take action:
+  Block
+
+Response code:
+  429
+
+Duration:
   5 minutes
 ```
 
 For classrooms/workshops behind one NAT, start higher:
 
 ```text
-100 requests / 60 seconds / IP
+100 requests / 60 seconds / IP or IP-with-NAT-support bucket
 ```
+
+### Free/Pro fallback rule
+
+If the zone plan does not allow `http.request.method` in rate limiting expressions, do **not** use the POST-only expression above. Use a path-only rule and set the threshold high enough that normal page reading is unaffected:
+
+```text
+Rule name:
+  Protect Python By Example examples path
+
+When incoming requests match:
+  starts_with(http.request.uri.path, "/examples/")
+
+With the same characteristics:
+  IP
+
+Then take action:
+  Block
+
+Response code:
+  429
+```
+
+Plan-aware starting points:
+
+```text
+Free:  20 requests / 10 seconds / IP, 10-second mitigation
+Pro:   120 requests / 60 seconds / IP, 5-minute mitigation
+```
+
+Because this fallback counts both example page GETs and runner POSTs, tune it from Cloudflare Security Events before lowering thresholds.
 
 Why this is the recommended first layer:
 
 - it runs before Worker execution
 - normal learners do not see Turnstile
 - no app-side state is needed
-- it protects the precise expensive path
-- it is easier to reason about than broad bot-risk rules
+- Business/Enterprise can target the precise expensive POST path
+- Free/Pro can still provide a coarse emergency brake on the `/examples/` path
 
 Tradeoffs:
 
 - IP-based thresholds can false-positive shared networks
+- Free/Pro path-only rules count GETs as well as POSTs
 - distributed abuse can evade a per-IP rule
 - rule configuration lives in Cloudflare unless managed through API/Terraform
 - smoke can be affected if repeated many times in a short window
@@ -227,11 +285,10 @@ Docs: <https://developers.cloudflare.com/waf/custom-rules/>
 
 WAF rules are a good second layer for risky-looking traffic, for example low reputation, suspicious user agents, or bot-management signals if available on the Cloudflare plan.
 
-Shape:
+For top-level HTML page requests, a Managed Challenge custom rule can be appropriate:
 
 ```text
-http.request.method eq "POST"
-and starts_with(http.request.uri.path, "/examples/")
+starts_with(http.request.uri.path, "/examples/")
 and <risk signal>
 ```
 
@@ -241,7 +298,13 @@ Action:
 Managed Challenge
 ```
 
-Managed Challenge docs: <https://developers.cloudflare.com/cloudflare-challenges/challenge-types/managed-challenge/>
+Managed Challenge docs: <https://developers.cloudflare.com/cloudflare-challenges/challenge-types/challenge-pages/#managed-challenges>
+
+For the AJAX/fetch runner endpoint itself, avoid returning a Challenge Page directly to the POST request. Cloudflare documents that Challenge Pages can fail when the browser expects a non-HTML AJAX/XHR/fetch response. Prefer one of these instead:
+
+- app-level Turnstile, as implemented here
+- Cloudflare Turnstile Pre-clearance if integrating WAF challenges with API requests
+- `Block` / `429` for hard abuse caps
 
 Use WAF custom rules for risk filtering. Use Rate Limiting for volume control.
 
@@ -295,10 +358,18 @@ Recommended settings:
 ```text
 Name: pythonbyexample-production
 Hostname: www.pythonbyexample.dev
-Mode: Managed or Invisible
+Mode: Invisible
 ```
 
-Docs: <https://developers.cloudflare.com/turnstile/>
+Docs:
+
+- Turnstile overview: <https://developers.cloudflare.com/turnstile/>
+- Widget modes: <https://developers.cloudflare.com/turnstile/concepts/widget/>
+- Widget configuration options: <https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/widget-configurations/>
+
+Invisible mode note: Cloudflare documents that invisible widgets have no visual footprint, and that widget `size` values are `normal`, `flexible`, or `compact`; invisibility is selected by widget mode, not by `size="invisible"`.
+
+Privacy note: Cloudflare documents that using Invisible mode requires referencing the Cloudflare Turnstile Privacy Addendum in your own privacy policy.
 
 Copy:
 
@@ -341,25 +412,24 @@ Do **not** put secret keys in `wrangler.jsonc`.
 Cloudflare Dashboard:
 
 ```text
+Security rules → Create rule → Rate limiting rule
+```
+
+or, in the WAF dashboard:
+
+```text
 Security → WAF → Rate limiting rules → Create rule
 ```
 
-Docs: <https://developers.cloudflare.com/waf/rate-limiting-rules/>
+Docs: <https://developers.cloudflare.com/waf/rate-limiting-rules/create-zone-dashboard/>
 
-Expression:
+Use the plan-aware guidance above:
 
-```text
-http.request.method eq "POST"
-and starts_with(http.request.uri.path, "/examples/")
-```
+- Business/Enterprise: match `POST` + `/examples/`, start at `30 requests / 60 seconds`, action `Block`, response `429`, duration `5 minutes`.
+- Classroom/shared NAT: start around `100 requests / 60 seconds` or use `IP with NAT support` if available.
+- Free/Pro: if method matching is unavailable, use a path-only `/examples/` rule with a higher threshold because it also counts GET page views.
 
-Start with:
-
-```text
-30 requests / 60 seconds / IP → Managed Challenge for 5 minutes
-```
-
-Raise the threshold if teaching cohorts behind a shared IP hit it.
+Do not configure `Managed Challenge for 5 minutes` on Free/Pro/Business rate limiting rules. Cloudflare documents that challenge actions on those plans use request throttling and have no selected duration; only Enterprise can configure a challenge-action duration. For this AJAX/fetch POST endpoint, a predictable `Block`/`429` edge cap is preferable.
 
 ### 4. Deploy
 
@@ -423,7 +493,7 @@ Browser behavior:
 
 1. click Run
 2. challenge is requested
-3. invisible Turnstile runs or displays only if Cloudflare needs interaction
+3. Invisible-mode Turnstile runs without page-load widget furniture
 4. widget disappears after callback
 5. run retries and produces output
 6. later runs in the same clearance window skip Turnstile

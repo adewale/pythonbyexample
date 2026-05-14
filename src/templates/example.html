@@ -69,7 +69,7 @@ async function requestTurnstileToken() {
     challengeBox.innerHTML = '';
     turnstileWidgetId = turnstile.render(challengeBox, {
       sitekey: challengeBox.dataset.turnstileSitekey,
-      size: 'invisible',
+      execution: 'execute',
       callback: (token) => { removeTurnstile(); resolve(token); },
       'error-callback': () => { removeTurnstile(); reject(new Error('Turnstile challenge failed')); },
       'expired-callback': () => { removeTurnstile(); reject(new Error('Turnstile challenge expired')); }

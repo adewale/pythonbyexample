@@ -326,7 +326,17 @@ class WranglerObservabilityConfigTests(unittest.TestCase):
         self.assertEqual(config["observability"]["head_sampling_rate"], 1)
         self.assertEqual(config["observability"]["logs"], {"invocation_logs": False})
         self.assertEqual(config["version_metadata"], {"binding": "CF_VERSION_METADATA"})
-        self.assertNotIn("vars", config)
+        self.assertEqual(
+            config.get("vars"),
+            {
+                "TURNSTILE_CHALLENGE_MODE": "session",
+                "TURNSTILE_CLEARANCE_SECONDS": "28800",
+            },
+        )
+        self.assertNotIn("TURNSTILE_SITE_KEY", config.get("vars", {}))
+        self.assertNotIn("TURNSTILE_SECRET_KEY", config.get("vars", {}))
+        self.assertNotIn("TURNSTILE_CLEARANCE_SECRET", config.get("vars", {}))
+        self.assertNotIn("PBE_SMOKE_BYPASS_SECRET", config.get("vars", {}))
 
 
 class WideEventMiddlewareTests(unittest.TestCase):

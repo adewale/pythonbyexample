@@ -28,6 +28,10 @@
   "version_metadata": {
     "binding": "CF_VERSION_METADATA"
   },
+  "vars": {
+    "TURNSTILE_CHALLENGE_MODE": "session",
+    "TURNSTILE_CLEARANCE_SECONDS": "28800"
+  },
   "assets": {
     "directory": "./public"
   },
