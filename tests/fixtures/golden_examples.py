@@ -7907,16 +7907,18 @@ EXAMPLES = [{'slug': 'hello-world',
                   'Python installation and from other projects. The usual workflow is a '
                   'command-line one: create `.venv`, activate it, then install project '
                   'dependencies there.',
-                  'In standard Python, `python -m venv .venv` is the everyday command. Dynamic '
-                  'Workers do not provide a project-local environment workflow, so this page '
-                  'teaches the proper standard-Python boundary and keeps the runnable evidence '
-                  'limited to what can be observed deterministically.',
+                  "In standard Python, `python -m venv .venv` is the everyday command. This site's "
+                  'live example runner is built from declared dependencies rather than an '
+                  'activated shell environment, so the runnable part keeps to deterministic '
+                  'evidence while the page still teaches the standard-Python workflow.',
                   'A virtual environment changes installation and import paths. It does not change '
                   'the Python language, package layout rules, or module names.'],
   'notes': ['Use `python -m venv .venv` for everyday standard-Python project setup.',
             'A venv isolates installed packages; it does not change how imports are written.',
-            'Dynamic Workers use a deployment dependency model, not an activated shell '
-            'environment.'],
+            "This site's runner uses a deployment dependency model, not an activated shell "
+            'environment.',
+            'That runner constraint is separate from the standard Python `venv` workflow you would '
+            'use in local projects.'],
   'see_also': ['packages', 'modules', 'import-aliases'],
   'walkthrough': [{'prose': '`venv.EnvBuilder` exposes the same environment-creation mechanism as '
                             '`python -m venv`. A temporary directory keeps the example from '
@@ -7937,8 +7939,8 @@ EXAMPLES = [{'slug': 'hello-world',
                        'directory with its own interpreter entry points and package install '
                        'location. After activation, `python -m pip install ...` installs into that '
                        'environment rather than into another project. (This workflow is for '
-                       'standard Python projects — Dynamic Workers are built from declared '
-                       'dependencies instead of an activated shell environment.)'],
+                       'standard Python projects. The Python By Example runner is deployed from '
+                       'declared dependencies instead of an activated shell environment.)'],
              'code': 'import subprocess\n'
                      'import sys\n'
                      '\n'
@@ -10421,9 +10423,9 @@ EXAMPLES = [{'slug': 'hello-world',
                   'another program, waits for it, and gives you a result object with the exit code '
                   'and captured output.',
                   'In standard Python this is the right tool for calling Git, compilers, shells, '
-                  'or another Python interpreter. Dynamic Workers do not provide an '
-                  'operating-system process table, so the page teaches the proper '
-                  '`subprocess.run()` contract and labels the runtime boundary instead of '
+                  "or another Python interpreter. This site's live example runner does not expose "
+                  'an operating-system process table, so the page teaches the proper '
+                  '`subprocess.run()` contract and labels the runner boundary instead of '
                   'pretending the command can run here.',
                   'Use a list of arguments when possible, capture output when the parent program '
                   'needs to inspect it, and treat a non-zero return code as a failure. The '
@@ -10432,7 +10434,9 @@ EXAMPLES = [{'slug': 'hello-world',
                   'streams and an exit status.'],
   'notes': ['Use a list of arguments instead of shell strings when possible.',
             'Capture output when the parent program needs to inspect it.',
-            '`check=True` turns non-zero exits into exceptions.'],
+            '`check=True` turns non-zero exits into exceptions.',
+            'If you run this in local/server Python, the child process is real; on this site, the '
+            'runnable evidence preserves the API shape without spawning a process.'],
   'see_also': ['virtual-environments', 'networking', 'threads-and-processes'],
   'walkthrough': [{'prose': '`subprocess.run()` starts a child process and waits for it. '
                             "`capture_output=True` stores the child's standard output and error "
@@ -10454,7 +10458,8 @@ EXAMPLES = [{'slug': 'hello-world',
                        'and raises `CalledProcessError` if the child exits non-zero '
                        '(`check=True`). The returned `result` holds the captured streams and exit '
                        'code as portable evidence the child ran. (This fragment runs in standard '
-                       "Python only — Dynamic Workers don't provide child processes.)"],
+                       'Python only — the Python By Example runner does not provide child '
+                       'processes.)'],
              'code': 'result = subprocess.run(\n'
                      '    [sys.executable, "-c", "print(\'child process\')"],\n'
                      '    text=True,\n'
@@ -10508,9 +10513,9 @@ EXAMPLES = [{'slug': 'hello-world',
                   'path. Threads are useful for overlapping I/O-shaped waits, while processes are '
                   'useful when CPU-bound work needs separate interpreter processes.',
                   'In standard Python, `ThreadPoolExecutor` and `ProcessPoolExecutor` are the '
-                  'ordinary tools for this lesson. Dynamic Workers do not expose native threads or '
-                  'child processes, so this page keeps the proper executor model visible and then '
-                  'explains why the full process boundary cannot execute in this runtime.',
+                  "ordinary tools for this lesson. This site's live example runner does not expose "
+                  'native threads or child processes, so this page keeps the proper executor model '
+                  'visible and separates the standard Python idea from what can execute here.',
                   'This is different from `asyncio`: threads and processes run ordinary callables '
                   'through executors, while `async` code cooperatively awaits coroutines. Choose '
                   'the smallest concurrency model that matches the bottleneck.'],
@@ -10518,7 +10523,9 @@ EXAMPLES = [{'slug': 'hello-world',
             'Processes avoid shared interpreter state but require values to cross a process '
             'boundary.',
             'Prefer `asyncio` for coroutine-based I/O and executors for ordinary blocking '
-            'callables.'],
+            'callables.',
+            'The displayed executor names are standard Python concepts; the site avoids actually '
+            'creating host threads or processes in the live runner.'],
   'see_also': ['async-await', 'subprocesses', 'networking'],
   'walkthrough': [{'prose': 'A thread pool runs ordinary callables while sharing memory with the '
                             'current process. `map()` returns results in input order.',
@@ -10540,8 +10547,8 @@ EXAMPLES = [{'slug': 'hello-world',
                        'two child processes with isolated memory. Each `pool.map` returns an '
                        'iterator over results in input order, and the surrounding `with` block '
                        'joins the workers when the body exits. (This fragment runs in standard '
-                       "Python only — Dynamic Workers don't provide native threads or child "
-                       'processes.)'],
+                       'Python only — the Python By Example runner does not provide native threads '
+                       'or child processes.)'],
              'code': 'with ThreadPoolExecutor(max_workers=2) as pool:\n'
                      '    print(list(pool.map(square, [1, 2, 3])))\n'
                      '\n'
@@ -10594,16 +10601,18 @@ EXAMPLES = [{'slug': 'hello-world',
                   'encoded before it leaves the process and decoded after bytes come back.',
                   'In standard Python, the socket version of this lesson uses connected endpoints '
                   'such as `socket.create_connection()` or, for a local deterministic '
-                  'demonstration, `socket.socketpair()`. Dynamic Workers do not expose arbitrary '
-                  'OS sockets, so this page teaches the proper socket contract while making the '
-                  'runtime constraint explicit.',
+                  "demonstration, `socket.socketpair()`. This site's live example runner does not "
+                  'expose arbitrary OS sockets or outbound calls, so this page teaches the socket '
+                  'contract while making the runner constraint explicit.',
                   'The useful mental model is endpoint plus bytes plus cleanup. A socket connects '
                   'two endpoints, transfers byte strings, and must be closed when the conversation '
                   'is finished.'],
   'notes': ['Network protocols move bytes, not Python `str` objects.',
             'Close real sockets when finished, usually with a context manager or `finally` block.',
             'Use high-level HTTP libraries for application HTTP unless socket-level control is the '
-            'lesson.'],
+            'lesson.',
+            'Cloudflare Workers support HTTP-style networking through platform APIs; this example '
+            'avoids outbound calls so the editable lesson stays deterministic and safe.'],
   'see_also': ['bytes-and-bytearray', 'subprocesses', 'async-await'],
   'walkthrough': [{'prose': 'The complete version adds two things: a `try`/`finally` so both '
                             'endpoints close even if `recv` or the surrounding work raises, and a '
@@ -10626,8 +10635,8 @@ EXAMPLES = [{'slug': 'hello-world',
                        'bytes into one end, and `recv` reads up to 16 bytes off the other. The '
                        'byte boundary is the whole point: `"ping".encode("utf-8")` produces '
                        "`b'ping'`, which is what the socket actually moves. (This fragment runs in "
-                       "standard Python only — Dynamic Workers don't expose arbitrary sockets and "
-                       'this app disables Worker outbound access.)'],
+                       'standard Python only — the Python By Example runner does not expose '
+                       'arbitrary sockets and disables outbound access for edited examples.)'],
              'code': 'left, right = socket.socketpair()\n'
                      'left.sendall("ping".encode("utf-8"))\n'
                      'data = right.recv(16)',

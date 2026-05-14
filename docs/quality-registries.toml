@@ -555,48 +555,6 @@ outcomes = [
   "write deterministic tests with `unittest` or `pytest`",
 ]
 
-[journey_outcomes."workers::Replace unavailable process boundaries with portable evidence."]
-journey = "workers"
-section = "Replace unavailable process boundaries with portable evidence."
-support = [
-  "virtual-environments",
-  "subprocesses",
-  "threads-and-processes",
-]
-outcomes = [
-  "report stable environment facts instead of creating or depending on a local virtual environment",
-  "show the command and `CompletedProcess` result shape",
-  "compare thread and process executor boundaries",
-]
-
-[journey_outcomes."workers::Keep network lessons local to the protocol boundary."]
-journey = "workers"
-section = "Keep network lessons local to the protocol boundary."
-support = [
-  "bytes-and-bytearray",
-  "networking",
-  "async-await",
-]
-outcomes = [
-  "show the text-to-bytes boundary that networking and subprocess APIs usually require",
-  "make endpoint and byte-encoding boundaries visible without opening a socket",
-  "show the supported coroutine model for I/O-shaped work in this environment",
-]
-
-[journey_outcomes."workers::Preserve the lesson while respecting the runtime."]
-journey = "workers"
-section = "Preserve the lesson while respecting the runtime."
-support = [
-  "logging",
-  "testing",
-  "context-managers",
-]
-outcomes = [
-  "show operational output through a configurable Python API rather than shell output",
-  "capture test-runner output so the page remains deterministic",
-  "show cleanup boundaries that still apply when resources are represented abstractly",
-]
-
 [score_model]
 # Criterion weights mirror docs/example-quality-rubric.md. The registry
 # makes the scoring model inspectable even before every example is broken

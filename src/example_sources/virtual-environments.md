@@ -14,7 +14,7 @@ expected_output = ".venv\nTrue\n"
 
 Virtual environments isolate a project's installed packages from the global Python installation and from other projects. The usual workflow is a command-line one: create `.venv`, activate it, then install project dependencies there.
 
-In standard Python, `python -m venv .venv` is the everyday command. Dynamic Workers do not provide a project-local environment workflow, so this page teaches the proper standard-Python boundary and keeps the runnable evidence limited to what can be observed deterministically.
+In standard Python, `python -m venv .venv` is the everyday command. This site's live example runner is built from declared dependencies rather than an activated shell environment, so the runnable part keeps to deterministic evidence while the page still teaches the standard-Python workflow.
 
 A virtual environment changes installation and import paths. It does not change the Python language, package layout rules, or module names.
 
@@ -36,7 +36,7 @@ with tempfile.TemporaryDirectory() as directory:
 :::
 
 :::unsupported
-The standard project setup command is `python -m venv .venv`. It creates a directory with its own interpreter entry points and package install location. After activation, `python -m pip install ...` installs into that environment rather than into another project. (This workflow is for standard Python projects — Dynamic Workers are built from declared dependencies instead of an activated shell environment.)
+The standard project setup command is `python -m venv .venv`. It creates a directory with its own interpreter entry points and package install location. After activation, `python -m pip install ...` installs into that environment rather than into another project. (This workflow is for standard Python projects. The Python By Example runner is deployed from declared dependencies instead of an activated shell environment.)
 
 ```python
 import subprocess
@@ -74,5 +74,6 @@ True
 :::note
 - Use `python -m venv .venv` for everyday standard-Python project setup.
 - A venv isolates installed packages; it does not change how imports are written.
-- Dynamic Workers use a deployment dependency model, not an activated shell environment.
+- This site's runner uses a deployment dependency model, not an activated shell environment.
+- That runner constraint is separate from the standard Python `venv` workflow you would use in local projects.
 :::

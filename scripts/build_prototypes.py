@@ -222,7 +222,7 @@ BANNER_CSS = """
 
 
 
-# ─── Journey-figures gestalt (all 18 section figures on one page) ──────
+# ─── Journey-figures gestalt (all journey section figures on one page) ─
 
 
 JOURNEY_FIGURES_GESTALT_STYLE = """
@@ -255,10 +255,11 @@ JOURNEY_FIGURES_GESTALT_STYLE = """
 def build_journey_figures_gestalt() -> None:
     """One page showing every journey section's figure, grouped by journey.
 
-    Reviewers can see all 18 section figures at once to spot drift and
+    Reviewers can see all section figures at once to spot drift and
     apply the rubric uniformly (see docs/journey-visualisation-rubric.md).
     """
     blocks: list[str] = []
+    total_figures = 0
     for slug in (
         "runtime",
         "control-flow",
@@ -267,7 +268,6 @@ def build_journey_figures_gestalt() -> None:
         "interfaces",
         "types",
         "reliability",
-        "workers",
     ):
         journey = JOURNEYS_BY_SLUG[slug]
         cards: list[str] = []
@@ -283,6 +283,7 @@ def build_journey_figures_gestalt() -> None:
                 f"<figcaption>{html.escape(caption)}</figcaption>"
                 f"</figure>"
             )
+            total_figures += 1
         blocks.append(
             f'<section class="journey-block">'
             f'<h2>{html.escape(journey["title"])}</h2>'
@@ -293,7 +294,7 @@ def build_journey_figures_gestalt() -> None:
     body = f"""
 <article class="example-shell">
   <section class="example-intro">
-    <p class="eyebrow">Journeys · 18 section figures</p>
+    <p class="eyebrow">Journeys · {total_figures} section figures</p>
     <h1>Journey-figures gestalt</h1>
     <p class="meta">Every journey section's figure on one page so the set can be reasoned about as a whole. Score against <a class="text-link" href="https://github.com/adewale/pythonbyexample/blob/main/docs/journey-visualisation-rubric.md">the rubric</a>; redesign anything below the 8.5 gate before shipping to /journeys/&lt;slug&gt;.</p>
   </section>
@@ -303,7 +304,7 @@ def build_journey_figures_gestalt() -> None:
     (OUT_DIR / "journey-figures-gestalt.html").write_text(
         page(
             "Journey-figures gestalt",
-            "All 18 journey section figures grouped by journey, for uniform rubric review.",
+            f"All {total_figures} journey section figures grouped by journey, for uniform rubric review.",
             JOURNEY_FIGURES_GESTALT_STYLE,
             body,
         )

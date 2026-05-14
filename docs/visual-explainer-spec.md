@@ -132,8 +132,7 @@ scored against `docs/journey-visualisation-rubric.md`. The same template
 is reused for every journey; figures are mapped via
 `JOURNEY_SECTION_FIGURES` in `scripts/build_prototypes.py`. Sections
 without a figure render as a heading + list with no figure column,
-which is the intended state for journeys still pending design (today,
-all three sections of the Workers journey).
+but production journeys are currently expected to have section figures.
 
 ### Why these two, not five
 

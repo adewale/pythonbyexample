@@ -661,37 +661,6 @@ def dict_buckets(c: Canvas) -> None:
     c.label(218, 58, "collision", anchor="start")
 
 
-# ─── Workers journey (abstract sections; designs tentative) ──────────
-
-
-def workers_portable_evidence(c: Canvas) -> None:
-    """Workers journey · teach the process boundary, then preserve evidence inside Worker limits."""
-    c.tag(0, 0, "standard Python")
-    c.cell(0, 12, "parent", w=64, h=22)
-    c.closed_arrow(64, 23, 100, 23, emphasis=False)
-    c.cell(102, 12, "child process", w=108, h=22, ghost=True)
-    c.dashed(102, 23, 210, 23)
-    c.tag(0, 52, "Dynamic Worker")
-    c.cell(0, 64, "same lesson", w=92, h=22)
-    c.closed_arrow(92, 75, 128, 75, emphasis=True)
-    c.cell(130, 64, "captured value", w=106, h=22, soft=True)
-
-
-def workers_protocol_local(c: Canvas) -> None:
-    """Workers journey · keep the bytes/protocol lesson local when sockets are unavailable."""
-    c.tag(0, 0, "protocol boundary")
-    c.cell(0, 12, "str", w=48, h=22)
-    c.closed_arrow(48, 23, 82, 23, emphasis=False)
-    c.label(65, 16, "encode", anchor="middle")
-    c.cell(84, 12, "bytes", w=64, h=22, soft=True)
-    c.dashed(148, 23, 184, 23)
-    c.cell(186, 12, "socket", w=70, h=22, ghost=True)
-    c.tag(0, 66, "local evidence")
-    c.cell(0, 78, "bytes", w=64, h=22, soft=True)
-    c.closed_arrow(64, 89, 100, 89, emphasis=True)
-    c.cell(102, 78, "parsed response", w=118, h=22)
-
-
 # ─── Examples promoted from the gestalt: new paint code ──────────────
 
 
@@ -1427,17 +1396,6 @@ def loop_else_gate(c: Canvas) -> None:
     c.cell(152, 50, "broke · else skipped", w=160, h=20)
 
 
-def workers_lesson_runtime(c: Canvas) -> None:
-    """Workers journey · standard feature, runtime constraint, preserved learner evidence."""
-    c.cell(0, 28, "Python feature", w=106, h=24)
-    c.closed_arrow(106, 40, 140, 18, emphasis=False)
-    c.cell(142, 6, "standard use", w=96, h=20)
-    c.closed_arrow(106, 40, 140, 62, emphasis=True)
-    c.cell(142, 50, "Worker evidence", w=120, h=20, soft=True)
-    c.dashed(238, 16, 266, 16)
-    c.cell(268, 6, "runtime limit", w=88, h=20, ghost=True)
-
-
 def lazy_stream(c: Canvas) -> None:
     """Iteration · Compose lazy value streams: filter and map flow values without materialising."""
     c.object_box(0, 26, "source", "[a,b,c]", w=78, h=24)
@@ -1532,10 +1490,6 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "comprehension-equivalence": (comprehension_equivalence, 280, 76),
     "list-append": (list_append, 220, 36),
     "dict-buckets": (dict_buckets, 270, 88),
-    # Workers journey (constraint-shaped sections; tightened designs)
-    "workers-portable-evidence": (workers_portable_evidence, 238, 94),
-    "workers-protocol-local": (workers_protocol_local, 258, 108),
-    "workers-lesson-runtime": (workers_lesson_runtime, 358, 76),
     # Newly designed paint code for examples that lacked a figure
     "number-lines": (number_lines, 260, 78),
     "expression-tree": (expression_tree, 220, 92),
@@ -2232,19 +2186,6 @@ SECTION_FIGURES: dict[str, tuple[str, str]] = {
         "reliability-operation-boundary",
         "Async, threaded, test, and logging work cross an operation boundary before evidence comes back.",
     ),
-    # Workers — constraint-shaped sections.
-    "Replace unavailable process boundaries with portable evidence.": (
-        "workers-portable-evidence",
-        "Worker isolation breaks the usual cross-process pathways; the lesson preserves a captured value as portable evidence instead.",
-    ),
-    "Keep network lessons local to the protocol boundary.": (
-        "workers-protocol-local",
-        "Demonstrate the protocol shape (request and response) rather than calling out over the network.",
-    ),
-    "Preserve the lesson while respecting the runtime.": (
-        "workers-lesson-runtime",
-        "The lesson's evidence survives across the boundary that the worker runtime enforces.",
-    ),
 }
 
 
@@ -2277,10 +2218,6 @@ SECTION_FIGURE_SCORES: dict[str, tuple[float, str]] = {
     "Choose the right loop shape.": (9.0, "loop choice by stopping rule"),
     "See the protocol behind `for`.": (9.5, "for surface mapped to iter()/next()/StopIteration"),
     "Compose lazy value streams.": (9.0, "consumer pull drives the lazy pipeline"),
-    # Workers
-    "Replace unavailable process boundaries with portable evidence.": (9.0, "standard process boundary contrasted with Worker-safe evidence"),
-    "Keep network lessons local to the protocol boundary.": (9.0, "protocol byte boundary plus local parsed evidence"),
-    "Preserve the lesson while respecting the runtime.": (9.0, "standard feature, runtime limit, preserved lesson evidence"),
     # Shapes
     "Pick the container that matches the question.": (9.0, "list/tuple/dict/set per question"),
     "Move between shapes deliberately.": (9.0, "input → transform → result"),

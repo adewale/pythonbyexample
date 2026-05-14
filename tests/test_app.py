@@ -195,6 +195,8 @@ class AppTests(unittest.TestCase):
         index = route("https://example.com/journeys")
         self.assertEqual(index.status, 200)
         self.assertIn("Python learning journeys", index.body)
+        self.assertNotIn('/journeys/workers', index.body)
+        self.assertEqual(route("https://example.com/journeys/workers").status, 404)
         self.assertGreaterEqual(len(JOURNEYS), 6)
         for journey in JOURNEYS:
             self.assertIn(f'/journeys/{journey["slug"]}', index.body)

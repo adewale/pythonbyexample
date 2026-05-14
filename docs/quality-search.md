@@ -15,7 +15,7 @@ Use these moves when a page is already close and the weakest criterion is clear:
 - **Add a before/after contrast** when the feature exists to remove boilerplate or clarify a shape.
 - **Add a runtime/static boundary cell** for typing pages where runtime behavior differs from type-checker behavior.
 - **Add a failure/recovery cell** for parsing, exceptions, warnings, and validation examples.
-- **Add a standard-Python/Worker-boundary unsupported cell** for runtime features constrained by Dynamic Workers.
+- **Add a standard-Python/runner-boundary unsupported cell** for runtime features constrained by this site's live example runner.
 - **Strengthen graph edges** with prerequisite, neighboring, and next-depth `see_also` links.
 - **Replace generic prose** with a concrete domain pressure: user input, package setup, protocol bytes, record shape, service logging, or state transition.
 
@@ -58,5 +58,6 @@ Future improvements that create new quality headroom:
 - Add an authoring command that proposes the top three rewrite moves for a slug from the criterion deficits.
 - Add browser snapshots for representative low-score shapes, not only layout smoke.
 - Track page archetypes (`foundational`, `protocol-boundary`, `static-typing`, `aggregator`, `runtime-constrained`) so rubrics can apply the right expectations.
+- TODO: Design a future learner-facing journey about the limitations and adaptation choices in this site's editable examples, without framing those constraints as Cloudflare Workers platform limitations.
 - Add a no-figure review path to avoid weak diagrams for constraint-shaped pages.
 - Let CI post a quality delta comment for PRs: scores changed, graph edges changed, weak criteria changed.

@@ -23,7 +23,7 @@ Topic-specific gates:
 - **Broad surface tours** — if a title names a broad surface area (`Testing`, `Packages`, `Regular Expressions`, `Type Hints`, `Async Await`, `Special Methods`, `Operators`, `Literals`), the page must either cover the reader's reasonable expectations or clearly frame itself as a first pass and link to focused neighbors. A broad title with one narrow demonstration is a scope bug, not just a content gap.
 - **Reduce without distorting** — small examples are good only when the necessary boundary, contrast, or edge case remains visible. If compression removes the part that makes the concept understandable, split the example or add another cell.
 - **Map-or-split rule** — broad pages must either be surface maps with explicit categories and `See also` links, or be split into narrower pages. Do not ship a broad page that merely samples unrelated forms.
-- **Runtime-boundary examples** — when standard Python code cannot run in Dynamic Workers, teach the standard form first, state the runtime constraint once, and avoid repeated apology or caveat-heavy prose.
+- **Runtime-boundary examples** — when standard Python code cannot run in this site's live example runner, teach the standard form first, state the runner constraint once, and avoid repeated apology or caveat-heavy prose.
 
 Release gates outside the score:
 

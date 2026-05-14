@@ -38,6 +38,7 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 - Deployment flow now regenerates embedded example data and asset fingerprints first.
 - `src/examples.py` is now a compatibility shim over Markdown example sources.
 - Output panels reserve space for execution timing to prevent layout shift after runs.
+- Removed the Workers journey and folded its runtime-boundary guidance into the affected examples' local notes.
 
 ### Fixed
 

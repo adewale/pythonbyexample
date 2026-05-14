@@ -378,40 +378,6 @@ JOURNEYS = [
             },
         ],
     },
-    {
-        "slug": "workers",
-        "title": "Workers",
-        "summary": "This journey explains the examples that were adapted so they can teach operating-system boundaries while still running inside Cloudflare Dynamic Workers.",
-        "sections": [
-            {
-                "title": "Replace unavailable process boundaries with portable evidence.",
-                "summary": "Dynamic Workers run Python in a constrained runtime, so examples cannot assume child processes, shell commands, or project-local virtual environments are available.",
-                "items": [
-                    ("example", "virtual-environments", "report stable environment facts instead of creating or depending on a local virtual environment"),
-                    ("example", "subprocesses", "show the command and `CompletedProcess` result shape"),
-                    ("example", "threads-and-processes", "compare thread and process executor boundaries"),
-                ],
-            },
-            {
-                "title": "Keep network lessons local to the protocol boundary.",
-                "summary": "Workers should not open arbitrary low-level sockets, so the networking example teaches addresses, protocol constants, and bytes without making an outbound connection.",
-                "items": [
-                    ("example", "bytes-and-bytearray", "show the text-to-bytes boundary that networking and subprocess APIs usually require"),
-                    ("example", "networking", "make endpoint and byte-encoding boundaries visible without opening a socket"),
-                    ("example", "async-await", "show the supported coroutine model for I/O-shaped work in this environment"),
-                ],
-            },
-            {
-                "title": "Preserve the lesson while respecting the runtime.",
-                "summary": "The changed examples favor deterministic, editable evidence over fake demonstrations of unavailable operating-system features.",
-                "items": [
-                    ("example", "logging", "show operational output through a configurable Python API rather than shell output"),
-                    ("example", "testing", "capture test-runner output so the page remains deterministic"),
-                    ("example", "context-managers", "show cleanup boundaries that still apply when resources are represented abstractly"),
-                ],
-            },
-        ],
-    },
 ]
 
 JOURNEYS_BY_SLUG = {journey["slug"]: journey for journey in JOURNEYS}

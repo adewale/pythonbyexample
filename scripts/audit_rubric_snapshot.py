@@ -189,7 +189,7 @@ def dimension_ledgers(
             independence_result,
         ),
         ("Layout fit", "Journey figure dimensions within production column", "PASS"),
-        ("Outcome support", "`check_journey_outcomes.py` over all 24 sections", "PASS"),
+        ("Outcome support", "`check_journey_outcomes.py` over all journey sections", "PASS"),
         ("Prerequisite order", "Journey order reviewed against lesson dependencies", "PASS"),
     ]
     return examples, figures, journeys

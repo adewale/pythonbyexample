@@ -22,7 +22,7 @@ SMOKE_PATHS = [
     "/examples/async-await",
     "/examples/networking",
     "/examples/subprocesses",
-    "/journeys/workers",
+    "/journeys/reliability",
     "/prototyping/production-figures-gestalt",
 ]
 POST_SMOKES = [

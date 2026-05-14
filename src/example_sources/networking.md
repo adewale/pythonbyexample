@@ -14,7 +14,7 @@ expected_output = "b'ping'\nping\n"
 
 Networking code sends and receives bytes across protocol boundaries. Higher-level HTTP clients hide many details, but the core rule remains: text is encoded before it leaves the process and decoded after bytes come back.
 
-In standard Python, the socket version of this lesson uses connected endpoints such as `socket.create_connection()` or, for a local deterministic demonstration, `socket.socketpair()`. Dynamic Workers do not expose arbitrary OS sockets, so this page teaches the proper socket contract while making the runtime constraint explicit.
+In standard Python, the socket version of this lesson uses connected endpoints such as `socket.create_connection()` or, for a local deterministic demonstration, `socket.socketpair()`. This site's live example runner does not expose arbitrary OS sockets or outbound calls, so this page teaches the socket contract while making the runner constraint explicit.
 
 The useful mental model is endpoint plus bytes plus cleanup. A socket connects two endpoints, transfers byte strings, and must be closed when the conversation is finished.
 
@@ -36,7 +36,7 @@ finally:
 :::
 
 :::unsupported
-`socketpair()` returns two connected endpoints. `sendall` writes encoded bytes into one end, and `recv` reads up to 16 bytes off the other. The byte boundary is the whole point: `"ping".encode("utf-8")` produces `b'ping'`, which is what the socket actually moves. (This fragment runs in standard Python only — Dynamic Workers don't expose arbitrary sockets and this app disables Worker outbound access.)
+`socketpair()` returns two connected endpoints. `sendall` writes encoded bytes into one end, and `recv` reads up to 16 bytes off the other. The byte boundary is the whole point: `"ping".encode("utf-8")` produces `b'ping'`, which is what the socket actually moves. (This fragment runs in standard Python only — the Python By Example runner does not expose arbitrary sockets and disables outbound access for edited examples.)
 
 ```python
 left, right = socket.socketpair()
@@ -73,4 +73,5 @@ ping
 - Network protocols move bytes, not Python `str` objects.
 - Close real sockets when finished, usually with a context manager or `finally` block.
 - Use high-level HTTP libraries for application HTTP unless socket-level control is the lesson.
+- Cloudflare Workers support HTTP-style networking through platform APIs; this example avoids outbound calls so the editable lesson stays deterministic and safe.
 :::
