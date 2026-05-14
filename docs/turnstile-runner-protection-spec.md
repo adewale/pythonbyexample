@@ -1,6 +1,6 @@
 # Turnstile runner protection spec
 
-This spec records the current runner-protection design for Python By Example's editable-code endpoint and the remaining Cloudflare setup required outside the repository.
+This spec records the current runner-protection design for Python By Example's editable-code endpoint, the Cloudflare setup already completed, and the remaining optional hardening work.
 
 ## Cloudflare references
 
@@ -53,9 +53,12 @@ Implemented in:
 ```text
 ae7b47d Add optional Turnstile protection
 10d90ca Document Turnstile runner protection
+8684479 Make Turnstile session-scoped and conditional
+16da978 Harden Turnstile runner protection
+d49b432 Make deployment smoke assert rendered output
 ```
 
-Current follow-up implementation changes this model from visible/per-request Turnstile to conditional once-per-session Turnstile.
+The deployed model is conditional once-per-session Turnstile, not visible/per-request Turnstile.
 
 Files involved:
 
@@ -343,60 +346,27 @@ Rate Limiting controls volume.
 Once-per-session Turnstile controls browser proof when app policy requires it.
 ```
 
-## What still needs to be done manually in Cloudflare
+## Production setup status
 
-### 1. Create Turnstile keys
+### Completed
 
-Cloudflare Dashboard:
-
-```text
-Turnstile → Add widget
-```
-
-Recommended settings:
+Cloudflare Dashboard Turnstile setup is complete:
 
 ```text
-Name: pythonbyexample-production
 Hostname: www.pythonbyexample.dev
 Mode: Invisible
 ```
 
-Docs:
-
-- Turnstile overview: <https://developers.cloudflare.com/turnstile/>
-- Widget modes: <https://developers.cloudflare.com/turnstile/concepts/widget/>
-- Widget configuration options: <https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/widget-configurations/>
-
-Invisible mode note: Cloudflare documents that invisible widgets have no visual footprint, and that widget `size` values are `normal`, `flexible`, or `compact`; invisibility is selected by widget mode, not by `size="invisible"`.
-
-Privacy note: Cloudflare documents that using Invisible mode requires referencing the Cloudflare Turnstile Privacy Addendum in your own privacy policy.
-
-Copy:
+The following Worker secrets have been configured in Cloudflare:
 
 ```text
-Site key
-Secret key
+TURNSTILE_SITE_KEY
+TURNSTILE_SECRET_KEY
+TURNSTILE_CLEARANCE_SECRET
+PBE_SMOKE_BYPASS_SECRET
 ```
 
-### 2. Set Worker secrets / vars
-
-Use Wrangler secrets docs: <https://developers.cloudflare.com/workers/configuration/secrets/>
-
-```bash
-npx wrangler secret put TURNSTILE_SITE_KEY
-npx wrangler secret put TURNSTILE_SECRET_KEY
-npx wrangler secret put TURNSTILE_CLEARANCE_SECRET
-npx wrangler secret put PBE_SMOKE_BYPASS_SECRET
-```
-
-Set non-secret vars either through Wrangler config or Cloudflare dashboard:
-
-```text
-TURNSTILE_CHALLENGE_MODE=session
-TURNSTILE_CLEARANCE_SECONDS=28800
-```
-
-If using `wrangler.jsonc`, add for non-secret values only:
+The following non-secret Worker vars are checked into `wrangler.jsonc`:
 
 ```jsonc
 "vars": {
@@ -407,7 +377,22 @@ If using `wrangler.jsonc`, add for non-secret values only:
 
 Do **not** put secret keys in `wrangler.jsonc`.
 
-### 3. Add Cloudflare Rate Limiting rule
+Manual browser verification and production smoke with `PBE_SMOKE_BYPASS_SECRET` both passed after deploying session-scoped Invisible-mode Turnstile.
+
+Docs:
+
+- Turnstile overview: <https://developers.cloudflare.com/turnstile/>
+- Widget modes: <https://developers.cloudflare.com/turnstile/concepts/widget/>
+- Widget configuration options: <https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/widget-configurations/>
+- Workers secrets: <https://developers.cloudflare.com/workers/configuration/secrets/>
+
+Invisible mode note: Cloudflare documents that invisible widgets have no visual footprint, and that widget `size` values are `normal`, `flexible`, or `compact`; invisibility is selected by widget mode, not by `size="invisible"`.
+
+Privacy note: Cloudflare documents that using Invisible mode requires referencing the Cloudflare Turnstile Privacy Addendum in your own privacy policy.
+
+## Remaining TODO
+
+### 1. Add Cloudflare Rate Limiting rule (optional, recommended for cost caps)
 
 Cloudflare Dashboard:
 
@@ -431,24 +416,18 @@ Use the plan-aware guidance above:
 
 Do not configure `Managed Challenge for 5 minutes` on Free/Pro/Business rate limiting rules. Cloudflare documents that challenge actions on those plans use request throttling and have no selected duration; only Enterprise can configure a challenge-action duration. For this AJAX/fetch POST endpoint, a predictable `Block`/`429` edge cap is preferable.
 
-### 4. Deploy
+### 2. Keep production deployment checks using the bypass secret
 
-```bash
-make deploy
-```
-
-### 5. Smoke test
-
-If `TURNSTILE_CHALLENGE_MODE` is `off` or secrets are absent:
-
-```bash
-scripts/smoke_deployment.py https://www.pythonbyexample.dev
-```
-
-If app-level session Turnstile is enabled:
+For protected production POST smoke, run:
 
 ```bash
 PBE_SMOKE_BYPASS_SECRET=... scripts/smoke_deployment.py https://www.pythonbyexample.dev
+```
+
+For GET-only public smoke without a secret:
+
+```bash
+scripts/smoke_deployment.py --skip-post https://www.pythonbyexample.dev
 ```
 
 Expected:
@@ -456,6 +435,8 @@ Expected:
 ```text
 Deployment smoke OK
 ```
+
+The smoke script checks the rendered output panel for POST runs. This is important because a Turnstile-required response can echo submitted code in the editor textarea without executing it.
 
 ## Verification checklist
 
