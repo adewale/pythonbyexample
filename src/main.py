@@ -1,4 +1,5 @@
 import hashlib
+import hmac
 import json
 import time
 from urllib.parse import parse_qs, urlencode, urlparse
@@ -15,6 +16,8 @@ import worker_asgi_bridge as asgi
 
 TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 SMOKE_BYPASS_HEADER = "x-pythonbyexample-smoke-secret"
+TURNSTILE_CLEARANCE_COOKIE = "pbe_turnstile_clearance"
+DEFAULT_TURNSTILE_CLEARANCE_SECONDS = 60 * 60 * 8
 
 try:
     from js import Object, Request as JsRequest, caches, fetch as js_fetch
@@ -83,6 +86,79 @@ def _turnstile_site_key(request: Request) -> str:
     return _env_text(request, "TURNSTILE_SITE_KEY")
 
 
+def _turnstile_secret(request: Request) -> str:
+    return _env_text(request, "TURNSTILE_SECRET_KEY")
+
+
+def _turnstile_clearance_secret(request: Request) -> str:
+    return _env_text(request, "TURNSTILE_CLEARANCE_SECRET") or _turnstile_secret(request)
+
+
+def _turnstile_challenge_mode(request: Request) -> str:
+    return (_env_text(request, "TURNSTILE_CHALLENGE_MODE") or "off").lower()
+
+
+def _turnstile_clearance_seconds(request: Request) -> int:
+    raw = _env_text(request, "TURNSTILE_CLEARANCE_SECONDS")
+    try:
+        return max(60, min(int(raw), 60 * 60 * 24 * 7)) if raw else DEFAULT_TURNSTILE_CLEARANCE_SECONDS
+    except ValueError:
+        return DEFAULT_TURNSTILE_CLEARANCE_SECONDS
+
+
+def _smoke_bypass_ok(request: Request) -> bool:
+    bypass_secret = _env_text(request, "PBE_SMOKE_BYPASS_SECRET")
+    return bool(bypass_secret and request.headers.get(SMOKE_BYPASS_HEADER) == bypass_secret)
+
+
+def _sign_clearance(secret: str, expires: int) -> str:
+    payload = str(expires)
+    signature = hmac.new(secret.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()
+    return f"{payload}.{signature}"
+
+
+def _clearance_valid(request: Request) -> bool:
+    secret = _turnstile_clearance_secret(request)
+    value = request.cookies.get(TURNSTILE_CLEARANCE_COOKIE, "")
+    if not secret or not value or "." not in value:
+        return False
+    expires_text, signature = value.split(".", 1)
+    try:
+        expires = int(expires_text)
+    except ValueError:
+        return False
+    if expires <= int(time.time()):
+        return False
+    expected = _sign_clearance(secret, expires).split(".", 1)[1]
+    return hmac.compare_digest(signature, expected)
+
+
+def _requires_turnstile(request: Request) -> bool:
+    if not _turnstile_secret(request) or _smoke_bypass_ok(request):
+        return False
+    mode = _turnstile_challenge_mode(request)
+    if mode in {"session", "once", "once-per-session"}:
+        return not _clearance_valid(request)
+    return False
+
+
+def _set_turnstile_clearance(response: HTMLResponse, request: Request) -> None:
+    secret = _turnstile_clearance_secret(request)
+    if not secret:
+        return
+    max_age = _turnstile_clearance_seconds(request)
+    expires = int(time.time()) + max_age
+    response.set_cookie(
+        TURNSTILE_CLEARANCE_COOKIE,
+        _sign_clearance(secret, expires),
+        max_age=max_age,
+        path="/examples",
+        secure=True,
+        httponly=True,
+        samesite="Lax",
+    )
+
+
 @app.get("/examples/{slug}", response_class=HTMLResponse)
 async def example_page(slug: str, request: Request):
     response = route(str(request.url), method="GET", turnstile_site_key=_turnstile_site_key(request))
@@ -98,20 +174,40 @@ async def run_example(slug: str, request: Request):
     form = parse_qs(body)
     submitted = form.get("code", [example["code"]])[0]
     turnstile_token = form.get("cf-turnstile-response", [""])[0]
-    ok, message = await _verify_turnstile(request, turnstile_token)
-    if not ok:
+    needs_turnstile = _requires_turnstile(request)
+    if needs_turnstile and not turnstile_token:
+        site_key = _turnstile_site_key(request)
+        message = "Verification required before running edited code."
+        if not site_key:
+            message = "Turnstile verification is required, but TURNSTILE_SITE_KEY is not configured."
         return _html(
             render_example_page(
                 example,
                 output=message,
                 code=submitted,
-                turnstile_site_key=_turnstile_site_key(request),
+                turnstile_site_key=site_key,
+                turnstile_required=bool(site_key),
             )
         )
+
+    turnstile_verified = False
+    if needs_turnstile:
+        ok, message = await _verify_turnstile(request, turnstile_token)
+        if not ok:
+            return _html(
+                render_example_page(
+                    example,
+                    output=message,
+                    code=submitted,
+                    turnstile_site_key=_turnstile_site_key(request),
+                    turnstile_required=True,
+                )
+            )
+        turnstile_verified = True
     started = time.perf_counter()
     output = await _run_example(request, example["slug"], submitted)
     elapsed_ms = (time.perf_counter() - started) * 1000
-    return _html(
+    response = _html(
         render_example_page(
             example,
             output=output,
@@ -120,15 +216,17 @@ async def run_example(slug: str, request: Request):
             turnstile_site_key=_turnstile_site_key(request),
         )
     )
+    if turnstile_verified:
+        _set_turnstile_clearance(response, request)
+    return response
 
 
 async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str]:
-    secret = _env_text(request, "TURNSTILE_SECRET_KEY")
+    secret = _turnstile_secret(request)
     if not secret:
         return True, ""
 
-    bypass_secret = _env_text(request, "PBE_SMOKE_BYPASS_SECRET")
-    if bypass_secret and request.headers.get(SMOKE_BYPASS_HEADER) == bypass_secret:
+    if _smoke_bypass_ok(request):
         return True, ""
 
     if not token:

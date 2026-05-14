@@ -1,34 +1,58 @@
 # Turnstile runner protection spec
 
-This spec records what Python By Example has already implemented around Cloudflare Turnstile, what is intentionally *not* enabled yet, and the candidate next protection models for the editable example runner.
+This spec records the current runner-protection design for Python By Example's editable-code endpoint and the remaining Cloudflare setup required outside the repository.
 
-## Goal
+## Cloudflare references
 
-Protect the costly endpoint:
+Grounding docs:
+
+- Turnstile overview: <https://developers.cloudflare.com/turnstile/>
+- Turnstile client-side rendering: <https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/>
+- Turnstile server-side validation / Siteverify: <https://developers.cloudflare.com/turnstile/get-started/server-side-validation/>
+- Turnstile widget concepts and appearance options: <https://developers.cloudflare.com/turnstile/concepts/widget/>
+- Cloudflare Managed Challenge: <https://developers.cloudflare.com/cloudflare-challenges/challenge-types/managed-challenge/>
+- WAF custom rules: <https://developers.cloudflare.com/waf/custom-rules/>
+- WAF rate limiting rules: <https://developers.cloudflare.com/waf/rate-limiting-rules/>
+- Ruleset Engine fields and expressions: <https://developers.cloudflare.com/ruleset-engine/rules-language/fields/reference/>
+- Workers secrets: <https://developers.cloudflare.com/workers/configuration/secrets/>
+- Workers environment variables: <https://developers.cloudflare.com/workers/configuration/environment-variables/>
+
+## Protected endpoint
+
+The expensive operation is the edited-code runner:
 
 ```text
 POST /examples/{slug}
 ```
 
-without making the normal learning loop feel like a CAPTCHA form.
+A successful POST can create/reuse a Dynamic Worker and execute user-edited Python. The protection goal is to stop abusive volume without making the ordinary learner loop feel like a CAPTCHA form.
 
-The desired learner path is:
+Normal desired path:
 
 ```text
 read example → edit code → click Run → see output
 ```
 
-Turnstile should be invisible unless risk or rate policy requires a challenge.
+Protection desired path:
 
-## Current implementation
+```text
+normal learner → no Turnstile visible, no Siteverify call
+new/suspicious/high-rate session → temporary invisible Turnstile → clearance cookie → many normal runs
+high-volume abuse → Cloudflare Rate Limiting / Managed Challenge before Worker execution
+```
 
-Implemented in commit:
+## Current repository implementation
+
+Implemented in:
 
 ```text
 ae7b47d Add optional Turnstile protection
+10d90ca Document Turnstile runner protection
 ```
 
-Files touched:
+Current follow-up implementation changes this model from visible/per-request Turnstile to conditional once-per-session Turnstile.
+
+Files involved:
 
 ```text
 src/main.py
@@ -41,30 +65,40 @@ docs/lessons-learned.md
 src/asset_manifest.py
 ```
 
-### Current behavior
+## Current behavior after this spec update
 
-Turnstile is **secret-gated**.
+Turnstile remains **secret/config gated** and is not active by default.
 
 If `TURNSTILE_SECRET_KEY` is absent:
 
-- no server-side Turnstile verification is performed
-- Dynamic Worker POST runs behave as before
+- no Turnstile policy is enforced
+- no Siteverify request is made
+- Dynamic Worker POST runs behave normally
 - local development remains frictionless
 
 If `TURNSTILE_SITE_KEY` is absent:
 
-- no Turnstile widget is rendered on example pages
+- no challenge container is rendered
+- a challenge-required policy cannot complete in the browser
 
-If both are configured:
+If `TURNSTILE_CHALLENGE_MODE` is absent or `off`:
 
-- example pages render a Turnstile widget in the run form
-- `POST /examples/{slug}` reads `cf-turnstile-response`
-- the Worker verifies the token against Cloudflare Siteverify
-- failed verification returns the example page with a friendly output message
-- failed verification does **not** create a Dynamic Worker
-- after AJAX submit, the client calls `turnstile.reset()`
+- normal POSTs do not require Turnstile
+- a configured site/secret key alone does not slow every run
 
-Siteverify endpoint:
+If `TURNSTILE_CHALLENGE_MODE=session` and both site/secret keys are configured:
+
+1. A browser without valid clearance posts edited code.
+2. The server returns the example page with a hidden `data-turnstile-required` marker and does **not** create a Dynamic Worker.
+3. Client JS lazily loads Turnstile using explicit rendering.
+4. It renders an invisible Turnstile widget only for that challenge.
+5. The Turnstile callback provides a token.
+6. The client removes the widget and retries the POST with `cf-turnstile-response`.
+7. The Worker validates the token through Siteverify.
+8. On success, the Worker sets a signed `pbe_turnstile_clearance` cookie.
+9. Later runs in that clearance window skip Turnstile and go straight to the Dynamic Worker.
+
+Siteverify endpoint from Cloudflare docs:
 
 ```text
 https://challenges.cloudflare.com/turnstile/v0/siteverify
@@ -76,123 +110,144 @@ Token field:
 cf-turnstile-response
 ```
 
-### Smoke-test bypass
+## Current environment variables / secrets
 
-Production smoke can bypass app-level Turnstile verification with a separate secret.
-
-Worker secret:
+### Required for app-level session Turnstile
 
 ```text
+TURNSTILE_SITE_KEY
+TURNSTILE_SECRET_KEY
+TURNSTILE_CHALLENGE_MODE=session
+```
+
+### Recommended
+
+```text
+TURNSTILE_CLEARANCE_SECRET
+TURNSTILE_CLEARANCE_SECONDS
 PBE_SMOKE_BYPASS_SECRET
 ```
 
-Smoke script environment variable:
+`TURNSTILE_CLEARANCE_SECRET` signs the clearance cookie. If absent, the Worker falls back to `TURNSTILE_SECRET_KEY` for signing. A separate secret is cleaner.
 
-```text
-PBE_SMOKE_BYPASS_SECRET
-```
+`TURNSTILE_CLEARANCE_SECONDS` defaults to 8 hours and is clamped between 60 seconds and 7 days.
 
-Header sent by `scripts/smoke_deployment.py` when the env var is set:
+`PBE_SMOKE_BYPASS_SECRET` lets deployment smoke test edited-code execution without solving Turnstile.
+
+Smoke header:
 
 ```text
 x-pythonbyexample-smoke-secret: <secret>
 ```
 
-This bypass is only for deployment verification. It should not be reused as a general user bypass.
+## Current app-level security properties
 
-### Cache note
+- Turnstile is not visible on initial page load.
+- The Turnstile script is not loaded until a challenge-required response is received.
+- The rendered widget uses invisible mode.
+- The widget is removed after callback success or failure.
+- Siteverify is called only when a challenge-required request retries with a token.
+- A valid challenge creates a signed, HttpOnly, Secure, SameSite=Lax clearance cookie scoped to `/examples`.
+- Failed or missing verification does not create a Dynamic Worker.
+- POST responses are still never cached.
+- Rendered HTML cache keys account for Turnstile site-key presence to avoid stale widget/no-widget HTML.
 
-Rendered HTML cache keys include a Turnstile-site-key hash fragment when a site key is configured. This prevents a cached page without a widget from being served after Turnstile is enabled, or vice versa.
+## Smoke-test behavior
 
-### Tests and verification added
+Normal smoke:
 
-`tests/test_app.py` checks that:
-
-- the Turnstile widget is not rendered by default
-- a site key renders the widget and Turnstile script
-- the client resets Turnstile after submit
-- the Worker source includes secret-gated Siteverify logic
-- the smoke bypass header is recognized by the implementation
-
-`make verify` and GitHub Verify passed after the implementation.
-
-## Current UX problem
-
-The current implementation is safe but not ideal:
-
-- the widget appears as page furniture when enabled
-- it can stay visible after completion
-- if enforcement is enabled for every run, every Dynamic Worker POST pays the Turnstile token/verification latency
-
-This is acceptable as a first security hook, but not the desired final UX.
-
-## Desired direction
-
-Move from:
-
-```text
-Turnstile enabled → every run must solve/verify Turnstile
+```bash
+scripts/smoke_deployment.py https://www.pythonbyexample.dev
 ```
 
-to:
+If app-level session Turnstile is enabled, use the bypass secret:
 
-```text
-normal run → no widget, no Siteverify call
-risky/rate-limited run → challenge required → temporary Turnstile → retry with token
+```bash
+PBE_SMOKE_BYPASS_SECRET=... scripts/smoke_deployment.py https://www.pythonbyexample.dev
 ```
 
-## Option A: Conditional challenge-required Turnstile
-
-### Flow
-
-Normal request:
+The script sends:
 
 ```text
-Run → POST /examples/{slug} → Dynamic Worker → output
+x-pythonbyexample-smoke-secret: <secret>
 ```
 
-Challenge request:
+This is only an app-level bypass. If Cloudflare Rate Limiting challenges smoke traffic before it reaches the Worker, either keep smoke below the threshold or add a Cloudflare-side skip/exception.
+
+## Recommended Cloudflare layer: Rate Limiting Rules
+
+The best first production protection for Dynamic Worker cost is Cloudflare Rate Limiting, because it runs before the Worker and directly targets repeated POST runs.
+
+Docs: <https://developers.cloudflare.com/waf/rate-limiting-rules/>
+
+Suggested rule:
 
 ```text
-Run
-→ server decides challenge is required
-→ response marks challenge_required
-→ client renders invisible/temporary Turnstile
-→ Turnstile callback returns token
-→ client retries POST with cf-turnstile-response
-→ server verifies token
-→ Dynamic Worker runs
-→ widget is removed/reset
+Rule name:
+  Protect Python By Example runner
+
+Expression:
+  http.request.method eq "POST"
+  and starts_with(http.request.uri.path, "/examples/")
+
+Threshold:
+  30 requests / 60 seconds / IP
+
+Action:
+  Managed Challenge
+
+Mitigation timeout:
+  5 minutes
 ```
 
-### Required changes
+For classrooms/workshops behind one NAT, start higher:
 
-Client:
+```text
+100 requests / 60 seconds / IP
+```
 
-- stop rendering the Turnstile widget on initial page load
-- add a hidden/empty challenge container near the Run button or output panel
-- when a response contains a challenge-required marker, load/render Turnstile
-- use invisible or interaction-only appearance
-- retry submit after callback
-- call `turnstile.remove(widgetId)` or clear the container after success
-- reset/remove on error or expiry
+Why this is the recommended first layer:
 
-Server:
+- it runs before Worker execution
+- normal learners do not see Turnstile
+- no app-side state is needed
+- it protects the precise expensive path
+- it is easier to reason about than broad bot-risk rules
 
-- add a policy function such as `requires_turnstile(request, form)`
-- verify token only when the policy requires it or when a token is supplied
-- return a challenge-required page fragment/message without creating a Dynamic Worker
-- keep smoke bypass
+Tradeoffs:
 
-Open requirement:
+- IP-based thresholds can false-positive shared networks
+- distributed abuse can evade a per-IP rule
+- rule configuration lives in Cloudflare unless managed through API/Terraform
+- smoke can be affected if repeated many times in a short window
 
-- this model needs a trigger. Without app gates, rate state, or WAF/rate-limit integration, the challenge flow exists but rarely/never activates.
+## Optional Cloudflare layer: WAF custom rules
 
-## Option B: App-side cheap gates
+Docs: <https://developers.cloudflare.com/waf/custom-rules/>
 
-These are not implemented yet; they are candidate triggers for conditional Turnstile.
+WAF rules are a good second layer for risky-looking traffic, for example low reputation, suspicious user agents, or bot-management signals if available on the Cloudflare plan.
 
-Possible gates before creating a Dynamic Worker:
+Shape:
+
+```text
+http.request.method eq "POST"
+and starts_with(http.request.uri.path, "/examples/")
+and <risk signal>
+```
+
+Action:
+
+```text
+Managed Challenge
+```
+
+Managed Challenge docs: <https://developers.cloudflare.com/cloudflare-challenges/challenge-types/managed-challenge/>
+
+Use WAF custom rules for risk filtering. Use Rate Limiting for volume control.
+
+## App-side cheap gates backlog
+
+These are not the primary protection, but remain useful before Dynamic Worker creation:
 
 - maximum submitted code byte size
 - maximum line count
@@ -201,190 +256,95 @@ Possible gates before creating a Dynamic Worker:
 - optional same-origin/referer shape check
 - reject malformed form submissions
 
-Pros:
+These gates should return friendly output-panel messages and must not create Dynamic Workers when they fail.
 
-- no extra Cloudflare products
-- easy to test in repo
-- prevents obviously wasteful submissions before Dynamic Worker creation
+## Why once-per-session is worth doing
 
-Cons:
+Once-per-session Turnstile is less disruptive than per-run Turnstile:
 
-- not strong against targeted abuse
-- content-shape rules can be arbitrary
-- does not solve high-rate distributed traffic
+- only the first challenged run pays the Turnstile cost
+- later runs use a signed clearance cookie
+- the widget is invisible/temporary
+- Siteverify is not part of every Dynamic Worker request
 
-## Option C: Cloudflare Rate Limiting Rules
+It is not a replacement for rate limiting:
 
-Target:
-
-```text
-http.request.method eq "POST"
-and starts_with(http.request.uri.path, "/examples/")
-```
-
-Recommended starting threshold:
-
-```text
-30 POSTs / 60 seconds / IP → Managed Challenge
-```
-
-Use a higher threshold for classrooms/workshops behind one NAT, for example:
-
-```text
-100 POSTs / 60 seconds / IP
-```
-
-Pros:
-
-- best first protection against Dynamic Worker cost abuse
-- runs before the Worker
-- no app latency for normal runs
-- no app-side state
-- directly matches the abuse mode: repeated runs
-
-Cons:
-
-- IP-based limits can false-positive shared networks
-- attackers can distribute across IPs
-- config lives in Cloudflare unless managed via Terraform/API
-- smoke normally only sends 5 POSTs, but repeated smoke runs may need care
-
-## Option D: Cloudflare WAF / Custom Rules with Managed Challenge
-
-Example shape:
-
-```text
-http.request.method eq "POST"
-and starts_with(http.request.uri.path, "/examples/")
-and <risk signal>
-```
-
-Risk signals can include:
-
-- IP reputation / threat score
-- country / ASN
-- request headers
-- user agent
-- bot signals, if available on the Cloudflare plan
-
-Pros:
-
-- edge-native risk filtering
-- no app state
-- no normal-path Turnstile latency
-- can challenge traffic before it reaches the Worker
-
-Cons:
-
-- advanced bot signals may require paid features
-- rules can be opaque and harder to debug
-- less directly tied to “too many example runs” than rate limiting
-- config may live outside the repo
-
-Best role:
-
-- second layer for obviously risky traffic, after basic rate limiting
-
-## Option E: Turnstile once per session
-
-This model asks a user to pass Turnstile once, then allows many runs for a time window.
-
-### Possible implementations
-
-1. **Server-signed session cookie**
-
-   Flow:
-
-   ```text
-   first run or first challenge → Turnstile token verified → Worker sets signed cookie → later runs skip Siteverify until expiry
-   ```
-
-   Cookie stores or proves:
-
-   - clearance timestamp
-   - expiry
-   - maybe rough run allowance
-   - HMAC signature using a Worker secret
-
-2. **Cloudflare clearance / pre-clearance**
-
-   Use Cloudflare challenge/clearance behavior so the edge remembers the browser is cleared for a period.
-
-3. **Durable Object state**
-
-   Store per-session or per-IP run counters and Turnstile clearance state server-side.
-
-### Pros
-
-- much better UX than Turnstile on every run
-- reduces Siteverify calls dramatically
-- widget can be invisible/temporary
-- still blocks repeated anonymous abuse after the first challenge gate
-
-### Cons
-
-- a pure client cookie can be deleted to reset state
-- signed-cookie implementation needs a secret, expiry, and careful HMAC handling
-- Durable Object is stronger but more code and one extra state lookup
-- once-per-session proves “a browser solved once”, not “this request is low cost”
-- does not replace rate limiting for high-volume or distributed abuse
-
-### Is once-per-session less trouble?
-
-Compared with conditional challenge-required Turnstile plus app-owned rate state, **yes**, a once-per-session model is less product complexity for users and can be simpler to reason about.
-
-Compared with Cloudflare Rate Limiting, **no**. Rate limiting is less app work and more directly protects Dynamic Worker cost.
-
-### Is once-per-session more effective?
-
-It is more effective than per-request Turnstile for UX, because it avoids repeated challenges and Siteverify latency.
-
-It is less effective than rate limiting for abuse control. A solved session can still send many expensive runs unless paired with a run limit, expiry, or edge rate rule.
+- a cleared browser can still send many runs
+- bots can create many cleared sessions
+- cookie-only state is weaker than edge rate enforcement
 
 Best use:
 
-- combine once-per-session Turnstile with Cloudflare Rate Limiting
-- challenge once for suspicious/high-rate clients
-- let normal users run freely until they cross a rate threshold
-
-## Recommended architecture
-
-Use layers:
-
-1. **Cloudflare Rate Limiting Rules** for `POST /examples/*` volume abuse.
-2. **Conditional app Turnstile** for any app-owned challenge-required flow.
-3. **Once-per-session clearance** if we want users to pass Turnstile once and then keep running examples without repeated latency.
-4. **Cheap app gates** as a backlog item for obvious malformed or oversized submissions.
-
-Recommended near-term path:
-
 ```text
-Rate Limiting first → invisible/temporary Turnstile UI → optional once-per-session clearance
+Rate Limiting controls volume.
+Once-per-session Turnstile controls browser proof when app policy requires it.
 ```
 
-Avoid making Siteverify part of every normal Dynamic Worker run.
+## What still needs to be done manually in Cloudflare
 
-## Operational setup notes
+### 1. Create Turnstile keys
 
-Create keys in Cloudflare Dashboard:
+Cloudflare Dashboard:
 
 ```text
-Turnstile → Add widget → hostname www.pythonbyexample.dev → Managed or Invisible mode
+Turnstile → Add widget
 ```
 
-Secrets/vars currently expected by the Worker:
+Recommended settings:
+
+```text
+Name: pythonbyexample-production
+Hostname: www.pythonbyexample.dev
+Mode: Managed or Invisible
+```
+
+Docs: <https://developers.cloudflare.com/turnstile/>
+
+Copy:
+
+```text
+Site key
+Secret key
+```
+
+### 2. Set Worker secrets / vars
+
+Use Wrangler secrets docs: <https://developers.cloudflare.com/workers/configuration/secrets/>
 
 ```bash
 npx wrangler secret put TURNSTILE_SITE_KEY
 npx wrangler secret put TURNSTILE_SECRET_KEY
+npx wrangler secret put TURNSTILE_CLEARANCE_SECRET
 npx wrangler secret put PBE_SMOKE_BYPASS_SECRET
 ```
 
-If using rate limiting, configure in Cloudflare Dashboard:
+Set non-secret vars either through Wrangler config or Cloudflare dashboard:
+
+```text
+TURNSTILE_CHALLENGE_MODE=session
+TURNSTILE_CLEARANCE_SECONDS=28800
+```
+
+If using `wrangler.jsonc`, add for non-secret values only:
+
+```jsonc
+"vars": {
+  "TURNSTILE_CHALLENGE_MODE": "session",
+  "TURNSTILE_CLEARANCE_SECONDS": "28800"
+}
+```
+
+Do **not** put secret keys in `wrangler.jsonc`.
+
+### 3. Add Cloudflare Rate Limiting rule
+
+Cloudflare Dashboard:
 
 ```text
 Security → WAF → Rate limiting rules → Create rule
 ```
+
+Docs: <https://developers.cloudflare.com/waf/rate-limiting-rules/>
 
 Expression:
 
@@ -393,41 +353,29 @@ http.request.method eq "POST"
 and starts_with(http.request.uri.path, "/examples/")
 ```
 
-Initial action:
+Start with:
 
 ```text
-Managed Challenge
+30 requests / 60 seconds / IP → Managed Challenge for 5 minutes
 ```
 
-Initial threshold:
+Raise the threshold if teaching cohorts behind a shared IP hit it.
 
-```text
-30 requests / 60 seconds / IP
+### 4. Deploy
+
+```bash
+make deploy
 ```
 
-## Verification checklist
+### 5. Smoke test
 
-With Turnstile disabled:
+If `TURNSTILE_CHALLENGE_MODE` is `off` or secrets are absent:
 
 ```bash
 scripts/smoke_deployment.py https://www.pythonbyexample.dev
 ```
 
-With Turnstile secrets enabled and current always-on app enforcement:
-
-```bash
-curl -i -X POST https://www.pythonbyexample.dev/examples/values \
-  -H 'Content-Type: application/x-www-form-urlencoded' \
-  --data-urlencode "code=print('should-not-run')"
-```
-
-Expected body includes:
-
-```text
-Turnstile verification is required
-```
-
-With smoke bypass configured:
+If app-level session Turnstile is enabled:
 
 ```bash
 PBE_SMOKE_BYPASS_SECRET=... scripts/smoke_deployment.py https://www.pythonbyexample.dev
@@ -439,10 +387,106 @@ Expected:
 Deployment smoke OK
 ```
 
-After moving to conditional/once-per-session:
+## Verification checklist
 
-- normal smoke should not require Turnstile
-- a forced challenge test should render a temporary widget
-- completing the widget should remove it from the page
-- retry should run the Dynamic Worker
-- subsequent cleared-session runs should skip Siteverify until expiry
+### Verify no visible widget on page load
+
+```bash
+curl -s https://www.pythonbyexample.dev/examples/values | grep -i "cf-turnstile"
+```
+
+Expected:
+
+```text
+(no output)
+```
+
+The page may include runner JavaScript containing the Turnstile API URL string, but it should not include a loaded Turnstile `<script src=...>` tag or visible widget markup on first render.
+
+### Verify app-level challenge-required mode
+
+With:
+
+```text
+TURNSTILE_SECRET_KEY configured
+TURNSTILE_SITE_KEY configured
+TURNSTILE_CHALLENGE_MODE=session
+```
+
+A first POST without a token should not run edited code. It should return a page that contains:
+
+```text
+data-turnstile-required="true"
+```
+
+Browser behavior:
+
+1. click Run
+2. challenge is requested
+3. invisible Turnstile runs or displays only if Cloudflare needs interaction
+4. widget disappears after callback
+5. run retries and produces output
+6. later runs in the same clearance window skip Turnstile
+
+### Verify no Dynamic Worker on missing challenge
+
+POST without token in session mode:
+
+```bash
+curl -i -X POST https://www.pythonbyexample.dev/examples/values \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode "code=print('should-not-run')"
+```
+
+Expected body:
+
+```text
+Verification required before running edited code
+```
+
+Expected absent:
+
+```text
+should-not-run
+```
+
+### Verify clearance cookie exists after browser success
+
+In browser DevTools:
+
+```text
+Application → Cookies → pbe_turnstile_clearance
+```
+
+Expected attributes:
+
+```text
+HttpOnly
+Secure
+SameSite=Lax
+Path=/examples
+```
+
+### Verify Rate Limiting rule
+
+Carefully test above threshold, or inspect Cloudflare Security Events after controlled POST bursts.
+
+Do not tune solely from one local curl loop; check classroom/shared-IP scenarios before lowering thresholds.
+
+## Decision summary
+
+Recommended final model:
+
+```text
+Cloudflare Rate Limiting first
++ optional WAF risk rules
++ app-level once-per-session Turnstile when configured
++ cheap app gates later
+```
+
+Avoid:
+
+```text
+Turnstile Siteverify on every normal Dynamic Worker run
+visible Turnstile widget as permanent page furniture
+```

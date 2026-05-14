@@ -748,17 +748,27 @@ def _render_cell(step):
     return f'<section class="lesson-step lp-cell"><div class="lp-prose">{prose_html}</div><div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">{source}</code></pre></div><div class="cell-output"><p class="cell-label">Output</p><pre><code>{html.escape(step["output"])}</code></pre></div></div></section>'
 
 
-def _turnstile_widget(site_key: str | None) -> str:
+def _turnstile_challenge_container(site_key: str | None) -> str:
     if not site_key:
         return ""
     escaped = html.escape(site_key)
-    return (
-        '<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>'
-        f'<div class="cf-turnstile" data-sitekey="{escaped}"></div>'
-    )
+    return f'<div class="turnstile-challenge" data-turnstile-sitekey="{escaped}" hidden></div>'
 
 
-def render_example_page(example, output=None, code=None, execution_time_ms=None, turnstile_site_key=None):
+def _turnstile_required_marker(required: bool) -> str:
+    if not required:
+        return ""
+    return '<div data-turnstile-required="true" hidden>Verification required before running edited code…</div>'
+
+
+def render_example_page(
+    example,
+    output=None,
+    code=None,
+    execution_time_ms=None,
+    turnstile_site_key=None,
+    turnstile_required=False,
+):
     notes = [render_inline(note) for note in example.get("notes", [])]
     walkthrough = _walkthrough_cells(example)
     shown_output = output if output is not None else example.get("expected_output", "Run this example to see output here.")
@@ -806,7 +816,7 @@ def render_example_page(example, output=None, code=None, execution_time_ms=None,
             "SLUG": html.escape(example["slug"]),
             "EDITOR_ROWS": str(max(18, editable_code.count("\n") + 2)),
             "EDITABLE_CODE": html.escape(editable_code),
-            "TURNSTILE_WIDGET": _turnstile_widget(turnstile_site_key),
+            "TURNSTILE_CHALLENGE": _turnstile_challenge_container(turnstile_site_key) + _turnstile_required_marker(turnstile_required),
             "OUTPUT_PLACEHOLDER": " data-output-placeholder" if output is None else "",
             "OUTPUT_HEADING": html.escape(output_heading),
             "SHOWN_OUTPUT": html.escape(shown_output),

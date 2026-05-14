@@ -305,21 +305,31 @@ class AppTests(unittest.TestCase):
         self.assertNotIn('<article class="card"', home)
         self.assertIn('class="example-shell"', html)
 
-    def test_turnstile_widget_is_optional_and_form_bound(self):
+    def test_turnstile_widget_is_conditional_and_temporary(self):
         html = render_example_page(get_example("hello-world"))
-        self.assertNotIn("cf-turnstile", html)
-        self.assertNotIn("challenges.cloudflare.com/turnstile", html)
+        self.assertNotIn('class="turnstile-challenge"', html)
+        self.assertNotIn('<script src="https://challenges.cloudflare.com/turnstile', html)
 
         protected = render_example_page(get_example("hello-world"), turnstile_site_key="site-key-123")
-        self.assertIn("https://challenges.cloudflare.com/turnstile/v0/api.js", protected)
-        self.assertIn('class="cf-turnstile"', protected)
-        self.assertIn('data-sitekey="site-key-123"', protected)
-        self.assertIn("window.turnstile", protected)
-        self.assertIn("turnstile.reset", protected)
+        self.assertIn('data-turnstile-sitekey="site-key-123"', protected)
+        self.assertIn("https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit", protected)
+        self.assertIn("turnstile.render", protected)
+        self.assertIn("size: 'invisible'", protected)
+        self.assertIn("turnstile.remove", protected)
+        self.assertNotIn('class="cf-turnstile"', protected)
 
-    def test_turnstile_verification_is_secret_gated_in_worker(self):
+        challenged = render_example_page(
+            get_example("hello-world"),
+            turnstile_site_key="site-key-123",
+            turnstile_required=True,
+        )
+        self.assertIn('data-turnstile-required="true"', challenged)
+
+    def test_turnstile_verification_is_session_gated_in_worker(self):
         main_source = (ROOT / "src" / "main.py").read_text()
         self.assertIn("TURNSTILE_SECRET_KEY", main_source)
+        self.assertIn("TURNSTILE_CHALLENGE_MODE", main_source)
+        self.assertIn("TURNSTILE_CLEARANCE_COOKIE", main_source)
         self.assertIn("cf-turnstile-response", main_source)
         self.assertIn("/turnstile/v0/siteverify", main_source)
         self.assertIn("PBE_SMOKE_BYPASS_SECRET", main_source)
@@ -356,7 +366,7 @@ class AppTests(unittest.TestCase):
         self.assertIn('class="syntax-inline">print()</code>', html)
         self.assertNotIn("navigator.clipboard", html)
         self.assertIn("fetch(form.action", html)
-        self.assertIn("new URLSearchParams(new FormData(form))", html)
+        self.assertIn("new URLSearchParams(formData)", html)
         self.assertIn("application/x-www-form-urlencoded", html)
         self.assertIn("Running in a Dynamic Python Worker", html)
         self.assertIn("catch (error)", html)
