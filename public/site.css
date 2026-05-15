@@ -147,7 +147,7 @@
     .example-top, .example-nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1rem; flex-wrap: wrap; }
     .example-nav { margin-top: var(--space-5); padding-top: var(--space-3); border-top: 1px solid var(--hairline); }
     footer { margin-block: 2rem; color: var(--muted); }
-    .site-footer-note { font-size: .82rem; }
+    .site-footer-note { font-size: .82rem; text-align: center; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 1ms !important; } }
     /* Cell banner: a figure attached to a cell renders in a banner row
        AFTER that cell, spanning the full content width. Cells always
