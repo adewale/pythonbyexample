@@ -34,36 +34,17 @@ except ImportError:  # Cloudflare Workers import siblings without the package pr
 
 def aliasing_mutation(c: Canvas) -> None:
     """Two names binding to one mutable list, before and after a mutation."""
-    c.tag(0, 12, "before")
-    c.name_box(0, 18, "first")
-    c.name_box(0, 48, "second")
-    c.closed_arrow(60, 30, 86, 46, emphasis=False)
-    c.closed_arrow(60, 60, 86, 46, emphasis=False)
-    c.object_box(88, 32, "", '["python"]', w=88, h=28)
-
-    c.tag(0, 100, "after append")
-    c.name_box(0, 108, "first")
-    c.name_box(0, 138, "second")
-    c.closed_arrow(60, 120, 86, 136, emphasis=False)
-    c.closed_arrow(60, 150, 86, 136, emphasis=False)
-    c.object_box(88, 122, "", '["python","workers"]', w=130, h=28)
+    c.two_names_one_object(0, 18, "before", "first", "second", '["python"]', object_w=88)
+    c.two_names_one_object(0, 108, "after append", "first", "second",
+                           '["python","workers"]', object_w=130)
 
 
 def tuple_no_mutation(c: Canvas) -> None:
     """The contrast: two names binding to one immutable tuple — no mutation possible."""
-    c.tag(0, 12, "tuple — frozen")
-    c.name_box(0, 18, "first")
-    c.name_box(0, 48, "second")
-    c.closed_arrow(60, 30, 86, 46, emphasis=False)
-    c.closed_arrow(60, 60, 86, 46, emphasis=False)
-    c.object_box(88, 32, "", '("python",)', w=110, h=28)
-
-    c.tag(0, 100, "no .append")
-    c.name_box(0, 108, "first")
-    c.name_box(0, 138, "second")
-    c.closed_arrow(60, 120, 86, 136, emphasis=False)
-    c.closed_arrow(60, 150, 86, 136, emphasis=False)
-    c.object_box(88, 122, "", '("python",)', w=110, h=28)
+    c.two_names_one_object(0, 18, "tuple — frozen", "first", "second",
+                           '("python",)', object_w=110)
+    c.two_names_one_object(0, 108, "no .append", "first", "second",
+                           '("python",)', object_w=110)
     c.label(150, 170, "tuples raise AttributeError", anchor="middle")
 
 
@@ -597,14 +578,7 @@ def dataclass_fields(c: Canvas) -> None:
 
 def class_triangle(c: Canvas) -> None:
     """Classes · instance → class → type — every Python value sits on this triangle."""
-    c.dot(20, 28)
-    c.label(20, 54, "instance", anchor="middle")
-    c.closed_arrow(26, 28, 86, 28, emphasis=False)
-    c.frame(88, 10, 60, 36, label="class")
-    c.mono(118, 32, "Class")
-    c.closed_arrow(148, 28, 208, 28, emphasis=False)
-    c.frame(210, 10, 60, 36, label="type")
-    c.mono(240, 32, "type")
+    c.type_triangle("type", "type")
 
 
 def exception_cause_context(c: Canvas) -> None:
@@ -729,8 +703,7 @@ def sort_stability(c: Canvas) -> None:
 def kw_only_separator(c: Canvas) -> None:
     """Keyword-only arguments · `*` divides positional from keyword-only."""
     c.mono(0, 18, "def f(a, b, *, c, d): …", anchor="start")
-    # JetBrains Mono advances ~6px per char at fs=10; '*' sits at index 12.
-    c.dashed(75, 22, 75, 38)
+    c.mono_divider(0, 12, 22, 38)  # the '*' sits at index 12
     c.label(33, 50, "positional or kw", anchor="middle")
     c.label(120, 50, "keyword only", anchor="middle")
 
@@ -738,8 +711,7 @@ def kw_only_separator(c: Canvas) -> None:
 def positional_only_separator(c: Canvas) -> None:
     """Positional-only parameters · `/` divides positional-only from positional-or-kw."""
     c.mono(0, 18, "def f(a, b, /, c, d): …", anchor="start")
-    # JetBrains Mono advances ~6px per char at fs=10; '/' sits at index 12.
-    c.dashed(75, 22, 75, 38)
+    c.mono_divider(0, 12, 22, 38)  # the '/' sits at index 12
     c.label(33, 50, "positional only", anchor="middle")
     c.label(120, 50, "positional or kw", anchor="middle")
 
@@ -899,14 +871,7 @@ def property_fork(c: Canvas) -> None:
 
 def metaclass_triangle(c: Canvas) -> None:
     """Metaclasses · instance → class → metaclass; the metaclass is the type of the class."""
-    c.dot(20, 30)
-    c.label(20, 56, "instance", anchor="middle")
-    c.closed_arrow(26, 30, 86, 30, emphasis=False)
-    c.frame(88, 12, 60, 36, label="class")
-    c.mono(118, 34, "Class")
-    c.closed_arrow(148, 30, 218, 30, emphasis=False)
-    c.frame(220, 12, 80, 36, label="metaclass")
-    c.mono(260, 34, "type")
+    c.type_triangle("metaclass", "type", third_w=80)
 
 
 def sys_path_resolution(c: Canvas) -> None:

@@ -21,7 +21,7 @@ import re
 import unittest
 
 from src.marginalia import ATTACHMENTS, FIGURES, SCORES
-from src.marginalia_grammar import Canvas
+from src.marginalia_grammar import Canvas, text_width
 
 
 # The gestalt review pages under /prototyping/* render the same paint
@@ -35,31 +35,12 @@ ATTR = re.compile(r'([\w-]+)="([^"]+)"')
 # src/marginalia_grammar.py.
 PAD_TOP, PAD_X, PAD_BOTTOM = 14, 14, 14
 
-# Approximate character widths as a multiple of font-size. Sans-serif
-# glyph advance varies sharply by case: uppercase letters (L, O, P)
-# average ~0.65 of font-size, mixed-case ~0.55, narrow lowercase
-# (l, i) ~0.40. The tag() primitive upper-cases its argument; label()
-# uses mixed case. Different bounds catch both: too-loose missed the
-# async-swimlane "LOOP" clip; too-tight over-flags every mixed-case
-# label kissing a sibling rect.
-CHAR_WIDTH = {
-    "mono": 0.62,           # JetBrains Mono / IBM Plex Mono
-    "sans_upper": 0.65,     # Source Sans Pro uppercase (tag font)
-    "sans": 0.55,           # Source Sans Pro mixed-case (label font)
-    "serif": 0.52,          # Iowan Old Style / Charter italic
-}
-
-
-def font_class(family: str) -> str:
-    if "Mono" in family or "monospace" in family:
-        return "mono"
-    # "sans-serif" contains "serif" as a substring; check sans first
-    # so the system-sans fallback string doesn't misclassify.
-    if "sans" in family.lower():
-        return "sans"
-    if "serif" in family or "Iowan" in family or "Charter" in family:
-        return "serif"
-    return "sans"
+# Character advance and text-width estimation live in
+# src/marginalia_grammar.py (BBOX_ADVANCE / text_width) so the paint
+# code and these contracts share one source of truth. The bounds are
+# deliberately conservative: too-loose missed the async-swimlane "LOOP"
+# clip; too-tight over-flags every mixed-case label kissing a sibling
+# rect. Recalibrate there, not here.
 
 
 def text_bbox(d: dict, content: str) -> tuple[float, float, float, float]:
@@ -70,15 +51,7 @@ def text_bbox(d: dict, content: str) -> tuple[float, float, float, float]:
     anchor = d.get("text-anchor", "start")
     family = d.get("font-family", "sans-serif")
     tracking = float(d.get("letter-spacing", 0))
-    klass = font_class(family)
-    # Differentiate uppercase sans (tag font: LOOP, INT, …) from
-    # mixed-case sans (label font: next(), stdout, …); upper-cased
-    # glyphs are ~18 % wider per advance.
-    if klass == "sans" and content == content.upper() and any(ch.isalpha() for ch in content):
-        per_char = CHAR_WIDTH["sans_upper"] * fs
-    else:
-        per_char = CHAR_WIDTH[klass] * fs
-    width = (per_char + tracking) * len(content)
+    width = text_width(content, family, fs, tracking)
     if anchor == "middle":
         x -= width / 2
     elif anchor == "end":
@@ -574,7 +547,46 @@ class FigureEmphasisScarcityContract(unittest.TestCase):
     pair that `closed_arrow(emphasis=True)` emits), one orange caret,
     or one element whose fill or stroke is the EMPHASIS colour and
     isn't part of those compound shapes.
+
+    Two complementary checks:
+
+    1. The grammar's semantic counter (Canvas.accent_count) — the
+       authoritative census. It sees what the output census cannot:
+       EMPHASIS <line> gates and <path> traces, which are
+       indistinguishable from an arrow's shaft in raw SVG. Gates
+       collectively count as ONE accent per figure (repeated
+       structural punctuation reads as one system); a gate set plus
+       any focal accent still fails.
+    2. The output census below — a backstop that catches any future
+       primitive painting EMPHASIS fills/strokes without counting.
     """
+
+    def test_grammar_accent_counter_allows_at_most_one(self):
+        failures: list[str] = []
+        for name, (paint, w, h) in ALL_FIGURES.items():
+            canvas = Canvas(w=w, h=h)
+            paint(canvas)
+            if canvas.accent_count() > 1:
+                failures.append(
+                    f"{name}: {canvas.accent_count()} accent marks (rubric allows at most 1)"
+                )
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+    def test_uncounted_figures_paint_no_emphasis_colour(self):
+        """If the counter says zero accents, no EMPHASIS ink may appear.
+
+        Catches a primitive that paints the accent colour without
+        incrementing the census — the way the contract itself would rot.
+        """
+        from src.marginalia_grammar import EMPHASIS
+
+        failures: list[str] = []
+        for name, (paint, w, h) in ALL_FIGURES.items():
+            canvas = Canvas(w=w, h=h)
+            paint(canvas)
+            if canvas.accent_count() == 0 and any(EMPHASIS in part for part in canvas.parts):
+                failures.append(f"{name}: paints EMPHASIS but accent_count() == 0")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
     def test_at_most_one_accent_per_figure(self):
         from src.marginalia_grammar import EMPHASIS
