@@ -1,7 +1,7 @@
 .PHONY: test embed-examples build check-generated fingerprint browser-layout-test seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy lint
 
 test:
-	python3 -m unittest discover -s tests -v
+	uv run --python 3.13 python -m unittest discover -s tests -v
 
 embed-examples:
 	scripts/embed_example_sources.py

@@ -6,7 +6,7 @@ Production: <https://www.pythonbyexample.dev> (`workers.dev` remains enabled as 
 
 ## Features
 
-- 104 curated Python 3.13 examples in learning order
+- 109 curated Python 3.13 examples in learning order
 - Literate source/output cells for each example walkthrough
 - Editable complete examples powered by CodeMirror
 - Read-only syntax highlighting powered by Shiki
@@ -60,8 +60,10 @@ This project is developed with red-green-refactor TDD:
 Install dependencies with `uv`, then run:
 
 ```bash
-python3 -m unittest discover -s tests -v
+make test
 ```
+
+The test suite (and the example loader it imports) requires Python 3.13; `make test` runs it through `uv run --python 3.13` so a system `python3` on another version still works.
 
 After cloning, install the local git hooks once so merges and rebases regenerate `src/asset_manifest.py` instead of producing conflicts:
 

@@ -138,8 +138,15 @@ the figure can merge.
 - **Stroke-weight discipline.** Only `W_HAIRLINE`, `W_STROKE`,
   `W_EMPHASIS`, `W_GHOST`. *Contract 5c.*
 - **Emphasis scarcity, enforced.** At most ONE accent mark
-  (`EMPHASIS`-coloured arrowhead, caret, dot, or rect stroke) per
-  figure. Was a soft v1 criterion; now hard. *Contract 9.*
+  (`EMPHASIS`-coloured arrowhead, caret, dot, traced path, or rect
+  stroke) per figure. Was a soft v1 criterion; now hard. The census
+  is semantic, counted by the grammar itself (`Canvas.accent_count`),
+  because an arrow's shaft and a standalone gate line are
+  indistinguishable in raw SVG. Two codified carve-outs: all gates in
+  a figure collectively count as ONE accent (repeated structural
+  punctuation — every pause point on a ribbon — reads as one system),
+  and a `lanes` traced path plus its terminal dot count as one mark.
+  A gate set plus any focal accent still fails. *Contract 9.*
 - **Banner-fit, enforced.** Every figure's intrinsic width
   (Canvas.w + 2 · PAD_X) must fit `.cell-banner--1`'s 440px max
   ceiling. *Contract 8.*

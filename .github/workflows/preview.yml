@@ -1,16 +1,19 @@
-name: Preview viz
+name: Preview
 
 on:
-  push:
-    branches:
-      - claude/tuftean-marginalia-viz-TB0fw
   workflow_dispatch:
+    inputs:
+      name:
+        description: Preview Worker name prefix
+        required: false
+        default: preview
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: preview-viz
+  group: preview-${{ inputs.name || 'preview' }}
   cancel-in-progress: true
 
 jobs:
@@ -45,11 +48,11 @@ jobs:
         run: |
           set -x
           uv run pywrangler preview \
-            --name viz \
+            --name "${{ inputs.name || 'preview' }}" \
             --message "${{ github.sha }}" \
             --json
       - name: Smoke test deployed Preview
-        run: scripts/smoke_deployment.py https://viz-pythonbyexample.adewale-883.workers.dev
+        run: scripts/smoke_deployment.py "https://${{ inputs.name || 'preview' }}-pythonbyexample.adewale-883.workers.dev"
       - name: Dump wrangler logs on failure
         if: failure()
         run: |

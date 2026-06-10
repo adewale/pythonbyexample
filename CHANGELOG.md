@@ -6,8 +6,19 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ## Unreleased
 
+## 2026-05-16
+
 ### Added
 
+- Production custom domain `www.pythonbyexample.dev` (with `workers.dev` as fallback).
+- Learning journeys: curated multi-example arcs with per-section learner outcomes and a journeys index.
+- Marginalia figure system: a locked SVG diagram grammar (`src/marginalia_grammar.py`), curator-owned example-cell figures and journey section figures (`src/marginalia.py`), and gestalt review pages under `/prototyping/*`.
+- Figure geometry contract tests covering clipping, collision, palette, caption uniqueness, and anchor resolution for every registered figure.
+- Quality registries (`docs/quality-registries.toml`) with criterion-level scoring, confusable-pair checks, footgun coverage, no-figure rationales, journey outcome contracts, and enforced quality-score gates.
+- Optional Turnstile protection for edited-code runs: secret-gated, session-scoped clearance cookie, Invisible-mode widget loaded only when the server requires a challenge, and a smoke-test bypass header.
+- Structured wide-event observability for the Worker, with smoke checks asserting the custom event payload.
+- Deployment smoke script (`scripts/smoke_deployment.py`) checking rendered pages and representative Dynamic Worker POST runs.
+- Footer link to the GitHub repository.
 - MIT license.
 - SEO metadata for the home page and all example pages.
 - SEO/cache linter for future page additions.

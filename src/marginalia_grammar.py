@@ -65,12 +65,73 @@ SIZE_SMALL = 9
 SIZE_TAG = 8
 BASELINE = 4  # add to box-center y to render text vertically centered
 
+# ─── Text metrics ──────────────────────────────────────────────────────
+# Single source of truth for character advance. Paint code uses
+# MONO_ADVANCE (the font's exact advance) to compute positions; the
+# geometry contracts use BBOX_ADVANCE (deliberately conservative
+# over-estimates) to detect clipping and collision. Keeping both here —
+# instead of one in a paint comment and one in the test file — means a
+# recalibration happens in one place and both consumers move together.
+MONO_ADVANCE = 0.6  # JetBrains Mono advances 600/1000 units per em.
+BBOX_ADVANCE = {
+    "mono": 0.62,        # JetBrains Mono / IBM Plex Mono
+    "sans_upper": 0.65,  # Source Sans Pro uppercase (tag font)
+    "sans": 0.55,        # Source Sans Pro mixed-case (label font)
+    "serif": 0.52,       # Iowan Old Style / Charter italic
+}
+
+
+def font_class(family: str) -> str:
+    if "Mono" in family or "monospace" in family:
+        return "mono"
+    # "sans-serif" contains "serif" as a substring; check sans first
+    # so the system-sans fallback string doesn't misclassify.
+    if "sans" in family.lower():
+        return "sans"
+    if "serif" in family or "Iowan" in family or "Charter" in family:
+        return "serif"
+    return "sans"
+
+
+def text_width(content: str, family: str, size: float, tracking: float = 0.0) -> float:
+    """Conservative rendered width of a text run, for bbox math.
+
+    Upper-cased sans glyphs (the tag font: LOOP, INT, …) advance ~18%
+    wider than mixed-case sans; differentiating the two keeps the
+    contracts tight enough to catch real clips without over-flagging
+    every mixed-case label that kisses a sibling rect.
+    """
+    klass = font_class(family)
+    if klass == "sans" and content == content.upper() and any(ch.isalpha() for ch in content):
+        per_char = BBOX_ADVANCE["sans_upper"] * size
+    else:
+        per_char = BBOX_ADVANCE[klass] * size
+    return (per_char + tracking) * len(content)
+
 
 @dataclass
 class Canvas:
     w: int = 320
     h: int = 110
     parts: list[str] = field(default_factory=list)
+    # Semantic accent census. Every primitive that paints EMPHASIS
+    # increments _accents (or sets _gates_painted); the scarcity
+    # contract asserts accent_count() <= 1 from here instead of trying
+    # to reverse-engineer marks from SVG output, where an arrow's
+    # shaft+head pair and a standalone gate line are indistinguishable.
+    _accents: int = 0
+    _gates_painted: bool = False
+
+    def accent_count(self) -> int:
+        """Number of accent marks on the canvas, per the scarcity rule.
+
+        Gates are repeated structural punctuation — every pause point on
+        a ribbon, in every ribbon of the figure — and read as one system,
+        so all gates collectively count as a single accent. A gate set
+        plus any focal accent (emphasis arrow, caret, dot, traced path)
+        is still two marks competing for attention, and still fails.
+        """
+        return self._accents + (1 if self._gates_painted else 0)
 
     # ── tokens (private; cards should not reach for these) ────────────
     def _add(self, s: str) -> None:
@@ -98,6 +159,8 @@ class Canvas:
         self._line(x1, y1, x2, y2, weight=W_HAIRLINE, dash=DASH)
 
     def dot(self, x, y, *, emphasis=False):
+        if emphasis:
+            self._accents += 1
         self._add(f'<circle cx="{x}" cy="{y}" r="{DOT_R}" fill="{EMPHASIS if emphasis else INK}"/>')
 
     def tick(self, x, y, *, length=TICK_LEN):
@@ -123,6 +186,8 @@ class Canvas:
         per figure — the one mark the surrounding prose explicitly names.
         Saturated --accent strokes everywhere break visual scarcity.
         """
+        if emphasis:
+            self._accents += 1
         color = EMPHASIS if emphasis else INK
         weight = W_EMPHASIS if emphasis else W_STROKE
         dx, dy = x2 - x1, y2 - y1
@@ -214,8 +279,23 @@ class Canvas:
         prose only names one of them — the others paint in ink so the
         scarce-emphasis rule still holds.
         """
+        if emphasis:
+            self._accents += 1
         fill = EMPHASIS if emphasis else INK
         self._add(f'<polygon points="{x},{y_top - 1} {x - 4},{y_top - 7} {x + 4},{y_top - 7}" fill="{fill}"/>')
+
+    def mono_divider(self, x_start, index, y_top, y_bot, *, size=SIZE_MONO):
+        """Dashed vertical centred on character `index` of a start-anchored
+        mono string drawn at x_start.
+
+        The x is computed from the font's advance (MONO_ADVANCE), not
+        eyeballed: hand-tuned positions drift, computed positions match
+        the rendered glyph. Returns the computed x.
+        """
+        advance = MONO_ADVANCE * size
+        x = x_start + index * advance + advance / 2
+        self.dashed(x, y_top, x, y_bot)
+        return x
 
     def register(self, x, y, w, *, divisions=None, between=False):
         """Hairline with regular ticks."""
@@ -251,6 +331,7 @@ class Canvas:
 
     def gate(self, x, y_top, y_bot):
         """Vertical EMPHASIS line crossing a ribbon."""
+        self._gates_painted = True
         self._line(x, y_top, x, y_bot, color=EMPHASIS, weight=W_EMPHASIS)
 
     def ribbon(self, x, y, w, *, h=30, gates=(), soft_segments=()):
@@ -280,6 +361,37 @@ class Canvas:
         ox, oy = self.object_box(nx + gap, y, type_tag, value, w=object_w)
         self.closed_arrow(nx + 2, ny, ox - 2, oy)
         return (x, y, nx + gap + object_w, y + OBJECT_H)
+
+    def two_names_one_object(self, x, y, tag_text, name_a, name_b, value, *, object_w=OBJECT_W):
+        """Two names bound to one shared object — the aliasing picture.
+
+        Twin panels and twin figures (aliasing-mutation,
+        tuple-no-mutation) must keep this layout coordinate-identical;
+        composing it as a phrase makes drift structurally impossible.
+        y is the top of the first name box; the tag paints 6 above it.
+        """
+        if tag_text:
+            self.tag(x, y - 6, tag_text)
+        self.name_box(x, y, name_a)
+        self.name_box(x, y + 30, name_b)
+        self.closed_arrow(x + NAME_W, y + 12, x + NAME_W + 26, y + 28, emphasis=False)
+        self.closed_arrow(x + NAME_W, y + 42, x + NAME_W + 26, y + 28, emphasis=False)
+        self.object_box(x + NAME_W + 28, y + 14, "", value, w=object_w, h=28)
+
+    def type_triangle(self, third_label, third_value, *, third_w=60):
+        """instance → class → <third> — the triangle shared by the
+        class-triangle / metaclass-triangle twin figures. The shared
+        coordinates live here so the twins cannot drift apart; only the
+        third frame's label, value, and width vary.
+        """
+        self.dot(20, 28)
+        self.label(20, 54, "instance", anchor="middle")
+        self.closed_arrow(26, 28, 86, 28, emphasis=False)
+        self.frame(88, 10, 60, 36, label="class")
+        self.mono(118, 32, "Class")
+        self.closed_arrow(148, 28, 208, 28, emphasis=False)
+        self.frame(210, 10, third_w, 36, label=third_label)
+        self.mono(210 + third_w / 2, 32, third_value)
 
     def dispatch(self, x, y, src, dst, *, src_w=70, dst_w=120):
         """Source form → method form."""
@@ -322,9 +434,13 @@ class Canvas:
         for y, lab in ys_labels:
             self.lane(y, x0=x0, x1=x1, label=lab)
         if path:
+            # The traced path and its terminal dot are one mark: count
+            # once here and paint the dot directly so dot() doesn't
+            # count it a second time.
+            self._accents += 1
             d = " ".join(("M" if i == 0 else "L") + f"{px},{py}" for i, (px, py) in enumerate(path))
             self._add(f'<path d="{d}" stroke="{EMPHASIS}" stroke-width="{W_EMPHASIS}" fill="none"/>')
-            self.dot(path[-1][0], path[-1][1], emphasis=True)
+            self._add(f'<circle cx="{path[-1][0]}" cy="{path[-1][1]}" r="{DOT_R}" fill="{EMPHASIS}"/>')
 
     # ── render ────────────────────────────────────────────────────────
     # Figures render at INTRINSIC_SCALE × their viewBox dimensions. The
@@ -351,9 +467,14 @@ class Canvas:
         vb_h = self.h + pad_top + pad_bottom
         out_w = round(vb_w * self.INTRINSIC_SCALE)
         out_h = round(vb_h * self.INTRINSIC_SCALE)
+        # aria-hidden: the figcaption is the canonical voice for every
+        # figure; without it screen readers walk the SVG's internal
+        # <text> fragments ("STR", "next()", …) out of context before
+        # reaching the caption.
         return (
             f'<svg viewBox="-{pad_x} -{pad_top} {vb_w} {vb_h}" '
             f'width="{out_w}" height="{out_h}" '
+            f'aria-hidden="true" focusable="false" '
             f'xmlns="http://www.w3.org/2000/svg">'
             + "".join(self.parts)
             + "</svg>"
