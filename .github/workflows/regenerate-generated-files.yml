@@ -1,11 +1,11 @@
 name: Regenerate generated files
 
 # Merges made through the GitHub UI bypass the local git hooks that keep
-# src/asset_manifest.py and friends in sync, so a merge to main can land with
-# stale generated files (and a red Verify run). This workflow regenerates them
-# and pushes a fix-up commit. Pushes made with GITHUB_TOKEN do not trigger
-# other workflows, so the fix-up commit is not re-verified by CI; it only ever
-# contains deterministic `make build` output.
+# src/asset_manifest.py and src/example_sources_data.py in sync, so a merge to
+# main can land with stale generated files (and a red Verify run). This
+# workflow regenerates them and pushes a fix-up commit. Pushes made with
+# GITHUB_TOKEN do not trigger other workflows, so the fix-up commit is not
+# re-verified by CI; it only ever contains deterministic `make build` output.
 
 on:
   push:
@@ -24,20 +24,37 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: false
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
-      - name: Regenerate embedded examples and fingerprinted assets
-        run: make build
+      # Pull before building so the regenerated output reflects the latest
+      # main, not the triggering SHA — building first then rebasing could
+      # push stale generated files when another commit lands mid-run.
+      # merge.ours.driver backs the merge=ours attributes on generated files
+      # so the rebase never hits conflict markers in them.
       - name: Commit and push regenerated files if they drifted
         run: |
-          git add -A src/example_sources_data.py src/asset_manifest.py public
-          if git diff --cached --quiet; then
-            echo "Generated files are current."
-            exit 0
-          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "Regenerate fingerprinted assets"
-          git pull --rebase origin main
-          git push origin main
+          git config merge.ours.driver true
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            make build
+            git add -A src/example_sources_data.py src/asset_manifest.py public
+            if git diff --cached --quiet; then
+              echo "Generated files are current."
+              exit 0
+            fi
+            git commit -m "Regenerate fingerprinted assets"
+            if git push origin main; then
+              exit 0
+            fi
+            echo "Push raced with another commit; retrying (attempt $attempt)."
+            git reset --soft HEAD~1
+            git restore --staged .
+          done
+          echo "Failed to push regenerated files after 3 attempts." >&2
+          exit 1
