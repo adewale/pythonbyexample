@@ -7,6 +7,7 @@ while preventing silent holes or stale entries.
 """
 from __future__ import annotations
 
+import datetime
 import sys
 import tomllib
 from pathlib import Path
@@ -40,6 +41,17 @@ def main() -> int:
             errors.append(f"{slug}: missing no-figure reason")
         if not isinstance(review_after, str) or not review_after.strip():
             errors.append(f"{slug}: missing review_after")
+        else:
+            try:
+                due = datetime.date.fromisoformat(review_after)
+            except ValueError:
+                errors.append(f"{slug}: review_after must be an ISO date, got {review_after!r}")
+            else:
+                if due <= datetime.date.today():
+                    errors.append(
+                        f"{slug}: review_after {review_after} has passed; "
+                        f"re-review the no-figure decision and move the date or draw the figure"
+                    )
 
     if errors:
         for error in errors:

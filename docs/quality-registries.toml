@@ -188,7 +188,7 @@ journey_average_min = 8.8
 [quality_waivers.hello-world]
 accepted_min = 7.0
 reason = "Traditional first example is intentionally tiny: program -> output is the goal, not a full concept tour."
-expires = "never"
+expires = "2026-12-01"
 
 [no_figure_rationales]
 # Slugs may be added here only when the page is constraint-shaped,

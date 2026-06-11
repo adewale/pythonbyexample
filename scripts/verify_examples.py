@@ -47,8 +47,14 @@ def main() -> int:
     titles: set[str] = set()
     version_sensitive: list[str] = []
     count = 0
-    for example in examples:
+    for order_slug, example in zip(catalog.order, examples):
         slug = example["slug"]
+        if slug != order_slug:
+            errors.append(
+                f"{EXAMPLES_DIR / f'{order_slug}.md'}:1: frontmatter slug {slug!r} "
+                f"does not match the filename"
+            )
+            continue
         if selected and slug not in selected:
             continue
         count += 1

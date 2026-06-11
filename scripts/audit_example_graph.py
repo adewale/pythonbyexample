@@ -15,7 +15,12 @@ from src.examples import EXAMPLES  # noqa: E402
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--check", action="store_true", help="fail on invalid graph links")
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="additionally fail on orphaned examples (invalid links, self-links, "
+        "and out-degree violations always fail)",
+    )
     parser.add_argument("--max-out-degree", type=int, default=4)
     args = parser.parse_args()
 

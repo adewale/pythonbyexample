@@ -4,6 +4,11 @@
 This is not the editorial source of truth. It is a search aid: it breaks the
 rubric into observable criteria so the next rewrite can target the weakest
 axis instead of arguing about one opaque number.
+
+It is also the one bound on the hand-curated score registry: a curated
+score more than --max-delta above the heuristic fails the build, so the
+registry cannot drift upward without the page itself changing in ways
+the observable criteria can see.
 """
 from __future__ import annotations
 
@@ -82,6 +87,12 @@ def main() -> int:
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--below", type=float, default=9.0)
     parser.add_argument("--limit", type=int, default=20)
+    parser.add_argument(
+        "--max-delta",
+        type=float,
+        default=1.5,
+        help="fail when a curated score exceeds the heuristic by more than this",
+    )
     args = parser.parse_args()
 
     weights = tomllib.loads(REGISTRY.read_text())["score_model"]
@@ -116,6 +127,17 @@ def main() -> int:
         f"curated_avg={mean(row['curated'] for row in rows):.2f} "
         f"heuristic_avg={mean(row['heuristic'] for row in rows):.2f}"
     )
+
+    inflated = [row for row in rows if row["curated"] - row["heuristic"] > args.max_delta]
+    if inflated:
+        for row in sorted(inflated, key=lambda r: r["heuristic"] - r["curated"]):
+            print(
+                f"{row['slug']}: curated {row['curated']:.1f} exceeds heuristic "
+                f"{row['heuristic']:.1f} by more than {args.max_delta:.1f}; "
+                f"re-grade or improve the page",
+                file=sys.stderr,
+            )
+        return 1
     return 0
 
 

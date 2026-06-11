@@ -31,11 +31,12 @@ OUT = ROOT / "public" / "prototyping" / "marginalia-gestalt.html"
 
 
 def _example_cards() -> list[Card]:
-    """One Card per example slug that has a production attachment.
+    """One Card per attached production figure, in example order.
 
-    The paint function, intrinsic width, and intrinsic height all come
-    from FIGURES[ATTACHMENTS[slug][0][1]]. Slugs without attachments
-    (or without scores) are skipped.
+    The paint function, dimensions, and the exact production figcaption
+    all come from FIGURES/ATTACHMENTS, so reviewers judge the same
+    figure+caption pairing readers see — a caption asserting something
+    the figure does not draw is visible here at a glance.
     """
     _, examples = load_examples()
     cards: list[Card] = []
@@ -44,23 +45,22 @@ def _example_cards() -> list[Card]:
         attachments = ATTACHMENTS.get(slug)
         if not attachments:
             continue
-        # Single-figure banner per slug today; future multi-figure
-        # banners would extend this to one card per figure.
-        _, figure_name, _caption = attachments[0]
-        paint, w, h = FIGURES[figure_name]
-        card = Card(
-            slug=slug,
-            title=ex["title"],
-            section=ex["section"],
-            order=i,
-            figure=paint,
-            width=w,
-            height=h,
-        )
-        score = SCORES.get(slug)
-        if score is not None:
-            card.score, card.score_note = score
-        cards.append(card)
+        for _, figure_name, caption in attachments:
+            paint, w, h = FIGURES[figure_name]
+            card = Card(
+                slug=slug,
+                title=ex["title"],
+                section=ex["section"],
+                order=i,
+                figure=paint,
+                caption=caption,
+                width=w,
+                height=h,
+            )
+            score = SCORES.get(slug)
+            if score is not None:
+                card.score, card.score_note = score
+            cards.append(card)
     return cards
 
 
@@ -110,6 +110,10 @@ HEAD = """<!doctype html>
   }
   .card h3 { font-size: 15px; font-weight: 500; margin: 0; letter-spacing: -0.005em; }
   .card svg { margin-top: 8px; max-width: 100%; height: auto; overflow: visible; }
+  .card .caption {
+    margin: 6px 0 0; font-size: 12px; color: var(--ink);
+    max-width: 44ch;
+  }
   .card .note {
     margin: 6px 0 0; font-style: italic; font-size: 12px; color: var(--ink-soft);
     max-width: 38ch;
@@ -143,7 +147,7 @@ def render() -> str:
 
 def main() -> None:
     OUT.write_text(render())
-    print(f"wrote {OUT.relative_to(ROOT)} — {len(EXAMPLES)} examples (from production FIGURES)")
+    print(f"wrote {OUT.relative_to(ROOT)} — {len(EXAMPLES)} figure cards (from production FIGURES)")
 
 
 if __name__ == "__main__":

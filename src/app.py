@@ -11,10 +11,12 @@ try:
     from .asset_manifest import ASSET_PATHS
     from .examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
     from .marginalia import render_banner, render_for_section
+    from .textfmt import render_inline
 except ImportError:  # Cloudflare Python Workers import sibling modules from main's directory.
     from asset_manifest import ASSET_PATHS
     from examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
     from marginalia import render_banner, render_for_section
+    from textfmt import render_inline
 
 
 class AppResponse:
@@ -413,17 +415,6 @@ FAVICON_SVG = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" rol
   <text x="31" y="40" fill="#521000" font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="18" font-weight="800">py</text>
 </svg>'''
 
-
-
-def render_inline(text: str) -> str:
-    parts = text.split("`")
-    rendered = []
-    for index, part in enumerate(parts):
-        if index % 2:
-            rendered.append(f'<code class="syntax-inline">{html.escape(part)}</code>')
-        else:
-            rendered.append(html.escape(part))
-    return "".join(rendered)
 
 
 def _template(name: str) -> str:

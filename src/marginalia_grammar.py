@@ -15,6 +15,14 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from typing import Callable
+from xml.sax.saxutils import escape as xml_escape
+
+# Padding emitted around every figure's registered canvas by
+# Canvas.to_svg(); the geometry contracts import these so paint code and
+# tests share one source of truth.
+PAD_TOP = 14
+PAD_X = 14
+PAD_BOTTOM = 14
 
 # ─── Palette ───────────────────────────────────────────────────────────
 # Aligned with public/site.css design tokens. These are the only
@@ -207,7 +215,7 @@ class Canvas:
             attrs.append('font-style="italic"')
         if tracking:
             attrs.append(f'letter-spacing="{tracking}"')
-        self._add(f"<text {' '.join(attrs)}>{s}</text>")
+        self._add(f"<text {' '.join(attrs)}>{xml_escape(s)}</text>")
 
     def mono(self, x, y, s, *, anchor="middle", size=SIZE_MONO, color=INK):
         self._text(x, y, s, family=FONT_MONO, size=size, anchor=anchor, color=color)
@@ -462,7 +470,7 @@ class Canvas:
     INTRINSIC_SCALE = 1.6
 
     def to_svg(self) -> str:
-        pad_top, pad_x, pad_bottom = 14, 14, 14
+        pad_top, pad_x, pad_bottom = PAD_TOP, PAD_X, PAD_BOTTOM
         vb_w = self.w + 2 * pad_x
         vb_h = self.h + pad_top + pad_bottom
         out_w = round(vb_w * self.INTRINSIC_SCALE)
@@ -489,6 +497,7 @@ class Card:
     order: int | str
     figure: Callable[[Canvas], None]
     note: str = ""
+    caption: str = ""
     width: int = 320
     height: int = 110
     is_journey: bool = False
@@ -503,6 +512,12 @@ class Card:
             eyebrow = f"{self.section} · {self.order:02d}"
         else:
             eyebrow = f"Journey · {self.order}"
+        # The production caption is part of what reviewers must judge:
+        # a caption that asserts something the figure does not draw is a
+        # shipped defect, so the gestalt shows the exact figcaption text.
+        caption_html = (
+            f'  <p class="caption">{xml_escape(self.caption)}</p>\n' if self.caption else ""
+        )
         note_html = f'  <p class="note">{self.note}</p>\n' if self.note else ""
         score_html = ""
         if self.score is not None:
@@ -518,6 +533,7 @@ class Card:
             f'  <p class="eyebrow">{eyebrow}</p>\n'
             f'  <h3>{self.title}</h3>\n'
             f"  {c.to_svg()}\n"
+            f"{caption_html}"
             f"{score_html}"
             f"{note_html}"
             f"</div>"

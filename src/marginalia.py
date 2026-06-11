@@ -20,13 +20,14 @@ docs/journey-visualisation-rubric.md for the figure-quality rubric.
 
 from __future__ import annotations
 
-import html
 from typing import Callable
 
 try:
     from .marginalia_grammar import Canvas
+    from .textfmt import render_inline
 except ImportError:  # Cloudflare Workers import siblings without the package prefix.
     from marginalia_grammar import Canvas
+    from textfmt import render_inline
 
 
 # ─── Named figures ─────────────────────────────────────────────────────
@@ -123,6 +124,20 @@ def loop_repetition(c: Canvas) -> None:
         c.cell(0, y, loop, w=70, h=22)
         c.closed_arrow(70, y + 11, 104, y + 11, emphasis=(loop == "sentinel"))
         c.cell(106, y, stop, w=150, h=22, soft=(loop == "sentinel"))
+
+
+def while_backedge(c: Canvas) -> None:
+    """while-loops · the back-edge that returns control to the test each pass."""
+    c.cell(64, 4, "while test:", w=104, h=22)
+    c.closed_arrow(116, 26, 116, 46, emphasis=False)
+    c.label(124, 40, "true")
+    c.cell(64, 48, "body", w=104, h=22)
+    c.stroke(168, 59, 204, 59)
+    c.stroke(204, 59, 204, 15)
+    c.closed_arrow(204, 15, 170, 15, emphasis=True)
+    c.label(212, 40, "repeat")
+    c.closed_arrow(64, 15, 30, 15, emphasis=False)
+    c.label(0, 9, "false")
 
 
 def iter_protocol(c: Canvas) -> None:
@@ -834,12 +849,12 @@ def partial_functions(c: Canvas) -> None:
 def args_kwargs(c: Canvas) -> None:
     """Args and kwargs · *args gathers extra positionals; **kwargs gathers extra keywords."""
     c.mono(20, 22, "def f(*args, **kwargs): …", anchor="start")
-    # *args occupies signature indices 6-10 (center x≈20+8*6=68 with mono advance ≈6);
-    # **kwargs occupies indices 13-20 (center x≈20+17*6=122).
-    c.dashed(68, 26, 68, 44)
-    c.dashed(122, 26, 122, 44)
-    c.label(68, 56, "→ tuple", anchor="middle")
-    c.label(122, 56, "→ dict", anchor="middle")
+    # *args spans signature indices 6-10 (center char 8); **kwargs spans
+    # 13-20 (center falls on the 16/17 boundary, index 16.5).
+    args_x = c.mono_divider(20, 8, 26, 44)
+    kwargs_x = c.mono_divider(20, 16.5, 26, 44)
+    c.label(args_x, 56, "→ tuple", anchor="middle")
+    c.label(kwargs_x, 56, "→ dict", anchor="middle")
 
 
 def multiple_return(c: Canvas) -> None:
@@ -1403,6 +1418,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "slice-ruler": (slice_ruler, 232, 120),
     "branch-fork": (branch_fork, 232, 100),
     "loop-repetition": (loop_repetition, 260, 100),
+    "while-backedge": (while_backedge, 252, 80),
     "iter-protocol": (iter_protocol, 304, 70),
     # Runtime
     "program-output": (program_output, 240, 80),
@@ -1967,8 +1983,11 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "UPPER_CASE is a naming convention, not a language constraint; the binding behaves like any other variable.",
     )],
     "while-loops": [(
+        "cell-0", "while-backedge",
+        "`while` repeats the body while the test stays true; the back-edge returns control to the test before each pass.",
+    ), (
         "cell-0", "loop-repetition",
-        "while repeats the body until the condition becomes false; the back-edge returns to the test each pass.",
+        "Each loop shape has its own stopping rule: `for` ends when the iterable is exhausted, `while` when the condition turns false, sentinel iteration when the marker value appears.",
     )],
     "advanced-match-patterns": [(
         "cell-0", "match-pattern-variants",
@@ -2110,7 +2129,7 @@ def render_banner(slug: str, position: str) -> str:
         return ""
     figures: list[str] = []
     for name, caption in matched:
-        cap = f"<figcaption>{html.escape(caption)}</figcaption>" if caption else ""
+        cap = f"<figcaption>{render_inline(caption)}</figcaption>" if caption else ""
         figures.append(f"<figure>{_render_svg(name)}{cap}</figure>")
     count_class = f" cell-banner--{len(matched)}"
     return f'<div class="cell-banner{count_class}">{"".join(figures)}</div>'
@@ -2232,7 +2251,7 @@ def render_for_section(section_title: str) -> str:
     if not entry:
         return ""
     name, caption = entry
-    cap = f"<figcaption>{html.escape(caption)}</figcaption>" if caption else ""
+    cap = f"<figcaption>{render_inline(caption)}</figcaption>" if caption else ""
     return f'<figure class="journey-section-figure">{_render_svg(name)}{cap}</figure>'
 
 
@@ -2324,7 +2343,7 @@ SCORES: dict[str, tuple[float, str]] = {
     "match-statements": (9.0, "dispatch ladder; first match wins"),
     "advanced-match-patterns": (9.0, "four pattern variants"),
     "loop-else": (9.0, "fell-through vs broke, two outcomes"),
-    "while-loops": (9.0, "back-edge mechanism"),
+    "while-loops": (9.0, "back-edge mechanism plus the three stopping rules"),
     "type-aliases": (9.0, "complex annotation collapses to a name"),
     "typed-dicts": (9.0, "keys with declared value types"),
     "comprehension-patterns": (9.0, "nested clauses compose"),
