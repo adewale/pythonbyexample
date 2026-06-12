@@ -14,19 +14,9 @@ from __future__ import annotations
 
 import datetime
 import sys
-import tomllib
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-REGISTRY_PATH = ROOT / "docs" / "quality-registries.toml"
-sys.path.insert(0, str(ROOT))
-
-from src.examples import EXAMPLES  # noqa: E402
-from src.marginalia import EXAMPLE_QUALITY_SCORES, SECTION_FIGURE_SCORES  # noqa: E402
-
-
-def _load_registry() -> dict:
-    return tomllib.loads(REGISTRY_PATH.read_text())
+from _common import load_catalog, load_registry
+from src.marginalia import EXAMPLE_QUALITY_SCORES, SECTION_FIGURE_SCORES
 
 
 def _entry_has_text(entry: dict, *keys: str) -> bool:
@@ -48,7 +38,7 @@ def check_expiry_date(value, *, today: datetime.date | None = None) -> str | Non
 
 
 def main() -> int:
-    registry = _load_registry()
+    registry = load_registry()
     gates = registry.get("quality_gates", {})
     target = float(gates.get("example_target", 9.0))
     hard_min = float(gates.get("example_hard_min", 8.5))
@@ -62,7 +52,8 @@ def main() -> int:
             print(error, file=sys.stderr)
         return 1
 
-    slugs = {example["slug"] for example in EXAMPLES}
+    _catalog, examples = load_catalog()
+    slugs = {example["slug"] for example in examples}
     waivers = registry.get("quality_waivers", {})
     backlog = registry.get("quality_improvement_backlog", {})
     section_backlog = registry.get("journey_section_improvement_backlog", {})

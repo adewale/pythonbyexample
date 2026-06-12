@@ -9,16 +9,12 @@ present, not that it is phrased in any particular way.
 from __future__ import annotations
 
 import sys
-import tomllib
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-EXAMPLES_DIR = ROOT / "src" / "example_sources"
-REGISTRY_PATH = ROOT / "docs" / "quality-registries.toml"
+from _common import EXAMPLES_DIR, REGISTRY_PATH, load_registry
 
 
 def main() -> int:
-    data = tomllib.loads(REGISTRY_PATH.read_text())
+    data = load_registry()
     footguns = data.get("footguns", [])
     errors: list[str] = []
     for entry in footguns:

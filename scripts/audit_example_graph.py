@@ -5,12 +5,8 @@ from __future__ import annotations
 import argparse
 import sys
 from collections import Counter
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
-from src.examples import EXAMPLES  # noqa: E402
+from _common import load_catalog
 
 
 def main() -> int:
@@ -24,12 +20,13 @@ def main() -> int:
     parser.add_argument("--max-out-degree", type=int, default=4)
     args = parser.parse_args()
 
-    slugs = {example["slug"] for example in EXAMPLES}
+    _catalog, examples = load_catalog()
+    slugs = {example["slug"] for example in examples}
     incoming: Counter[str] = Counter()
     outgoing: dict[str, list[str]] = {}
     errors: list[str] = []
 
-    for example in EXAMPLES:
+    for example in examples:
         slug = example["slug"]
         links = list(example.get("see_also", []))
         outgoing[slug] = links
@@ -53,7 +50,7 @@ def main() -> int:
                 reciprocal.append(tuple(sorted((source, target))))
     reciprocal = sorted(set(reciprocal))
 
-    print(f"examples={len(EXAMPLES)}")
+    print(f"examples={len(examples)}")
     print(f"linked_sources={len(linked)}")
     print(f"edges={sum(len(links) for links in outgoing.values())}")
     print(f"orphaned={len(orphaned)}")

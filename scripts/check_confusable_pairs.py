@@ -2,25 +2,27 @@
 """Verify that each confusable pair appears on its owning page.
 
 Reads `docs/quality-registries.toml` and fails if the owning page's
-source text is missing any token from the pair.
+teaching cells are missing any token from the pair.
 
 Matching defends against substring shadowing: a token occurrence that
 sits inside a longer sibling token's occurrence does not count, so
 "def " cannot be satisfied by the "async def " that another token
 already requires — the page must contain a plain function definition of
 its own. Entries may also supply `patterns` (regular expressions) when
-substring tokens are not precise enough.
+substring tokens are not precise enough. Intro prose, frontmatter, and
+notes do not count; the contrast must be present in cell prose/code/output.
 """
 from __future__ import annotations
 
 import re
 import sys
-import tomllib
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-EXAMPLES_DIR = ROOT / "src" / "example_sources"
-REGISTRY_PATH = ROOT / "docs" / "quality-registries.toml"
+from _common import EXAMPLES_DIR, REGISTRY_PATH, load_registry
+CELL_BLOCK_RE = re.compile(r":::(?:cell|unsupported)\n(.*?)\n:::", re.S)
+
+
+def cell_text(markdown_text: str) -> str:
+    return "\n\n".join(match.group(1) for match in CELL_BLOCK_RE.finditer(markdown_text))
 
 
 def _spans(text: str, token: str) -> list[tuple[int, int]]:
@@ -52,7 +54,7 @@ def missing_tokens(text: str, tokens: list[str]) -> list[str]:
 
 
 def main() -> int:
-    data = tomllib.loads(REGISTRY_PATH.read_text())
+    data = load_registry()
     pairs = data.get("confusable_pairs", [])
     errors: list[str] = []
     for entry in pairs:
@@ -62,7 +64,7 @@ def main() -> int:
         if not page.exists():
             errors.append(f"{REGISTRY_PATH}: owner page missing for {name!r}: {owner}.md")
             continue
-        text = page.read_text()
+        text = cell_text(page.read_text())
         missing = missing_tokens(text, entry.get("tokens", []))
         if missing:
             errors.append(f"{page}: confusable pair {name!r} missing tokens: {missing}")

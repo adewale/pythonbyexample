@@ -113,10 +113,12 @@ class RegistryIntegrityTests(unittest.TestCase):
         self.addCleanup(registry_path.unlink, missing_ok=True)
         program = textwrap.dedent(f"""
             import sys
+            import tomllib
             from pathlib import Path
             sys.path.insert(0, {str(SCRIPTS)!r})
             import check_registry_integrity as mod
-            mod.REGISTRY_PATH = Path({str(registry_path)!r})
+            registry_path = Path({str(registry_path)!r})
+            mod.load_registry = lambda: tomllib.loads(registry_path.read_text())
             sys.exit(mod.main())
         """)
         return subprocess.run(
@@ -174,6 +176,16 @@ class RegistryIntegrityTests(unittest.TestCase):
         self.assertEqual(result.returncode, 1)
         self.assertIn("unknown slug", result.stderr)
 
+    def test_paired_pages_need_cell_tokens(self):
+        result = self._write_and_run(
+            textwrap.dedent("""
+                [paired_pages]
+                pairs = [["iterators", "generators"]]
+            """)
+        )
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("needs cell_tokens", result.stderr)
+
 
 class NotesSupportedHeuristicTests(unittest.TestCase):
     """The notes check should accept grounded bullets and reject ungrounded ones."""
@@ -220,6 +232,11 @@ class GateLogicCanFailTests(unittest.TestCase):
         both_forms = "async def fetch(): ...\ndef plain(): ..."
         self.assertEqual(mod.missing_tokens(both_forms, ["async def", "def "]), [])
 
+    def test_confusable_pairs_ignore_intro_only_mentions(self):
+        mod = _scripts_import("check_confusable_pairs")
+        markdown = "intro mentions list and tuple\n\n:::cell\ncell prose\n```python\nprint('ok')\n```\n```output\nok\n```\n:::"
+        self.assertEqual(mod.missing_tokens(mod.cell_text(markdown), ["list", "tuple"]), ["list", "tuple"])
+
     def test_inline_link_regex_catches_external_targets(self):
         mod = _scripts_import("check_inline_links")
         match = mod.LINK_RE.search("see [docs](/data-model/container-protocols) here")
@@ -227,6 +244,26 @@ class GateLogicCanFailTests(unittest.TestCase):
         self.assertIsNone(mod.INTERNAL_RE.match(match.group(2)))
         good = mod.LINK_RE.search("see [page](/examples/values)")
         self.assertIsNotNone(mod.INTERNAL_RE.match(good.group(2)))
+
+    def test_scope_first_pass_requires_registry_named_neighbors(self):
+        mod = _scripts_import("check_broad_surface_tours")
+        page = Path("src/example_sources/type-hints.md")
+        self.assertTrue(mod.scope_first_pass_errors(page, ["generics-and-typevar"], []))
+        self.assertTrue(
+            mod.scope_first_pass_errors(
+                page,
+                ["generics-and-typevar"],
+                ["generics-and-typevar", "paramspec"],
+            )
+        )
+        self.assertEqual(
+            mod.scope_first_pass_errors(
+                page,
+                ["generics-and-typevar", "paramspec"],
+                ["generics-and-typevar", "paramspec"],
+            ),
+            [],
+        )
 
     def test_waiver_expiry_dates_are_enforced(self):
         import datetime

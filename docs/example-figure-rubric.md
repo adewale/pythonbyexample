@@ -185,8 +185,8 @@ the figure can merge.
 
 ## Page-level coherence (per slug, multi-figure)
 
-A separate 0-1.0 score applied to slugs whose `ATTACHMENTS[slug]`
-list contains more than one figure. Multi-figure pages must form a
+A separate 0-1.0 score applied to slugs whose `[[figure_attachments]]`
+entries (loaded as `ATTACHMENTS[slug]`) contain more than one figure. Multi-figure pages must form a
 coherent set, not three angles on the same point.
 
 - **1.0** — figures show distinct aspects of the lesson in a

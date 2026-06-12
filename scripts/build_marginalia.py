@@ -17,15 +17,9 @@ journey-figures-gestalt.html instead.)
 
 from __future__ import annotations
 
-import sys
-from pathlib import Path
-
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "src"))
-
-from marginalia import ATTACHMENTS, FIGURES, SCORES  # noqa: E402  (sys.path set above)
-from marginalia_grammar import Card  # noqa: E402
-from example_loader import load_examples  # noqa: E402
+from _common import ROOT, load_catalog
+from src.marginalia import ATTACHMENTS, FIGURES, SCORES
+from src.marginalia_grammar import Card
 
 OUT = ROOT / "public" / "prototyping" / "marginalia-gestalt.html"
 
@@ -38,7 +32,7 @@ def _example_cards() -> list[Card]:
     figure+caption pairing readers see — a caption asserting something
     the figure does not draw is visible here at a glance.
     """
-    _, examples = load_examples()
+    _, examples = load_catalog()
     cards: list[Card] = []
     for i, ex in enumerate(examples, start=1):
         slug = ex["slug"]

@@ -19,18 +19,20 @@
         __TURNSTILE_CHALLENGE__
         <div class="playground-toolbar">
           <button class="button" type="submit">Run</button>
-          <button class="tool-button" type="button" data-reset onclick="resetCode()">Reset</button>
+          <button class="tool-button" type="button" data-reset>Reset</button>
         </div>
       </form>
       <section class="runner-panel output-panel" aria-live="polite"__OUTPUT_PLACEHOLDER__><h3>__OUTPUT_HEADING__</h3><pre><code>__SHOWN_OUTPUT__</code></pre><p class="execution-time">__EXECUTION_TIME__</p></section>
     </div>
   </section>
 </article>
-<script>
+<script nonce="__CSP_NONCE__">
 const originalCode = __ORIGINAL_CODE_JSON__;
 function editor() { return document.getElementById('code-editor'); }
 function resizeEditor() { const field = editor(); field.style.height = 'auto'; field.style.height = field.scrollHeight + 'px'; }
 function resetCode() { editor().value = originalCode; if (window.pythonByExampleEditor) window.pythonByExampleEditor.setValue(originalCode); resizeEditor(); editor().focus(); }
+const resetButton = document.querySelector('[data-reset]');
+if (resetButton) resetButton.addEventListener('click', resetCode);
 resizeEditor();
 editor().addEventListener('input', resizeEditor);
 const form = document.querySelector('form');

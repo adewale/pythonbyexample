@@ -51,7 +51,6 @@ jobs:
           CHROME_PATH: /usr/bin/google-chrome
         run: |
           make verify
-          scripts/check_example_migration_parity.py
           scripts/format_examples.py --check
           make verify-python-version VERSION=3.13
           git diff --check

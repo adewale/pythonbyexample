@@ -12,7 +12,7 @@ class MarkdownMigrationPrereqTests(unittest.TestCase):
         spec = SPEC.read_text()
         required_phrases = [
             "Cloudflare bundling behavior",
-            "Golden parity script",
+            "Historical golden parity script",
             "Cell model",
             "Generated full code",
             "Verifier correctness",
@@ -72,20 +72,22 @@ class MarkdownMigrationPrereqTests(unittest.TestCase):
         readme = README.read_text()
         workflow = CI.read_text()
         for phrase in [
-            "Golden fixture policy",
+            "Golden fixture cleanup policy",
             "CI policy",
             "Contributor documentation policy",
             "Native Markdown bundling remains unproven",
             "reserialize it deterministically",
+            "TOML editorial registries",
         ]:
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, spec)
         for phrase in ["src/example_sources/", ":::program", ":::cell", "make build", "make verify-examples"]:
             with self.subTest(readme=phrase):
                 self.assertIn(phrase, readme)
-        for phrase in ["make verify", "check_example_migration_parity.py", "format_examples.py --check", "verify-python-version"]:
+        for phrase in ["make verify", "format_examples.py --check", "verify-python-version"]:
             with self.subTest(workflow=phrase):
                 self.assertIn(phrase, workflow)
+        self.assertNotIn("check_example_migration_parity.py", workflow)
 
 
 if __name__ == "__main__":

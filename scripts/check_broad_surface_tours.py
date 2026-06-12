@@ -3,33 +3,34 @@
 
 Reads `docs/quality-registries.toml`. A page may opt out of the strict
 check by adding `scope_first_pass = true` to its frontmatter, in which
-case it must instead carry `see_also` links pointing at focused
-neighbors that the registry expects to exist.
+case the registry must name `focused_neighbors` and the page must link to
+all of them via `see_also`.
 """
 from __future__ import annotations
 
-import re
 import sys
-import tomllib
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-EXAMPLES_DIR = ROOT / "src" / "example_sources"
-REGISTRY_PATH = ROOT / "docs" / "quality-registries.toml"
+from _common import EXAMPLES_DIR, REGISTRY_PATH, frontmatter, load_registry
 
 
-FRONTMATTER_RE = re.compile(r"^\+\+\+\n(.*?)\n\+\+\+\n", re.DOTALL)
-
-
-def parse_frontmatter(text: str) -> dict:
-    match = FRONTMATTER_RE.match(text)
-    if not match:
-        return {}
-    return tomllib.loads(match.group(1))
+def scope_first_pass_errors(page: Path, see_also: list[str], focused_neighbors: list[str]) -> list[str]:
+    errors: list[str] = []
+    if not focused_neighbors:
+        errors.append(
+            f"{page}: scope_first_pass=true requires focused_neighbors in broad_surface_tours"
+        )
+        return errors
+    missing = [slug for slug in focused_neighbors if slug not in see_also]
+    if missing:
+        errors.append(
+            f"{page}: scope_first_pass=true missing focused see_also neighbors: {missing}"
+        )
+    return errors
 
 
 def main() -> int:
-    data = tomllib.loads(REGISTRY_PATH.read_text())
+    data = load_registry()
     tours = data.get("broad_surface_tours", {})
     errors: list[str] = []
     for slug, spec in tours.items():
@@ -38,15 +39,17 @@ def main() -> int:
             errors.append(f"{REGISTRY_PATH}: broad-tour page missing: {slug}.md")
             continue
         text = page.read_text()
-        frontmatter = parse_frontmatter(text)
+        page_frontmatter = frontmatter(page)
         required = spec.get("required_tokens", [])
         missing = [token for token in required if token not in text]
-        if frontmatter.get("scope_first_pass"):
-            see_also = frontmatter.get("see_also") or []
-            if not see_also:
-                errors.append(
-                    f"{page}: scope_first_pass=true requires see_also links to focused neighbors"
+        if page_frontmatter.get("scope_first_pass"):
+            errors.extend(
+                scope_first_pass_errors(
+                    page,
+                    page_frontmatter.get("see_also") or [],
+                    spec.get("focused_neighbors") or [],
                 )
+            )
             continue
         if missing:
             errors.append(

@@ -196,9 +196,10 @@ independently.
 
 ### What the project owner does
 
-Edit `ATTACHMENTS` in `src/marginalia.py`. Add a paint function (composed
-from grammar primitives) and register it in `FIGURES`. Append a tuple of
-`(anchor, figure_name, caption)` to `ATTACHMENTS[slug]`. Done.
+Edit `docs/quality-registries.toml`. Add `[[figure_attachments]]` and
+`[[example_figure_scores]]` entries. If the figure is new, add a paint
+function (composed from grammar primitives) and register it in `FIGURES` in
+`src/marginalia.py`. Done.
 
 ## Pipeline invariants (root-cause rules)
 

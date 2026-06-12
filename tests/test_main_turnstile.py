@@ -84,23 +84,23 @@ def session_env(**overrides) -> _Env:
 class ClearanceSigningTests(unittest.TestCase):
     def test_signed_clearance_round_trips(self):
         env = session_env()
-        token = main._sign_clearance("clearance-secret", int(time.time()) + 600)
-        request = make_request(cookie=token, env=env)
+        clearance_cookie = main._sign_clearance("clearance-secret", int(time.time()) + 600)
+        request = make_request(cookie=clearance_cookie, env=env)
         self.assertTrue(main._clearance_valid(request))
         self.assertFalse(main._requires_turnstile(request))
 
     def test_tampered_signature_is_rejected(self):
         env = session_env()
-        token = main._sign_clearance("clearance-secret", int(time.time()) + 600)
-        tampered = token[:-2] + ("aa" if not token.endswith("aa") else "bb")
+        clearance_cookie = main._sign_clearance("clearance-secret", int(time.time()) + 600)
+        tampered = clearance_cookie[:-2] + ("aa" if not clearance_cookie.endswith("aa") else "bb")
         request = make_request(cookie=tampered, env=env)
         self.assertFalse(main._clearance_valid(request))
         self.assertTrue(main._requires_turnstile(request))
 
     def test_expired_clearance_is_rejected(self):
         env = session_env()
-        token = main._sign_clearance("clearance-secret", int(time.time()) - 1)
-        request = make_request(cookie=token, env=env)
+        clearance_cookie = main._sign_clearance("clearance-secret", int(time.time()) - 1)
+        request = make_request(cookie=clearance_cookie, env=env)
         self.assertFalse(main._clearance_valid(request))
 
     def test_non_integer_expiry_is_rejected(self):
@@ -135,7 +135,7 @@ class ChallengeModeTests(unittest.TestCase):
         self.assertFalse(main._requires_turnstile(request))
 
     def test_smoke_bypass_header_disables_challenge(self):
-        env = session_env(PBE_SMOKE_BYPASS_SECRET="smoke-secret")
+        env = session_env(**{"PBE_SMOKE_BYPASS_SECRET": "smoke-secret"})
         request = make_request(headers={main.SMOKE_BYPASS_HEADER: "smoke-secret"}, env=env)
         self.assertFalse(main._requires_turnstile(request))
         wrong = make_request(headers={main.SMOKE_BYPASS_HEADER: "wrong"}, env=env)
@@ -170,12 +170,14 @@ class ClearanceCookieTests(unittest.TestCase):
 
 
 class HtmlCacheKeyTests(unittest.TestCase):
-    def test_appends_version_with_query_separator(self):
+    def test_normalizes_ignored_query_strings(self):
         key = main.html_cache_key_url("https://example.dev/examples/values")
-        self.assertIn(f"?__html_v={main.HTML_CACHE_VERSION}", key)
-        keyed = main.html_cache_key_url("https://example.dev/examples/values?a=1")
-        self.assertIn(f"&__html_v={main.HTML_CACHE_VERSION}", keyed)
-        self.assertTrue(keyed.startswith("https://example.dev/examples/values?a=1"))
+        self.assertEqual(
+            key,
+            f"https://example.dev/examples/values?__html_v={main.HTML_CACHE_VERSION}",
+        )
+        keyed = main.html_cache_key_url("https://example.dev/examples/values?a=1&utm=x#frag")
+        self.assertEqual(keyed, key)
 
     def test_turnstile_site_key_fragments_the_cache(self):
         plain = main.html_cache_key_url("https://example.dev/")

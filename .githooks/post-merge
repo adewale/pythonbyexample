@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
-# Regenerate generated files after a merge or pull so embedded example
-# data and the asset manifest reflect the merged tree, not whichever
-# parent won the conflict.
+# Regenerate generated files after a merge or pull so embedded data,
+# asset manifests, fingerprints, and prototype pages reflect the merged
+# tree, not whichever parent won the conflict.
 set -e
 cd "$(git rev-parse --show-toplevel)"
-uv run --python 3.13 python scripts/embed_example_sources.py >/dev/null
-uv run --python 3.13 python scripts/fingerprint_assets.py >/dev/null
-if ! git diff --quiet src/example_sources_data.py src/asset_manifest.py public/_headers; then
+make build >/dev/null
+if ! git diff --quiet src/example_sources_data.py src/editorial_registry_data.py src/asset_manifest.py public/_headers public/prototyping; then
   echo "post-merge: generated files regenerated; stage and amend if needed"
 fi

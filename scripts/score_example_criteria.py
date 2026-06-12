@@ -16,17 +16,10 @@ import argparse
 import json
 import re
 import sys
-import tomllib
-from pathlib import Path
 from statistics import mean
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
-from src.example_loader import load_examples  # noqa: E402
-from src.marginalia import EXAMPLE_QUALITY_SCORES  # noqa: E402
-
-REGISTRY = ROOT / "docs" / "quality-registries.toml"
+from _common import load_catalog, load_registry
+from src.marginalia import EXAMPLE_QUALITY_SCORES
 GENERIC_PHRASES = [
     "it exists to make a common boundary explicit",
     "the example is small, deterministic",
@@ -95,8 +88,8 @@ def main() -> int:
     )
     args = parser.parse_args()
 
-    weights = tomllib.loads(REGISTRY.read_text())["score_model"]
-    _, examples = load_examples()
+    weights = load_registry()["score_model"]
+    _, examples = load_catalog()
     rows = []
     for example in examples:
         criteria = criterion_scores(example)

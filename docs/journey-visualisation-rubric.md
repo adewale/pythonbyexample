@@ -88,9 +88,9 @@ Score each section figure on a 10-point scale.
 - **Exactly one figure per section.** Section figures are not stacked.
   If the section needs two figures the section is doing two things.
 - **Caption present.** A figure without a `figcaption` is not allowed.
-- **Section summary aligns with caption.** The summary in
-  `src/app.py`'s `JOURNEYS` list agrees with what the figure caption
-  asserts. Disagreement means one or the other is wrong.
+- **Section summary aligns with caption.** The journey section summary in
+  `docs/quality-registries.toml` agrees with what the figure caption asserts.
+  Disagreement means one or the other is wrong.
 - **Renders within the centered figure block.** The figure obeys the
   width the layout gives it (`clamp(280px, 70vw, 640px)`); design at a
   viewBox whose rendered width fits the shared 640px ceiling.

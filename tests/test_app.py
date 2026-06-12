@@ -11,6 +11,7 @@ from pathlib import Path
 from src.app import build_dynamic_worker_code, get_example, list_examples, render_example_page, render_home, route
 from src.example_loader import EXAMPLES_DIR, load_manifest, verify_example_output
 from src.example_sources_data import EXAMPLE_SOURCE_FILES
+from src.security import CONTENT_SECURITY_POLICY, CSP_SCRIPT_NONCE
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -310,6 +311,8 @@ class AppTests(unittest.TestCase):
         self.assertNotIn("nav a { min-height: 40px; display: inline-flex; align-items: center; border-radius", css)
         self.assertNotIn("transition: all", css)
         self.assertIn("min-height: 40px", css)
+        self.assertIn("--accent-action: #C83800", css)
+        self.assertIn("background: var(--accent-action)", css)
         self.assertIn("box-shadow:", css)
         self.assertIn("background: transparent", css)
         self.assertIn("border-left: 2px solid var(--accent)", css)
@@ -329,6 +332,8 @@ class AppTests(unittest.TestCase):
         protected = render_example_page(get_example("hello-world"), turnstile_site_key="site-key-123")
         self.assertIn('data-turnstile-sitekey="site-key-123"', protected)
         self.assertIn("https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit", protected)
+        self.assertIn(f'nonce="{CSP_SCRIPT_NONCE}"', protected)
+        self.assertNotIn("onclick=", protected)
         self.assertIn("turnstile.render", protected)
         self.assertIn("execution: 'execute'", protected)
         self.assertNotIn("size: 'invisible'", protected)
@@ -351,6 +356,10 @@ class AppTests(unittest.TestCase):
         self.assertIn("/turnstile/v0/siteverify", main_source)
         self.assertIn("PBE_SMOKE_BYPASS_SECRET", main_source)
         self.assertIn("x-pythonbyexample-smoke-secret", main_source)
+        self.assertIn("Content-Security-Policy", main_source)
+        self.assertIn("Strict-Transport-Security", main_source)
+        self.assertIn("script-src-attr 'none'", CONTENT_SECURITY_POLICY)
+        self.assertNotIn("script-src 'unsafe-inline'", CONTENT_SECURITY_POLICY)
 
     def test_cf_workers_design_system_and_playground_lessons(self):
         html = render_example_page(get_example("hello-world"), output="hello world\n")
@@ -456,6 +465,7 @@ class AppTests(unittest.TestCase):
         self.assertIn('def should_cache_get_url(url: str) -> bool:', main_source)
         self.assertIn('return not path.startswith("/layout-options/")', main_source)
         self.assertIn('response.headers.set("Cache-Control", "no-store")', main_source)
+        self.assertNotIn("route(", main_source)
 
     def test_dynamic_worker_execution_uses_hash_keyed_get_cache(self):
         main_source = (ROOT / "src" / "main.py").read_text()

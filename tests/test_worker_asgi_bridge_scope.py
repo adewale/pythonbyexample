@@ -1,9 +1,13 @@
 import importlib
+import pathlib
 import sys
 import types
 import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
+
+
+ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 class WorkerAsgiBridgeScopeTests(unittest.TestCase):
@@ -76,6 +80,14 @@ class WorkerAsgiBridgeScopeTests(unittest.TestCase):
         self.assertIsNot(scope["state"], state)
         self.assertIs(scope["state"]["wide_event"], wide_event)
         self.assertEqual(scope["state"]["cache"], "bypass")
+
+    def test_bridge_has_pre_asgi_body_cap_hook(self):
+        bridge_source = (ROOT / "src" / "worker_asgi_bridge.py").read_text()
+        main_source = (ROOT / "src" / "main.py").read_text()
+
+        self.assertIn("max_body_bytes", bridge_source)
+        self.assertIn("body_bytes > max_body_bytes", bridge_source)
+        self.assertIn("max_body_bytes=MAX_SUBMITTED_BODY_BYTES", main_source)
 
 
 if __name__ == "__main__":

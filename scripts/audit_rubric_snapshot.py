@@ -9,22 +9,15 @@ from __future__ import annotations
 
 import argparse
 import datetime
-import sys
-import tomllib
 from collections import Counter
 from pathlib import Path
 from statistics import mean, median
 from typing import Any
 
-ROOT = Path(__file__).resolve().parents[1]
-REGISTRY_PATH = ROOT / "docs" / "quality-registries.toml"
-if str(ROOT) not in sys.path:
-    sys.path.insert(0, str(ROOT))
-
-from scripts.score_example_criteria import criterion_scores, weighted_score  # noqa: E402
-from src.app import JOURNEYS  # noqa: E402
-from src.example_loader import load_examples  # noqa: E402
-from src.marginalia import (  # noqa: E402
+from _common import load_catalog, load_registry
+from scripts.score_example_criteria import criterion_scores, weighted_score
+from src.app import JOURNEYS
+from src.marginalia import (
     ATTACHMENTS,
     EXAMPLE_QUALITY_SCORES,
     SCORES,
@@ -214,8 +207,8 @@ def render_table(headers: list[str], rows: list[list[object]]) -> list[str]:
 
 
 def render_report(date: str) -> str:
-    registry = tomllib.loads(REGISTRY_PATH.read_text())
-    _catalog, examples = load_examples()
+    registry = load_registry()
+    _catalog, examples = load_catalog()
     example_scores = [score for score, _comment in EXAMPLE_QUALITY_SCORES.values()]
     figure_scores = [score for score, _comment in SCORES.values()]
     journey_scores = [score for score, _comment in SECTION_FIGURE_SCORES.values()]

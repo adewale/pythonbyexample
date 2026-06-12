@@ -128,6 +128,7 @@ async def process_request(
     ctx: Context | None,
     *,
     state: dict | None = None,
+    max_body_bytes: int | None = None,
 ) -> js.Response:
     from js import Object, Response, TransformStream
     from pyodide.ffi import create_proxy
@@ -141,11 +142,25 @@ async def process_request(
     writer = None
 
     receive_queue = Queue()
+    body_bytes = 0
     if req.body:
         async for data in req.body:
+            chunk = data.to_bytes()
+            body_bytes += len(chunk)
+            if max_body_bytes is not None and body_bytes > max_body_bytes:
+                return Response.new(
+                    "Request body too large.",
+                    status=413,
+                    headers=Object.fromEntries(
+                        [
+                            ["Content-Type", "text/plain; charset=utf-8"],
+                            ["Cache-Control", "no-store"],
+                        ]
+                    ),
+                )
             await receive_queue.put(
                 {
-                    "body": data.to_bytes(),
+                    "body": chunk,
                     "more_body": True,
                     "type": "http.request",
                 }
@@ -315,11 +330,12 @@ async def fetch(
     ctx: Context | None = None,
     *,
     state: dict | None = None,
+    max_body_bytes: int | None = None,
 ) -> js.Response:
     logger.debug("ASGI request: %s %s", req.method, req.url)
     await _ensure_application_started(app)
     try:
-        return await process_request(app, req, env, ctx, state=state)
+        return await process_request(app, req, env, ctx, state=state, max_body_bytes=max_body_bytes)
     except Exception:
         logger.exception("ASGI request failed")
         raise

@@ -5,7 +5,6 @@
 ## Verification
 
 - [ ] `make verify`
-- [ ] `scripts/check_example_migration_parity.py`
 - [ ] `scripts/format_examples.py --check`
 - [ ] `make verify-python-version VERSION=3.13`
 - [ ] `git diff --check`

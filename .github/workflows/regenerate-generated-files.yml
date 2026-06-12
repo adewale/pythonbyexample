@@ -1,8 +1,9 @@
 name: Regenerate generated files
 
 # Merges made through the GitHub UI bypass the local git hooks that keep
-# src/asset_manifest.py and src/example_sources_data.py in sync, so a merge to
-# main can land with stale generated files (and a red Verify run). This
+# src/asset_manifest.py, src/example_sources_data.py, and
+# src/editorial_registry_data.py in sync, so a merge to main can land with
+# stale generated files (and a red Verify run). This
 # workflow regenerates them and pushes a fix-up commit. Pushes made with
 # GITHUB_TOKEN do not trigger other workflows, so the fix-up commit is not
 # re-verified by CI; it only ever contains deterministic `make build` output.
@@ -43,7 +44,7 @@ jobs:
           for attempt in 1 2 3; do
             git pull --rebase origin main
             make build
-            git add -A src/example_sources_data.py src/asset_manifest.py public
+            git add -A src/example_sources_data.py src/editorial_registry_data.py src/asset_manifest.py public
             if git diff --cached --quiet; then
               echo "Generated files are current."
               exit 0

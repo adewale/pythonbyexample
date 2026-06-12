@@ -14,17 +14,14 @@ from __future__ import annotations
 
 import re
 
-from _common import EXAMPLES_DIR, ROOT, fail, load_catalog
+from _common import EXAMPLES_DIR, fail, load_catalog
 
 LINK_RE = re.compile(r"\[([^\[\]]+)\]\(([^()\s]+)\)")
 INTERNAL_RE = re.compile(r"^/(examples|journeys)/([a-z0-9-]+)$")
 
 
 def journey_slugs() -> set[str]:
-    import sys
-
-    sys.path.insert(0, str(ROOT / "src"))
-    from app import JOURNEYS_BY_SLUG
+    from src.app import JOURNEYS_BY_SLUG
 
     return set(JOURNEYS_BY_SLUG)
 
