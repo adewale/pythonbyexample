@@ -1,6 +1,8 @@
 # Example source format spec
 
-This spec describes a future source format for Python By Example examples. The goal is to make each example independently editable, reviewable, and verifiable while keeping the project strictly a Python language tour.
+**Status: implemented.** The migration this spec planned is complete — all examples live as Markdown under `src/example_sources/`, the website serves them through `src/example_loader.py`, and the checklists below are the historical execution record. The format rules and verification model remain the contract for new examples.
+
+This spec describes the source format for Python By Example examples. The goal is to make each example independently editable, reviewable, and verifiable while keeping the project strictly a Python language tour.
 
 Every page should teach a Python language concept, standard syntax pattern, object model behavior, or core standard-library concept that belongs in the learning sequence.
 
@@ -81,68 +83,68 @@ Investigation and verification tasks come first because they decide the implemen
 
 ### Phase 0: spikes and investigations
 
-- [ ] Freeze a golden copy of the current catalog before conversion; do not rely on git history as the only golden source.
-- [ ] Spike Cloudflare Worker bundling for raw Markdown files under `src/example_sources/` using `pywrangler dev`.
-- [ ] Spike production bundling, or document why local Worker bundling failure is enough to require embedded source data.
-- [ ] Decide whether to keep the default embedded-data approach or replace it with proven native file bundling.
-- [ ] Audit current walkthrough fragments and classify each example as fully executable cells, needs larger cells, or needs rewrite.
-- [ ] Rewrite or redesign `match-statements`, `recursion`, `classes`, `properties`, `special-methods`, and `type-hints` so they retain fine-grained literate cells without non-executable fragments.
-- [ ] Decide the final cell policy for non-executable explanatory fragments before writing conversion tooling.
-- [ ] Confirm the `:::program` plus executable restatement-cell model works for the six problematic examples before converting all examples.
-- [ ] Spike parser line-number tracking for frontmatter, cells, Python fences, output fences, and notes.
-- [ ] Spike formatter behavior on several hand-edited Markdown examples and confirm it preserves prose/code semantics.
-- [ ] Spike `uv run --python $(VERSION)` behavior for `verify-python-version` on locally available Python versions.
-- [ ] Identify which examples should be marked `version_sensitive` before future Python runtime migrations.
+- [x] Freeze a golden copy of the current catalog before conversion; do not rely on git history as the only golden source.
+- [x] Spike Cloudflare Worker bundling for raw Markdown files under `src/example_sources/` using `pywrangler dev`.
+- [x] Spike production bundling, or document why local Worker bundling failure is enough to require embedded source data.
+- [x] Decide whether to keep the default embedded-data approach or replace it with proven native file bundling.
+- [x] Audit current walkthrough fragments and classify each example as fully executable cells, needs larger cells, or needs rewrite.
+- [x] Rewrite or redesign `match-statements`, `recursion`, `classes`, `properties`, `special-methods`, and `type-hints` so they retain fine-grained literate cells without non-executable fragments.
+- [x] Decide the final cell policy for non-executable explanatory fragments before writing conversion tooling.
+- [x] Confirm the `:::program` plus executable restatement-cell model works for the six problematic examples before converting all examples.
+- [x] Spike parser line-number tracking for frontmatter, cells, Python fences, output fences, and notes.
+- [x] Spike formatter behavior on several hand-edited Markdown examples and confirm it preserves prose/code semantics.
+- [x] Spike `uv run --python $(VERSION)` behavior for `verify-python-version` on locally available Python versions.
+- [x] Identify which examples should be marked `version_sensitive` before future Python runtime migrations.
 
 ### Phase 1: tooling while the live app stays on `src/examples.py`
 
-- [ ] Add fixture Markdown examples for a small subset: `hello-world`, `values`, one multi-cell example, and one difficult class/method example.
-- [ ] Add a checked-in golden catalog fixture for parity; keep it until after the cleanup milestone.
-- [ ] Add `src/example_loader.py` with TOML frontmatter parsing, explicit cell parsing, line-number metadata, and generated `doc_url`.
-- [ ] Add verifier execution using `compile(..., dont_inherit=True)`.
-- [ ] Add support for exactly one `:::program` block per example and make the website editor source come from that block.
-- [ ] Add verifier checks for wrong output, missing fences, duplicate slugs, stale embedded data, hardcoded docs versions, incompatible `min_python`, and inherited future flags.
-- [ ] Add `scripts/format_examples.py` with `--check` mode.
-- [ ] Add `scripts/embed_example_sources.py` if the bundling spike keeps the embedded-data approach.
-- [ ] Add `scripts/check_example_migration_parity.py` against the checked-in golden catalog fixture and the current `src/examples.py` golden source.
-- [ ] Add Make targets: `build`, `embed-examples`, `check-generated`, `verify-examples`, `format-examples`, and `verify-python-version`.
-- [ ] Update fingerprinting so Markdown source or embedded source data changes `HTML_CACHE_VERSION`.
-- [ ] Keep the website importing the current `src/examples.py` during this phase.
+- [x] Add fixture Markdown examples for a small subset: `hello-world`, `values`, one multi-cell example, and one difficult class/method example.
+- [x] Add a checked-in golden catalog fixture for parity; keep it until after the cleanup milestone.
+- [x] Add `src/example_loader.py` with TOML frontmatter parsing, explicit cell parsing, line-number metadata, and generated `doc_url`.
+- [x] Add verifier execution using `compile(..., dont_inherit=True)`.
+- [x] Add support for exactly one `:::program` block per example and make the website editor source come from that block.
+- [x] Add verifier checks for wrong output, missing fences, duplicate slugs, stale embedded data, hardcoded docs versions, incompatible `min_python`, and inherited future flags.
+- [x] Add `scripts/format_examples.py` with `--check` mode.
+- [x] Add `scripts/embed_example_sources.py` if the bundling spike keeps the embedded-data approach.
+- [x] Add `scripts/check_example_migration_parity.py` against the checked-in golden catalog fixture and the current `src/examples.py` golden source.
+- [x] Add Make targets: `build`, `embed-examples`, `check-generated`, `verify-examples`, `format-examples`, and `verify-python-version`.
+- [x] Update fingerprinting so Markdown source or embedded source data changes `HTML_CACHE_VERSION`.
+- [x] Keep the website importing the current `src/examples.py` during this phase.
 
 ### Phase 2: mechanical conversion and parity
 
-- [ ] Mechanically convert all current examples to Markdown without rewriting teaching content.
-- [ ] Run the formatter and commit canonical Markdown shape.
-- [ ] Run verifier across every Markdown example.
-- [ ] Run golden parity and require the program block to match old `code` byte-for-byte.
-- [ ] Run golden parity and classify walkthrough differences as identical or teaching-structure.
-- [ ] Fix every semantic difference; do not allowlist semantic differences for the app switch.
-- [ ] Fix every teaching-structure difference, including collapsed/lost cells.
-- [ ] Fix examples whose cells are not executable according to the final cell policy.
-- [ ] Verify Markdown-only edits change generated embedded data and `HTML_CACHE_VERSION`.
-- [ ] Verify stale generated files fail `make check-generated`.
+- [x] Mechanically convert all current examples to Markdown without rewriting teaching content.
+- [x] Run the formatter and commit canonical Markdown shape.
+- [x] Run verifier across every Markdown example.
+- [x] Run golden parity and require the program block to match old `code` byte-for-byte.
+- [x] Run golden parity and classify walkthrough differences as identical or teaching-structure.
+- [x] Fix every semantic difference; do not allowlist semantic differences for the app switch.
+- [x] Fix every teaching-structure difference, including collapsed/lost cells.
+- [x] Fix examples whose cells are not executable according to the final cell policy.
+- [x] Verify Markdown-only edits change generated embedded data and `HTML_CACHE_VERSION`.
+- [x] Verify stale generated files fail `make check-generated`.
 
 ### Phase 3: app switch
 
-- [ ] Block this phase unless golden parity reports 100% parity for metadata, code behavior, output, notes, walkthrough prose/source, rendered cell count, and cell source/output structure.
-- [ ] Switch `src/examples.py` to a thin compatibility layer over the Markdown loader.
-- [ ] Verify existing app tests still pass without weakening assertions.
-- [ ] Run `make build`, `make verify-examples`, `make test`, `make seo-cache-lint`, `make browser-layout-test`, `make lint`, and `git diff --check`.
-- [ ] Start local Worker with `pywrangler dev` and verify it does not fail on missing Markdown files.
-- [ ] Verify representative GET pages render from the Markdown loader.
-- [ ] Verify POST execution still runs edited code through Dynamic Workers.
-- [ ] Verify browser layout for Shiki, CodeMirror, literate cells, and output panels.
+- [x] Block this phase unless golden parity reports 100% parity for metadata, code behavior, output, notes, walkthrough prose/source, rendered cell count, and cell source/output structure.
+- [x] Switch `src/examples.py` to a thin compatibility layer over the Markdown loader.
+- [x] Verify existing app tests still pass without weakening assertions.
+- [x] Run `make build`, `make verify-examples`, `make test`, `make seo-cache-lint`, `make browser-layout-test`, `make lint`, and `git diff --check`.
+- [x] Start local Worker with `pywrangler dev` and verify it does not fail on missing Markdown files.
+- [x] Verify representative GET pages render from the Markdown loader.
+- [x] Verify POST execution still runs edited code through Dynamic Workers.
+- [x] Verify browser layout for Shiki, CodeMirror, literate cells, and output panels.
 
 ### Phase 4: deploy and cleanup
 
-- [ ] Do not deploy Markdown-backed examples unless Phase 3 has 100% parity and no collapsed/lost literate cells.
-- [ ] Deploy only after local Worker startup and all verification pass.
-- [ ] Smoke-test `https://www.pythonbyexample.dev`.
-- [ ] Smoke-test `https://pythonbyexample.adewale-883.workers.dev`.
-- [ ] Verify production asset caching and HTML cache-busting after an example-only edit.
-- [ ] Keep the frozen golden fixture through at least one stable production release cycle and rollback window.
-- [ ] Remove temporary golden parity scaffolding only in a dedicated cleanup PR after CI and production confidence are established.
-- [ ] Update README contributor instructions to point contributors at Markdown examples, `make build`, and `make verify-examples`.
+- [x] Do not deploy Markdown-backed examples unless Phase 3 has 100% parity and no collapsed/lost literate cells.
+- [x] Deploy only after local Worker startup and all verification pass.
+- [x] Smoke-test `https://www.pythonbyexample.dev`.
+- [x] Smoke-test `https://pythonbyexample.adewale-883.workers.dev`.
+- [x] Verify production asset caching and HTML cache-busting after an example-only edit.
+- [x] Keep the frozen golden fixture through at least one stable production release cycle and rollback window.
+- [x] Remove temporary golden parity scaffolding only in a dedicated cleanup PR after CI and production confidence are established.
+- [x] Update README contributor instructions to point contributors at Markdown examples, `make build`, and `make verify-examples`.
 
 ## Implementation milestones
 
@@ -200,7 +202,21 @@ Each example file contains:
 2. Introductory prose.
 3. Exactly one `:::program` block containing the full editable program.
 4. One or more explicit `:::cell` blocks for the literate walkthrough.
-5. Optional `:::note` blocks.
+5. Optional `:::unsupported` blocks: a prose-plus-code teaching unit whose code the
+   runner environment cannot execute (subprocesses, sockets, threads). The fence is
+   displayed but not executed; the prose must say plainly that Run fails in the
+   sandbox and where the shown evidence comes from.
+6. Optional `:::note` blocks.
+
+Frontmatter fields beyond the navigation basics:
+
+- `expected_output` overrides the generated program output for
+  environment-shaped pages whose real output the build environment cannot
+  reproduce deterministically; the verifier still executes the program.
+- `standalone_cells = true` opts a page out of the program-covers-cells gate
+  when it deliberately demonstrates code the editable program does not
+  contain; the opt-out is reported on every run so it stays a visible
+  editorial decision.
 
 TOML is preferred over YAML so the loader can use Python's standard-library `tomllib` locally and in the Worker bundle.
 
@@ -533,15 +549,16 @@ The command should fail if:
 
 ## Golden fixture policy
 
-`tests/fixtures/golden_examples.py` is temporary but intentional migration safety infrastructure.
+`tests/fixtures/golden_examples.py` began as migration safety infrastructure and is now a reviewed **structural snapshot** of the parsed catalog: every example's metadata, program, expected output, and full cell sequence (prose, code, output, kind).
+
+What the gate proves: an accidental loader/parser/renderer change cannot silently rewrite the teaching structure readers get — it surfaces in `scripts/check_example_migration_parity.py` as snapshot drift across many examples, while a deliberate content edit drifts only the files actually touched. The gate is not a freshness check on content; refreshes are part of editing.
 
 Rules:
 
-- Keep the golden fixture checked in while Markdown remains new.
-- Do not update the golden fixture in the same change as ordinary content edits.
-- If changing intended teaching structure, update Markdown first and let parity fail; then update the golden fixture in a separate explicit fixture-refresh commit after review.
-- Remove the golden fixture only after at least one stable production release cycle, CI coverage for `make verify` and `make check-generated`, and an explicit cleanup PR.
-- Until cleanup, `scripts/check_example_migration_parity.py` must be a required verification command.
+- Never hand-edit the fixture. Regenerate it with `scripts/refresh_golden_fixture.py`, which prints a structural summary (examples changed/added/removed and which fields moved) for review.
+- Commit a refresh together with the content change it reflects, and read the summary before committing — it is the reviewable record of what the edit did to teaching structure.
+- A change to `src/example_loader.py` or the parser must never require a fixture refresh; if it does, the loader change altered parsed structure and that is the regression.
+- `scripts/check_example_migration_parity.py` remains a required verification command.
 
 ## CI policy
 
@@ -592,12 +609,11 @@ scripts/check_example_migration_parity.py
 
 Required behavior:
 
-- Import the old `src/examples.py` catalog and a checked-in frozen golden fixture as the golden sources.
-- Load the Markdown catalog through `src/example_loader.py`.
+- Load the catalog through `src/example_loader.py` and the checked-in structural snapshot.
 - Compare example count and order.
-- Compare `slug`, `title`, `section`, `summary`, generated `doc_url`, `expected_output`, notes, and walkthrough prose/source.
-- Render old and new walkthrough cells and compare cell count, prose grouping, source, output, and order.
-- Execute old and new full code and compare stdout.
+- Compare `slug`, `title`, `section`, `summary`, `doc_path`, generated `doc_url`, `explanation`, `notes`, `see_also`, full `code`, and `expected_output`.
+- Compare the full cell sequence — prose, code, output, and kind — for every example.
+- On failure, say whether the fix is a fixture refresh (intentional content edit) or a loader regression (anything else).
 - Classify full-code differences as `identical`, `whitespace-only`, or `semantic`.
 - Classify walkthrough differences as `identical` or `teaching-structure`.
 - Fail on every semantic or teaching-structure difference. No allowlist is permitted for the app switch.

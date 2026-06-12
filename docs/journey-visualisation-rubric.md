@@ -1,6 +1,6 @@
 # Journey visualisation rubric
 
-This rubric scores the figure beside each journey section heading.
+This rubric scores the figure rendered between each journey section heading and its example list.
 The example rubric (docs/example-quality-rubric.md) covers individual
 lesson pages; this one covers the conceptual figures that introduce
 each journey section.
@@ -55,9 +55,11 @@ Score each section figure on a 10-point scale.
    identical to the banner figure in one of the section's lessons,
    one of them is wrong. Usually the section figure should be the
    *more abstract* one.
-10. **Layout fit (0-0.5)** — renders comfortably at the journey
-    page's ~280-320px section-figure column. Text inside the SVG
-    stays readable at that scale; the figure does not overflow.
+10. **Layout fit (0-0.5)** — renders comfortably in the centered
+    `.journey-section-figure` block (`clamp(280px, 70vw, 640px)`).
+    Text inside the SVG stays readable across that range; the figure
+    does not overflow (rendered width ≤ 640px, enforced by
+    Contract 8).
 
 ## Topic gates
 
@@ -89,9 +91,9 @@ Score each section figure on a 10-point scale.
 - **Section summary aligns with caption.** The summary in
   `src/app.py`'s `JOURNEYS` list agrees with what the figure caption
   asserts. Disagreement means one or the other is wrong.
-- **Renders within `.journey-section`'s 2-column grid.** The figure
-  obeys the column the layout gives it (~280-320px); design at a
-  viewBox sized for that column, not at lesson-figure dimensions.
+- **Renders within the centered figure block.** The figure obeys the
+  width the layout gives it (`clamp(280px, 70vw, 640px)`); design at a
+  viewBox whose rendered width fits the shared 640px ceiling.
 - **Uses only the four palette constants.** `INK`, `INK_SOFT`,
   `EMPHASIS`, `SOFT_FILL`. Anything else is grounds for redesign.
 

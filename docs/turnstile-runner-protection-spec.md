@@ -94,6 +94,11 @@ If `TURNSTILE_CHALLENGE_MODE` is absent or `off`:
 - normal POSTs do not require Turnstile
 - a configured site/secret key alone does not slow every run
 
+Any other value of `TURNSTILE_CHALLENGE_MODE` — including a typo such as
+`sesion` — fails closed: with a secret key configured, the challenge is
+required exactly as in `session` mode. A misconfigured mode string must
+never silently disable protection.
+
 If `TURNSTILE_CHALLENGE_MODE=session` and both site/secret keys are configured:
 
 1. A browser without valid clearance posts edited code.

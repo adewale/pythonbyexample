@@ -20,6 +20,7 @@ Production: <https://www.pythonbyexample.dev> (`workers.dev` remains enabled as 
 - Dark mode via `prefers-color-scheme`, including dual-theme code highlighting
 - Per-example social-card images composed from the marginalia figure set
 - Learner-behavior reporting from Worker wide events (`docs/learner-analytics.md`)
+- A quality-gate suite for registries, rubric scores, coverage, and teaching structure that fails builds when content regresses
 
 ## Attribution
 
@@ -200,6 +201,10 @@ make social-cards
 This composes a 1200x630 card per example from its marginalia figure and
 rasterizes it to `public/og/<slug>.jpg` with headless Chrome (set
 `CHROME_PATH` if Chrome is not at the default location).
+
+`make quality-checks` runs the registry, confusable-pair, broad-tour,
+footgun, notes, program/cell, prose-duplication, inline-link, scoring,
+figure, journey, and example-graph gates.
 
 `src/example_sources_data.py` is generated and committed so Cloudflare Workers can load examples in production. Do not edit it by hand.
 

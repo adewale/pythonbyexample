@@ -99,40 +99,33 @@ Captions are per-figure.
   font-style: italic;
   max-width: 44ch;
 }
-.cell-banner--1 figure { max-width: 440px; }
+.cell-banner--1 figure { max-width: clamp(280px, 65vw, 640px); }
 ```
 
 The cell never reflows: cells without banners around them and cells
 between banners look identical to today's layout.
 
-### Journey pages — figure beside section heading
+### Journey pages — figure between section heading and list
 
 Journey pages are not literate code; they are linear lists of items
-grouped under section headings. Here the figure lives **beside** the
-section heading in a 2-column row (heading-and-list on the left, figure
-on the right). The column model is fixed for the whole journey page:
-each section is a 2-col grid, every section the same shape.
+grouped under section headings. The figure renders as a centered block
+**between** the section heading and the example list — the same
+single-column flow on every viewport:
 
 ```css
-.journey-section {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4);
-}
-@media (min-width: 900px) {
-  .journey-section {
-    grid-template-columns: minmax(0, 1.4fr) minmax(220px, 320px);
-    align-items: start;
-  }
+.journey-section-figure {
+  margin: var(--space-4) auto;
+  width: 100%;
+  max-width: clamp(280px, 70vw, 640px);
 }
 ```
 
 One figure per section, faithful to the section's conceptual shift,
-scored against `docs/journey-visualisation-rubric.md`. The same template
-is reused for every journey; figures are mapped via
-`JOURNEY_SECTION_FIGURES` in `scripts/build_prototypes.py`. Sections
-without a figure render as a heading + list with no figure column,
-but production journeys are currently expected to have section figures.
+scored against `docs/journey-visualisation-rubric.md`. Figures are
+mapped by section title via `SECTION_FIGURES` in `src/marginalia.py`;
+`render_for_section` returns empty for unmapped titles, but the
+SectionFigureContract requires every production journey section to
+have one.
 
 ### Why these two, not five
 

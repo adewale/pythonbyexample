@@ -42,7 +42,7 @@ Quality bands:
 - **7.0-7.9**: serviceable tutorial material, not yet reference-grade.
 - **below 7.0**: rewrite before publishing.
 
-Project gate: every shipped example should score at least **8.5**, and the catalog average should exceed sampled Go By Example and Rust By Example pages on craft and understandability. The score is a guide, not a substitute for reading the page.
+Project gate (enforced by `scripts/check_quality_scores.py` against `docs/quality-registries.toml`): every shipped example targets **9.0**; anything below target needs a time-boxed waiver, and anything below the **8.5** hard minimum needs an improvement-backlog entry with a concrete next action. The catalog average should exceed sampled Go By Example and Rust By Example pages on craft and understandability. The score is a guide, not a substitute for reading the page.
 
 ## Weak-example smells
 
