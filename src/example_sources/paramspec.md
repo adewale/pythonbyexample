@@ -110,5 +110,6 @@ calling add
 :::note
 - `ParamSpec` preserves a callable's parameter list through transparent wrappers.
 - Pair `ParamSpec` with a `TypeVar` when the return type should also be preserved.
+- Python 3.12+ also accepts the inline PEP 695 spelling `def wrap[**P, R](func: Callable[P, R])`, which declares both variables in the signature itself.
 - If the wrapper changes the public signature, write that new signature directly instead.
 :::

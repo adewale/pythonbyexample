@@ -5,7 +5,9 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 const args = new Set(process.argv.slice(2));
-const chromePath = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const chromePath = process.env.CHROME_PATH || (process.platform === 'darwin'
+  ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+  : '/usr/bin/google-chrome');
 const target = process.env.TARGET_URL || 'http://127.0.0.1:9696/layout-options/mobile-run-first';
 const output = process.env.OUTPUT || (args.has('--inject-shiki') ? '/tmp/pythonbyexample-shots/desktop-literate-shiki.png' : '/tmp/pythonbyexample-shots/desktop-literate-plain.png');
 const url = `${target}${target.includes('?') ? '&' : '?'}screenshot_test=${Date.now()}`;

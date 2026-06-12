@@ -27,6 +27,11 @@ def connect(host, *, timeout=5, secure=True):
 connect("example.com")
 connect("example.com", timeout=10)
 connect("localhost", secure=False)
+
+try:
+    connect("example.com", 10)
+except TypeError as error:
+    print(type(error).__name__)
 ```
 :::
 
@@ -67,6 +72,21 @@ connect("localhost", secure=False)
 
 ```output
 http://localhost timeout=5
+```
+:::
+
+:::cell
+The bare `*` is enforced at the call site: passing the timeout positionally raises `TypeError` instead of silently filling the wrong slot.
+
+```python
+try:
+    connect("example.com", 10)
+except TypeError as error:
+    print(type(error).__name__)
+```
+
+```output
+TypeError
 ```
 :::
 

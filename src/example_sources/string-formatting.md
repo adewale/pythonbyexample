@@ -52,7 +52,7 @@ Ada scored 9.5
 :::
 
 :::cell
-Format specifications after `:` control display without changing the underlying values. Here the rank is right-aligned, the name is left-aligned, and the score is padded to one decimal place.
+Format specifications after `:` control display without changing the underlying values. Here the rank is right-aligned, the name is left-aligned, and `05.1f` zero-pads the score to a width of five characters with one decimal place.
 
 ```python
 row = f"{rank:>2} | {name:<8} | {score:05.1f}"

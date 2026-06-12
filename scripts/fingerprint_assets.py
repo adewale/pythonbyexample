@@ -64,6 +64,10 @@ def main() -> None:
         f"HTML_CACHE_VERSION = {version!r}\n"
     )
     (PUBLIC / "_headers").write_text(
+        "/*\n"
+        "  X-Content-Type-Options: nosniff\n"
+        "  Referrer-Policy: strict-origin-when-cross-origin\n"
+        "  X-Frame-Options: DENY\n\n"
         "/site.*.css\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/syntax-highlight.*.js\n"

@@ -1,7 +1,7 @@
 +++
 slug = "bytes-and-bytearray"
 title = "Bytes and Bytearray"
-section = "Basics"
+section = "Text"
 summary = "bytes and bytearray store binary data, not Unicode text."
 doc_path = "/library/stdtypes.html#binary-sequence-types-bytes-bytearray-memoryview"
 see_also = [

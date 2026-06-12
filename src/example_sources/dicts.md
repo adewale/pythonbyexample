@@ -86,7 +86,7 @@ Grace: 9
 :::
 
 :::cell
-Mutating a dictionary while iterating it raises `RuntimeError`. Snapshot the keys with `list(d.keys())` (or build a list of changes and apply them after the loop) so the iteration sees a stable view.
+Adding or removing keys while iterating a dictionary raises `RuntimeError` ("dictionary changed size during iteration"); reassigning an existing key's value is allowed. Snapshot the keys with `list(d.keys())` (or build a list of changes and apply them after the loop) so deletions see a stable view.
 
 ```python
 inventory = {"apple": 0, "pear": 3, "plum": 0}
@@ -105,5 +105,5 @@ print(inventory)
 - Dictionaries preserve insertion order in modern Python.
 - Use `get()` when a missing key has a reasonable default.
 - Use direct indexing when a missing key should be treated as an error.
-- Snapshot keys with `list(d.keys())` before deleting items in a loop; mutating during iteration raises `RuntimeError`.
+- Snapshot keys with `list(d.keys())` before deleting items in a loop; adding or removing keys during iteration raises `RuntimeError`.
 :::

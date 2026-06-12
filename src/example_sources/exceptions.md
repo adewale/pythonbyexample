@@ -50,6 +50,12 @@ def safe_parse_fixed(text):
 
 print(safe_parse_broken("42"))
 print(safe_parse_fixed("42"))
+print(safe_parse_broken(["4", "2"]))
+
+try:
+    safe_parse_fixed(["4", "2"])
+except TypeError as error:
+    print(type(error).__name__)
 ```
 :::
 
@@ -99,7 +105,7 @@ checked python
 :::
 
 :::cell
-Bare `except:` and broad `except Exception:` swallow far more than the failure you meant to handle, including `KeyboardInterrupt` (bare) and most programming bugs (broad). Catch the specific class — `ValueError` here — so unexpected failures still surface.
+Bare `except:` and broad `except Exception:` swallow far more than the failure you meant to handle, including `KeyboardInterrupt` (bare) and most programming bugs (broad). The two functions look interchangeable on good input — the divergence appears on a buggy call: passing a list is a programming error, yet the broad version converts it into a quiet `None` while the specific version lets the `TypeError` surface.
 
 ```python
 def safe_parse_broken(text):
@@ -116,11 +122,19 @@ def safe_parse_fixed(text):
 
 print(safe_parse_broken("42"))
 print(safe_parse_fixed("42"))
+print(safe_parse_broken(["4", "2"]))
+
+try:
+    safe_parse_fixed(["4", "2"])
+except TypeError as error:
+    print(type(error).__name__)
 ```
 
 ```output
 42
 42
+None
+TypeError
 ```
 :::
 

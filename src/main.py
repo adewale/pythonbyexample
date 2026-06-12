@@ -22,6 +22,10 @@ TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverif
 SMOKE_BYPASS_HEADER = "x-pythonbyexample-smoke-secret"
 TURNSTILE_CLEARANCE_COOKIE = "pbe_turnstile_clearance"
 DEFAULT_TURNSTILE_CLEARANCE_SECONDS = 60 * 60 * 8
+# Generous ceiling for an edited example program (the largest curated
+# program is well under 4 KB). Bounds the bytes we hash, embed in a
+# Dynamic Worker module, and echo back into the page.
+MAX_SUBMITTED_BODY_BYTES = 100_000
 
 try:
     from js import Object, Request as JsRequest, caches, fetch as js_fetch
@@ -79,6 +83,25 @@ def should_cache_get_url(url: str) -> bool:
     return not path.startswith("/layout-options/")
 
 
+# Static assets get the same set from public/_headers; Worker-rendered
+# HTML needs them applied here. frame-ancestors 'none' (plus the legacy
+# X-Frame-Options) keeps the Run button out of clickjacking frames.
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "X-Frame-Options": "DENY",
+    "Content-Security-Policy": "frame-ancestors 'none'",
+}
+
+
+def _apply_security_headers(response) -> None:
+    headers = getattr(response, "headers", None)
+    if headers is None:
+        return
+    for name, value in SECURITY_HEADERS.items():
+        headers.set(name, value)
+
+
 def html_cache_key_url(url: str, turnstile_site_key: str = "") -> str:
     separator = "&" if "?" in url else "?"
     turnstile_fragment = ""
@@ -131,7 +154,8 @@ def _turnstile_clearance_seconds(request: Request) -> int:
 
 def _smoke_bypass_ok(request: Request) -> bool:
     bypass_secret = _env_text(request, "PBE_SMOKE_BYPASS_SECRET")
-    return bool(bypass_secret and request.headers.get(SMOKE_BYPASS_HEADER) == bypass_secret)
+    supplied = request.headers.get(SMOKE_BYPASS_HEADER, "")
+    return bool(bypass_secret) and hmac.compare_digest(supplied, bypass_secret)
 
 
 def _sign_clearance(secret: str, expires: int) -> str:
@@ -160,9 +184,11 @@ def _requires_turnstile(request: Request) -> bool:
     if not _turnstile_secret(request) or _smoke_bypass_ok(request):
         return False
     mode = _turnstile_challenge_mode(request)
-    if mode in {"session", "once", "once-per-session"}:
-        return not _clearance_valid(request)
-    return False
+    if mode == "off":
+        return False
+    # Any other value — including a typo of "session" — fails closed and
+    # requires the challenge rather than silently disabling protection.
+    return not _clearance_valid(request)
 
 
 def _set_turnstile_clearance(response: HTMLResponse, request: Request) -> None:
@@ -193,7 +219,19 @@ async def run_example(slug: str, request: Request):
     example = get_example(slug)
     if example is None:
         return _html("<h1>Example not found</h1>", 404)
-    body = (await request.body()).decode("utf-8")
+    raw_body = await request.body()
+    if len(raw_body) > MAX_SUBMITTED_BODY_BYTES:
+        if event := _wide_event(request):
+            event["example"] = {"slug": example["slug"], "code_bytes": len(raw_body), "rejected": "too_large"}
+        return _html(
+            render_example_page(
+                example,
+                output=f"Submitted code is too large (over {MAX_SUBMITTED_BODY_BYTES // 1000} kB). Trim it and run again.",
+                turnstile_site_key=_turnstile_site_key(request),
+            ),
+            413,
+        )
+    body = raw_body.decode("utf-8")
     form = parse_qs(body)
     submitted = form.get("code", [example["code"]])[0]
     submitted_bytes = submitted.encode("utf-8")
@@ -429,12 +467,16 @@ class Default(WorkerEntrypoint):
                         self.env,
                         state={"wide_event": event},
                     )
+                    _apply_security_headers(response)
                     if getattr(response, "status", 200) == 200:
                         response.headers.set(
                             "Cache-Control",
                             "public, max-age=300, stale-while-revalidate=86400",
                         )
                         await caches.default.put(cache_key, response.clone())
+                    else:
+                        # Error pages must not linger in browser heuristic caches.
+                        response.headers.set("Cache-Control", "no-store")
                     return response
                 event["cache"] = "bypass"
                 response = await asgi.fetch(
@@ -443,16 +485,19 @@ class Default(WorkerEntrypoint):
                     self.env,
                     state={"wide_event": event},
                 )
+                _apply_security_headers(response)
                 response.headers.set("Cache-Control", "no-store")
                 return response
 
             event["cache"] = "bypass"
-            return await asgi.fetch(
+            response = await asgi.fetch(
                 app,
                 asgi_request,
                 self.env,
                 state={"wide_event": event},
             )
+            _apply_security_headers(response)
+            return response
         except Exception as exc:
             event["status_code"] = 500
             event["outcome"] = "error"

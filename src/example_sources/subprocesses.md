@@ -36,7 +36,7 @@ print(result.returncode)
 :::
 
 :::unsupported
-`subprocess.run` spawns a child Python interpreter, captures its stdout and stderr (`capture_output=True`), decodes them as text (`text=True`), and raises `CalledProcessError` if the child exits non-zero (`check=True`). The returned `result` holds the captured streams and exit code as portable evidence the child ran. (This fragment runs in standard Python only — the Python By Example runner does not provide child processes.)
+`subprocess.run` spawns a child Python interpreter, captures its stdout and stderr (`capture_output=True`), decodes them as text (`text=True`), and raises `CalledProcessError` if the child exits non-zero (`check=True`). The returned `result` holds the captured streams and exit code as portable evidence the child ran. (The in-browser Run button cannot spawn child processes, so pressing Run on this page fails in the sandbox; the verified output below comes from standard CPython at build time.)
 
 ```python
 result = subprocess.run(
@@ -76,5 +76,5 @@ child process
 - Use a list of arguments instead of shell strings when possible.
 - Capture output when the parent program needs to inspect it.
 - `check=True` turns non-zero exits into exceptions.
-- If you run this in local/server Python, the child process is real; on this site, the runnable evidence preserves the API shape without spawning a process.
+- The output shown here was produced by really spawning the child under standard CPython when the example was verified; the site's in-browser sandbox cannot create processes, so live runs of this page fail there.
 :::

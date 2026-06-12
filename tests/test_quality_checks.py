@@ -1,8 +1,8 @@
-"""Tests for the four quality-check scripts.
+"""Tests for the quality-check scripts in scripts/.
 
-Each test runs the script as a subprocess against a temporary registry
-or example directory so the script's command-line behavior is what is
-validated, not just its internals.
+Each smoke test runs the script as a subprocess so the command-line
+behavior is what is validated, not just its internals; the negative
+tests prove each gate can actually fail.
 """
 import subprocess
 import sys
@@ -15,9 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 SCRIPTS = ROOT / "scripts"
 
 
-def run(script: str, *, env_overrides: dict[str, str] | None = None) -> subprocess.CompletedProcess:
+def run(script: str, *args: str) -> subprocess.CompletedProcess:
     return subprocess.run(
-        [sys.executable, str(SCRIPTS / script)],
+        [sys.executable, str(SCRIPTS / script), *args],
         capture_output=True,
         text=True,
         cwd=ROOT,
@@ -79,6 +79,25 @@ class CheckScriptSmokeTests(unittest.TestCase):
         self.assertIn("Example and diagram inventory", result.stdout)
         self.assertIn("Journey section inventory", result.stdout)
 
+    def test_program_covers_cells_passes(self):
+        result = run("check_program_covers_cells.py")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn("Program-covers-cells check OK", result.stdout)
+
+    def test_prose_duplication_passes(self):
+        result = run("check_prose_duplication.py")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn("Prose-duplication check OK", result.stdout)
+
+    def test_inline_links_pass(self):
+        result = run("check_inline_links.py")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+        self.assertIn("Inline-link check OK", result.stdout)
+
+    def test_example_graph_passes(self):
+        result = run("audit_example_graph.py", "--check")
+        self.assertEqual(result.returncode, 0, msg=result.stderr)
+
 
 class RegistryIntegrityTests(unittest.TestCase):
     """The integrity script catches typos before they reach the coverage checks."""
@@ -91,6 +110,7 @@ class RegistryIntegrityTests(unittest.TestCase):
         with tempfile.NamedTemporaryFile("w", suffix=".toml", delete=False) as fh:
             fh.write(registry_text)
             registry_path = Path(fh.name)
+        self.addCleanup(registry_path.unlink, missing_ok=True)
         program = textwrap.dedent(f"""
             import sys
             from pathlib import Path
@@ -169,6 +189,59 @@ class NotesSupportedHeuristicTests(unittest.TestCase):
         self.assertNotIn("functions", extracted)  # filtered
         self.assertIn("quick", extracted)
         self.assertIn("fox", extracted)
+
+
+def _scripts_import(name):
+    sys.path.insert(0, str(SCRIPTS))
+    try:
+        return __import__(name)
+    finally:
+        sys.path.pop(0)
+
+
+class GateLogicCanFailTests(unittest.TestCase):
+    """Each content gate's core predicate must be able to reject bad input —
+    a gate that cannot fail is decoration, not enforcement."""
+
+    def test_program_covers_cells_flags_disjoint_cell(self):
+        mod = _scripts_import("check_program_covers_cells")
+        program = mod.substantive_lines("total = 1\nprint(total)")
+        disjoint_cell = mod.substantive_lines("other = 2\nvalue = other * 2")
+        self.assertEqual(set(program) & set(disjoint_cell), set())
+        overlapping_cell = mod.substantive_lines("total = 1\nextra = total + 1")
+        self.assertNotEqual(set(program) & set(overlapping_cell), set())
+
+    def test_confusable_pairs_reject_substring_shadowing(self):
+        mod = _scripts_import("check_confusable_pairs")
+        async_only_page = "async def fetch(): ...\nawait fetch()"
+        self.assertEqual(
+            mod.missing_tokens(async_only_page, ["async def", "def "]), ["def "]
+        )
+        both_forms = "async def fetch(): ...\ndef plain(): ..."
+        self.assertEqual(mod.missing_tokens(both_forms, ["async def", "def "]), [])
+
+    def test_inline_link_regex_catches_external_targets(self):
+        mod = _scripts_import("check_inline_links")
+        match = mod.LINK_RE.search("see [docs](/data-model/container-protocols) here")
+        self.assertIsNotNone(match)
+        self.assertIsNone(mod.INTERNAL_RE.match(match.group(2)))
+        good = mod.LINK_RE.search("see [page](/examples/values)")
+        self.assertIsNotNone(mod.INTERNAL_RE.match(good.group(2)))
+
+    def test_waiver_expiry_dates_are_enforced(self):
+        import datetime
+
+        mod = _scripts_import("check_quality_scores")
+        today = datetime.date(2026, 6, 11)
+        self.assertIsNotNone(mod.check_expiry_date("never", today=today))
+        self.assertIsNotNone(mod.check_expiry_date("2026-06-11", today=today))
+        self.assertIsNotNone(mod.check_expiry_date(None, today=today))
+        self.assertIsNone(mod.check_expiry_date("2026-06-12", today=today))
+
+    def test_criterion_scoring_fails_on_inflated_curated_score(self):
+        result = run("score_example_criteria.py", "--max-delta", "-11")
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("exceeds heuristic", result.stderr)
 
 
 if __name__ == "__main__":

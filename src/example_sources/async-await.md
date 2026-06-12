@@ -23,9 +23,12 @@ The alternative is ordinary `def` for work that completes immediately. Use async
 ```python
 import asyncio
 
+def slug_to_title(slug):
+    return slug.replace("-", " ").title()
+
 async def fetch_title(slug):
     await asyncio.sleep(0)
-    return slug.replace("-", " ").title()
+    return slug_to_title(slug)
 
 async def main():
     title = await fetch_title("async-await")
@@ -62,6 +65,21 @@ asyncio.run(driver())
 :::
 
 :::cell
+An ordinary `def` function computes its result immediately: calling it runs the body and hands the value straight back. This synchronous form is the baseline the rest of the page contrasts against.
+
+```python
+def slug_to_title(slug):
+    return slug.replace("-", " ").title()
+
+print(slug_to_title("async-await"))
+```
+
+```output
+Async Await
+```
+:::
+
+:::cell
 An `async def` function returns a coroutine object when called. The function body has not produced its final result yet.
 
 ```python
@@ -69,7 +87,7 @@ import asyncio
 
 async def fetch_title(slug):
     await asyncio.sleep(0)
-    return slug.replace("-", " ").title()
+    return slug_to_title(slug)
 
 coroutine = fetch_title("async-await")
 print(coroutine.__class__.__name__)
@@ -114,7 +132,7 @@ asyncio.run(main())
 :::
 
 :::cell
-`async with` and `async for` are the asynchronous forms of context managers and iteration. A class implements `__aenter__`/`__aexit__` to act as an async context manager; an `async def` function with `yield` becomes an async generator. The dedicated [async iteration and context](/iteration/async-iteration-and-context) page explains the protocols in depth.
+`async with` and `async for` are the asynchronous forms of context managers and iteration. A class implements `__aenter__`/`__aexit__` to act as an async context manager; an `async def` function with `yield` becomes an async generator. The dedicated [async iteration and context](/examples/async-iteration-and-context) page explains the protocols in depth.
 
 ```python
 class Session:

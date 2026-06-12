@@ -91,6 +91,7 @@ T
 
 :::note
 - A `TypeVar` stands for a type chosen by the caller.
+- Python 3.12+ also accepts the inline PEP 695 spelling `def first[T](items: list[T]) -> T`, which declares the variable without a separate `TypeVar` line; the explicit form shown here works everywhere and reads the same way.
 - Generic functions avoid losing information to `object` or `Any`.
 - Use generics when input and output types are connected.
 :::

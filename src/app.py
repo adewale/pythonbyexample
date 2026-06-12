@@ -5,6 +5,7 @@ import difflib
 import html
 import io
 import json
+import re
 from pathlib import Path
 
 try:
@@ -67,8 +68,10 @@ def _recommended_examples(slug, limit=4):
 def build_dynamic_worker_code(example_code: str) -> str:
     """Build a Python Dynamic Worker module that executes one example.
 
-    The parent Worker supplies only curated example code from this repository. The
-    dynamic Worker has no outbound network access when loaded by src.main.
+    The code may be a curated example or a visitor's edited version of one
+    (the POST handler in src.main passes the submitted text). Embedding via
+    repr() keeps it a plain string literal, and src.main loads the dynamic
+    Worker with no outbound network access and tight CPU/subrequest limits.
     """
     return f'''from workers import WorkerEntrypoint, Response
 import contextlib
@@ -423,10 +426,18 @@ def _template(name: str) -> str:
     return _TEMPLATE_CACHE[name]
 
 
+_PLACEHOLDER_RE = re.compile(r"__([A-Z][A-Z0-9_]*?)__")
+
+
 def _replace(template: str, values: dict[str, str]) -> str:
-    for key, value in values.items():
-        template = template.replace(f"__{key}__", value)
-    return template
+    # Single pass over the template only: substituted values are never
+    # rescanned, so user-submitted code containing a literal __TOKEN__
+    # cannot pick up later substitutions, and the result cannot depend
+    # on dict order. Unknown placeholders stay literal for the SEO lint
+    # to catch.
+    return _PLACEHOLDER_RE.sub(
+        lambda match: values.get(match.group(1), match.group(0)), template
+    )
 
 
 def _meta_description(text: str) -> str:
@@ -743,7 +754,7 @@ def render_cell_output_flow_option(example):
   <section class="notebook-notes"><h2>Notes</h2><ul>{notes}</ul></section>
 </article>
 <script>
-const originalCode = {json.dumps(woven_source)};
+const originalCode = {json.dumps(woven_source).replace("<", "\\u003c")};
 function editor() {{ return document.getElementById('code-editor'); }}
 function resizeEditor() {{ const field = editor(); if (!field) return; field.style.height = 'auto'; field.style.height = field.scrollHeight + 'px'; }}
 function resetCode() {{ editor().value = originalCode; resizeEditor(); editor().focus(); }}
@@ -851,7 +862,9 @@ def render_example_page(
             "OUTPUT_HEADING": html.escape(output_heading),
             "SHOWN_OUTPUT": html.escape(shown_output),
             "EXECUTION_TIME": html.escape(execution_time),
-            "ORIGINAL_CODE_JSON": json.dumps(example["code"]),
+            # <-escaping keeps a literal </script> in example code
+            # from terminating the inline script block.
+            "ORIGINAL_CODE_JSON": json.dumps(example["code"]).replace("<", "\\u003c"),
         },
     )
     return _layout(

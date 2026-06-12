@@ -36,7 +36,7 @@ finally:
 :::
 
 :::unsupported
-`socketpair()` returns two connected endpoints. `sendall` writes encoded bytes into one end, and `recv` reads up to 16 bytes off the other. The byte boundary is the whole point: `"ping".encode("utf-8")` produces `b'ping'`, which is what the socket actually moves. (This fragment runs in standard Python only — the Python By Example runner does not expose arbitrary sockets and disables outbound access for edited examples.)
+`socketpair()` returns two connected endpoints. `sendall` writes encoded bytes into one end, and `recv` reads up to 16 bytes off the other. The byte boundary is the whole point: `"ping".encode("utf-8")` produces `b'ping'`, which is what the socket actually moves. (The in-browser Run button cannot open sockets — the sandbox disables outbound access — so pressing Run on this page fails; the verified output below comes from a real socket pair under standard CPython at build time.)
 
 ```python
 left, right = socket.socketpair()

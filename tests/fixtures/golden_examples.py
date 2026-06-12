@@ -1,7 +1,10 @@
-"""Versioned example catalog for Python By Example.
+"""Structural snapshot of the example catalog (generated).
 
-This fixture freezes the reviewed public catalog for migration/parity checks.
-Update it intentionally after example rewrites have passed verification.
+Regenerate with scripts/refresh_golden_fixture.py after intentional
+content changes; review the printed structural summary before
+committing. check_example_migration_parity.py fails the build whenever
+the loader's output stops matching this snapshot, so an accidental
+loader/parser change cannot silently rewrite the teaching structure.
 """
 
 PYTHON_VERSION = '3.13'
@@ -19,28 +22,20 @@ EXAMPLES = [{'slug': 'hello-world',
                   'Strings are ordinary values, so the message passed to `print()` can be changed, '
                   'stored in a variable, or produced by a function. This example keeps the first '
                   'program intentionally small.',
-                  '`print()` writes text followed by a newline. Strings can be delimited with '
-                  'single or double quotes.'],
+                  'Run the program and compare what you see with the source: the text appears on '
+                  'standard output followed by a newline, which is why successive `print()` calls '
+                  'land on separate lines.'],
   'notes': ['`print()` writes text followed by a newline.',
             'Strings can be delimited with single or double quotes.'],
   'see_also': ['values', 'variables'],
-  'walkthrough': [{'prose': 'Every Python program starts by executing statements from top to '
-                            'bottom. Calling `print()` is the smallest useful program because it '
-                            'shows how Python evaluates an expression and sends text to standard '
-                            'output.',
-                   'code': 'print("hello world")'}],
-  'cells': [{'prose': ['Every Python program starts by executing statements from top to bottom. '
-                       'Calling `print()` is the smallest useful program because it shows how '
-                       'Python evaluates an expression and sends text to standard output.'],
+  'cells': [{'kind': 'cell',
+             'prose': ['The whole program is one statement. Python evaluates the string literal '
+                       '`"hello world"` and passes that value to `print()`, which writes it to '
+                       'standard output — the output panel shows exactly that line.'],
              'code': 'print("hello world")',
-             'output': 'hello world',
-             'line': 21,
-             'kind': 'cell'}],
+             'output': 'hello world'}],
   'code': 'print("hello world")\n',
-  'expected_output': 'hello world\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'hello world\n'},
  {'slug': 'values',
   'title': 'Values',
   'section': 'Basics',
@@ -61,23 +56,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use `is None` for the absence marker, not `== None`.',
             'This overview introduces boundaries that later pages explain in detail.'],
   'see_also': ['variables', 'booleans', 'none', 'literals'],
-  'walkthrough': [{'prose': 'Start with several built-in values. Python does not require '
-                            'declarations before binding these names, and each value is still an '
-                            'object with a type.',
-                   'code': 'text = "python"\n'
-                           'count = 3\n'
-                           'ratio = 2.5\n'
-                           'ready = True\n'
-                           'missing = None\n'
-                           '\n'
-                           'print(type(text).__name__)'},
-                  {'prose': 'Methods and operators evaluate to new values. The original `text`, '
-                            '`count`, and `ratio` bindings remain ordinary objects you can reuse.',
-                   'code': 'print(text.upper())\nprint(count + 4)\nprint(ratio * 2)'},
-                  {'prose': 'Boolean expressions combine facts, and `None` is checked by identity '
-                            'because it is a singleton absence marker.',
-                   'code': 'print(ready and count > 0)\nprint(missing is None)'}],
-  'cells': [{'prose': ['Start with several built-in values. Python does not require declarations '
+  'cells': [{'kind': 'cell',
+             'prose': ['Start with several built-in values. Python does not require declarations '
                        'before binding these names, and each value is still an object with a '
                        'type.'],
              'code': 'text = "python"\n'
@@ -87,21 +67,17 @@ EXAMPLES = [{'slug': 'hello-world',
                      'missing = None\n'
                      '\n'
                      'print(type(text).__name__)',
-             'output': 'str',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Methods and operators evaluate to new values. The original `text`, '
+             'output': 'str'},
+            {'kind': 'cell',
+             'prose': ['Methods and operators evaluate to new values. The original `text`, '
                        '`count`, and `ratio` bindings remain ordinary objects you can reuse.'],
              'code': 'print(text.upper())\nprint(count + 4)\nprint(ratio * 2)',
-             'output': 'PYTHON\n7\n5.0',
-             'line': 41,
-             'kind': 'cell'},
-            {'prose': ['Boolean expressions combine facts, and `None` is checked by identity '
+             'output': 'PYTHON\n7\n5.0'},
+            {'kind': 'cell',
+             'prose': ['Boolean expressions combine facts, and `None` is checked by identity '
                        'because it is a singleton absence marker.'],
              'code': 'print(ready and count > 0)\nprint(missing is None)',
-             'output': 'True\nTrue',
-             'line': 57,
-             'kind': 'cell'}],
+             'output': 'True\nTrue'}],
   'code': 'text = "python"\n'
           'count = 3\n'
           'ratio = 2.5\n'
@@ -115,10 +91,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(ready and count > 0)\n'
           'print(missing is None)\n',
-  'expected_output': 'str\nPYTHON\n7\n5.0\nTrue\nTrue\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'str\nPYTHON\n7\n5.0\nTrue\nTrue\n'},
  {'slug': 'literals',
   'title': 'Literals',
   'section': 'Basics',
@@ -139,71 +112,25 @@ EXAMPLES = [{'slug': 'hello-world',
             'Bytes literals are binary data; string literals are Unicode text.',
             '`...` evaluates to the `Ellipsis` object.'],
   'see_also': ['values', 'strings', 'numbers', 'string-formatting'],
-  'walkthrough': [{'prose': 'Numeric literals write numbers directly. Complex literals use `j` for '
-                            'the imaginary part.',
-                   'code': 'whole = 42\n'
-                           'fraction = 3.5\n'
-                           'complex_number = 2 + 3j\n'
-                           'print(whole, fraction, complex_number.imag)'},
-                  {'prose': 'Integer literals also accept hexadecimal (`0x`), binary (`0b`), and '
-                            'octal (`0o`) prefixes. Underscores group digits visually without '
-                            'changing the value.',
-                   'code': 'flags = 0xFF\n'
-                           'mask = 0b1010\n'
-                           'million = 1_000_000\n'
-                           'print(flags, mask, million)'},
-                  {'prose': 'String literals write Unicode text. Raw strings keep backslashes '
-                            'literal, bytes literals write binary data rather than text, and '
-                            'f-strings (`f"..."`) embed expressions inline.',
-                   'code': 'text = "python"\n'
-                           'raw_pattern = r"\\d+"\n'
-                           'data = b"py"\n'
-                           'score = 98\n'
-                           'formatted = f"score={score}"\n'
-                           'print(text)\n'
-                           'print(raw_pattern)\n'
-                           'print(data)\n'
-                           'print(formatted)'},
-                  {'prose': 'Container literals create tuples, lists, dictionaries, and sets. Each '
-                            'container answers a different question about order, position, lookup, '
-                            'or uniqueness.',
-                   'code': 'point = (2, 3)\n'
-                           'names = ["Ada", "Grace"]\n'
-                           'scores = {"Ada": 98}\n'
-                           'unique = {"py", "go"}\n'
-                           'print(point)\n'
-                           'print(names[0])\n'
-                           'print(scores["Ada"])\n'
-                           'print(sorted(unique))'},
-                  {'prose': '`True`, `False`, `None`, and `...` are singleton literal-like '
-                            'constants used for truth values, absence, and placeholders.',
-                   'code': 'print(True, False, None)\nprint(...)'},
-                  {'prose': 'Curly-brace literals are dictionaries by default. The empty form `{}` '
-                            'is an empty dictionary, not an empty set; use `set()` for that. A '
-                            'non-empty `{1, 2}` is a set because keyless items can only be a set.',
-                   'code': 'print(type({}).__name__)\n'
-                           'print(type(set()).__name__)\n'
-                           'print(type({1, 2}).__name__)'}],
-  'cells': [{'prose': ['Numeric literals write numbers directly. Complex literals use `j` for the '
+  'cells': [{'kind': 'cell',
+             'prose': ['Numeric literals write numbers directly. Complex literals use `j` for the '
                        'imaginary part.'],
              'code': 'whole = 42\n'
                      'fraction = 3.5\n'
                      'complex_number = 2 + 3j\n'
                      'print(whole, fraction, complex_number.imag)',
-             'output': '42 3.5 3.0',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Integer literals also accept hexadecimal (`0x`), binary (`0b`), and octal '
+             'output': '42 3.5 3.0'},
+            {'kind': 'cell',
+             'prose': ['Integer literals also accept hexadecimal (`0x`), binary (`0b`), and octal '
                        '(`0o`) prefixes. Underscores group digits visually without changing the '
                        'value.'],
              'code': 'flags = 0xFF\n'
                      'mask = 0b1010\n'
                      'million = 1_000_000\n'
                      'print(flags, mask, million)',
-             'output': '255 10 1000000',
-             'line': 38,
-             'kind': 'cell'},
-            {'prose': ['String literals write Unicode text. Raw strings keep backslashes literal, '
+             'output': '255 10 1000000'},
+            {'kind': 'cell',
+             'prose': ['String literals write Unicode text. Raw strings keep backslashes literal, '
                        'bytes literals write binary data rather than text, and f-strings '
                        '(`f"..."`) embed expressions inline.'],
              'code': 'text = "python"\n'
@@ -215,10 +142,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(raw_pattern)\n'
                      'print(data)\n'
                      'print(formatted)',
-             'output': "python\n\\d+\nb'py'\nscore=98",
-             'line': 53,
-             'kind': 'cell'},
-            {'prose': ['Container literals create tuples, lists, dictionaries, and sets. Each '
+             'output': "python\n\\d+\nb'py'\nscore=98"},
+            {'kind': 'cell',
+             'prose': ['Container literals create tuples, lists, dictionaries, and sets. Each '
                        'container answers a different question about order, position, lookup, or '
                        'uniqueness.'],
              'code': 'point = (2, 3)\n'
@@ -229,24 +155,20 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(names[0])\n'
                      'print(scores["Ada"])\n'
                      'print(sorted(unique))',
-             'output': "(2, 3)\nAda\n98\n['go', 'py']",
-             'line': 76,
-             'kind': 'cell'},
-            {'prose': ['`True`, `False`, `None`, and `...` are singleton literal-like constants '
+             'output': "(2, 3)\nAda\n98\n['go', 'py']"},
+            {'kind': 'cell',
+             'prose': ['`True`, `False`, `None`, and `...` are singleton literal-like constants '
                        'used for truth values, absence, and placeholders.'],
              'code': 'print(True, False, None)\nprint(...)',
-             'output': 'True False None\nEllipsis',
-             'line': 98,
-             'kind': 'cell'},
-            {'prose': ['Curly-brace literals are dictionaries by default. The empty form `{}` is '
+             'output': 'True False None\nEllipsis'},
+            {'kind': 'cell',
+             'prose': ['Curly-brace literals are dictionaries by default. The empty form `{}` is '
                        'an empty dictionary, not an empty set; use `set()` for that. A non-empty '
                        '`{1, 2}` is a set because keyless items can only be a set.'],
              'code': 'print(type({}).__name__)\n'
                      'print(type(set()).__name__)\n'
                      'print(type({1, 2}).__name__)',
-             'output': 'dict\nset\nset',
-             'line': 112,
-             'kind': 'cell'}],
+             'output': 'dict\nset\nset'}],
   'code': 'whole = 42\n'
           'fraction = 3.5\n'
           'complex_number = 2 + 3j\n'
@@ -296,10 +218,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'Ellipsis\n'
                      'dict\n'
                      'set\n'
-                     'set\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     'set\n'},
  {'slug': 'numbers',
   'title': 'Numbers',
   'section': 'Basics',
@@ -321,32 +240,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use `math.isclose` instead of `==` for floating-point comparison; reach for '
             '`decimal.Decimal` when exact decimal precision is the domain requirement.'],
   'see_also': ['literals', 'operators'],
-  'walkthrough': [{'prose': 'Python has `int` for whole numbers and `float` for approximate '
-                            'real-valued arithmetic. True division with `/` returns a `float`, '
-                            'even when both inputs are integers.',
-                   'code': 'count = 10\n'
-                           'ratio = 0.25\n'
-                           '\n'
-                           'print(count + 5)\n'
-                           'print(count / 4)\n'
-                           'print(ratio * 2)'},
-                  {'prose': 'Floor division and modulo are useful when you need quotient and '
-                            'remainder behavior. Powers use `**`, not `^`.',
-                   'code': 'print(count // 4)\nprint(count % 4)\nprint(2 ** 5)'},
-                  {'prose': 'Complex numbers are built in. The literal suffix `j` marks the '
-                            'imaginary part.',
-                   'code': 'z = 2 + 3j\nprint(z.real, z.imag)'},
-                  {'prose': 'Floating-point values are approximate, so `==` between expected and '
-                            'computed floats is rarely the right test. Compare with `math.isclose` '
-                            '(or work in `decimal.Decimal`) when the question is "are these the '
-                            'same number to within tolerance".',
-                   'code': 'import math\n'
-                           '\n'
-                           'print(0.1 + 0.2)\n'
-                           'print(0.1 + 0.2 == 0.3)\n'
-                           'print(math.isclose(0.1 + 0.2, 0.3))\n'
-                           'print(round(3.14159, 2))'}],
-  'cells': [{'prose': ['Python has `int` for whole numbers and `float` for approximate real-valued '
+  'cells': [{'kind': 'cell',
+             'prose': ['Python has `int` for whole numbers and `float` for approximate real-valued '
                        'arithmetic. True division with `/` returns a `float`, even when both '
                        'inputs are integers.'],
              'code': 'count = 10\n'
@@ -355,22 +250,19 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(count + 5)\n'
                      'print(count / 4)\n'
                      'print(ratio * 2)',
-             'output': '15\n2.5\n0.5',
-             'line': 21,
-             'kind': 'cell'},
-            {'prose': ['Floor division and modulo are useful when you need quotient and remainder '
+             'output': '15\n2.5\n0.5'},
+            {'kind': 'cell',
+             'prose': ['Floor division and modulo are useful when you need quotient and remainder '
                        'behavior. Powers use `**`, not `^`.'],
              'code': 'print(count // 4)\nprint(count % 4)\nprint(2 ** 5)',
-             'output': '2\n2\n32',
-             'line': 40,
-             'kind': 'cell'},
-            {'prose': ['Complex numbers are built in. The literal suffix `j` marks the imaginary '
+             'output': '2\n2\n32'},
+            {'kind': 'cell',
+             'prose': ['Complex numbers are built in. The literal suffix `j` marks the imaginary '
                        'part.'],
              'code': 'z = 2 + 3j\nprint(z.real, z.imag)',
-             'output': '2.0 3.0',
-             'line': 56,
-             'kind': 'cell'},
-            {'prose': ['Floating-point values are approximate, so `==` between expected and '
+             'output': '2.0 3.0'},
+            {'kind': 'cell',
+             'prose': ['Floating-point values are approximate, so `==` between expected and '
                        'computed floats is rarely the right test. Compare with `math.isclose` (or '
                        'work in `decimal.Decimal`) when the question is "are these the same number '
                        'to within tolerance".'],
@@ -380,9 +272,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(0.1 + 0.2 == 0.3)\n'
                      'print(math.isclose(0.1 + 0.2, 0.3))\n'
                      'print(round(3.14159, 2))',
-             'output': '0.30000000000000004\nFalse\nTrue\n3.14',
-             'line': 69,
-             'kind': 'cell'}],
+             'output': '0.30000000000000004\nFalse\nTrue\n3.14'}],
   'code': 'import math\n'
           '\n'
           'count = 10\n'
@@ -391,6 +281,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(count + 5)\n'
           'print(count / 4)\n'
+          'print(ratio * 2)\n'
           'print(count // 4)\n'
           'print(count % 4)\n'
           'print(2 ** 5)\n'
@@ -399,10 +290,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(0.1 + 0.2 == 0.3)\n'
           'print(math.isclose(0.1 + 0.2, 0.3))\n'
           'print(round(3.14159, 2))\n',
-  'expected_output': '15\n2.5\n2\n2\n32\n2.0 3.0\n0.30000000000000004\nFalse\nTrue\n3.14\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '15\n2.5\n0.5\n2\n2\n32\n2.0 3.0\n0.30000000000000004\nFalse\nTrue\n3.14\n'},
  {'slug': 'booleans',
   'title': 'Booleans',
   'section': 'Basics',
@@ -423,40 +311,8 @@ EXAMPLES = [{'slug': 'hello-world',
             '`bool` subclasses `int`; `isinstance(True, int)` is `True`. Exclude booleans '
             'explicitly when only "real" integers should pass.'],
   'see_also': ['truthiness', 'operators', 'conditionals'],
-  'walkthrough': [{'prose': 'Use booleans for facts that are either true or false. Python spells '
-                            'the constants `True` and `False`.',
-                   'code': 'logged_in = True\n'
-                           'has_permission = False\n'
-                           '\n'
-                           'print(logged_in and has_permission)\n'
-                           'print(logged_in or has_permission)\n'
-                           'print(not has_permission)'},
-                  {'prose': 'Use `and`, `or`, and `not` to combine truth values. These operators '
-                            'read like English and short-circuit when possible.',
-                   'code': 'logged_in = True\n'
-                           'has_permission = False\n'
-                           '\n'
-                           'print(logged_in and has_permission)\n'
-                           'print(logged_in or has_permission)\n'
-                           'print(not has_permission)'},
-                  {'prose': 'Comparisons produce booleans too, so they compose naturally with '
-                            'logical operators in conditions and validation checks.',
-                   'code': 'name = "Ada"\nprint(name == "Ada" and len(name) > 0)'},
-                  {'prose': '`bool` is a subclass of `int`, which is occasionally a footgun. '
-                            '`True` behaves as `1` and `False` as `0` in arithmetic, and '
-                            '`isinstance(True, int)` is `True`. When a function must reject '
-                            'booleans, exclude them explicitly with `isinstance(value, int) and '
-                            'not isinstance(value, bool)`.',
-                   'code': 'print(isinstance(True, int))\n'
-                           'print(True + True)\n'
-                           'print(sum([True, True, False, True]))\n'
-                           '\n'
-                           'def is_strict_int(value):\n'
-                           '    return isinstance(value, int) and not isinstance(value, bool)\n'
-                           '\n'
-                           'print(is_strict_int(True))\n'
-                           'print(is_strict_int(1))'}],
-  'cells': [{'prose': ['Use booleans for facts that are either true or false. Python spells the '
+  'cells': [{'kind': 'cell',
+             'prose': ['Use booleans for facts that are either true or false. Python spells the '
                        'constants `True` and `False`.',
                        'Use `and`, `or`, and `not` to combine truth values. These operators read '
                        'like English and short-circuit when possible.'],
@@ -466,16 +322,14 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(logged_in and has_permission)\n'
                      'print(logged_in or has_permission)\n'
                      'print(not has_permission)',
-             'output': 'False\nTrue\nTrue',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Comparisons produce booleans too, so they compose naturally with logical '
+             'output': 'False\nTrue\nTrue'},
+            {'kind': 'cell',
+             'prose': ['Comparisons produce booleans too, so they compose naturally with logical '
                        'operators in conditions and validation checks.'],
              'code': 'name = "Ada"\nprint(name == "Ada" and len(name) > 0)',
-             'output': 'True',
-             'line': 43,
-             'kind': 'cell'},
-            {'prose': ['`bool` is a subclass of `int`, which is occasionally a footgun. `True` '
+             'output': 'True'},
+            {'kind': 'cell',
+             'prose': ['`bool` is a subclass of `int`, which is occasionally a footgun. `True` '
                        'behaves as `1` and `False` as `0` in arithmetic, and `isinstance(True, '
                        'int)` is `True`. When a function must reject booleans, exclude them '
                        'explicitly with `isinstance(value, int) and not isinstance(value, bool)`.'],
@@ -488,9 +342,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(is_strict_int(True))\n'
                      'print(is_strict_int(1))',
-             'output': 'True\n2\n3\nFalse\nTrue',
-             'line': 56,
-             'kind': 'cell'}],
+             'output': 'True\n2\n3\nFalse\nTrue'}],
   'code': 'logged_in = True\n'
           'has_permission = False\n'
           '\n'
@@ -510,10 +362,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(is_strict_int(True))\n'
           'print(is_strict_int(1))\n',
-  'expected_output': 'False\nTrue\nTrue\nTrue\nTrue\n2\n3\nFalse\nTrue\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'False\nTrue\nTrue\nTrue\nTrue\n2\n3\nFalse\nTrue\n'},
  {'slug': 'operators',
   'title': 'Operators',
   'section': 'Basics',
@@ -540,71 +389,25 @@ EXAMPLES = [{'slug': 'hello-world',
                'equality-and-identity',
                'assignment-expressions',
                'operator-overloading'],
-  'walkthrough': [{'prose': 'Arithmetic operators compute new values. Use `//` for floor division, '
-                            '`%` for remainder, and `**` for powers.',
-                   'code': 'count = 10\n'
-                           'print(count + 5)\n'
-                           'print(count // 4)\n'
-                           'print(count % 4)\n'
-                           'print(2 ** 5)'},
-                  {'prose': 'Comparison operators produce booleans. Python comparisons can chain, '
-                            'which keeps range checks readable.',
-                   'code': 'score = 91\n'
-                           'print(80 <= score < 100)\n'
-                           'print(score == 100 or score >= 90)\n'
-                           'print("py" in "python")'},
-                  {'prose': 'Bitwise operators work on integer bit patterns. They are useful for '
-                            'masks and flags, not ordinary boolean logic. `&` is bitwise AND, `|` '
-                            'is bitwise OR, `^` is exclusive OR, and `<<` shifts left.',
-                   'code': 'flags = 0b0011\n'
-                           'print(flags & 0b0101)\n'
-                           'print(flags | 0b0100)\n'
-                           'print(flags ^ 0b0101)\n'
-                           'print(flags << 1)'},
-                  {'prose': 'The `@` operator is reserved for matrix-like multiplication and '
-                            'custom types that define `__matmul__`.',
-                   'code': 'class Scale:\n'
-                           '    def __init__(self, value):\n'
-                           '        self.value = value\n'
-                           '\n'
-                           '    def __matmul__(self, other):\n'
-                           '        return self.value * other.value\n'
-                           '\n'
-                           'print(Scale(2) @ Scale(3))'},
-                  {'prose': 'The walrus operator `:=` assigns inside an expression. Use it when '
-                            'naming a value avoids repeating work in a condition.',
-                   'code': 'items = ["a", "b"]\nif (size := len(items)) > 0:\n    print(size)'},
-                  {'prose': '`and` and `or` short-circuit: the right side runs only when the left '
-                            'side cannot already determine the result. That makes them safe for '
-                            'guard expressions like `obj and obj.value` where the right side would '
-                            'fail on `None`.',
-                   'code': 'def loud():\n'
-                           '    print("ran")\n'
-                           '    return True\n'
-                           '\n'
-                           'print(False and loud())\n'
-                           'print(True or loud())\n'
-                           'print(True and loud())'}],
-  'cells': [{'prose': ['Arithmetic operators compute new values. Use `//` for floor division, `%` '
+  'cells': [{'kind': 'cell',
+             'prose': ['Arithmetic operators compute new values. Use `//` for floor division, `%` '
                        'for remainder, and `**` for powers.'],
              'code': 'count = 10\n'
                      'print(count + 5)\n'
                      'print(count // 4)\n'
                      'print(count % 4)\n'
                      'print(2 ** 5)',
-             'output': '15\n2\n2\n32',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Comparison operators produce booleans. Python comparisons can chain, which '
+             'output': '15\n2\n2\n32'},
+            {'kind': 'cell',
+             'prose': ['Comparison operators produce booleans. Python comparisons can chain, which '
                        'keeps range checks readable.'],
              'code': 'score = 91\n'
                      'print(80 <= score < 100)\n'
                      'print(score == 100 or score >= 90)\n'
                      'print("py" in "python")',
-             'output': 'True\nTrue\nTrue',
-             'line': 42,
-             'kind': 'cell'},
-            {'prose': ['Bitwise operators work on integer bit patterns. They are useful for masks '
+             'output': 'True\nTrue\nTrue'},
+            {'kind': 'cell',
+             'prose': ['Bitwise operators work on integer bit patterns. They are useful for masks '
                        'and flags, not ordinary boolean logic. `&` is bitwise AND, `|` is bitwise '
                        'OR, `^` is exclusive OR, and `<<` shifts left.'],
              'code': 'flags = 0b0011\n'
@@ -612,10 +415,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(flags | 0b0100)\n'
                      'print(flags ^ 0b0101)\n'
                      'print(flags << 1)',
-             'output': '1\n7\n6\n6',
-             'line': 59,
-             'kind': 'cell'},
-            {'prose': ['The `@` operator is reserved for matrix-like multiplication and custom '
+             'output': '1\n7\n6\n6'},
+            {'kind': 'cell',
+             'prose': ['The `@` operator is reserved for matrix-like multiplication and custom '
                        'types that define `__matmul__`.'],
              'code': 'class Scale:\n'
                      '    def __init__(self, value):\n'
@@ -625,16 +427,14 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        return self.value * other.value\n'
                      '\n'
                      'print(Scale(2) @ Scale(3))',
-             'output': '6',
-             'line': 78,
-             'kind': 'cell'},
-            {'prose': ['The walrus operator `:=` assigns inside an expression. Use it when naming '
+             'output': '6'},
+            {'kind': 'cell',
+             'prose': ['The walrus operator `:=` assigns inside an expression. Use it when naming '
                        'a value avoids repeating work in a condition.'],
              'code': 'items = ["a", "b"]\nif (size := len(items)) > 0:\n    print(size)',
-             'output': '2',
-             'line': 97,
-             'kind': 'cell'},
-            {'prose': ['`and` and `or` short-circuit: the right side runs only when the left side '
+             'output': '2'},
+            {'kind': 'cell',
+             'prose': ['`and` and `or` short-circuit: the right side runs only when the left side '
                        'cannot already determine the result. That makes them safe for guard '
                        'expressions like `obj and obj.value` where the right side would fail on '
                        '`None`.'],
@@ -645,9 +445,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(False and loud())\n'
                      'print(True or loud())\n'
                      'print(True and loud())',
-             'output': 'False\nTrue\nran\nTrue',
-             'line': 111,
-             'kind': 'cell'}],
+             'output': 'False\nTrue\nran\nTrue'}],
   'code': 'count = 10\n'
           'print(count + 5)\n'
           'print(count // 4)\n'
@@ -676,11 +474,16 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'items = ["a", "b"]\n'
           'if (size := len(items)) > 0:\n'
-          '    print(size)\n',
-  'expected_output': '15\n2\n2\n32\nTrue\nTrue\nTrue\n1\n7\n6\n6\n6\n2\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+          '    print(size)\n'
+          '\n'
+          'def loud():\n'
+          '    print("ran")\n'
+          '    return True\n'
+          '\n'
+          'print(False and loud())\n'
+          'print(True or loud())\n'
+          'print(True and loud())\n',
+  'expected_output': '15\n2\n2\n32\nTrue\nTrue\nTrue\n1\n7\n6\n6\n6\n2\nFalse\nTrue\nran\nTrue\n'},
  {'slug': 'none',
   'title': 'None',
   'section': 'Basics',
@@ -699,36 +502,13 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use dictionary defaults for missing mapping keys and exceptions for invalid '
             'operations.'],
   'see_also': ['values', 'truthiness', 'exceptions', 'dicts'],
-  'walkthrough': [{'prose': "`None` is Python's value for “nothing here.” Check it with `is None` "
-                            'because it is a singleton identity value.',
-                   'code': 'result = None\nprint(result is None)'},
-                  {'prose': 'Functions often return `None` when absence is expected and callers '
-                            'can continue. The function name and surrounding code should make that '
-                            'possibility clear.',
-                   'code': 'def find_score(name):\n'
-                           '    if name == "Ada":\n'
-                           '        return 10\n'
-                           '    return None\n'
-                           '\n'
-                           'score = find_score("Grace")\n'
-                           'print(score is None)'},
-                  {'prose': 'A missing dictionary key is another absence boundary. Use `get()` '
-                            'when the mapping can supply a default, and use exceptions for invalid '
-                            'operations that cannot produce a value.',
-                   'code': 'profile = {"name": "Ada"}\n'
-                           'print(profile.get("timezone", "UTC"))\n'
-                           '\n'
-                           'try:\n'
-                           '    int("python")\n'
-                           'except ValueError:\n'
-                           '    print("invalid number")'}],
-  'cells': [{'prose': ["`None` is Python's value for “nothing here.” Check it with `is None` "
+  'cells': [{'kind': 'cell',
+             'prose': ["`None` is Python's value for “nothing here.” Check it with `is None` "
                        'because it is a singleton identity value.'],
              'code': 'result = None\nprint(result is None)',
-             'output': 'True',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Functions often return `None` when absence is expected and callers can '
+             'output': 'True'},
+            {'kind': 'cell',
+             'prose': ['Functions often return `None` when absence is expected and callers can '
                        'continue. The function name and surrounding code should make that '
                        'possibility clear.'],
              'code': 'def find_score(name):\n'
@@ -738,10 +518,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'score = find_score("Grace")\n'
                      'print(score is None)',
-             'output': 'True',
-             'line': 36,
-             'kind': 'cell'},
-            {'prose': ['A missing dictionary key is another absence boundary. Use `get()` when the '
+             'output': 'True'},
+            {'kind': 'cell',
+             'prose': ['A missing dictionary key is another absence boundary. Use `get()` when the '
                        'mapping can supply a default, and use exceptions for invalid operations '
                        'that cannot produce a value.'],
              'code': 'profile = {"name": "Ada"}\n'
@@ -751,9 +530,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    int("python")\n'
                      'except ValueError:\n'
                      '    print("invalid number")',
-             'output': 'UTC\ninvalid number',
-             'line': 54,
-             'kind': 'cell'}],
+             'output': 'UTC\ninvalid number'}],
   'code': 'result = None\n'
           'print(result is None)\n'
           '\n'
@@ -772,10 +549,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '    int("python")\n'
           'except ValueError:\n'
           '    print("invalid number")\n',
-  'expected_output': 'True\nTrue\nUTC\ninvalid number\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'True\nTrue\nUTC\ninvalid number\n'},
  {'slug': 'variables',
   'title': 'Variables',
   'section': 'Basics',
@@ -795,33 +569,21 @@ EXAMPLES = [{'slug': 'hello-world',
             'Rebinding a name is normal.',
             'Use augmented assignment for counters and accumulators.'],
   'see_also': ['values', 'mutability', 'object-lifecycle', 'constants'],
-  'walkthrough': [{'prose': 'Assignment binds a name to a value. Once bound, the name can be used '
-                            'anywhere that value is needed.',
-                   'code': 'message = "hi"\nprint(message)'},
-                  {'prose': 'Assignment can rebind the same name to a different value. The name is '
-                            'not permanently attached to the first object.',
-                   'code': 'message = "hello"\nprint(message)'},
-                  {'prose': 'Augmented assignment reads the current binding, computes an updated '
-                            'value, and stores the result back under the same name.',
-                   'code': 'count = 3\ncount += 1\nprint(count)'}],
-  'cells': [{'prose': ['Assignment binds a name to a value. Once bound, the name can be used '
+  'cells': [{'kind': 'cell',
+             'prose': ['Assignment binds a name to a value. Once bound, the name can be used '
                        'anywhere that value is needed.'],
              'code': 'message = "hi"\nprint(message)',
-             'output': 'hi',
-             'line': 25,
-             'kind': 'cell'},
-            {'prose': ['Assignment can rebind the same name to a different value. The name is not '
+             'output': 'hi'},
+            {'kind': 'cell',
+             'prose': ['Assignment can rebind the same name to a different value. The name is not '
                        'permanently attached to the first object.'],
              'code': 'message = "hello"\nprint(message)',
-             'output': 'hello',
-             'line': 38,
-             'kind': 'cell'},
-            {'prose': ['Augmented assignment reads the current binding, computes an updated value, '
+             'output': 'hello'},
+            {'kind': 'cell',
+             'prose': ['Augmented assignment reads the current binding, computes an updated value, '
                        'and stores the result back under the same name.'],
              'code': 'count = 3\ncount += 1\nprint(count)',
-             'output': '4',
-             'line': 51,
-             'kind': 'cell'}],
+             'output': '4'}],
   'code': 'message = "hi"\n'
           'print(message)\n'
           '\n'
@@ -831,16 +593,13 @@ EXAMPLES = [{'slug': 'hello-world',
           'count = 3\n'
           'count += 1\n'
           'print(count)\n',
-  'expected_output': 'hi\nhello\n4\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'hi\nhello\n4\n'},
  {'slug': 'constants',
   'title': 'Constants',
   'section': 'Basics',
   'summary': 'Python uses naming conventions and optional types for values that should not change.',
-  'doc_path': '/tutorial/classes.html#python-scopes-and-namespaces',
-  'doc_url': 'https://docs.python.org/3.13/tutorial/classes.html#python-scopes-and-namespaces',
+  'doc_path': '/library/typing.html#typing.Final',
+  'doc_url': 'https://docs.python.org/3.13/library/typing.html#typing.Final',
   'explanation': ['Python has no `const` keyword for ordinary names. Modules use all-caps names '
                   'such as `MAX_RETRIES` to say “treat this as fixed configuration, not changing '
                   'state.”',
@@ -853,47 +612,28 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use all-caps names for fixed module-level configuration.',
             'Add `Final` when static tooling should flag accidental rebinding.'],
   'see_also': ['variables', 'literal-and-final', 'type-hints'],
-  'walkthrough': [{'prose': 'All-caps names communicate design intent: this value is configuration '
-                            'that callers should treat as fixed.',
-                   'code': 'MAX_RETRIES = 3\n'
-                           '\n'
-                           'for attempt in range(1, MAX_RETRIES + 1):\n'
-                           '    print(f"attempt {attempt} of {MAX_RETRIES}")'},
-                  {'prose': 'Constants are useful when a repeated literal deserves a name at the '
-                            'domain boundary.',
-                   'code': 'API_VERSION = "2026-05"\nprint(API_VERSION)'},
-                  {'prose': '`Final` lets type checkers reject reassignment, but Python still runs '
-                            'ordinary rebinding at runtime.',
-                   'code': 'from typing import Final\n'
-                           '\n'
-                           'MAX_RETRIES: Final = 3\n'
-                           'MAX_RETRIES = 5\n'
-                           'print(MAX_RETRIES)'}],
-  'cells': [{'prose': ['All-caps names communicate design intent: this value is configuration that '
+  'cells': [{'kind': 'cell',
+             'prose': ['All-caps names communicate design intent: this value is configuration that '
                        'callers should treat as fixed.'],
              'code': 'MAX_RETRIES = 3\n'
                      '\n'
                      'for attempt in range(1, MAX_RETRIES + 1):\n'
                      '    print(f"attempt {attempt} of {MAX_RETRIES}")',
-             'output': 'attempt 1 of 3\nattempt 2 of 3\nattempt 3 of 3',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Constants are useful when a repeated literal deserves a name at the domain '
+             'output': 'attempt 1 of 3\nattempt 2 of 3\nattempt 3 of 3'},
+            {'kind': 'cell',
+             'prose': ['Constants are useful when a repeated literal deserves a name at the domain '
                        'boundary.'],
              'code': 'API_VERSION = "2026-05"\nprint(API_VERSION)',
-             'output': '2026-05',
-             'line': 39,
-             'kind': 'cell'},
-            {'prose': ['`Final` lets type checkers reject reassignment, but Python still runs '
+             'output': '2026-05'},
+            {'kind': 'cell',
+             'prose': ['`Final` lets type checkers reject reassignment, but Python still runs '
                        'ordinary rebinding at runtime.'],
              'code': 'from typing import Final\n'
                      '\n'
                      'MAX_RETRIES: Final = 3\n'
                      'MAX_RETRIES = 5\n'
                      'print(MAX_RETRIES)',
-             'output': '5',
-             'line': 52,
-             'kind': 'cell'}],
+             'output': '5'}],
   'code': 'from typing import Final\n'
           '\n'
           'MAX_RETRIES: Final = 3\n'
@@ -906,10 +646,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'MAX_RETRIES = 5\n'
           'print(MAX_RETRIES)\n',
-  'expected_output': 'attempt 1 of 3\nattempt 2 of 3\nattempt 3 of 3\n2026-05\n5\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'attempt 1 of 3\nattempt 2 of 3\nattempt 3 of 3\n2026-05\n5\n'},
  {'slug': 'truthiness',
   'title': 'Truthiness',
   'section': 'Basics',
@@ -925,46 +662,24 @@ EXAMPLES = [{'slug': 'hello-world',
   'notes': ['Empty containers and zero-like numbers are false in conditions.',
             'Use explicit comparisons when they communicate intent better than truthiness.'],
   'see_also': ['booleans', 'none', 'conditionals', 'special-methods'],
-  'walkthrough': [{'prose': "Truthiness is one of Python's most important conveniences: conditions "
-                            'can test objects directly instead of requiring explicit boolean '
-                            'comparisons everywhere.',
-                   'code': 'items = []\nname = "Ada"\n\nif not items:\n    print("no items")'},
-                  {'prose': 'Empty containers, numeric zero, None, and False are false; most other '
-                            'values are true. This makes common checks such as if items: concise '
-                            'and idiomatic.',
-                   'code': 'items = []\nname = "Ada"\n\nif not items:\n    print("no items")'},
-                  {'prose': 'Use truthiness when it reads naturally, but choose explicit '
-                            'comparisons when the distinction matters, such as checking whether a '
-                            'value is exactly None.',
-                   'code': 'if name:\n    print("has a name")'},
-                  {'prose': 'Use truthiness when it reads naturally, but choose explicit '
-                            'comparisons when the distinction matters, such as checking whether a '
-                            'value is exactly None.',
-                   'code': 'print(bool(0))\nprint(bool(42))'}],
-  'cells': [{'prose': ["Truthiness is one of Python's most important conveniences: conditions can "
-                       'test objects directly instead of requiring explicit boolean comparisons '
-                       'everywhere.',
-                       'Empty containers, numeric zero, None, and False are false; most other '
-                       'values are true. This makes common checks such as if items: concise and '
-                       'idiomatic.'],
+  'cells': [{'kind': 'cell',
+             'prose': ['An empty list is false, so `not items` reads as "items is empty". The '
+                       'condition tests the object directly — no `len(items) == 0` comparison is '
+                       'needed.'],
              'code': 'items = []\nname = "Ada"\n\nif not items:\n    print("no items")',
-             'output': 'no items',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Use truthiness when it reads naturally, but choose explicit comparisons '
-                       'when the distinction matters, such as checking whether a value is exactly '
-                       'None.'],
+             'output': 'no items'},
+            {'kind': 'cell',
+             'prose': ['A non-empty string is true, so `if name:` asks "did we get a name?" in one '
+                       'word. Reach for an explicit comparison instead when the distinction '
+                       'matters — `if name is not None:` treats an empty string differently from a '
+                       'missing one.'],
              'code': 'if name:\n    print("has a name")',
-             'output': 'has a name',
-             'line': 41,
-             'kind': 'cell'},
-            {'prose': ['Use truthiness when it reads naturally, but choose explicit comparisons '
-                       'when the distinction matters, such as checking whether a value is exactly '
-                       'None.'],
+             'output': 'has a name'},
+            {'kind': 'cell',
+             'prose': ['`bool()` reveals the truth value any condition would use. Zero-like '
+                       'numbers convert to `False`; other numbers convert to `True`.'],
              'code': 'print(bool(0))\nprint(bool(42))',
-             'output': 'False\nTrue',
-             'line': 54,
-             'kind': 'cell'}],
+             'output': 'False\nTrue'}],
   'code': 'items = []\n'
           'name = "Ada"\n'
           '\n'
@@ -976,10 +691,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(bool(0))\n'
           'print(bool(42))\n',
-  'expected_output': 'no items\nhas a name\nFalse\nTrue\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'no items\nhas a name\nFalse\nTrue\n'},
  {'slug': 'equality-and-identity',
   'title': 'Equality and Identity',
   'section': 'Data Model',
@@ -1000,55 +712,27 @@ EXAMPLES = [{'slug': 'hello-world',
             "Never use `is` to compare numbers; CPython's small-integer cache makes the result an "
             'implementation detail.'],
   'see_also': ['none', 'values', 'object-lifecycle', 'mutability'],
-  'walkthrough': [{'prose': 'Equal containers can be different objects. `==` compares list '
-                            'contents, while `is` checks whether both names refer to the same list '
-                            'object.',
-                   'code': 'left = [1, 2, 3]\n'
-                           'right = [1, 2, 3]\n'
-                           'print(left == right)\n'
-                           'print(left is right)'},
-                  {'prose': 'Identity matters when objects are mutable. `same` is another name for '
-                            '`left`, so mutating through one name changes the object seen through '
-                            'the other.',
-                   'code': 'same = left\nsame.append(4)\nprint(left)\nprint(same is left)'},
-                  {'prose': 'Use `is` for singleton identity checks such as `None`. This asks '
-                            'whether the value is the one special `None` object.',
-                   'code': 'value = None\nprint(value is None)'},
-                  {'prose': '`is` for integers is unreliable because CPython caches small integers '
-                            '(roughly `-5` to `256`) but not larger ones. Two equal large integers '
-                            'can be different objects. Use `==` for value comparisons; reserve '
-                            '`is` for singletons.',
-                   'code': 'small_a = 100\n'
-                           'small_b = 100\n'
-                           'print(small_a is small_b)\n'
-                           '\n'
-                           'big_a = int("1000")\n'
-                           'big_b = int("1000")\n'
-                           'print(big_a is big_b)\n'
-                           'print(big_a == big_b)'}],
-  'cells': [{'prose': ['Equal containers can be different objects. `==` compares list contents, '
+  'cells': [{'kind': 'cell',
+             'prose': ['Equal containers can be different objects. `==` compares list contents, '
                        'while `is` checks whether both names refer to the same list object.'],
              'code': 'left = [1, 2, 3]\n'
                      'right = [1, 2, 3]\n'
                      'print(left == right)\n'
                      'print(left is right)',
-             'output': 'True\nFalse',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Identity matters when objects are mutable. `same` is another name for '
+             'output': 'True\nFalse'},
+            {'kind': 'cell',
+             'prose': ['Identity matters when objects are mutable. `same` is another name for '
                        '`left`, so mutating through one name changes the object seen through the '
                        'other.'],
              'code': 'same = left\nsame.append(4)\nprint(left)\nprint(same is left)',
-             'output': '[1, 2, 3, 4]\nTrue',
-             'line': 39,
-             'kind': 'cell'},
-            {'prose': ['Use `is` for singleton identity checks such as `None`. This asks whether '
+             'output': '[1, 2, 3, 4]\nTrue'},
+            {'kind': 'cell',
+             'prose': ['Use `is` for singleton identity checks such as `None`. This asks whether '
                        'the value is the one special `None` object.'],
              'code': 'value = None\nprint(value is None)',
-             'output': 'True',
-             'line': 55,
-             'kind': 'cell'},
-            {'prose': ['`is` for integers is unreliable because CPython caches small integers '
+             'output': 'True'},
+            {'kind': 'cell',
+             'prose': ['`is` for integers is unreliable because CPython caches small integers '
                        '(roughly `-5` to `256`) but not larger ones. Two equal large integers can '
                        'be different objects. Use `==` for value comparisons; reserve `is` for '
                        'singletons.'],
@@ -1060,9 +744,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'big_b = int("1000")\n'
                      'print(big_a is big_b)\n'
                      'print(big_a == big_b)',
-             'output': 'True\nFalse\nTrue',
-             'line': 68,
-             'kind': 'cell'}],
+             'output': 'True\nFalse\nTrue'}],
   'code': 'left = [1, 2, 3]\n'
           'right = [1, 2, 3]\n'
           'print(left == right)\n'
@@ -1084,10 +766,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'big_b = int("1000")\n'
           'print(big_a is big_b)\n'
           'print(big_a == big_b)\n',
-  'expected_output': 'True\nFalse\n[1, 2, 3, 4]\nTrue\nTrue\nTrue\nFalse\nTrue\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'True\nFalse\n[1, 2, 3, 4]\nTrue\nTrue\nTrue\nFalse\nTrue\n'},
  {'slug': 'mutability',
   'title': 'Mutability',
   'section': 'Data Model',
@@ -1107,28 +786,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Aliasing is useful, but copy mutable containers when independent changes are needed.',
             'Pay attention to whether an operation mutates in place or returns a new value.'],
   'see_also': ['variables', 'object-lifecycle', 'copying-collections', 'lists'],
-  'walkthrough': [{'prose': 'Mutable objects can change in place. `first` and `second` point to '
-                            'the same list, so appending through one name changes the object seen '
-                            'through both names.',
-                   'code': 'first = ["python"]\n'
-                           'second = first\n'
-                           'second.append("workers")\n'
-                           'print(first)\n'
-                           'print(second)'},
-                  {'prose': 'Immutable objects do not change in place. String methods such as '
-                            '`upper()` return a new string, leaving the original string unchanged.',
-                   'code': 'text = "python"\n'
-                           'upper_text = text.upper()\n'
-                           'print(text)\n'
-                           'print(upper_text)'},
-                  {'prose': 'Some APIs make the boundary explicit. `sorted()` returns a new list, '
-                            'while methods such as `append()` and `list.sort()` mutate an existing '
-                            'list.',
-                   'code': 'numbers = [3, 1, 2]\n'
-                           'ordered = sorted(numbers)\n'
-                           'print(ordered)\n'
-                           'print(numbers)'}],
-  'cells': [{'prose': ['Mutable objects can change in place. `first` and `second` point to the '
+  'cells': [{'kind': 'cell',
+             'prose': ['Mutable objects can change in place. `first` and `second` point to the '
                        'same list, so appending through one name changes the object seen through '
                        'both names.'],
              'code': 'first = ["python"]\n'
@@ -1136,24 +795,20 @@ EXAMPLES = [{'slug': 'hello-world',
                      'second.append("workers")\n'
                      'print(first)\n'
                      'print(second)',
-             'output': "['python', 'workers']\n['python', 'workers']",
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Immutable objects do not change in place. String methods such as `upper()` '
+             'output': "['python', 'workers']\n['python', 'workers']"},
+            {'kind': 'cell',
+             'prose': ['Immutable objects do not change in place. String methods such as `upper()` '
                        'return a new string, leaving the original string unchanged.'],
              'code': 'text = "python"\nupper_text = text.upper()\nprint(text)\nprint(upper_text)',
-             'output': 'python\nPYTHON',
-             'line': 40,
-             'kind': 'cell'},
-            {'prose': ['Some APIs make the boundary explicit. `sorted()` returns a new list, while '
+             'output': 'python\nPYTHON'},
+            {'kind': 'cell',
+             'prose': ['Some APIs make the boundary explicit. `sorted()` returns a new list, while '
                        'methods such as `append()` and `list.sort()` mutate an existing list.'],
              'code': 'numbers = [3, 1, 2]\n'
                      'ordered = sorted(numbers)\n'
                      'print(ordered)\n'
                      'print(numbers)',
-             'output': '[1, 2, 3]\n[3, 1, 2]',
-             'line': 56,
-             'kind': 'cell'}],
+             'output': '[1, 2, 3]\n[3, 1, 2]'}],
   'code': 'first = ["python"]\n'
           'second = first\n'
           'second.append("workers")\n'
@@ -1174,10 +829,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'python\n'
                      'PYTHON\n'
                      '[1, 2, 3]\n'
-                     '[3, 1, 2]\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     '[3, 1, 2]\n'},
  {'slug': 'object-lifecycle',
   'title': 'Object Lifecycle',
   'section': 'Basics',
@@ -1199,26 +851,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Python reclaims unreachable objects automatically, so lifetime bugs usually come from '
             'keeping references longer than intended.'],
   'see_also': ['variables', 'mutability', 'classes'],
-  'walkthrough': [{'prose': 'Two names can refer to the same object. Mutating through one name '
-                            'would affect the object seen through the other.',
-                   'code': 'class Box:\n'
-                           '    def __init__(self, label):\n'
-                           '        self.label = label\n'
-                           '\n'
-                           'box = Box("draft")\n'
-                           'alias = box\n'
-                           '\n'
-                           'print(box is alias)\n'
-                           'print(alias.label)'},
-                  {'prose': 'Rebinding `box` does not change the original object. `alias` still '
-                            'reaches the first `Box` until that reference is removed too.',
-                   'code': 'box = Box("published")\n'
-                           'print(alias.label)\n'
-                           'print(box.label)\n'
-                           '\n'
-                           'del alias\n'
-                           'print("old object unreachable")'}],
-  'cells': [{'prose': ['Two names can refer to the same object. Mutating through one name would '
+  'cells': [{'kind': 'cell',
+             'prose': ['Two names can refer to the same object. Mutating through one name would '
                        'affect the object seen through the other.'],
              'code': 'class Box:\n'
                      '    def __init__(self, label):\n'
@@ -1229,10 +863,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(box is alias)\n'
                      'print(alias.label)',
-             'output': 'True\ndraft',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Rebinding `box` does not change the original object. `alias` still reaches '
+             'output': 'True\ndraft'},
+            {'kind': 'cell',
+             'prose': ['Rebinding `box` does not change the original object. `alias` still reaches '
                        'the first `Box` until that reference is removed too.'],
              'code': 'box = Box("published")\n'
                      'print(alias.label)\n'
@@ -1240,9 +873,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'del alias\n'
                      'print("old object unreachable")',
-             'output': 'draft\npublished\nold object unreachable',
-             'line': 43,
-             'kind': 'cell'}],
+             'output': 'draft\npublished\nold object unreachable'}],
   'code': 'class Box:\n'
           '    def __init__(self, label):\n'
           '        self.label = label\n'
@@ -1259,10 +890,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'del alias\n'
           'print("old object unreachable")\n',
-  'expected_output': 'True\ndraft\ndraft\npublished\nold object unreachable\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'True\ndraft\ndraft\npublished\nold object unreachable\n'},
  {'slug': 'strings',
   'title': 'Strings',
   'section': 'Text',
@@ -1287,30 +915,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'User-visible “characters” can be more subtle than code points; combining marks and '
             'emoji sequences may need specialized text handling.'],
   'see_also': ['values', 'string-formatting', 'bytes-and-bytearray', 'regular-expressions'],
-  'walkthrough': [{'prose': 'Compare three words by code-point count and UTF-8 byte count. ASCII '
-                            'characters take one byte each (`hello` → 5 bytes); the `é` in `café` '
-                            'is one code point but two UTF-8 bytes; each Thai character takes '
-                            'three. The `str` type abstracts over all three.',
-                   'code': 'english = "hello"\n'
-                           'french = "café"\n'
-                           'thai = "สวัสดี"\n'
-                           '\n'
-                           'for label, word in [("English", english), ("French", french), ("Thai", '
-                           'thai)]:\n'
-                           '    print(label, word, len(word), len(word.encode("utf-8")))'},
-                  {'prose': 'Indexing and iteration work with Unicode code points, not encoded '
-                            'bytes. `ord()` returns the integer code point, which is often '
-                            'displayed in hexadecimal when teaching text encoding.',
-                   'code': 'print(thai[0])\nprint([hex(ord(char)) for char in thai[:2]])'},
-                  {'prose': 'String methods return new strings because strings are immutable. '
-                            'Encoding turns text into bytes when another system needs a byte '
-                            'representation.',
-                   'code': 'text = "  café  "\n'
-                           'clean = text.strip()\n'
-                           'print(clean)\n'
-                           'print(clean.upper())\n'
-                           'print(clean.encode("utf-8"))'}],
-  'cells': [{'prose': ['Compare three words by code-point count and UTF-8 byte count. ASCII '
+  'cells': [{'kind': 'cell',
+             'prose': ['Compare three words by code-point count and UTF-8 byte count. ASCII '
                        'characters take one byte each (`hello` → 5 bytes); the `é` in `café` is '
                        'one code point but two UTF-8 bytes; each Thai character takes three. The '
                        '`str` type abstracts over all three.'],
@@ -1321,26 +927,22 @@ EXAMPLES = [{'slug': 'hello-world',
                      'for label, word in [("English", english), ("French", french), ("Thai", '
                      'thai)]:\n'
                      '    print(label, word, len(word), len(word.encode("utf-8")))',
-             'output': 'English hello 5 5\nFrench café 4 5\nThai สวัสดี 6 18',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Indexing and iteration work with Unicode code points, not encoded bytes. '
+             'output': 'English hello 5 5\nFrench café 4 5\nThai สวัสดี 6 18'},
+            {'kind': 'cell',
+             'prose': ['Indexing and iteration work with Unicode code points, not encoded bytes. '
                        '`ord()` returns the integer code point, which is often displayed in '
                        'hexadecimal when teaching text encoding.'],
              'code': 'print(thai[0])\nprint([hex(ord(char)) for char in thai[:2]])',
-             'output': "ส\n['0xe2a', '0xe27']",
-             'line': 42,
-             'kind': 'cell'},
-            {'prose': ['String methods return new strings because strings are immutable. Encoding '
+             'output': "ส\n['0xe2a', '0xe27']"},
+            {'kind': 'cell',
+             'prose': ['String methods return new strings because strings are immutable. Encoding '
                        'turns text into bytes when another system needs a byte representation.'],
              'code': 'text = "  café  "\n'
                      'clean = text.strip()\n'
                      'print(clean)\n'
                      'print(clean.upper())\n'
                      'print(clean.encode("utf-8"))',
-             'output': "café\nCAFÉ\nb'caf\\xc3\\xa9'",
-             'line': 56,
-             'kind': 'cell'}],
+             'output': "café\nCAFÉ\nb'caf\\xc3\\xa9'"}],
   'code': 'english = "hello"\n'
           'french = "café"\n'
           'thai = "สวัสดี"\n'
@@ -1363,13 +965,10 @@ EXAMPLES = [{'slug': 'hello-world',
                      "['0xe2a', '0xe27']\n"
                      'café\n'
                      'CAFÉ\n'
-                     "b'caf\\xc3\\xa9'\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     "b'caf\\xc3\\xa9'\n"},
  {'slug': 'bytes-and-bytearray',
   'title': 'Bytes and Bytearray',
-  'section': 'Basics',
+  'section': 'Text',
   'summary': 'bytes and bytearray store binary data, not Unicode text.',
   'doc_path': '/library/stdtypes.html#binary-sequence-types-bytes-bytearray-memoryview',
   'doc_url': 'https://docs.python.org/3.13/library/stdtypes.html#binary-sequence-types-bytes-bytearray-memoryview',
@@ -1386,49 +985,29 @@ EXAMPLES = [{'slug': 'hello-world',
             'Indexing `bytes` returns integers from 0 to 255.',
             'Use `bytearray` when binary data must be changed in place.'],
   'see_also': ['strings', 'literals', 'networking'],
-  'walkthrough': [{'prose': 'Encode text when an external boundary needs bytes. UTF-8 uses one '
-                            'byte for ASCII characters and more than one byte for many other '
-                            'characters.',
-                   'code': 'text = "café"\n'
-                           'data = text.encode("utf-8")\n'
-                           'print(data)\n'
-                           'print(len(text), len(data))'},
-                  {'prose': 'Decode bytes when the program needs text again. The decoder must '
-                            'match the encoding used at the boundary.',
-                   'code': 'print(data.decode("utf-8"))'},
-                  {'prose': 'Indexing a `bytes` object returns an integer byte value, not a '
-                            'one-character `bytes` object.',
-                   'code': 'print(data[0])'},
-                  {'prose': '`bytes` is immutable. Use `bytearray` when binary data must be '
-                            'changed in place.',
-                   'code': 'packet = bytearray(b"py")\npacket[0] = ord("P")\nprint(packet)'}],
-  'cells': [{'prose': ['Encode text when an external boundary needs bytes. UTF-8 uses one byte for '
+  'cells': [{'kind': 'cell',
+             'prose': ['Encode text when an external boundary needs bytes. UTF-8 uses one byte for '
                        'ASCII characters and more than one byte for many other characters.'],
              'code': 'text = "café"\n'
                      'data = text.encode("utf-8")\n'
                      'print(data)\n'
                      'print(len(text), len(data))',
-             'output': "b'caf\\xc3\\xa9'\n4 5",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Decode bytes when the program needs text again. The decoder must match the '
+             'output': "b'caf\\xc3\\xa9'\n4 5"},
+            {'kind': 'cell',
+             'prose': ['Decode bytes when the program needs text again. The decoder must match the '
                        'encoding used at the boundary.'],
              'code': 'print(data.decode("utf-8"))',
-             'output': 'café',
-             'line': 38,
-             'kind': 'cell'},
-            {'prose': ['Indexing a `bytes` object returns an integer byte value, not a '
+             'output': 'café'},
+            {'kind': 'cell',
+             'prose': ['Indexing a `bytes` object returns an integer byte value, not a '
                        'one-character `bytes` object.'],
              'code': 'print(data[0])',
-             'output': '99',
-             'line': 50,
-             'kind': 'cell'},
-            {'prose': ['`bytes` is immutable. Use `bytearray` when binary data must be changed in '
+             'output': '99'},
+            {'kind': 'cell',
+             'prose': ['`bytes` is immutable. Use `bytearray` when binary data must be changed in '
                        'place.'],
              'code': 'packet = bytearray(b"py")\npacket[0] = ord("P")\nprint(packet)',
-             'output': "bytearray(b'Py')",
-             'line': 62,
-             'kind': 'cell'}],
+             'output': "bytearray(b'Py')"}],
   'code': 'text = "café"\n'
           'data = text.encode("utf-8")\n'
           '\n'
@@ -1440,10 +1019,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'packet = bytearray(b"py")\n'
           'packet[0] = ord("P")\n'
           'print(packet)\n',
-  'expected_output': "b'caf\\xc3\\xa9'\n4 5\ncafé\n99\nbytearray(b'Py')\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "b'caf\\xc3\\xa9'\n4 5\ncafé\n99\nbytearray(b'Py')\n"},
  {'slug': 'string-formatting',
   'title': 'String Formatting',
   'section': 'Text',
@@ -1463,23 +1039,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Expressions inside braces are evaluated before formatting.',
             'Format specifications after `:` control alignment, width, padding, and precision.'],
   'see_also': ['strings', 'logging', 'csv-data', 'values'],
-  'walkthrough': [{'prose': 'An f-string evaluates expressions inside braces and inserts their '
-                            'string form into the surrounding text. This is clearer than joining '
-                            'several converted values by hand.',
-                   'code': 'name = "Ada"\n'
-                           'score = 9.5\n'
-                           'rank = 1\n'
-                           '\n'
-                           'message = f"{name} scored {score}"\n'
-                           'print(message)'},
-                  {'prose': 'Format specifications after `:` control display without changing the '
-                            'underlying values. Here the rank is right-aligned, the name is '
-                            'left-aligned, and the score is padded to one decimal place.',
-                   'code': 'row = f"{rank:>2} | {name:<8} | {score:05.1f}"\nprint(row)'},
-                  {'prose': 'The debug form with `=` is useful while learning or logging because '
-                            'it prints both the expression and the value.',
-                   'code': 'print(f"{score = }")'}],
-  'cells': [{'prose': ['An f-string evaluates expressions inside braces and inserts their string '
+  'cells': [{'kind': 'cell',
+             'prose': ['An f-string evaluates expressions inside braces and inserts their string '
                        'form into the surrounding text. This is clearer than joining several '
                        'converted values by hand.'],
              'code': 'name = "Ada"\n'
@@ -1488,22 +1049,19 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'message = f"{name} scored {score}"\n'
                      'print(message)',
-             'output': 'Ada scored 9.5',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Format specifications after `:` control display without changing the '
+             'output': 'Ada scored 9.5'},
+            {'kind': 'cell',
+             'prose': ['Format specifications after `:` control display without changing the '
                        'underlying values. Here the rank is right-aligned, the name is '
-                       'left-aligned, and the score is padded to one decimal place.'],
+                       'left-aligned, and `05.1f` zero-pads the score to a width of five '
+                       'characters with one decimal place.'],
              'code': 'row = f"{rank:>2} | {name:<8} | {score:05.1f}"\nprint(row)',
-             'output': ' 1 | Ada      | 009.5',
-             'line': 40,
-             'kind': 'cell'},
-            {'prose': ['The debug form with `=` is useful while learning or logging because it '
+             'output': ' 1 | Ada      | 009.5'},
+            {'kind': 'cell',
+             'prose': ['The debug form with `=` is useful while learning or logging because it '
                        'prints both the expression and the value.'],
              'code': 'print(f"{score = }")',
-             'output': 'score = 9.5',
-             'line': 53,
-             'kind': 'cell'}],
+             'output': 'score = 9.5'}],
   'code': 'name = "Ada"\n'
           'score = 9.5\n'
           'rank = 1\n'
@@ -1515,10 +1073,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(row)\n'
           '\n'
           'print(f"{score = }")\n',
-  'expected_output': 'Ada scored 9.5\n 1 | Ada      | 009.5\nscore = 9.5\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'Ada scored 9.5\n 1 | Ada      | 009.5\nscore = 9.5\n'},
  {'slug': 'conditionals',
   'title': 'Conditionals',
   'section': 'Control Flow',
@@ -1538,35 +1093,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Keep branch bodies short; move larger work into functions so the decision remains '
             'easy to scan.'],
   'see_also': ['booleans', 'truthiness', 'guard-clauses', 'match-statements'],
-  'walkthrough': [{'prose': 'Start with the value that the branches will test. A conditional is '
-                            'only useful when the branch condition is visible and meaningful.',
-                   'code': 'temperature = 72\n'
-                           '\n'
-                           'if temperature < 60:\n'
-                           '    print("cold")\n'
-                           'elif temperature < 80:\n'
-                           '    print("comfortable")\n'
-                           'else:\n'
-                           '    print("hot")'},
-                  {'prose': 'Use `if`, `elif`, and `else` for one ordered choice. Python tests the '
-                            'branches from top to bottom and runs only the first matching block.',
-                   'code': 'temperature = 72\n'
-                           '\n'
-                           'if temperature < 60:\n'
-                           '    print("cold")\n'
-                           'elif temperature < 80:\n'
-                           '    print("comfortable")\n'
-                           'else:\n'
-                           '    print("hot")'},
-                  {'prose': 'Truthiness is part of conditional flow. Empty collections are false, '
-                            'so `if items:` reads as “if there is anything to work with.”',
-                   'code': 'items = ["coat", "hat"]\n'
-                           'if items:\n'
-                           '    print(f"packing {len(items)} items")'},
-                  {'prose': 'Use the ternary expression when you are choosing a value. If either '
-                            'side needs multiple statements, use a normal `if` block instead.',
-                   'code': 'status = "ok" if temperature < 90 else "danger"\nprint(status)'}],
-  'cells': [{'prose': ['Start with the value that the branches will test. A conditional is only '
+  'cells': [{'kind': 'cell',
+             'prose': ['Start with the value that the branches will test. A conditional is only '
                        'useful when the branch condition is visible and meaningful.',
                        'Use `if`, `elif`, and `else` for one ordered choice. Python tests the '
                        'branches from top to bottom and runs only the first matching block.'],
@@ -1578,21 +1106,17 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    print("comfortable")\n'
                      'else:\n'
                      '    print("hot")',
-             'output': 'comfortable',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Truthiness is part of conditional flow. Empty collections are false, so '
+             'output': 'comfortable'},
+            {'kind': 'cell',
+             'prose': ['Truthiness is part of conditional flow. Empty collections are false, so '
                        '`if items:` reads as “if there is anything to work with.”'],
              'code': 'items = ["coat", "hat"]\nif items:\n    print(f"packing {len(items)} items")',
-             'output': 'packing 2 items',
-             'line': 44,
-             'kind': 'cell'},
-            {'prose': ['Use the ternary expression when you are choosing a value. If either side '
+             'output': 'packing 2 items'},
+            {'kind': 'cell',
+             'prose': ['Use the ternary expression when you are choosing a value. If either side '
                        'needs multiple statements, use a normal `if` block instead.'],
              'code': 'status = "ok" if temperature < 90 else "danger"\nprint(status)',
-             'output': 'ok',
-             'line': 58,
-             'kind': 'cell'}],
+             'output': 'ok'}],
   'code': 'temperature = 72\n'
           '\n'
           'if temperature < 60:\n'
@@ -1608,10 +1132,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'status = "ok" if temperature < 90 else "danger"\n'
           'print(status)\n',
-  'expected_output': 'comfortable\npacking 2 items\nok\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'comfortable\npacking 2 items\nok\n'},
  {'slug': 'guard-clauses',
   'title': 'Guard Clauses',
   'section': 'Control Flow',
@@ -1632,29 +1153,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'They work best when the early cases are true boundaries.',
             'For exceptional failures, raise an exception instead of returning a sentinel string.'],
   'see_also': ['conditionals', 'exceptions', 'functions'],
-  'walkthrough': [{'prose': 'The nested version is correct, but the useful work is buried inside '
-                            'both tests.',
-                   'code': 'def nested_discount(price, percent):\n'
-                           '    if price >= 0:\n'
-                           '        if 0 <= percent <= 100:\n'
-                           '            return round(price - price * percent / 100, 2)\n'
-                           '        return "invalid discount"\n'
-                           '    return "invalid price"\n'
-                           '\n'
-                           'print(nested_discount(100, 15))'},
-                  {'prose': 'The guard-clause version handles impossible inputs first, then lets '
-                            'the ordinary calculation sit at the top level of the function body.',
-                   'code': 'def guarded_discount(price, percent):\n'
-                           '    if price < 0:\n'
-                           '        return "invalid price"\n'
-                           '    if not 0 <= percent <= 100:\n'
-                           '        return "invalid discount"\n'
-                           '\n'
-                           '    return round(price - price * percent / 100, 2)\n'
-                           '\n'
-                           'print(guarded_discount(-5, 10))\n'
-                           'print(guarded_discount(100, 120))'}],
-  'cells': [{'prose': ['The nested version is correct, but the useful work is buried inside both '
+  'cells': [{'kind': 'cell',
+             'prose': ['The nested version is correct, but the useful work is buried inside both '
                        'tests.'],
              'code': 'def nested_discount(price, percent):\n'
                      '    if price >= 0:\n'
@@ -1664,10 +1164,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    return "invalid price"\n'
                      '\n'
                      'print(nested_discount(100, 15))',
-             'output': '85.0',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['The guard-clause version handles impossible inputs first, then lets the '
+             'output': '85.0'},
+            {'kind': 'cell',
+             'prose': ['The guard-clause version handles impossible inputs first, then lets the '
                        'ordinary calculation sit at the top level of the function body.'],
              'code': 'def guarded_discount(price, percent):\n'
                      '    if price < 0:\n'
@@ -1679,9 +1178,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(guarded_discount(-5, 10))\n'
                      'print(guarded_discount(100, 120))',
-             'output': 'invalid price\ninvalid discount',
-             'line': 41,
-             'kind': 'cell'}],
+             'output': 'invalid price\ninvalid discount'}],
   'code': 'def nested_discount(price, percent):\n'
           '    if price >= 0:\n'
           '        if 0 <= percent <= 100:\n'
@@ -1701,10 +1198,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(nested_discount(100, 15))\n'
           'print(guarded_discount(-5, 10))\n'
           'print(guarded_discount(100, 120))\n',
-  'expected_output': '85.0\ninvalid price\ninvalid discount\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '85.0\ninvalid price\ninvalid discount\n'},
  {'slug': 'assignment-expressions',
   'title': 'Assignment Expressions',
   'section': 'Control Flow',
@@ -1721,39 +1215,23 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use it to avoid computing the same value twice.',
             'Prefer a normal assignment when the expression becomes hard to scan.'],
   'see_also': ['conditionals', 'while-loops', 'variables'],
-  'walkthrough': [{'prose': 'An assignment expression can name a computed value while a condition '
-                            'tests it. Here empty strings are skipped because their length is '
-                            'zero.',
-                   'code': 'messages = ["hello", "", "python"]\n'
-                           '\n'
-                           'for message in messages:\n'
-                           '    if length := len(message):\n'
-                           '        print(message, length)'},
-                  {'prose': 'The same idea works in loops that read state until a sentinel '
-                            'appears. The assignment and comparison stay together.',
-                   'code': 'queue = ["retry", "ok"]\n'
-                           'while (status := queue.pop(0)) != "ok":\n'
-                           '    print(status)\n'
-                           'print(status)'}],
-  'cells': [{'prose': ['An assignment expression can name a computed value while a condition tests '
+  'cells': [{'kind': 'cell',
+             'prose': ['An assignment expression can name a computed value while a condition tests '
                        'it. Here empty strings are skipped because their length is zero.'],
              'code': 'messages = ["hello", "", "python"]\n'
                      '\n'
                      'for message in messages:\n'
                      '    if length := len(message):\n'
                      '        print(message, length)',
-             'output': 'hello 5\npython 6',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['The same idea works in loops that read state until a sentinel appears. The '
+             'output': 'hello 5\npython 6'},
+            {'kind': 'cell',
+             'prose': ['The same idea works in loops that read state until a sentinel appears. The '
                        'assignment and comparison stay together.'],
              'code': 'queue = ["retry", "ok"]\n'
                      'while (status := queue.pop(0)) != "ok":\n'
                      '    print(status)\n'
                      'print(status)',
-             'output': 'retry\nok',
-             'line': 39,
-             'kind': 'cell'}],
+             'output': 'retry\nok'}],
   'code': 'messages = ["hello", "", "python"]\n'
           '\n'
           'for message in messages:\n'
@@ -1764,10 +1242,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'while (status := queue.pop(0)) != "ok":\n'
           '    print(status)\n'
           'print(status)\n',
-  'expected_output': 'hello 5\npython 6\nretry\nok\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'hello 5\npython 6\nretry\nok\n'},
  {'slug': 'for-loops',
   'title': 'For Loops',
   'section': 'Control Flow',
@@ -1788,34 +1263,21 @@ EXAMPLES = [{'slug': 'hello-world',
             'Reach for `while` when the stopping condition must be rechecked manually.',
             '`iter()` and `next()` expose the protocol that `for` uses internally.'],
   'see_also': ['while-loops', 'iterating-over-iterables', 'iterators'],
-  'walkthrough': [{'prose': 'Direct iteration keeps the code focused on the values in the '
-                            'collection.',
-                   'code': 'for name in ["Ada", "Grace", "Guido"]:\n    print(name)'},
-                  {'prose': '`range(3)` yields `0`, `1`, and `2` lazily. Use it when those '
-                            'integers are the thing being iterated over.',
-                   'code': 'for number in range(3):\n    print(number)'},
-                  {'prose': '`enumerate()` is the usual Python way to keep a counter beside each '
-                            'value without indexing back into the list.',
-                   'code': 'for index, name in enumerate(["Ada", "Grace"], start=1):\n'
-                           '    print(index, name)'}],
-  'cells': [{'prose': ['Direct iteration keeps the code focused on the values in the collection.'],
+  'cells': [{'kind': 'cell',
+             'prose': ['Direct iteration keeps the code focused on the values in the collection.'],
              'code': 'for name in ["Ada", "Grace", "Guido"]:\n    print(name)',
-             'output': 'Ada\nGrace\nGuido',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`range(3)` yields `0`, `1`, and `2` lazily. Use it when those integers are '
+             'output': 'Ada\nGrace\nGuido'},
+            {'kind': 'cell',
+             'prose': ['`range(3)` yields `0`, `1`, and `2` lazily. Use it when those integers are '
                        'the thing being iterated over.'],
              'code': 'for number in range(3):\n    print(number)',
-             'output': '0\n1\n2',
-             'line': 37,
-             'kind': 'cell'},
-            {'prose': ['`enumerate()` is the usual Python way to keep a counter beside each value '
+             'output': '0\n1\n2'},
+            {'kind': 'cell',
+             'prose': ['`enumerate()` is the usual Python way to keep a counter beside each value '
                        'without indexing back into the list.'],
              'code': 'for index, name in enumerate(["Ada", "Grace"], start=1):\n'
                      '    print(index, name)',
-             'output': '1 Ada\n2 Grace',
-             'line': 52,
-             'kind': 'cell'}],
+             'output': '1 Ada\n2 Grace'}],
   'code': 'for name in ["Ada", "Grace", "Guido"]:\n'
           '    print(name)\n'
           '\n'
@@ -1824,10 +1286,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'for index, name in enumerate(["Ada", "Grace"], start=1):\n'
           '    print(index, name)\n',
-  'expected_output': 'Ada\nGrace\nGuido\n0\n1\n2\n1 Ada\n2 Grace\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'Ada\nGrace\nGuido\n0\n1\n2\n1 Ada\n2 Grace\n'},
  {'slug': 'break-and-continue',
   'title': 'Break and Continue',
   'section': 'Control Flow',
@@ -1845,40 +1304,24 @@ EXAMPLES = [{'slug': 'hello-world',
             'Prefer plain `if`/`else` when the loop does not need early skip or early stop '
             'behavior.'],
   'see_also': ['for-loops', 'while-loops', 'loop-else'],
-  'walkthrough': [{'prose': '`continue` skips the rest of the current iteration. The empty name is '
-                            'ignored, and the loop moves on to the next value.',
-                   'code': 'names = ["Ada", "", "Grace"]\n'
-                           'for name in names:\n'
-                           '    if not name:\n'
-                           '        continue\n'
-                           '    print(name)'},
-                  {'prose': '`break` exits the loop immediately. The value after `stop` is never '
-                            'processed because the loop has already ended.',
-                   'code': 'commands = ["load", "save", "stop", "delete"]\n'
-                           'for command in commands:\n'
-                           '    if command == "stop":\n'
-                           '        break\n'
-                           '    print(command)'}],
-  'cells': [{'prose': ['`continue` skips the rest of the current iteration. The empty name is '
+  'cells': [{'kind': 'cell',
+             'prose': ['`continue` skips the rest of the current iteration. The empty name is '
                        'ignored, and the loop moves on to the next value.'],
              'code': 'names = ["Ada", "", "Grace"]\n'
                      'for name in names:\n'
                      '    if not name:\n'
                      '        continue\n'
                      '    print(name)',
-             'output': 'Ada\nGrace',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`break` exits the loop immediately. The value after `stop` is never '
+             'output': 'Ada\nGrace'},
+            {'kind': 'cell',
+             'prose': ['`break` exits the loop immediately. The value after `stop` is never '
                        'processed because the loop has already ended.'],
              'code': 'commands = ["load", "save", "stop", "delete"]\n'
                      'for command in commands:\n'
                      '    if command == "stop":\n'
                      '        break\n'
                      '    print(command)',
-             'output': 'load\nsave',
-             'line': 39,
-             'kind': 'cell'}],
+             'output': 'load\nsave'}],
   'code': 'names = ["Ada", "", "Grace"]\n'
           'for name in names:\n'
           '    if not name:\n'
@@ -1890,10 +1333,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '    if command == "stop":\n'
           '        break\n'
           '    print(command)\n',
-  'expected_output': 'Ada\nGrace\nload\nsave\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'Ada\nGrace\nload\nsave\n'},
  {'slug': 'loop-else',
   'title': 'Loop Else',
   'section': 'Control Flow',
@@ -1910,25 +1350,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'It is best for search loops with a clear found/not-found split.',
             'It works with both `for` and `while` loops.'],
   'see_also': ['break-and-continue', 'for-loops', 'while-loops'],
-  'walkthrough': [{'prose': 'If the loop reaches `break`, the `else` block is skipped. This branch '
-                            'means the search succeeded early.',
-                   'code': 'names = ["Ada", "Grace", "Guido"]\n'
-                           '\n'
-                           'for name in names:\n'
-                           '    if name == "Grace":\n'
-                           '        print("found")\n'
-                           '        break\n'
-                           'else:\n'
-                           '    print("missing")'},
-                  {'prose': 'If the loop finishes without `break`, the `else` block runs. This '
-                            'branch means the search examined every value and found nothing.',
-                   'code': 'for name in names:\n'
-                           '    if name == "Linus":\n'
-                           '        print("found")\n'
-                           '        break\n'
-                           'else:\n'
-                           '    print("missing")'}],
-  'cells': [{'prose': ['If the loop reaches `break`, the `else` block is skipped. This branch '
+  'cells': [{'kind': 'cell',
+             'prose': ['If the loop reaches `break`, the `else` block is skipped. This branch '
                        'means the search succeeded early.'],
              'code': 'names = ["Ada", "Grace", "Guido"]\n'
                      '\n'
@@ -1938,10 +1361,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        break\n'
                      'else:\n'
                      '    print("missing")',
-             'output': 'found',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['If the loop finishes without `break`, the `else` block runs. This branch '
+             'output': 'found'},
+            {'kind': 'cell',
+             'prose': ['If the loop finishes without `break`, the `else` block runs. This branch '
                        'means the search examined every value and found nothing.'],
              'code': 'for name in names:\n'
                      '    if name == "Linus":\n'
@@ -1949,9 +1371,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        break\n'
                      'else:\n'
                      '    print("missing")',
-             'output': 'missing',
-             'line': 41,
-             'kind': 'cell'}],
+             'output': 'missing'}],
   'code': 'names = ["Ada", "Grace", "Guido"]\n'
           '\n'
           'for name in names:\n'
@@ -1967,10 +1387,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '        break\n'
           'else:\n'
           '    print("missing")\n',
-  'expected_output': 'found\nmissing\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'found\nmissing\n'},
  {'slug': 'iterating-over-iterables',
   'title': 'Iterating over Iterables',
   'section': 'Iteration',
@@ -1990,48 +1407,25 @@ EXAMPLES = [{'slug': 'hello-world',
             'Different producers can feed the same loop protocol.',
             'Prefer `enumerate()` over `range(len(...))` when you need an index.'],
   'see_also': ['iterators', 'iterator-vs-iterable', 'for-loops'],
-  'walkthrough': [{'prose': 'Start with an ordinary list. A list stores values, and a `for` loop '
-                            'asks it for one value at a time.',
-                   'code': 'names = ["Ada", "Grace", "Guido"]\n'
-                           '\n'
-                           'for name in names:\n'
-                           '    print(name)'},
-                  {'prose': 'When you only need the values, iterate over the collection directly. '
-                            'There is no index variable because the loop body does not need one.',
-                   'code': 'names = ["Ada", "Grace", "Guido"]\n'
-                           '\n'
-                           'for name in names:\n'
-                           '    print(name)'},
-                  {'prose': 'When you need both a position and a value, use `enumerate()`. It '
-                            'produces index/value pairs without manual indexing.',
-                   'code': 'for index, name in enumerate(names):\n    print(index, name)'},
-                  {'prose': 'Dictionaries are iterable too, but `dict.items()` is the clearest way '
-                            'to say that the loop needs keys and values together.',
-                   'code': 'scores = {"Ada": 10, "Grace": 9}\n'
-                           'for name, score in scores.items():\n'
-                           '    print(name, score)'}],
-  'cells': [{'prose': ['Start with an ordinary list. A list stores values, and a `for` loop asks '
+  'cells': [{'kind': 'cell',
+             'prose': ['Start with an ordinary list. A list stores values, and a `for` loop asks '
                        'it for one value at a time.',
                        'When you only need the values, iterate over the collection directly. There '
                        'is no index variable because the loop body does not need one.'],
              'code': 'names = ["Ada", "Grace", "Guido"]\n\nfor name in names:\n    print(name)',
-             'output': 'Ada\nGrace\nGuido',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['When you need both a position and a value, use `enumerate()`. It produces '
+             'output': 'Ada\nGrace\nGuido'},
+            {'kind': 'cell',
+             'prose': ['When you need both a position and a value, use `enumerate()`. It produces '
                        'index/value pairs without manual indexing.'],
              'code': 'for index, name in enumerate(names):\n    print(index, name)',
-             'output': '0 Ada\n1 Grace\n2 Guido',
-             'line': 41,
-             'kind': 'cell'},
-            {'prose': ['Dictionaries are iterable too, but `dict.items()` is the clearest way to '
+             'output': '0 Ada\n1 Grace\n2 Guido'},
+            {'kind': 'cell',
+             'prose': ['Dictionaries are iterable too, but `dict.items()` is the clearest way to '
                        'say that the loop needs keys and values together.'],
              'code': 'scores = {"Ada": 10, "Grace": 9}\n'
                      'for name, score in scores.items():\n'
                      '    print(name, score)',
-             'output': 'Ada 10\nGrace 9',
-             'line': 56,
-             'kind': 'cell'}],
+             'output': 'Ada 10\nGrace 9'}],
   'code': 'names = ["Ada", "Grace", "Guido"]\n'
           '\n'
           'for name in names:\n'
@@ -2043,10 +1437,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'scores = {"Ada": 10, "Grace": 9}\n'
           'for name, score in scores.items():\n'
           '    print(name, score)\n',
-  'expected_output': 'Ada\nGrace\nGuido\n0 Ada\n1 Grace\n2 Guido\nAda 10\nGrace 9\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'Ada\nGrace\nGuido\n0 Ada\n1 Grace\n2 Guido\nAda 10\nGrace 9\n'},
  {'slug': 'iterators',
   'title': 'Iterators',
   'section': 'Iteration',
@@ -2064,39 +1455,24 @@ EXAMPLES = [{'slug': 'hello-world',
             '`next()` consumes one value from an iterator.',
             'Many iterators are one-pass even when the original collection is reusable.'],
   'see_also': ['iterating-over-iterables', 'iterator-vs-iterable', 'generators'],
-  'walkthrough': [{'prose': '`iter()` asks an iterable for an iterator. `next()` consumes one '
-                            "value and advances the iterator's position.",
-                   'code': 'names = ["Ada", "Grace", "Guido"]\n'
-                           'iterator = iter(names)\n'
-                           'print(next(iterator))\n'
-                           'print(next(iterator))'},
-                  {'prose': 'A `for` loop consumes the same iterator protocol. Because two values '
-                            'were already consumed, the loop sees only the remaining value.',
-                   'code': 'for name in iterator:\n    print(name)'},
-                  {'prose': 'The list itself is reusable. Asking it for a fresh iterator starts a '
-                            'new pass over the same stored values.',
-                   'code': 'again = iter(names)\nprint(next(again))'}],
-  'cells': [{'prose': ['`iter()` asks an iterable for an iterator. `next()` consumes one value and '
+  'cells': [{'kind': 'cell',
+             'prose': ['`iter()` asks an iterable for an iterator. `next()` consumes one value and '
                        "advances the iterator's position."],
              'code': 'names = ["Ada", "Grace", "Guido"]\n'
                      'iterator = iter(names)\n'
                      'print(next(iterator))\n'
                      'print(next(iterator))',
-             'output': 'Ada\nGrace',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['A `for` loop consumes the same iterator protocol. Because two values were '
+             'output': 'Ada\nGrace'},
+            {'kind': 'cell',
+             'prose': ['A `for` loop consumes the same iterator protocol. Because two values were '
                        'already consumed, the loop sees only the remaining value.'],
              'code': 'for name in iterator:\n    print(name)',
-             'output': 'Guido',
-             'line': 38,
-             'kind': 'cell'},
-            {'prose': ['The list itself is reusable. Asking it for a fresh iterator starts a new '
+             'output': 'Guido'},
+            {'kind': 'cell',
+             'prose': ['The list itself is reusable. Asking it for a fresh iterator starts a new '
                        'pass over the same stored values.'],
              'code': 'again = iter(names)\nprint(next(again))',
-             'output': 'Ada',
-             'line': 51,
-             'kind': 'cell'}],
+             'output': 'Ada'}],
   'code': 'names = ["Ada", "Grace", "Guido"]\n'
           'iterator = iter(names)\n'
           'print(next(iterator))\n'
@@ -2107,10 +1483,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'again = iter(names)\n'
           'print(next(again))\n',
-  'expected_output': 'Ada\nGrace\nGuido\nAda\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'Ada\nGrace\nGuido\nAda\n'},
  {'slug': 'iterator-vs-iterable',
   'title': 'Iterator vs Iterable',
   'section': 'Iteration',
@@ -2134,65 +1507,28 @@ EXAMPLES = [{'slug': 'hello-world',
             'Functions that traverse their input more than once must accept an iterable or '
             'materialize the input at the boundary.'],
   'see_also': ['iterators', 'iterating-over-iterables', 'generators'],
-  'walkthrough': [{'prose': 'A list is iterable. Each `for` loop or `list()` call asks the list '
-                            'for a fresh iterator under the hood, so the same data can be '
-                            'traversed many times.',
-                   'code': 'names = ["Ada", "Grace"]\nprint(list(names))\nprint(list(names))'},
-                  {'prose': 'An iterator is one-pass. Calling `iter()` returns a position-tracking '
-                            'object; once it has been exhausted, it stays exhausted.',
-                   'code': 'stream = iter(names)\nprint(list(stream))\nprint(list(stream))'},
-                  {'prose': 'Calling `iter()` on an iterable returns a brand-new iterator each '
-                            'time. Calling `iter()` on an iterator returns the same object — that '
-                            'is the rule that lets a `for` loop accept either kind.',
-                   'code': 'first = iter(names)\n'
-                           'second = iter(names)\n'
-                           'print(first is second)\n'
-                           'print(iter(first) is first)'},
-                  {'prose': 'The distinction shows up at API boundaries. A function that loops '
-                            'over its argument twice works for an iterable but silently produces '
-                            'wrong answers for an iterator, because the second pass finds the '
-                            'iterator already exhausted. Materialize once at the boundary when '
-                            'both passes matter.',
-                   'code': 'def total_and_count(numbers):\n'
-                           '    total = sum(numbers)\n'
-                           '    count = sum(1 for _ in numbers)\n'
-                           '    return total, count\n'
-                           '\n'
-                           'def values():\n'
-                           '    yield from [10, 9, 8]\n'
-                           '\n'
-                           'print(total_and_count([10, 9, 8]))\n'
-                           'print(total_and_count(values()))\n'
-                           '\n'
-                           'def total_and_count_safe(numbers):\n'
-                           '    items = list(numbers)\n'
-                           '    return sum(items), len(items)\n'
-                           '\n'
-                           'print(total_and_count_safe(values()))'}],
-  'cells': [{'prose': ['A list is iterable. Each `for` loop or `list()` call asks the list for a '
+  'cells': [{'kind': 'cell',
+             'prose': ['A list is iterable. Each `for` loop or `list()` call asks the list for a '
                        'fresh iterator under the hood, so the same data can be traversed many '
                        'times.'],
              'code': 'names = ["Ada", "Grace"]\nprint(list(names))\nprint(list(names))',
-             'output': "['Ada', 'Grace']\n['Ada', 'Grace']",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['An iterator is one-pass. Calling `iter()` returns a position-tracking '
+             'output': "['Ada', 'Grace']\n['Ada', 'Grace']"},
+            {'kind': 'cell',
+             'prose': ['An iterator is one-pass. Calling `iter()` returns a position-tracking '
                        'object; once it has been exhausted, it stays exhausted.'],
              'code': 'stream = iter(names)\nprint(list(stream))\nprint(list(stream))',
-             'output': "['Ada', 'Grace']\n[]",
-             'line': 37,
-             'kind': 'cell'},
-            {'prose': ['Calling `iter()` on an iterable returns a brand-new iterator each time. '
+             'output': "['Ada', 'Grace']\n[]"},
+            {'kind': 'cell',
+             'prose': ['Calling `iter()` on an iterable returns a brand-new iterator each time. '
                        'Calling `iter()` on an iterator returns the same object — that is the rule '
                        'that lets a `for` loop accept either kind.'],
              'code': 'first = iter(names)\n'
                      'second = iter(names)\n'
                      'print(first is second)\n'
                      'print(iter(first) is first)',
-             'output': 'False\nTrue',
-             'line': 52,
-             'kind': 'cell'},
-            {'prose': ['The distinction shows up at API boundaries. A function that loops over its '
+             'output': 'False\nTrue'},
+            {'kind': 'cell',
+             'prose': ['The distinction shows up at API boundaries. A function that loops over its '
                        'argument twice works for an iterable but silently produces wrong answers '
                        'for an iterator, because the second pass finds the iterator already '
                        'exhausted. Materialize once at the boundary when both passes matter.'],
@@ -2212,9 +1548,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    return sum(items), len(items)\n'
                      '\n'
                      'print(total_and_count_safe(values()))',
-             'output': '(27, 3)\n(27, 0)\n(27, 3)',
-             'line': 68,
-             'kind': 'cell'}],
+             'output': '(27, 3)\n(27, 0)\n(27, 3)'}],
   'code': 'names = ["Ada", "Grace"]\n'
           '\n'
           'print(list(names))\n'
@@ -2253,10 +1587,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'True\n'
                      '(27, 3)\n'
                      '(27, 0)\n'
-                     '(27, 3)\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     '(27, 3)\n'},
  {'slug': 'sentinel-iteration',
   'title': 'Sentinel Iteration',
   'section': 'Iteration',
@@ -2277,27 +1608,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'The sentinel stops iteration and is not yielded.',
             'When the loop needs richer branching, an explicit `while` loop may be clearer.'],
   'see_also': ['iterators', 'while-loops', 'break-and-continue'],
-  'walkthrough': [{'prose': 'The two-argument form turns a polling callable into an iterator. The '
-                            'empty string stops the loop without appearing in the result.',
-                   'code': 'chunks = iter(["py", "thon", ""])\n'
-                           '\n'
-                           '\n'
-                           'def read_chunk():\n'
-                           '    return next(chunks)\n'
-                           '\n'
-                           'print(list(iter(read_chunk, "")))'},
-                  {'prose': 'The equivalent manual loop needs an explicit read, comparison, and '
-                            '`break`. Use this shape when the stop condition is more complicated '
-                            'than a single sentinel value.',
-                   'code': 'chunks = iter(["py", "thon", ""])\n'
-                           'word = ""\n'
-                           'while True:\n'
-                           '    chunk = next(chunks)\n'
-                           '    if chunk == "":\n'
-                           '        break\n'
-                           '    word += chunk\n'
-                           'print(word)'}],
-  'cells': [{'prose': ['The two-argument form turns a polling callable into an iterator. The empty '
+  'cells': [{'kind': 'cell',
+             'prose': ['The two-argument form turns a polling callable into an iterator. The empty '
                        'string stops the loop without appearing in the result.'],
              'code': 'chunks = iter(["py", "thon", ""])\n'
                      '\n'
@@ -2306,10 +1618,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    return next(chunks)\n'
                      '\n'
                      'print(list(iter(read_chunk, "")))',
-             'output': "['py', 'thon']",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['The equivalent manual loop needs an explicit read, comparison, and '
+             'output': "['py', 'thon']"},
+            {'kind': 'cell',
+             'prose': ['The equivalent manual loop needs an explicit read, comparison, and '
                        '`break`. Use this shape when the stop condition is more complicated than a '
                        'single sentinel value.'],
              'code': 'chunks = iter(["py", "thon", ""])\n'
@@ -2320,9 +1631,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        break\n'
                      '    word += chunk\n'
                      'print(word)',
-             'output': 'python',
-             'line': 40,
-             'kind': 'cell'}],
+             'output': 'python'}],
   'code': 'chunks = iter(["py", "thon", ""])\n'
           '\n'
           '\n'
@@ -2339,10 +1648,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '        break\n'
           '    word += chunk\n'
           'print(word)\n',
-  'expected_output': "['py', 'thon']\npython\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "['py', 'thon']\npython\n"},
  {'slug': 'match-statements',
   'title': 'Match Statements',
   'section': 'Control Flow',
@@ -2358,40 +1664,12 @@ EXAMPLES = [{'slug': 'hello-world',
                   'should appear before broad fallback cases such as `_`.'],
   'notes': ['`match` compares structure, not just equality.',
             'Patterns can bind names such as `x` and `y` while matching.',
+            'Mapping patterns match when the named keys are present; extra keys in the subject are '
+            'ignored rather than failing the case.',
             'Put the catch-all `_` case last, because cases are tried from top to bottom.'],
   'see_also': ['conditionals', 'advanced-match-patterns', 'structured-data-shapes', 'dicts'],
-  'walkthrough': [{'prose': 'Use `match` when the shape of a value is the decision. This command '
-                            'is a dictionary with an action and coordinates; the first case checks '
-                            'that shape and binds `x` and `y`.',
-                   'code': 'command = {"action": "move", "x": 3, "y": 4}\n'
-                           '\n'
-                           'match command:\n'
-                           '    case {"action": "move", "x": x, "y": y}:\n'
-                           '        print(f"move to {x},{y}")'},
-                  {'prose': 'Other cases describe other valid shapes. This complete fragment '
-                            'changes the command so the `quit` case is the first matching pattern.',
-                   'code': 'command = {"action": "quit"}\n'
-                           '\n'
-                           'match command:\n'
-                           '    case {"action": "move", "x": x, "y": y}:\n'
-                           '        print(f"move to {x},{y}")\n'
-                           '    case {"action": "quit"}:\n'
-                           '        print("quit")'},
-                  {'prose': 'Broader patterns and the `_` catch-all belong after specific cases. '
-                            'This fragment extracts an unknown action before the final fallback '
-                            'would run.',
-                   'code': 'command = {"action": "jump"}\n'
-                           '\n'
-                           'match command:\n'
-                           '    case {"action": "move", "x": x, "y": y}:\n'
-                           '        print(f"move to {x},{y}")\n'
-                           '    case {"action": "quit"}:\n'
-                           '        print("quit")\n'
-                           '    case {"action": action}:\n'
-                           '        print(f"unknown action: {action}")\n'
-                           '    case _:\n'
-                           '        print("invalid command")'}],
-  'cells': [{'prose': ['Use `match` when the shape of a value is the decision. This command is a '
+  'cells': [{'kind': 'cell',
+             'prose': ['Use `match` when the shape of a value is the decision. This command is a '
                        'dictionary with an action and coordinates; the first case checks that '
                        'shape and binds `x` and `y`.'],
              'code': 'command = {"action": "move", "x": 3, "y": 4}\n'
@@ -2399,10 +1677,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'match command:\n'
                      '    case {"action": "move", "x": x, "y": y}:\n'
                      '        print(f"move to {x},{y}")',
-             'output': 'move to 3,4',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Other cases describe other valid shapes. This complete fragment changes '
+             'output': 'move to 3,4'},
+            {'kind': 'cell',
+             'prose': ['Other cases describe other valid shapes. This complete fragment changes '
                        'the command so the `quit` case is the first matching pattern.'],
              'code': 'command = {"action": "quit"}\n'
                      '\n'
@@ -2411,10 +1688,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        print(f"move to {x},{y}")\n'
                      '    case {"action": "quit"}:\n'
                      '        print("quit")',
-             'output': 'quit',
-             'line': 39,
-             'kind': 'cell'},
-            {'prose': ['Broader patterns and the `_` catch-all belong after specific cases. This '
+             'output': 'quit'},
+            {'kind': 'cell',
+             'prose': ['Broader patterns and the `_` catch-all belong after specific cases. This '
                        'fragment extracts an unknown action before the final fallback would run.'],
              'code': 'command = {"action": "jump"}\n'
                      '\n'
@@ -2427,9 +1703,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        print(f"unknown action: {action}")\n'
                      '    case _:\n'
                      '        print("invalid command")',
-             'output': 'unknown action: jump',
-             'line': 57,
-             'kind': 'cell'}],
+             'output': 'unknown action: jump'}],
   'code': 'command = {"action": "move", "x": 3, "y": 4}\n'
           '\n'
           'match command:\n'
@@ -2441,10 +1715,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '        print(f"unknown action: {action}")\n'
           '    case _:\n'
           '        print("invalid command")\n',
-  'expected_output': 'move to 3,4\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'move to 3,4\n'},
  {'slug': 'advanced-match-patterns',
   'title': 'Advanced Match Patterns',
   'section': 'Control Flow',
@@ -2461,28 +1732,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Guards refine a pattern after the structure matches.',
             'OR patterns and star patterns keep shape-based branches compact.'],
   'see_also': ['match-statements', 'tuples', 'classes'],
-  'walkthrough': [{'prose': 'Sequence patterns match by position. A guard after `if` adds a '
-                            'condition that must also be true.',
-                   'code': 'def describe(command):\n'
-                           '    match command:\n'
-                           '        case ["move", x, y] if x >= 0 and y >= 0:\n'
-                           '            return f"move to {x},{y}"\n'
-                           '        case ["quit" | "exit"]:\n'
-                           '            return "stop"\n'
-                           '        case ["echo", *words]:\n'
-                           '            return " ".join(words)\n'
-                           '        case _:\n'
-                           '            return "unknown"\n'
-                           '\n'
-                           'print(describe(["move", 2, 3]))'},
-                  {'prose': 'An OR pattern accepts several alternatives in one case. A star '
-                            'pattern captures the rest of a sequence.',
-                   'code': 'print(describe(["exit"]))\n'
-                           'print(describe(["echo", "hello", "python"]))'},
-                  {'prose': 'The wildcard `_` catches values that did not match earlier cases. '
-                            'Here the guard rejects the negative coordinate.',
-                   'code': 'print(describe(["move", -1, 3]))'}],
-  'cells': [{'prose': ['Sequence patterns match by position. A guard after `if` adds a condition '
+  'cells': [{'kind': 'cell',
+             'prose': ['Sequence patterns match by position. A guard after `if` adds a condition '
                        'that must also be true.'],
              'code': 'def describe(command):\n'
                      '    match command:\n'
@@ -2496,21 +1747,17 @@ EXAMPLES = [{'slug': 'hello-world',
                      '            return "unknown"\n'
                      '\n'
                      'print(describe(["move", 2, 3]))',
-             'output': 'move to 2,3',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['An OR pattern accepts several alternatives in one case. A star pattern '
+             'output': 'move to 2,3'},
+            {'kind': 'cell',
+             'prose': ['An OR pattern accepts several alternatives in one case. A star pattern '
                        'captures the rest of a sequence.'],
              'code': 'print(describe(["exit"]))\nprint(describe(["echo", "hello", "python"]))',
-             'output': 'stop\nhello python',
-             'line': 45,
-             'kind': 'cell'},
-            {'prose': ['The wildcard `_` catches values that did not match earlier cases. Here the '
+             'output': 'stop\nhello python'},
+            {'kind': 'cell',
+             'prose': ['The wildcard `_` catches values that did not match earlier cases. Here the '
                        'guard rejects the negative coordinate.'],
              'code': 'print(describe(["move", -1, 3]))',
-             'output': 'unknown',
-             'line': 59,
-             'kind': 'cell'}],
+             'output': 'unknown'}],
   'code': 'def describe(command):\n'
           '    match command:\n'
           '        case ["move", x, y] if x >= 0 and y >= 0:\n'
@@ -2526,10 +1773,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(describe(["exit"]))\n'
           'print(describe(["echo", "hello", "python"]))\n'
           'print(describe(["move", -1, 3]))\n',
-  'expected_output': 'move to 2,3\nstop\nhello python\nunknown\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'move to 2,3\nstop\nhello python\nunknown\n'},
  {'slug': 'while-loops',
   'title': 'While Loops',
   'section': 'Control Flow',
@@ -2549,24 +1793,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Prefer `for` when you already have a collection, range, iterator, or generator to '
             'consume.'],
   'see_also': ['for-loops', 'sentinel-iteration', 'break-and-continue'],
-  'walkthrough': [{'prose': 'Use `while` when the condition, not an iterable, controls repetition. '
-                            'Here the loop owns the countdown state and updates it each time '
-                            'through the body.',
-                   'code': 'remaining = 3\n'
-                           'while remaining > 0:\n'
-                           '    print(f"launch in {remaining}")\n'
-                           '    remaining -= 1\n'
-                           'print("liftoff")'},
-                  {'prose': 'A sentinel loop stops when a special value appears. The loop does not '
-                            'know in advance how many retries it will need; it keeps going until '
-                            'the state says to stop.',
-                   'code': 'responses = iter(["retry", "retry", "ok"])\n'
-                           'status = next(responses)\n'
-                           'while status != "ok":\n'
-                           '    print(f"status: {status}")\n'
-                           '    status = next(responses)\n'
-                           'print(f"status: {status}")'}],
-  'cells': [{'prose': ['Use `while` when the condition, not an iterable, controls repetition. Here '
+  'cells': [{'kind': 'cell',
+             'prose': ['Use `while` when the condition, not an iterable, controls repetition. Here '
                        'the loop owns the countdown state and updates it each time through the '
                        'body.'],
              'code': 'remaining = 3\n'
@@ -2574,10 +1802,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    print(f"launch in {remaining}")\n'
                      '    remaining -= 1\n'
                      'print("liftoff")',
-             'output': 'launch in 3\nlaunch in 2\nlaunch in 1\nliftoff',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['A sentinel loop stops when a special value appears. The loop does not know '
+             'output': 'launch in 3\nlaunch in 2\nlaunch in 1\nliftoff'},
+            {'kind': 'cell',
+             'prose': ['A sentinel loop stops when a special value appears. The loop does not know '
                        'in advance how many retries it will need; it keeps going until the state '
                        'says to stop.'],
              'code': 'responses = iter(["retry", "retry", "ok"])\n'
@@ -2586,9 +1813,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    print(f"status: {status}")\n'
                      '    status = next(responses)\n'
                      'print(f"status: {status}")',
-             'output': 'status: retry\nstatus: retry\nstatus: ok',
-             'line': 41,
-             'kind': 'cell'}],
+             'output': 'status: retry\nstatus: retry\nstatus: ok'}],
   'code': 'remaining = 3\n'
           'while remaining > 0:\n'
           '    print(f"launch in {remaining}")\n'
@@ -2607,10 +1832,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'liftoff\n'
                      'status: retry\n'
                      'status: retry\n'
-                     'status: ok\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     'status: ok\n'},
  {'slug': 'lists',
   'title': 'Lists',
   'section': 'Collections',
@@ -2627,33 +1849,21 @@ EXAMPLES = [{'slug': 'hello-world',
             'Negative indexes count from the end.',
             '`sorted()` returns a new list; `list.sort()` sorts the existing list in place.'],
   'see_also': ['tuples', 'sets', 'slices', 'copying-collections'],
-  'walkthrough': [{'prose': 'Create a list with square brackets. Because lists are mutable, '
-                            '`append()` changes this same list object.',
-                   'code': 'numbers = [3, 1, 4]\nnumbers.append(1)\n\nprint(numbers)'},
-                  {'prose': 'Use indexes to read positions. Negative indexes are convenient for '
-                            'reading from the end.',
-                   'code': 'print(numbers[0])\nprint(numbers[-1])'},
-                  {'prose': 'Use `sorted()` when you want an ordered copy and still need the '
-                            'original order afterward.',
-                   'code': 'print(sorted(numbers))\nprint(numbers)'}],
-  'cells': [{'prose': ['Create a list with square brackets. Because lists are mutable, `append()` '
+  'cells': [{'kind': 'cell',
+             'prose': ['Create a list with square brackets. Because lists are mutable, `append()` '
                        'changes this same list object.'],
              'code': 'numbers = [3, 1, 4]\nnumbers.append(1)\n\nprint(numbers)',
-             'output': '[3, 1, 4, 1]',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Use indexes to read positions. Negative indexes are convenient for reading '
+             'output': '[3, 1, 4, 1]'},
+            {'kind': 'cell',
+             'prose': ['Use indexes to read positions. Negative indexes are convenient for reading '
                        'from the end.'],
              'code': 'print(numbers[0])\nprint(numbers[-1])',
-             'output': '3\n1',
-             'line': 38,
-             'kind': 'cell'},
-            {'prose': ['Use `sorted()` when you want an ordered copy and still need the original '
+             'output': '3\n1'},
+            {'kind': 'cell',
+             'prose': ['Use `sorted()` when you want an ordered copy and still need the original '
                        'order afterward.'],
              'code': 'print(sorted(numbers))\nprint(numbers)',
-             'output': '[1, 1, 3, 4]\n[3, 1, 4, 1]',
-             'line': 52,
-             'kind': 'cell'}],
+             'output': '[1, 1, 3, 4]\n[3, 1, 4, 1]'}],
   'code': 'numbers = [3, 1, 4]\n'
           'numbers.append(1)\n'
           '\n'
@@ -2662,10 +1872,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(numbers[-1])\n'
           'print(sorted(numbers))\n'
           'print(numbers)\n',
-  'expected_output': '[3, 1, 4, 1]\n3\n1\n[1, 1, 3, 4]\n[3, 1, 4, 1]\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '[3, 1, 4, 1]\n3\n1\n[1, 1, 3, 4]\n[3, 1, 4, 1]\n'},
  {'slug': 'tuples',
   'title': 'Tuples',
   'section': 'Collections',
@@ -2687,49 +1894,24 @@ EXAMPLES = [{'slug': 'hello-world',
             "Reach for a dataclass or `NamedTuple` when fields deserve names everywhere they're "
             'used.'],
   'see_also': ['lists', 'unpacking', 'structured-data-shapes'],
-  'walkthrough': [{'prose': 'Use a tuple for a fixed-size record where each position has a known '
-                            'meaning. Unpacking turns those positions into names at the point of '
-                            'use.',
-                   'code': 'point = (3, 4)\nx, y = point\nprint(x + y)'},
-                  {'prose': 'Tuples are sequences, so indexing and `len()` work. They are '
-                            'different from lists because their length and item references are '
-                            'fixed after creation.',
-                   'code': 'red = (255, 0, 0)\nprint(red[0])\nprint(len(red))'},
-                  {'prose': 'Tuples pair naturally with multiple return values and unpacking. If '
-                            'the fields need names everywhere, graduate to a dataclass or named '
-                            'tuple.',
-                   'code': 'record = ("Ada", 10)\nname, score = record\nprint(f"{name}: {score}")'},
-                  {'prose': 'Lists and tuples carry different intent. A list holds a variable '
-                            'number of similar items and grows with `append`; a tuple has a fixed '
-                            'shape where each position has its own meaning, and unpacking gives '
-                            'those positions names.',
-                   'code': 'scores = [10, 9, 8]\n'
-                           'scores.append(7)\n'
-                           'print(scores)\n'
-                           '\n'
-                           'student = ("Ada", 2024, "math")\n'
-                           'name, year, subject = student\n'
-                           'print(name, year, subject)'}],
-  'cells': [{'prose': ['Use a tuple for a fixed-size record where each position has a known '
+  'cells': [{'kind': 'cell',
+             'prose': ['Use a tuple for a fixed-size record where each position has a known '
                        'meaning. Unpacking turns those positions into names at the point of use.'],
              'code': 'point = (3, 4)\nx, y = point\nprint(x + y)',
-             'output': '7',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Tuples are sequences, so indexing and `len()` work. They are different '
+             'output': '7'},
+            {'kind': 'cell',
+             'prose': ['Tuples are sequences, so indexing and `len()` work. They are different '
                        'from lists because their length and item references are fixed after '
                        'creation.'],
              'code': 'red = (255, 0, 0)\nprint(red[0])\nprint(len(red))',
-             'output': '255\n3',
-             'line': 36,
-             'kind': 'cell'},
-            {'prose': ['Tuples pair naturally with multiple return values and unpacking. If the '
+             'output': '255\n3'},
+            {'kind': 'cell',
+             'prose': ['Tuples pair naturally with multiple return values and unpacking. If the '
                        'fields need names everywhere, graduate to a dataclass or named tuple.'],
              'code': 'record = ("Ada", 10)\nname, score = record\nprint(f"{name}: {score}")',
-             'output': 'Ada: 10',
-             'line': 51,
-             'kind': 'cell'},
-            {'prose': ['Lists and tuples carry different intent. A list holds a variable number of '
+             'output': 'Ada: 10'},
+            {'kind': 'cell',
+             'prose': ['Lists and tuples carry different intent. A list holds a variable number of '
                        'similar items and grows with `append`; a tuple has a fixed shape where '
                        'each position has its own meaning, and unpacking gives those positions '
                        'names.'],
@@ -2740,9 +1922,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'student = ("Ada", 2024, "math")\n'
                      'name, year, subject = student\n'
                      'print(name, year, subject)',
-             'output': '[10, 9, 8, 7]\nAda 2024 math',
-             'line': 65,
-             'kind': 'cell'}],
+             'output': '[10, 9, 8, 7]\nAda 2024 math'}],
   'code': 'point = (3, 4)\n'
           'x, y = point\n'
           'print(x + y)\n'
@@ -2762,10 +1942,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'student = ("Ada", 2024, "math")\n'
           'name, year, subject = student\n'
           'print(name, year, subject)\n',
-  'expected_output': '7\n255\n3\nAda: 10\n[10, 9, 8, 7]\nAda 2024 math\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '7\n255\n3\nAda: 10\n[10, 9, 8, 7]\nAda 2024 math\n'},
  {'slug': 'unpacking',
   'title': 'Unpacking',
   'section': 'Collections',
@@ -2783,55 +1960,31 @@ EXAMPLES = [{'slug': 'hello-world',
             'Prefer indexing when you need one position; prefer unpacking when naming several '
             'positions makes the shape clearer.'],
   'see_also': ['tuples', 'multiple-return-values', 'args-and-kwargs', 'dicts'],
-  'walkthrough': [{'prose': 'Unpacking binds multiple names from one iterable or mapping. It makes '
-                            'the structure of data visible at the point where values are '
-                            'introduced.',
-                   'code': 'point = (3, 4)\nx, y = point\nprint(x, y)'},
-                  {'prose': 'Starred unpacking handles variable-length sequences by collecting the '
-                            'middle or remaining values. This keeps common head-tail patterns '
-                            'readable.',
-                   'code': 'first, *middle, last = [1, 2, 3, 4]\nprint(first, middle, last)'},
-                  {'prose': 'Dictionary unpacking with ** connects structured data to function '
-                            'calls. It is widely used in configuration, adapters, and code that '
-                            'bridges APIs.',
-                   'code': 'def describe(name, language):\n'
-                           '    print(name, language)\n'
-                           '\n'
-                           'data = {"name": "Ada", "language": "Python"}\n'
-                           'describe(**data)'},
-                  {'prose': 'Dictionary unpacking with ** connects structured data to function '
-                            'calls. It is widely used in configuration, adapters, and code that '
-                            'bridges APIs.',
-                   'code': 'def describe(name, language):\n'
-                           '    print(name, language)\n'
-                           '\n'
-                           'data = {"name": "Ada", "language": "Python"}\n'
-                           'describe(**data)'}],
-  'cells': [{'prose': ['Unpacking binds multiple names from one iterable or mapping. It makes the '
-                       'structure of data visible at the point where values are introduced.'],
+  'cells': [{'kind': 'cell',
+             'prose': ['Tuple unpacking assigns each position to a name in one statement: `x` '
+                       'receives the first element of `point` and `y` the second. The assignment '
+                       'fails loudly if the number of names and elements disagree, which catches '
+                       'shape mistakes early.'],
              'code': 'point = (3, 4)\nx, y = point\nprint(x, y)',
-             'output': '3 4',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Starred unpacking handles variable-length sequences by collecting the '
-                       'middle or remaining values. This keeps common head-tail patterns '
-                       'readable.'],
+             'output': '3 4'},
+            {'kind': 'cell',
+             'prose': ["The starred name collects however many elements the head and tail don't "
+                       'claim — here `first` and `last` take the ends and `*middle` gathers the '
+                       'rest into a list. The same list works whether it has four elements or '
+                       'forty.'],
              'code': 'first, *middle, last = [1, 2, 3, 4]\nprint(first, middle, last)',
-             'output': '1 [2, 3] 4',
-             'line': 37,
-             'kind': 'cell'},
-            {'prose': ['Dictionary unpacking with ** connects structured data to function calls. '
-                       'It is widely used in configuration, adapters, and code that bridges APIs.',
-                       'Dictionary unpacking with ** connects structured data to function calls. '
-                       'It is widely used in configuration, adapters, and code that bridges APIs.'],
+             'output': '1 [2, 3] 4'},
+            {'kind': 'cell',
+             'prose': ["`describe(**data)` spreads the dictionary's keys as keyword arguments, so "
+                       'the call site never repeats `name=` and `language=` by hand. This is the '
+                       'bridge between dict-shaped data (configuration, parsed JSON) and function '
+                       'signatures.'],
              'code': 'def describe(name, language):\n'
                      '    print(name, language)\n'
                      '\n'
                      'data = {"name": "Ada", "language": "Python"}\n'
                      'describe(**data)',
-             'output': 'Ada Python',
-             'line': 50,
-             'kind': 'cell'}],
+             'output': 'Ada Python'}],
   'code': 'point = (3, 4)\n'
           'x, y = point\n'
           'print(x, y)\n'
@@ -2844,10 +1997,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'data = {"name": "Ada", "language": "Python"}\n'
           'describe(**data)\n',
-  'expected_output': '3 4\n1 [2, 3] 4\nAda Python\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '3 4\n1 [2, 3] 4\nAda Python\n'},
  {'slug': 'dicts',
   'title': 'Dictionaries',
   'section': 'Collections',
@@ -2865,67 +2015,42 @@ EXAMPLES = [{'slug': 'hello-world',
   'notes': ['Dictionaries preserve insertion order in modern Python.',
             'Use `get()` when a missing key has a reasonable default.',
             'Use direct indexing when a missing key should be treated as an error.',
-            'Snapshot keys with `list(d.keys())` before deleting items in a loop; mutating during '
-            'iteration raises `RuntimeError`.'],
+            'Snapshot keys with `list(d.keys())` before deleting items in a loop; adding or '
+            'removing keys during iteration raises `RuntimeError`.'],
   'see_also': ['lists', 'sets', 'typed-dicts', 'json'],
-  'walkthrough': [{'prose': 'Use a dictionary as a small record when fields have names. Direct '
-                            'indexing communicates that the key is required, while `get()` '
-                            'communicates that a missing key has a fallback.',
-                   'code': 'profile = {"name": "Ada", "language": "Python"}\n'
-                           'profile["year"] = 1843\n'
-                           'print(profile["name"])\n'
-                           'print(profile.get("timezone", "UTC"))'},
-                  {'prose': 'Use a dictionary as a lookup table when keys identify values. This is '
-                            'different from a list, where numeric position is the lookup key.',
-                   'code': 'scores = {"Ada": 10, "Grace": 9}\n'
-                           'print(scores["Grace"])\n'
-                           'print(scores.get("Guido", 0))'},
-                  {'prose': 'Use `items()` when the loop needs both keys and values. It avoids '
-                            'looping over keys and then indexing back into the dictionary.',
-                   'code': 'for name, score in scores.items():\n    print(f"{name}: {score}")'},
-                  {'prose': 'Mutating a dictionary while iterating it raises `RuntimeError`. '
-                            'Snapshot the keys with `list(d.keys())` (or build a list of changes '
-                            'and apply them after the loop) so the iteration sees a stable view.',
-                   'code': 'inventory = {"apple": 0, "pear": 3, "plum": 0}\n'
-                           'for name in list(inventory.keys()):\n'
-                           '    if inventory[name] == 0:\n'
-                           '        del inventory[name]\n'
-                           'print(inventory)'}],
-  'cells': [{'prose': ['Use a dictionary as a small record when fields have names. Direct indexing '
+  'cells': [{'kind': 'cell',
+             'prose': ['Use a dictionary as a small record when fields have names. Direct indexing '
                        'communicates that the key is required, while `get()` communicates that a '
                        'missing key has a fallback.'],
              'code': 'profile = {"name": "Ada", "language": "Python"}\n'
                      'profile["year"] = 1843\n'
                      'print(profile["name"])\n'
                      'print(profile.get("timezone", "UTC"))',
-             'output': 'Ada\nUTC',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Use a dictionary as a lookup table when keys identify values. This is '
+             'output': 'Ada\nUTC'},
+            {'kind': 'cell',
+             'prose': ['Use a dictionary as a lookup table when keys identify values. This is '
                        'different from a list, where numeric position is the lookup key.'],
              'code': 'scores = {"Ada": 10, "Grace": 9}\n'
                      'print(scores["Grace"])\n'
                      'print(scores.get("Guido", 0))',
-             'output': '9\n0',
-             'line': 39,
-             'kind': 'cell'},
-            {'prose': ['Use `items()` when the loop needs both keys and values. It avoids looping '
+             'output': '9\n0'},
+            {'kind': 'cell',
+             'prose': ['Use `items()` when the loop needs both keys and values. It avoids looping '
                        'over keys and then indexing back into the dictionary.'],
              'code': 'for name, score in scores.items():\n    print(f"{name}: {score}")',
-             'output': 'Ada: 10\nGrace: 9',
-             'line': 54,
-             'kind': 'cell'},
-            {'prose': ['Mutating a dictionary while iterating it raises `RuntimeError`. Snapshot '
-                       'the keys with `list(d.keys())` (or build a list of changes and apply them '
-                       'after the loop) so the iteration sees a stable view.'],
+             'output': 'Ada: 10\nGrace: 9'},
+            {'kind': 'cell',
+             'prose': ['Adding or removing keys while iterating a dictionary raises `RuntimeError` '
+                       '("dictionary changed size during iteration"); reassigning an existing '
+                       "key's value is allowed. Snapshot the keys with `list(d.keys())` (or build "
+                       'a list of changes and apply them after the loop) so deletions see a stable '
+                       'view.'],
              'code': 'inventory = {"apple": 0, "pear": 3, "plum": 0}\n'
                      'for name in list(inventory.keys()):\n'
                      '    if inventory[name] == 0:\n'
                      '        del inventory[name]\n'
                      'print(inventory)',
-             'output': "{'pear': 3}",
-             'line': 68,
-             'kind': 'cell'}],
+             'output': "{'pear': 3}"}],
   'code': 'profile = {"name": "Ada", "language": "Python"}\n'
           'profile["year"] = 1843\n'
           'print(profile["name"])\n'
@@ -2943,10 +2068,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '    if inventory[name] == 0:\n'
           '        del inventory[name]\n'
           'print(inventory)\n',
-  'expected_output': "Ada\nUTC\n9\n0\nAda: 10\nGrace: 9\n{'pear': 3}\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "Ada\nUTC\n9\n0\nAda: 10\nGrace: 9\n{'pear': 3}\n"},
  {'slug': 'sets',
   'title': 'Sets',
   'section': 'Collections',
@@ -2960,53 +2082,32 @@ EXAMPLES = [{'slug': 'hello-world',
                   'other.',
                   'Because sets are unordered, examples often wrap output in `sorted()` so the '
                   'display is deterministic.'],
-  'notes': ['Use lists when order and repeated values matter.',
-            'Use sets when uniqueness and membership are the main operations.',
+  'notes': ['Use sets when uniqueness and membership are the main operations.',
             'Prefer lists when order or repeated values are part of the meaning.',
             'Sets are unordered, so sort them when examples need deterministic display.'],
   'see_also': ['lists', 'dicts', 'comprehensions'],
-  'walkthrough': [{'prose': 'Creating a set removes duplicates. Keep a list when order and '
-                            'repeated values matter; convert to a set when uniqueness is the '
-                            'point.',
-                   'code': 'languages = ["python", "go", "python"]\n'
-                           'unique_languages = set(languages)\n'
-                           'print(sorted(unique_languages))'},
-                  {'prose': 'Membership checks are the everyday set operation. A list can also use '
-                            '`in`, but a set says that membership is central to the data shape.',
-                   'code': 'allowed = {"python", "rust"}\n'
-                           'print("python" in allowed)\n'
-                           'print("ruby" in allowed)'},
-                  {'prose': 'Union, intersection, and difference describe relationships between '
-                            'groups without manual loops.',
-                   'code': 'compiled = {"go", "rust"}\n'
-                           'print(sorted(allowed | compiled))\n'
-                           'print(sorted(allowed & compiled))\n'
-                           'print(sorted(allowed - compiled))'}],
-  'cells': [{'prose': ['Creating a set removes duplicates. Keep a list when order and repeated '
+  'cells': [{'kind': 'cell',
+             'prose': ['Creating a set removes duplicates. Keep a list when order and repeated '
                        'values matter; convert to a set when uniqueness is the point.'],
              'code': 'languages = ["python", "go", "python"]\n'
                      'unique_languages = set(languages)\n'
                      'print(sorted(unique_languages))',
-             'output': "['go', 'python']",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Membership checks are the everyday set operation. A list can also use '
+             'output': "['go', 'python']"},
+            {'kind': 'cell',
+             'prose': ['Membership checks are the everyday set operation. A list can also use '
                        '`in`, but a set says that membership is central to the data shape.'],
              'code': 'allowed = {"python", "rust"}\n'
                      'print("python" in allowed)\n'
                      'print("ruby" in allowed)',
-             'output': 'True\nFalse',
-             'line': 36,
-             'kind': 'cell'},
-            {'prose': ['Union, intersection, and difference describe relationships between groups '
+             'output': 'True\nFalse'},
+            {'kind': 'cell',
+             'prose': ['Union, intersection, and difference describe relationships between groups '
                        'without manual loops.'],
              'code': 'compiled = {"go", "rust"}\n'
                      'print(sorted(allowed | compiled))\n'
                      'print(sorted(allowed & compiled))\n'
                      'print(sorted(allowed - compiled))',
-             'output': "['go', 'python', 'rust']\n['rust']\n['python']",
-             'line': 51,
-             'kind': 'cell'}],
+             'output': "['go', 'python', 'rust']\n['rust']\n['python']"}],
   'code': 'languages = ["python", "go", "python"]\n'
           'unique_languages = set(languages)\n'
           'print(sorted(unique_languages))\n'
@@ -3024,10 +2125,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'False\n'
                      "['go', 'python', 'rust']\n"
                      "['rust']\n"
-                     "['python']\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     "['python']\n"},
  {'slug': 'slices',
   'title': 'Slices',
   'section': 'Collections',
@@ -3045,35 +2143,17 @@ EXAMPLES = [{'slug': 'hello-world',
             'Omitted bounds mean the beginning or end of the sequence.',
             'A negative step walks backward; `[::-1]` is a common reversed-copy idiom.'],
   'see_also': ['lists', 'tuples', 'strings'],
-  'walkthrough': [{'prose': 'Omitted bounds mean “from the beginning” or “through the end.” '
-                            'Because the stop index is excluded, adjacent slices split a sequence '
-                            'cleanly.',
-                   'code': 'letters = ["a", "b", "c", "d", "e", "f"]\n'
-                           'first_page = letters[:3]\n'
-                           'rest = letters[3:]\n'
-                           'print(first_page)\n'
-                           'print(rest)'},
-                  {'prose': 'Use `start:stop` for a middle range and `step` when you want to skip '
-                            'or walk backward. These operations return new lists; the original '
-                            'list is unchanged.',
-                   'code': 'middle = letters[1:5]\n'
-                           'every_other = letters[::2]\n'
-                           'reversed_letters = letters[::-1]\n'
-                           'print(middle)\n'
-                           'print(every_other)\n'
-                           'print(reversed_letters)\n'
-                           'print(letters)'}],
-  'cells': [{'prose': ['Omitted bounds mean “from the beginning” or “through the end.” Because the '
+  'cells': [{'kind': 'cell',
+             'prose': ['Omitted bounds mean “from the beginning” or “through the end.” Because the '
                        'stop index is excluded, adjacent slices split a sequence cleanly.'],
              'code': 'letters = ["a", "b", "c", "d", "e", "f"]\n'
                      'first_page = letters[:3]\n'
                      'rest = letters[3:]\n'
                      'print(first_page)\n'
                      'print(rest)',
-             'output': "['a', 'b', 'c']\n['d', 'e', 'f']",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Use `start:stop` for a middle range and `step` when you want to skip or '
+             'output': "['a', 'b', 'c']\n['d', 'e', 'f']"},
+            {'kind': 'cell',
+             'prose': ['Use `start:stop` for a middle range and `step` when you want to skip or '
                        'walk backward. These operations return new lists; the original list is '
                        'unchanged.'],
              'code': 'middle = letters[1:5]\n'
@@ -3086,9 +2166,7 @@ EXAMPLES = [{'slug': 'hello-world',
              'output': "['b', 'c', 'd', 'e']\n"
                        "['a', 'c', 'e']\n"
                        "['f', 'e', 'd', 'c', 'b', 'a']\n"
-                       "['a', 'b', 'c', 'd', 'e', 'f']",
-             'line': 39,
-             'kind': 'cell'}],
+                       "['a', 'b', 'c', 'd', 'e', 'f']"}],
   'code': 'letters = ["a", "b", "c", "d", "e", "f"]\n'
           'first_page = letters[:3]\n'
           'rest = letters[3:]\n'
@@ -3107,10 +2185,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      "['b', 'c', 'd', 'e']\n"
                      "['a', 'c', 'e']\n"
                      "['f', 'e', 'd', 'c', 'b', 'a']\n"
-                     "['a', 'b', 'c', 'd', 'e', 'f']\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     "['a', 'b', 'c', 'd', 'e', 'f']\n"},
  {'slug': 'comprehensions',
   'title': 'Comprehensions',
   'section': 'Collections',
@@ -3131,47 +2206,29 @@ EXAMPLES = [{'slug': 'hello-world',
             'List, dict, and set comprehensions build concrete collections immediately.',
             'Switch to a loop when the transformation needs multiple steps or explanations.'],
   'see_also': ['for-loops', 'generator-expressions', 'comprehension-patterns', 'lists'],
-  'walkthrough': [{'prose': 'A list comprehension maps each input item to one output item. This '
-                            'one calls `title()` for every name and collects the results in a new '
-                            'list.',
-                   'code': 'names = ["ada", "guido", "grace"]\n'
-                           'titled = [name.title() for name in names]\n'
-                           'print(titled)'},
-                  {'prose': 'Add an `if` clause when only some items should appear. A dictionary '
-                            'comprehension can transform key/value pairs while preserving the '
-                            'dictionary shape.',
-                   'code': 'scores = {"Ada": 10, "Guido": 8, "Grace": 10}\n'
-                           'high_scores = {name: score for name, score in scores.items() if score '
-                           '>= 10}\n'
-                           'print(high_scores)'},
-                  {'prose': 'A set comprehension keeps only unique results. Here two people have '
-                            'the same score, so the resulting set has two values.',
-                   'code': 'unique_scores = {score for score in scores.values()}\n'
-                           'print(unique_scores)'}],
-  'cells': [{'prose': ['A list comprehension maps each input item to one output item. This one '
+  'cells': [{'kind': 'cell',
+             'prose': ['A list comprehension maps each input item to one output item. This one '
                        'calls `title()` for every name and collects the results in a new list.'],
              'code': 'names = ["ada", "guido", "grace"]\n'
                      'titled = [name.title() for name in names]\n'
                      'print(titled)',
-             'output': "['Ada', 'Guido', 'Grace']",
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Add an `if` clause when only some items should appear. A dictionary '
+             'output': "['Ada', 'Guido', 'Grace']"},
+            {'kind': 'cell',
+             'prose': ['Add an `if` clause when only some items should appear. A dictionary '
                        'comprehension can transform key/value pairs while preserving the '
                        'dictionary shape.'],
              'code': 'scores = {"Ada": 10, "Guido": 8, "Grace": 10}\n'
                      'high_scores = {name: score for name, score in scores.items() if score >= '
                      '10}\n'
                      'print(high_scores)',
-             'output': "{'Ada': 10, 'Grace': 10}",
-             'line': 37,
-             'kind': 'cell'},
-            {'prose': ['A set comprehension keeps only unique results. Here two people have the '
-                       'same score, so the resulting set has two values.'],
-             'code': 'unique_scores = {score for score in scores.values()}\nprint(unique_scores)',
-             'output': '{8, 10}',
-             'line': 51,
-             'kind': 'cell'}],
+             'output': "{'Ada': 10, 'Grace': 10}"},
+            {'kind': 'cell',
+             'prose': ['A set comprehension keeps only unique results. Here two people have the '
+                       'same score, so the resulting set has two values — printed through '
+                       '`sorted()` because sets have no display order to rely on.'],
+             'code': 'unique_scores = {score for score in scores.values()}\n'
+                     'print(sorted(unique_scores))',
+             'output': '[8, 10]'}],
   'code': 'names = ["ada", "guido", "grace"]\n'
           'titled = [name.title() for name in names]\n'
           'print(titled)\n'
@@ -3181,11 +2238,8 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(high_scores)\n'
           '\n'
           'unique_scores = {score for score in scores.values()}\n'
-          'print(unique_scores)\n',
-  'expected_output': "['Ada', 'Guido', 'Grace']\n{'Ada': 10, 'Grace': 10}\n{8, 10}\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+          'print(sorted(unique_scores))\n',
+  'expected_output': "['Ada', 'Guido', 'Grace']\n{'Ada': 10, 'Grace': 10}\n[8, 10]\n"},
  {'slug': 'comprehension-patterns',
   'title': 'Comprehension Patterns',
   'section': 'Collections',
@@ -3203,36 +2257,22 @@ EXAMPLES = [{'slug': 'hello-world',
             'Multiple `for` clauses act like nested loops.',
             'Prefer an explicit loop when the comprehension stops being obvious.'],
   'see_also': ['comprehensions', 'generator-expressions', 'for-loops'],
-  'walkthrough': [{'prose': 'Multiple `for` clauses behave like nested loops. The leftmost `for` '
-                            'is the outer loop, and the next `for` runs inside it.',
-                   'code': 'colors = ["red", "blue"]\n'
-                           'sizes = ["S", "M"]\n'
-                           'variants = [(color, size) for color in colors for size in sizes]\n'
-                           'print(variants)'},
-                  {'prose': 'Multiple `if` clauses filter values. They are useful for simple '
-                            'conditions, but an explicit loop is clearer when the rules need names '
-                            'or explanation.',
-                   'code': 'numbers = range(10)\n'
-                           'filtered = [n for n in numbers if n % 2 == 0 if n > 2]\n'
-                           'print(filtered)'}],
-  'cells': [{'prose': ['Multiple `for` clauses behave like nested loops. The leftmost `for` is the '
+  'cells': [{'kind': 'cell',
+             'prose': ['Multiple `for` clauses behave like nested loops. The leftmost `for` is the '
                        'outer loop, and the next `for` runs inside it.'],
              'code': 'colors = ["red", "blue"]\n'
                      'sizes = ["S", "M"]\n'
                      'variants = [(color, size) for color in colors for size in sizes]\n'
                      'print(variants)',
-             'output': "[('red', 'S'), ('red', 'M'), ('blue', 'S'), ('blue', 'M')]",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Multiple `if` clauses filter values. They are useful for simple '
+             'output': "[('red', 'S'), ('red', 'M'), ('blue', 'S'), ('blue', 'M')]"},
+            {'kind': 'cell',
+             'prose': ['Multiple `if` clauses filter values. They are useful for simple '
                        'conditions, but an explicit loop is clearer when the rules need names or '
                        'explanation.'],
              'code': 'numbers = range(10)\n'
                      'filtered = [n for n in numbers if n % 2 == 0 if n > 2]\n'
                      'print(filtered)',
-             'output': '[4, 6, 8]',
-             'line': 37,
-             'kind': 'cell'}],
+             'output': '[4, 6, 8]'}],
   'code': 'colors = ["red", "blue"]\n'
           'sizes = ["S", "M"]\n'
           'variants = [(color, size) for color in colors for size in sizes]\n'
@@ -3241,10 +2281,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'numbers = range(10)\n'
           'filtered = [n for n in numbers if n % 2 == 0 if n > 2]\n'
           'print(filtered)\n',
-  'expected_output': "[('red', 'S'), ('red', 'M'), ('blue', 'S'), ('blue', 'M')]\n[4, 6, 8]\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "[('red', 'S'), ('red', 'M'), ('blue', 'S'), ('blue', 'M')]\n[4, 6, 8]\n"},
  {'slug': 'sorting',
   'title': 'Sorting',
   'section': 'Collections',
@@ -3261,30 +2298,13 @@ EXAMPLES = [{'slug': 'hello-world',
             '`key=` should return the value Python compares for each item.',
             "Python's sort is stable, so equal keys keep their original relative order."],
   'see_also': ['lists', 'lambdas', 'functions'],
-  'walkthrough': [{'prose': '`sorted()` returns a new list. Printing the original list afterward '
-                            'shows that the input order did not change.',
-                   'code': 'names = ["Guido", "Ada", "Grace"]\nprint(sorted(names))\nprint(names)'},
-                  {'prose': 'A key function computes the value to compare. Here the records are '
-                            'sorted by score, highest first, and the output shows the resulting '
-                            'order.',
-                   'code': 'users = [\n'
-                           '    {"name": "Ada", "score": 10},\n'
-                           '    {"name": "Guido", "score": 8},\n'
-                           '    {"name": "Grace", "score": 10},\n'
-                           ']\n'
-                           'ranked = sorted(users, key=lambda user: user["score"], reverse=True)\n'
-                           'print([user["name"] for user in ranked])'},
-                  {'prose': '`list.sort()` sorts the list in place. Use it when mutation is the '
-                            'point and no separate sorted copy is needed.',
-                   'code': 'users.sort(key=lambda user: user["name"])\n'
-                           'print([user["name"] for user in users])'}],
-  'cells': [{'prose': ['`sorted()` returns a new list. Printing the original list afterward shows '
+  'cells': [{'kind': 'cell',
+             'prose': ['`sorted()` returns a new list. Printing the original list afterward shows '
                        'that the input order did not change.'],
              'code': 'names = ["Guido", "Ada", "Grace"]\nprint(sorted(names))\nprint(names)',
-             'output': "['Ada', 'Grace', 'Guido']\n['Guido', 'Ada', 'Grace']",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['A key function computes the value to compare. Here the records are sorted '
+             'output': "['Ada', 'Grace', 'Guido']\n['Guido', 'Ada', 'Grace']"},
+            {'kind': 'cell',
+             'prose': ['A key function computes the value to compare. Here the records are sorted '
                        'by score, highest first, and the output shows the resulting order.'],
              'code': 'users = [\n'
                      '    {"name": "Ada", "score": 10},\n'
@@ -3293,16 +2313,13 @@ EXAMPLES = [{'slug': 'hello-world',
                      ']\n'
                      'ranked = sorted(users, key=lambda user: user["score"], reverse=True)\n'
                      'print([user["name"] for user in ranked])',
-             'output': "['Ada', 'Grace', 'Guido']",
-             'line': 37,
-             'kind': 'cell'},
-            {'prose': ['`list.sort()` sorts the list in place. Use it when mutation is the point '
+             'output': "['Ada', 'Grace', 'Guido']"},
+            {'kind': 'cell',
+             'prose': ['`list.sort()` sorts the list in place. Use it when mutation is the point '
                        'and no separate sorted copy is needed.'],
              'code': 'users.sort(key=lambda user: user["name"])\n'
                      'print([user["name"] for user in users])',
-             'output': "['Ada', 'Grace', 'Guido']",
-             'line': 55,
-             'kind': 'cell'}],
+             'output': "['Ada', 'Grace', 'Guido']"}],
   'code': 'names = ["Guido", "Ada", "Grace"]\n'
           'print(sorted(names))\n'
           'print(names)\n'
@@ -3320,10 +2337,7 @@ EXAMPLES = [{'slug': 'hello-world',
   'expected_output': "['Ada', 'Grace', 'Guido']\n"
                      "['Guido', 'Ada', 'Grace']\n"
                      "['Ada', 'Grace', 'Guido']\n"
-                     "['Ada', 'Grace', 'Guido']\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     "['Ada', 'Grace', 'Guido']\n"},
  {'slug': 'collections-module',
   'title': 'Collections Module',
   'section': 'Collections',
@@ -3343,41 +2357,16 @@ EXAMPLES = [{'slug': 'hello-world',
             'For new structured records with defaults and methods, consider `dataclasses` instead '
             'of `namedtuple`.'],
   'see_also': ['dicts', 'lists', 'tuples', 'sets'],
-  'walkthrough': [{'prose': 'Use `Counter` when the question is "how many times did each value '
-                            'appear?"',
-                   'code': 'from collections import Counter\n'
-                           '\n'
-                           'counts = Counter("banana")\n'
-                           'print(counts.most_common(2))'},
-                  {'prose': 'Use `defaultdict(list)` when each key gathers multiple values and the '
-                            'missing-key case should create an empty list automatically.',
-                   'code': 'from collections import defaultdict\n'
-                           '\n'
-                           'groups = defaultdict(list)\n'
-                           'for name, team in [("Ada", "red"), ("Grace", "blue"), ("Lin", '
-                           '"red")]:\n'
-                           '    groups[team].append(name)\n'
-                           'print(dict(groups))'},
-                  {'prose': 'Use `deque` for queue operations at both ends, and `namedtuple` when '
-                            'a tiny immutable record needs names as well as positions.',
-                   'code': 'from collections import deque, namedtuple\n'
-                           '\n'
-                           'queue = deque(["first"])\n'
-                           'queue.append("second")\n'
-                           'print(queue.popleft())\n'
-                           '\n'
-                           'Point = namedtuple("Point", "x y")\n'
-                           'print(Point(2, 3).x)'}],
-  'cells': [{'prose': ['Use `Counter` when the question is "how many times did each value '
+  'cells': [{'kind': 'cell',
+             'prose': ['Use `Counter` when the question is "how many times did each value '
                        'appear?"'],
              'code': 'from collections import Counter\n'
                      '\n'
                      'counts = Counter("banana")\n'
                      'print(counts.most_common(2))',
-             'output': "[('a', 3), ('n', 2)]",
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Use `defaultdict(list)` when each key gathers multiple values and the '
+             'output': "[('a', 3), ('n', 2)]"},
+            {'kind': 'cell',
+             'prose': ['Use `defaultdict(list)` when each key gathers multiple values and the '
                        'missing-key case should create an empty list automatically.'],
              'code': 'from collections import defaultdict\n'
                      '\n'
@@ -3385,10 +2374,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'for name, team in [("Ada", "red"), ("Grace", "blue"), ("Lin", "red")]:\n'
                      '    groups[team].append(name)\n'
                      'print(dict(groups))',
-             'output': "{'red': ['Ada', 'Lin'], 'blue': ['Grace']}",
-             'line': 38,
-             'kind': 'cell'},
-            {'prose': ['Use `deque` for queue operations at both ends, and `namedtuple` when a '
+             'output': "{'red': ['Ada', 'Lin'], 'blue': ['Grace']}"},
+            {'kind': 'cell',
+             'prose': ['Use `deque` for queue operations at both ends, and `namedtuple` when a '
                        'tiny immutable record needs names as well as positions.'],
              'code': 'from collections import deque, namedtuple\n'
                      '\n'
@@ -3398,9 +2386,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'Point = namedtuple("Point", "x y")\n'
                      'print(Point(2, 3).x)',
-             'output': 'first\n2',
-             'line': 55,
-             'kind': 'cell'}],
+             'output': 'first\n2'}],
   'code': 'from collections import Counter, defaultdict, deque, namedtuple\n'
           '\n'
           'counts = Counter("banana")\n'
@@ -3417,10 +2403,10 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'Point = namedtuple("Point", "x y")\n'
           'print(Point(2, 3).x)\n',
-  'expected_output': "[('a', 3), ('n', 2)]\n{'red': ['Ada', 'Lin'], 'blue': ['Grace']}\nfirst\n2\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "[('a', 3), ('n', 2)]\n"
+                     "{'red': ['Ada', 'Lin'], 'blue': ['Grace']}\n"
+                     'first\n'
+                     '2\n'},
  {'slug': 'copying-collections',
   'title': 'Copying Collections',
   'section': 'Collections',
@@ -3441,34 +2427,13 @@ EXAMPLES = [{'slug': 'hello-world',
             'Deep copies are useful for nested independence, but they can be expensive and '
             'surprising for objects with external resources.'],
   'see_also': ['mutability', 'lists', 'dicts'],
-  'walkthrough': [{'prose': 'Assignment does not copy a collection. It gives the same list another '
-                            'name.',
-                   'code': 'rows = [["Ada"], ["Grace"]]\nalias = rows\n\nprint(alias is rows)'},
-                  {'prose': 'A shallow copy creates a new outer list, but nested lists are still '
-                            'shared.',
-                   'code': 'shallow = rows.copy()\n'
-                           'rows[0].append("Lovelace")\n'
-                           '\n'
-                           'print(shallow is rows)\n'
-                           'print(rows[0] is shallow[0])\n'
-                           'print(shallow)'},
-                  {'prose': 'A deep copy is independent at the nested level, so later mutation of '
-                            '`rows[0]` does not appear in `deep`.',
-                   'code': 'import copy\n'
-                           '\n'
-                           'rows = [["Ada"], ["Grace"]]\n'
-                           'deep = copy.deepcopy(rows)\n'
-                           'rows[0].append("Lovelace")\n'
-                           '\n'
-                           'print(rows[0] is deep[0])\n'
-                           'print(deep)'}],
-  'cells': [{'prose': ['Assignment does not copy a collection. It gives the same list another '
+  'cells': [{'kind': 'cell',
+             'prose': ['Assignment does not copy a collection. It gives the same list another '
                        'name.'],
              'code': 'rows = [["Ada"], ["Grace"]]\nalias = rows\n\nprint(alias is rows)',
-             'output': 'True',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['A shallow copy creates a new outer list, but nested lists are still '
+             'output': 'True'},
+            {'kind': 'cell',
+             'prose': ['A shallow copy creates a new outer list, but nested lists are still '
                        'shared.'],
              'code': 'shallow = rows.copy()\n'
                      'rows[0].append("Lovelace")\n'
@@ -3476,10 +2441,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(shallow is rows)\n'
                      'print(rows[0] is shallow[0])\n'
                      'print(shallow)',
-             'output': "False\nTrue\n[['Ada', 'Lovelace'], ['Grace']]",
-             'line': 37,
-             'kind': 'cell'},
-            {'prose': ['A deep copy is independent at the nested level, so later mutation of '
+             'output': "False\nTrue\n[['Ada', 'Lovelace'], ['Grace']]"},
+            {'kind': 'cell',
+             'prose': ['A deep copy is independent at the nested level, so later mutation of '
                        '`rows[0]` does not appear in `deep`.'],
              'code': 'import copy\n'
                      '\n'
@@ -3489,9 +2453,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(rows[0] is deep[0])\n'
                      'print(deep)',
-             'output': "False\n[['Ada'], ['Grace']]",
-             'line': 56,
-             'kind': 'cell'}],
+             'output': "False\n[['Ada'], ['Grace']]"}],
   'code': 'import copy\n'
           '\n'
           'rows = [["Ada"], ["Grace"]]\n'
@@ -3512,10 +2474,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'True\n'
                      'False\n'
                      "[['Ada', 'Lovelace'], ['Grace']]\n"
-                     "[['Ada'], ['Grace']]\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     "[['Ada'], ['Grace']]\n"},
  {'slug': 'functions',
   'title': 'Functions',
   'section': 'Functions',
@@ -3535,74 +2494,31 @@ EXAMPLES = [{'slug': 'hello-world',
             'Never use a mutable value as a default argument; use `None` and build the container '
             'inside the function body.'],
   'see_also': ['variables', 'args-and-kwargs', 'keyword-only-arguments', 'closures'],
-  'walkthrough': [{'prose': '`return` sends a value back to the caller. The caller can print it, '
-                            'store it, or pass it to another function.',
-                   'code': 'def greet(name):\n'
-                           '    return f"Hello, {name}."\n'
-                           '\n'
-                           'print(greet("Python"))'},
-                  {'prose': 'Default arguments provide common values. Keyword arguments make it '
-                            'clear which option is being overridden.',
-                   'code': 'def format_total(amount, currency="USD"):\n'
-                           '    return f"{amount} {currency}"\n'
-                           '\n'
-                           'print(format_total(10))\n'
-                           'print(format_total(10, currency="EUR"))'},
-                  {'prose': 'A function without an explicit `return` returns `None`. That makes '
-                            'side-effect-only functions easy to distinguish from value-producing '
-                            'ones.',
-                   'code': 'def log(message):\n'
-                           '    print(f"log: {message}")\n'
-                           '\n'
-                           'result = log("saved")\n'
-                           'print(result)'},
-                  {'prose': 'Mutable default arguments are evaluated once when the function is '
-                            'defined, not on each call. The same list is shared across calls, so '
-                            "successive calls see each other's mutations. Use `None` as the "
-                            'sentinel and create a fresh container inside the body.',
-                   'code': 'def append_broken(item, items=[]):\n'
-                           '    items.append(item)\n'
-                           '    return items\n'
-                           '\n'
-                           'print(append_broken("a"))\n'
-                           'print(append_broken("b"))\n'
-                           '\n'
-                           '\n'
-                           'def append_fixed(item, items=None):\n'
-                           '    if items is None:\n'
-                           '        items = []\n'
-                           '    items.append(item)\n'
-                           '    return items\n'
-                           '\n'
-                           'print(append_fixed("a"))\n'
-                           'print(append_fixed("b"))'}],
-  'cells': [{'prose': ['`return` sends a value back to the caller. The caller can print it, store '
+  'cells': [{'kind': 'cell',
+             'prose': ['`return` sends a value back to the caller. The caller can print it, store '
                        'it, or pass it to another function.'],
              'code': 'def greet(name):\n    return f"Hello, {name}."\n\nprint(greet("Python"))',
-             'output': 'Hello, Python.',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Default arguments provide common values. Keyword arguments make it clear '
+             'output': 'Hello, Python.'},
+            {'kind': 'cell',
+             'prose': ['Default arguments provide common values. Keyword arguments make it clear '
                        'which option is being overridden.'],
              'code': 'def format_total(amount, currency="USD"):\n'
                      '    return f"{amount} {currency}"\n'
                      '\n'
                      'print(format_total(10))\n'
                      'print(format_total(10, currency="EUR"))',
-             'output': '10 USD\n10 EUR',
-             'line': 38,
-             'kind': 'cell'},
-            {'prose': ['A function without an explicit `return` returns `None`. That makes '
+             'output': '10 USD\n10 EUR'},
+            {'kind': 'cell',
+             'prose': ['A function without an explicit `return` returns `None`. That makes '
                        'side-effect-only functions easy to distinguish from value-producing ones.'],
              'code': 'def log(message):\n'
                      '    print(f"log: {message}")\n'
                      '\n'
                      'result = log("saved")\n'
                      'print(result)',
-             'output': 'log: saved\nNone',
-             'line': 55,
-             'kind': 'cell'},
-            {'prose': ['Mutable default arguments are evaluated once when the function is defined, '
+             'output': 'log: saved\nNone'},
+            {'kind': 'cell',
+             'prose': ['Mutable default arguments are evaluated once when the function is defined, '
                        'not on each call. The same list is shared across calls, so successive '
                        "calls see each other's mutations. Use `None` as the sentinel and create a "
                        'fresh container inside the body.'],
@@ -3622,9 +2538,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(append_fixed("a"))\n'
                      'print(append_fixed("b"))',
-             'output': "['a']\n['a', 'b']\n['a']\n['b']",
-             'line': 72,
-             'kind': 'cell'}],
+             'output': "['a']\n['a', 'b']\n['a']\n['b']"}],
   'code': 'def greet(name):\n'
           '    return f"Hello, {name}."\n'
           '\n'
@@ -3669,10 +2583,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      "['a']\n"
                      "['a', 'b']\n"
                      "['a']\n"
-                     "['b']\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     "['b']\n"},
  {'slug': 'keyword-only-arguments',
   'title': 'Keyword-only Arguments',
   'section': 'Functions',
@@ -3689,54 +2600,50 @@ EXAMPLES = [{'slug': 'hello-world',
             'Keyword-only flags avoid mysterious positional `True` and `False` arguments.',
             'Defaults work normally for keyword-only parameters.'],
   'see_also': ['functions', 'args-and-kwargs', 'positional-only-parameters', 'partial-functions'],
-  'walkthrough': [{'prose': 'Parameters after `*` must be named. The default options still apply '
-                            'when the caller omits them.',
-                   'code': 'def connect(host, *, timeout=5, secure=True):\n'
-                           '    scheme = "https" if secure else "http"\n'
-                           '    print(f"{scheme}://{host} timeout={timeout}")\n'
-                           '\n'
-                           'connect("example.com")'},
-                  {'prose': 'Naming the option makes the call site explicit. A reader does not '
-                            'have to remember which positional slot controls the timeout.',
-                   'code': 'connect("example.com", timeout=10)'},
-                  {'prose': 'Flags are especially good keyword-only arguments because a bare '
-                            'positional `False` is hard to interpret.',
-                   'code': 'connect("localhost", secure=False)'}],
-  'cells': [{'prose': ['Parameters after `*` must be named. The default options still apply when '
+  'cells': [{'kind': 'cell',
+             'prose': ['Parameters after `*` must be named. The default options still apply when '
                        'the caller omits them.'],
              'code': 'def connect(host, *, timeout=5, secure=True):\n'
                      '    scheme = "https" if secure else "http"\n'
                      '    print(f"{scheme}://{host} timeout={timeout}")\n'
                      '\n'
                      'connect("example.com")',
-             'output': 'https://example.com timeout=5',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Naming the option makes the call site explicit. A reader does not have to '
+             'output': 'https://example.com timeout=5'},
+            {'kind': 'cell',
+             'prose': ['Naming the option makes the call site explicit. A reader does not have to '
                        'remember which positional slot controls the timeout.'],
              'code': 'connect("example.com", timeout=10)',
-             'output': 'https://example.com timeout=10',
-             'line': 39,
-             'kind': 'cell'},
-            {'prose': ['Flags are especially good keyword-only arguments because a bare positional '
+             'output': 'https://example.com timeout=10'},
+            {'kind': 'cell',
+             'prose': ['Flags are especially good keyword-only arguments because a bare positional '
                        '`False` is hard to interpret.'],
              'code': 'connect("localhost", secure=False)',
-             'output': 'http://localhost timeout=5',
-             'line': 51,
-             'kind': 'cell'}],
+             'output': 'http://localhost timeout=5'},
+            {'kind': 'cell',
+             'prose': ['The bare `*` is enforced at the call site: passing the timeout '
+                       'positionally raises `TypeError` instead of silently filling the wrong '
+                       'slot.'],
+             'code': 'try:\n'
+                     '    connect("example.com", 10)\n'
+                     'except TypeError as error:\n'
+                     '    print(type(error).__name__)',
+             'output': 'TypeError'}],
   'code': 'def connect(host, *, timeout=5, secure=True):\n'
           '    scheme = "https" if secure else "http"\n'
           '    print(f"{scheme}://{host} timeout={timeout}")\n'
           '\n'
           'connect("example.com")\n'
           'connect("example.com", timeout=10)\n'
-          'connect("localhost", secure=False)\n',
+          'connect("localhost", secure=False)\n'
+          '\n'
+          'try:\n'
+          '    connect("example.com", 10)\n'
+          'except TypeError as error:\n'
+          '    print(type(error).__name__)\n',
   'expected_output': 'https://example.com timeout=5\n'
                      'https://example.com timeout=10\n'
-                     'http://localhost timeout=5\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     'http://localhost timeout=5\n'
+                     'TypeError\n'},
  {'slug': 'positional-only-parameters',
   'title': 'Positional-only Parameters',
   'section': 'Functions',
@@ -3753,20 +2660,8 @@ EXAMPLES = [{'slug': 'hello-world',
             '`*` marks parameters after it as keyword-only.',
             'Use these markers when the call shape is part of the API design.'],
   'see_also': ['keyword-only-arguments', 'functions', 'args-and-kwargs'],
-  'walkthrough': [{'prose': 'Parameters before `/` are positional-only. `value` is the main input, '
-                            'while `factor` remains an ordinary parameter that can be named.',
-                   'code': 'def scale(value, /, factor=2, *, clamp=False):\n'
-                           '    result = value * factor\n'
-                           '    if clamp:\n'
-                           '        result = min(result, 10)\n'
-                           '    return result\n'
-                           '\n'
-                           'print(scale(4))\n'
-                           'print(scale(4, factor=3))'},
-                  {'prose': 'Parameters after `*` are keyword-only. That makes options such as '
-                            '`clamp` explicit at the call site.',
-                   'code': 'print(scale(4, clamp=True))'}],
-  'cells': [{'prose': ['Parameters before `/` are positional-only. `value` is the main input, '
+  'cells': [{'kind': 'cell',
+             'prose': ['Parameters before `/` are positional-only. `value` is the main input, '
                        'while `factor` remains an ordinary parameter that can be named.'],
              'code': 'def scale(value, /, factor=2, *, clamp=False):\n'
                      '    result = value * factor\n'
@@ -3776,15 +2671,21 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(scale(4))\n'
                      'print(scale(4, factor=3))',
-             'output': '8\n12',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Parameters after `*` are keyword-only. That makes options such as `clamp` '
-                       'explicit at the call site.'],
-             'code': 'print(scale(4, clamp=True))',
-             'output': '8',
-             'line': 42,
-             'kind': 'cell'}],
+             'output': '8\n12'},
+            {'kind': 'cell',
+             'prose': ['Parameters after `*` are keyword-only. That makes options such as `clamp` '
+                       'explicit at the call site — here `4 * 3` would be `12`, and the clamp '
+                       'visibly caps the result at `10`.'],
+             'code': 'print(scale(4, factor=3, clamp=True))',
+             'output': '10'},
+            {'kind': 'cell',
+             'prose': ['The restriction is enforced, not advisory: passing the positional-only '
+                       '`value` by keyword raises `TypeError` at the call site.'],
+             'code': 'try:\n'
+                     '    scale(value=4)\n'
+                     'except TypeError as error:\n'
+                     '    print(type(error).__name__)',
+             'output': 'TypeError'}],
   'code': 'def scale(value, /, factor=2, *, clamp=False):\n'
           '    result = value * factor\n'
           '    if clamp:\n'
@@ -3793,11 +2694,13 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(scale(4))\n'
           'print(scale(4, factor=3))\n'
-          'print(scale(4, clamp=True))\n',
-  'expected_output': '8\n12\n8\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+          'print(scale(4, factor=3, clamp=True))\n'
+          '\n'
+          'try:\n'
+          '    scale(value=4)\n'
+          'except TypeError as error:\n'
+          '    print(type(error).__name__)\n',
+  'expected_output': '8\n12\n10\nTypeError\n'},
  {'slug': 'args-and-kwargs',
   'title': 'Args and Kwargs',
   'section': 'Functions',
@@ -3815,42 +2718,21 @@ EXAMPLES = [{'slug': 'hello-world',
             'Prefer explicit parameters when the accepted arguments are known and fixed.',
             '`*args` is a tuple; `**kwargs` is a dictionary.'],
   'see_also': ['functions', 'keyword-only-arguments', 'partial-functions', 'paramspec'],
-  'walkthrough': [{'prose': '`*args` collects extra positional arguments into a tuple. This fits '
-                            'functions that naturally accept any number of similar values.',
-                   'code': 'def total(*numbers):\n'
-                           '    return sum(numbers)\n'
-                           '\n'
-                           'print(total(2, 3, 5))'},
-                  {'prose': '`**kwargs` collects named arguments into a dictionary. The names '
-                            'become string keys.',
-                   'code': 'def describe(**metadata):\n'
-                           '    print(metadata)\n'
-                           '\n'
-                           'describe(owner="Ada", public=True)'},
-                  {'prose': 'A function can combine explicit parameters, `*args`, and `**kwargs`. '
-                            'Put the flexible parts last so the fixed shape remains visible.',
-                   'code': 'def report(title, *items, **metadata):\n'
-                           '    print(title)\n'
-                           '    print(items)\n'
-                           '    print(metadata)\n'
-                           '\n'
-                           'report("scores", 10, 9, owner="Ada")'}],
-  'cells': [{'prose': ['`*args` collects extra positional arguments into a tuple. This fits '
+  'cells': [{'kind': 'cell',
+             'prose': ['`*args` collects extra positional arguments into a tuple. This fits '
                        'functions that naturally accept any number of similar values.'],
              'code': 'def total(*numbers):\n    return sum(numbers)\n\nprint(total(2, 3, 5))',
-             'output': '10',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['`**kwargs` collects named arguments into a dictionary. The names become '
+             'output': '10'},
+            {'kind': 'cell',
+             'prose': ['`**kwargs` collects named arguments into a dictionary. The names become '
                        'string keys.'],
              'code': 'def describe(**metadata):\n'
                      '    print(metadata)\n'
                      '\n'
                      'describe(owner="Ada", public=True)',
-             'output': "{'owner': 'Ada', 'public': True}",
-             'line': 38,
-             'kind': 'cell'},
-            {'prose': ['A function can combine explicit parameters, `*args`, and `**kwargs`. Put '
+             'output': "{'owner': 'Ada', 'public': True}"},
+            {'kind': 'cell',
+             'prose': ['A function can combine explicit parameters, `*args`, and `**kwargs`. Put '
                        'the flexible parts last so the fixed shape remains visible.'],
              'code': 'def report(title, *items, **metadata):\n'
                      '    print(title)\n'
@@ -3858,9 +2740,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    print(metadata)\n'
                      '\n'
                      'report("scores", 10, 9, owner="Ada")',
-             'output': "scores\n(10, 9)\n{'owner': 'Ada'}",
-             'line': 53,
-             'kind': 'cell'}],
+             'output': "scores\n(10, 9)\n{'owner': 'Ada'}"}],
   'code': 'def total(*numbers):\n'
           '    return sum(numbers)\n'
           '\n'
@@ -3879,10 +2759,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '    print(metadata)\n'
           '\n'
           'report("scores", 10, 9, owner="Ada")\n',
-  'expected_output': "10\n{'owner': 'Ada', 'public': True}\nscores\n(10, 9)\n{'owner': 'Ada'}\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "10\n{'owner': 'Ada', 'public': True}\nscores\n(10, 9)\n{'owner': 'Ada'}\n"},
  {'slug': 'multiple-return-values',
   'title': 'Multiple Return Values',
   'section': 'Functions',
@@ -3899,19 +2776,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Unpacking at the call site gives each returned position a meaningful name.',
             'Use a class-like record when the result has many fields.'],
   'see_also': ['tuples', 'unpacking', 'functions'],
-  'walkthrough': [{'prose': 'Returning values separated by commas returns one tuple. The tuple is '
-                            'visible if the caller stores the result directly.',
-                   'code': 'def divide_with_remainder(total, size):\n'
-                           '    quotient = total // size\n'
-                           '    remainder = total % size\n'
-                           '    return quotient, remainder\n'
-                           '\n'
-                           'result = divide_with_remainder(17, 5)\n'
-                           'print(result)'},
-                  {'prose': 'Callers usually unpack the tuple immediately or soon after. The names '
-                            'at the call site document what each position means.',
-                   'code': 'boxes, leftover = result\nprint(boxes)\nprint(leftover)'}],
-  'cells': [{'prose': ['Returning values separated by commas returns one tuple. The tuple is '
+  'cells': [{'kind': 'cell',
+             'prose': ['Returning values separated by commas returns one tuple. The tuple is '
                        'visible if the caller stores the result directly.'],
              'code': 'def divide_with_remainder(total, size):\n'
                      '    quotient = total // size\n'
@@ -3920,15 +2786,12 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'result = divide_with_remainder(17, 5)\n'
                      'print(result)',
-             'output': '(3, 2)',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Callers usually unpack the tuple immediately or soon after. The names at '
+             'output': '(3, 2)'},
+            {'kind': 'cell',
+             'prose': ['Callers usually unpack the tuple immediately or soon after. The names at '
                        'the call site document what each position means.'],
              'code': 'boxes, leftover = result\nprint(boxes)\nprint(leftover)',
-             'output': '3\n2',
-             'line': 40,
-             'kind': 'cell'}],
+             'output': '3\n2'}],
   'code': 'def divide_with_remainder(total, size):\n'
           '    quotient = total // size\n'
           '    remainder = total % size\n'
@@ -3940,10 +2803,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'boxes, leftover = result\n'
           'print(boxes)\n'
           'print(leftover)\n',
-  'expected_output': '(3, 2)\n3\n2\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '(3, 2)\n3\n2\n'},
  {'slug': 'closures',
   'title': 'Closures',
   'section': 'Functions',
@@ -3963,34 +2823,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Closures bind names, not values; capture loop variables with `lambda x=x: ...` to '
             'freeze them at definition time.'],
   'see_also': ['functions', 'lambdas', 'decorators', 'partial-functions'],
-  'walkthrough': [{'prose': 'Define a function inside another function when the inner behavior '
-                            'needs to remember setup from the outer call. The returned function '
-                            'keeps access to `factor`.',
-                   'code': 'def make_multiplier(factor):\n'
-                           '    def multiply(value):\n'
-                           '        return value * factor\n'
-                           '    return multiply\n'
-                           '\n'
-                           'double = make_multiplier(2)\n'
-                           'print(double(5))'},
-                  {'prose': 'Calling the outer function again creates a separate closure. `triple` '
-                            'uses the same inner code, but remembers a different `factor`.',
-                   'code': 'triple = make_multiplier(3)\nprint(triple(5))'},
-                  {'prose': 'Closures bind names, not values. Lambdas defined in a loop all '
-                            'reference the same loop variable, so calling them later sees its '
-                            'final value. Capture the value at definition time by binding it as a '
-                            'default argument — `lambda i=i: i` — so each closure remembers its '
-                            'own `i`.',
-                   'code': 'late = []\n'
-                           'for i in range(3):\n'
-                           '    late.append(lambda: i)\n'
-                           'print([f() for f in late])\n'
-                           '\n'
-                           'bound = []\n'
-                           'for i in range(3):\n'
-                           '    bound.append(lambda i=i: i)\n'
-                           'print([f() for f in bound])'}],
-  'cells': [{'prose': ['Define a function inside another function when the inner behavior needs to '
+  'cells': [{'kind': 'cell',
+             'prose': ['Define a function inside another function when the inner behavior needs to '
                        'remember setup from the outer call. The returned function keeps access to '
                        '`factor`.'],
              'code': 'def make_multiplier(factor):\n'
@@ -4000,16 +2834,14 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'double = make_multiplier(2)\n'
                      'print(double(5))',
-             'output': '10',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Calling the outer function again creates a separate closure. `triple` uses '
+             'output': '10'},
+            {'kind': 'cell',
+             'prose': ['Calling the outer function again creates a separate closure. `triple` uses '
                        'the same inner code, but remembers a different `factor`.'],
              'code': 'triple = make_multiplier(3)\nprint(triple(5))',
-             'output': '15',
-             'line': 41,
-             'kind': 'cell'},
-            {'prose': ['Closures bind names, not values. Lambdas defined in a loop all reference '
+             'output': '15'},
+            {'kind': 'cell',
+             'prose': ['Closures bind names, not values. Lambdas defined in a loop all reference '
                        'the same loop variable, so calling them later sees its final value. '
                        'Capture the value at definition time by binding it as a default argument — '
                        '`lambda i=i: i` — so each closure remembers its own `i`.'],
@@ -4022,9 +2854,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'for i in range(3):\n'
                      '    bound.append(lambda i=i: i)\n'
                      'print([f() for f in bound])',
-             'output': '[2, 2, 2]\n[0, 1, 2]',
-             'line': 54,
-             'kind': 'cell'}],
+             'output': '[2, 2, 2]\n[0, 1, 2]'}],
   'code': 'def make_multiplier(factor):\n'
           '    def multiply(value):\n'
           '        return value * factor\n'
@@ -4045,10 +2875,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'for i in range(3):\n'
           '    bound.append(lambda i=i: i)\n'
           'print([f() for f in bound])\n',
-  'expected_output': '10\n15\n[2, 2, 2]\n[0, 1, 2]\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '10\n15\n[2, 2, 2]\n[0, 1, 2]\n'},
  {'slug': 'partial-functions',
   'title': 'Partial Functions',
   'section': 'Functions',
@@ -4069,34 +2896,16 @@ EXAMPLES = [{'slug': 'hello-world',
             'is expected.',
             'Use a regular function when the adapter needs more logic than argument binding.'],
   'see_also': ['functions', 'args-and-kwargs', 'callable-objects'],
-  'walkthrough': [{'prose': 'Without `partial`, callers repeat the same fixed argument every time '
-                            'they want the specialized behavior.',
-                   'code': 'def apply_tax(rate, amount):\n'
-                           '    return round(amount * (1 + rate), 2)\n'
-                           '\n'
-                           'print(apply_tax(0.2, 50))'},
-                  {'prose': '`partial` stores that fixed argument and returns a callable shaped '
-                            'for the remaining arguments.',
-                   'code': 'from functools import partial\n'
-                           '\n'
-                           'vat = partial(apply_tax, 0.2)\n'
-                           'service_tax = partial(apply_tax, rate=0.1)\n'
-                           '\n'
-                           'print(vat(50))\n'
-                           'print(service_tax(amount=80))'},
-                  {'prose': 'Partial objects expose the function and stored arguments, which is '
-                            'helpful when debugging callback wiring.',
-                   'code': 'print(vat.func.__name__)\nprint(vat.args)'}],
-  'cells': [{'prose': ['Without `partial`, callers repeat the same fixed argument every time they '
+  'cells': [{'kind': 'cell',
+             'prose': ['Without `partial`, callers repeat the same fixed argument every time they '
                        'want the specialized behavior.'],
              'code': 'def apply_tax(rate, amount):\n'
                      '    return round(amount * (1 + rate), 2)\n'
                      '\n'
                      'print(apply_tax(0.2, 50))',
-             'output': '60.0',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`partial` stores that fixed argument and returns a callable shaped for the '
+             'output': '60.0'},
+            {'kind': 'cell',
+             'prose': ['`partial` stores that fixed argument and returns a callable shaped for the '
                        'remaining arguments.'],
              'code': 'from functools import partial\n'
                      '\n'
@@ -4105,15 +2914,12 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(vat(50))\n'
                      'print(service_tax(amount=80))',
-             'output': '60.0\n88.0',
-             'line': 37,
-             'kind': 'cell'},
-            {'prose': ['Partial objects expose the function and stored arguments, which is helpful '
+             'output': '60.0\n88.0'},
+            {'kind': 'cell',
+             'prose': ['Partial objects expose the function and stored arguments, which is helpful '
                        'when debugging callback wiring.'],
              'code': 'print(vat.func.__name__)\nprint(vat.args)',
-             'output': 'apply_tax\n(0.2,)',
-             'line': 56,
-             'kind': 'cell'}],
+             'output': 'apply_tax\n(0.2,)'}],
   'code': 'from functools import partial\n'
           '\n'
           '\n'
@@ -4128,10 +2934,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(service_tax(amount=80))\n'
           'print(vat.func.__name__)\n'
           'print(vat.args)\n',
-  'expected_output': '60.0\n60.0\n88.0\napply_tax\n(0.2,)\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '60.0\n60.0\n88.0\napply_tax\n(0.2,)\n'},
  {'slug': 'scope-global-nonlocal',
   'title': 'Global and Nonlocal',
   'section': 'Functions',
@@ -4152,31 +2955,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Passing values and returning results is usually easier to test than rebinding outer '
             'names.'],
   'see_also': ['variables', 'closures', 'functions'],
-  'walkthrough': [{'prose': '`global` tells assignment to update a module-level binding. Without '
-                            'it, `count += 1` would try to assign a local `count`.',
-                   'code': 'count = 0\n'
-                           '\n'
-                           'def bump_global():\n'
-                           '    global count\n'
-                           '    count += 1\n'
-                           '\n'
-                           'bump_global()\n'
-                           'print(count)'},
-                  {'prose': '`nonlocal` tells assignment to update a binding in the nearest '
-                            'enclosing function scope. This is useful for small closures that keep '
-                            'state.',
-                   'code': 'def make_counter():\n'
-                           '    total = 0\n'
-                           '    def bump():\n'
-                           '        nonlocal total\n'
-                           '        total += 1\n'
-                           '        return total\n'
-                           '    return bump\n'
-                           '\n'
-                           'counter = make_counter()\n'
-                           'print(counter())\n'
-                           'print(counter())'}],
-  'cells': [{'prose': ['`global` tells assignment to update a module-level binding. Without it, '
+  'cells': [{'kind': 'cell',
+             'prose': ['`global` tells assignment to update a module-level binding. Without it, '
                        '`count += 1` would try to assign a local `count`.'],
              'code': 'count = 0\n'
                      '\n'
@@ -4186,10 +2966,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'bump_global()\n'
                      'print(count)',
-             'output': '1',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`nonlocal` tells assignment to update a binding in the nearest enclosing '
+             'output': '1'},
+            {'kind': 'cell',
+             'prose': ['`nonlocal` tells assignment to update a binding in the nearest enclosing '
                        'function scope. This is useful for small closures that keep state.'],
              'code': 'def make_counter():\n'
                      '    total = 0\n'
@@ -4202,9 +2981,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'counter = make_counter()\n'
                      'print(counter())\n'
                      'print(counter())',
-             'output': '1\n2',
-             'line': 41,
-             'kind': 'cell'}],
+             'output': '1\n2'}],
   'code': 'count = 0\n'
           '\n'
           'def bump_global():\n'
@@ -4226,10 +3003,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'counter = make_counter()\n'
           'print(counter())\n'
           'print(counter())\n',
-  'expected_output': '1\n1\n2\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '1\n1\n2\n'},
  {'slug': 'recursion',
   'title': 'Recursion',
   'section': 'Functions',
@@ -4249,27 +3023,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Python limits recursion depth, so loops are often better for very deep or simple '
             'repetition.'],
   'see_also': ['functions', 'conditionals', 'generators'],
-  'walkthrough': [{'prose': 'A leaf node is the base case. It has no children, so the function can '
-                            'return its own value without making another recursive call.',
-                   'code': 'def total(node):\n'
-                           '    subtotal = node["value"]\n'
-                           '    for child in node["children"]:\n'
-                           '        subtotal += total(child)\n'
-                           '    return subtotal\n'
-                           '\n'
-                           'print(total({"value": 2, "children": []}))'},
-                  {'prose': 'A non-leaf node solves the same problem for each child, then combines '
-                            'those smaller totals with its own value.',
-                   'code': 'tree = {\n'
-                           '    "value": 1,\n'
-                           '    "children": [\n'
-                           '        {"value": 2, "children": []},\n'
-                           '        {"value": 3, "children": [{"value": 4, "children": []}]},\n'
-                           '    ],\n'
-                           '}\n'
-                           '\n'
-                           'print(total(tree))'}],
-  'cells': [{'prose': ['A leaf node is the base case. It has no children, so the function can '
+  'cells': [{'kind': 'cell',
+             'prose': ['A leaf node is the base case. It has no children, so the function can '
                        'return its own value without making another recursive call.'],
              'code': 'def total(node):\n'
                      '    subtotal = node["value"]\n'
@@ -4278,10 +3033,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    return subtotal\n'
                      '\n'
                      'print(total({"value": 2, "children": []}))',
-             'output': '2',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['A non-leaf node solves the same problem for each child, then combines '
+             'output': '2'},
+            {'kind': 'cell',
+             'prose': ['A non-leaf node solves the same problem for each child, then combines '
                        'those smaller totals with its own value.'],
              'code': 'tree = {\n'
                      '    "value": 1,\n'
@@ -4292,9 +3046,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '}\n'
                      '\n'
                      'print(total(tree))',
-             'output': '10',
-             'line': 40,
-             'kind': 'cell'}],
+             'output': '10'}],
   'code': 'tree = {\n'
           '    "value": 1,\n'
           '    "children": [\n'
@@ -4311,10 +3063,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(total({"value": 2, "children": []}))\n'
           'print(total(tree))\n',
-  'expected_output': '2\n10\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '2\n10\n'},
  {'slug': 'lambdas',
   'title': 'Lambdas',
   'section': 'Functions',
@@ -4331,41 +3080,23 @@ EXAMPLES = [{'slug': 'hello-world',
             'Prefer `def` for multi-step or reused behavior.',
             'Lambdas are common as `key=` functions because the behavior is local to one call.'],
   'see_also': ['functions', 'sorting', 'callable-objects'],
-  'walkthrough': [{'prose': 'A lambda is a function expression. Assigning one to a name works, '
-                            'although `def` is usually clearer for reusable behavior.',
-                   'code': 'add_tax = lambda price: round(price * 1.08, 2)\nprint(add_tax(10))'},
-                  {'prose': 'Lambdas are most idiomatic when passed directly to another function. '
-                            '`sorted()` calls this key function once for each item.',
-                   'code': 'items = [("notebook", 5), ("pen", 2), ("bag", 20)]\n'
-                           'by_price = sorted(items, key=lambda item: item[1])\n'
-                           'print(by_price)'},
-                  {'prose': 'A named function is better when the behavior should be reused or '
-                            'explained. It produces the same sort key, but gives the operation a '
-                            'name.',
-                   'code': 'def price(item):\n'
-                           '    return item[1]\n'
-                           '\n'
-                           'print(sorted(items, key=price))'}],
-  'cells': [{'prose': ['A lambda is a function expression. Assigning one to a name works, although '
+  'cells': [{'kind': 'cell',
+             'prose': ['A lambda is a function expression. Assigning one to a name works, although '
                        '`def` is usually clearer for reusable behavior.'],
              'code': 'add_tax = lambda price: round(price * 1.08, 2)\nprint(add_tax(10))',
-             'output': '10.8',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Lambdas are most idiomatic when passed directly to another function. '
+             'output': '10.8'},
+            {'kind': 'cell',
+             'prose': ['Lambdas are most idiomatic when passed directly to another function. '
                        '`sorted()` calls this key function once for each item.'],
              'code': 'items = [("notebook", 5), ("pen", 2), ("bag", 20)]\n'
                      'by_price = sorted(items, key=lambda item: item[1])\n'
                      'print(by_price)',
-             'output': "[('pen', 2), ('notebook', 5), ('bag', 20)]",
-             'line': 35,
-             'kind': 'cell'},
-            {'prose': ['A named function is better when the behavior should be reused or '
+             'output': "[('pen', 2), ('notebook', 5), ('bag', 20)]"},
+            {'kind': 'cell',
+             'prose': ['A named function is better when the behavior should be reused or '
                        'explained. It produces the same sort key, but gives the operation a name.'],
              'code': 'def price(item):\n    return item[1]\n\nprint(sorted(items, key=price))',
-             'output': "[('pen', 2), ('notebook', 5), ('bag', 20)]",
-             'line': 49,
-             'kind': 'cell'}],
+             'output': "[('pen', 2), ('notebook', 5), ('bag', 20)]"}],
   'code': 'add_tax = lambda price: round(price * 1.08, 2)\n'
           'print(add_tax(10))\n'
           '\n'
@@ -4379,10 +3110,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(sorted(items, key=price))\n',
   'expected_output': '10.8\n'
                      "[('pen', 2), ('notebook', 5), ('bag', 20)]\n"
-                     "[('pen', 2), ('notebook', 5), ('bag', 20)]\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     "[('pen', 2), ('notebook', 5), ('bag', 20)]\n"},
  {'slug': 'generators',
   'title': 'Generators',
   'section': 'Iteration',
@@ -4403,55 +3131,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Prefer a list when you need to reuse stored results; prefer a generator when values '
             'can be streamed once.'],
   'see_also': ['iterators', 'iterator-vs-iterable', 'generator-expressions'],
-  'walkthrough': [{'prose': 'Calling a generator function returns an iterator. `next()` asks for '
-                            'one value and resumes the function until the next `yield`.',
-                   'code': 'def countdown(n):\n'
-                           '    while n > 0:\n'
-                           '        yield n\n'
-                           '        n -= 1\n'
-                           '\n'
-                           'numbers = countdown(3)\n'
-                           'print(next(numbers))\n'
-                           'print(next(numbers))'},
-                  {'prose': 'A `for` loop repeatedly calls `next()` for you. The loop stops when '
-                            'the generator is exhausted.',
-                   'code': 'for value in countdown(3):\n    print(value)'},
-                  {'prose': '`return` builds the entire result before handing it back; `yield` '
-                            'produces values on demand. The list keeps its values for repeated '
-                            'use, while the generator is exhausted after one pass.',
-                   'code': 'def countdown_eager(n):\n'
-                           '    result = []\n'
-                           '    while n > 0:\n'
-                           '        result.append(n)\n'
-                           '        n -= 1\n'
-                           '    return result\n'
-                           '\n'
-                           'values = countdown_eager(3)\n'
-                           'print(values)\n'
-                           'print(values)\n'
-                           '\n'
-                           'stream = countdown(3)\n'
-                           'print(list(stream))\n'
-                           'print(list(stream))'},
-                  {'prose': 'Every generator is an iterator. The same countdown written by hand '
-                            'needs `__iter__` and `__next__` and an explicit `StopIteration`. The '
-                            'generator function expresses the same protocol with one `yield`.',
-                   'code': 'class Countdown:\n'
-                           '    def __init__(self, n):\n'
-                           '        self.n = n\n'
-                           '\n'
-                           '    def __iter__(self):\n'
-                           '        return self\n'
-                           '\n'
-                           '    def __next__(self):\n'
-                           '        if self.n <= 0:\n'
-                           '            raise StopIteration\n'
-                           '        value = self.n\n'
-                           '        self.n -= 1\n'
-                           '        return value\n'
-                           '\n'
-                           'print(list(Countdown(3)))'}],
-  'cells': [{'prose': ['Calling a generator function returns an iterator. `next()` asks for one '
+  'cells': [{'kind': 'cell',
+             'prose': ['Calling a generator function returns an iterator. `next()` asks for one '
                        'value and resumes the function until the next `yield`.'],
              'code': 'def countdown(n):\n'
                      '    while n > 0:\n'
@@ -4461,16 +3142,14 @@ EXAMPLES = [{'slug': 'hello-world',
                      'numbers = countdown(3)\n'
                      'print(next(numbers))\n'
                      'print(next(numbers))',
-             'output': '3\n2',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['A `for` loop repeatedly calls `next()` for you. The loop stops when the '
+             'output': '3\n2'},
+            {'kind': 'cell',
+             'prose': ['A `for` loop repeatedly calls `next()` for you. The loop stops when the '
                        'generator is exhausted.'],
              'code': 'for value in countdown(3):\n    print(value)',
-             'output': '3\n2\n1',
-             'line': 42,
-             'kind': 'cell'},
-            {'prose': ['`return` builds the entire result before handing it back; `yield` produces '
+             'output': '3\n2\n1'},
+            {'kind': 'cell',
+             'prose': ['`return` builds the entire result before handing it back; `yield` produces '
                        'values on demand. The list keeps its values for repeated use, while the '
                        'generator is exhausted after one pass.'],
              'code': 'def countdown_eager(n):\n'
@@ -4487,10 +3166,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'stream = countdown(3)\n'
                      'print(list(stream))\n'
                      'print(list(stream))',
-             'output': '[3, 2, 1]\n[3, 2, 1]\n[3, 2, 1]\n[]',
-             'line': 57,
-             'kind': 'cell'},
-            {'prose': ['Every generator is an iterator. The same countdown written by hand needs '
+             'output': '[3, 2, 1]\n[3, 2, 1]\n[3, 2, 1]\n[]'},
+            {'kind': 'cell',
+             'prose': ['Every generator is an iterator. The same countdown written by hand needs '
                        '`__iter__` and `__next__` and an explicit `StopIteration`. The generator '
                        'function expresses the same protocol with one `yield`.'],
              'code': 'class Countdown:\n'
@@ -4508,9 +3186,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        return value\n'
                      '\n'
                      'print(list(Countdown(3)))',
-             'output': '[3, 2, 1]',
-             'line': 85,
-             'kind': 'cell'}],
+             'output': '[3, 2, 1]'}],
   'code': 'def countdown(n):\n'
           '    while n > 0:\n'
           '        yield n\n'
@@ -4553,10 +3229,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '        return value\n'
           '\n'
           'print(list(Countdown(3)))\n',
-  'expected_output': '3\n2\n3\n2\n1\n[3, 2, 1]\n[3, 2, 1]\n[3, 2, 1]\n[]\n[3, 2, 1]\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '3\n2\n3\n2\n1\n[3, 2, 1]\n[3, 2, 1]\n[3, 2, 1]\n[]\n[3, 2, 1]\n'},
  {'slug': 'yield-from',
   'title': 'Yield From',
   'section': 'Iteration',
@@ -4573,22 +3246,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'It keeps generator pipelines compact.',
             'Use a plain `yield` when producing one value directly.'],
   'see_also': ['generators', 'generator-expressions', 'itertools'],
-  'walkthrough': [{'prose': '`yield from` delegates to another iterable. The caller receives one '
-                            'stream even though part of it came from a list.',
-                   'code': 'def page():\n'
-                           '    yield "header"\n'
-                           '    yield from ["intro", "body"]\n'
-                           '    yield "footer"\n'
-                           '\n'
-                           'print(list(page()))'},
-                  {'prose': 'Delegation is useful when flattening nested iterables. `yield from '
-                            'row` replaces an inner loop that would yield each item by hand.',
-                   'code': 'def flatten(rows):\n'
-                           '    for row in rows:\n'
-                           '        yield from row\n'
-                           '\n'
-                           'print(list(flatten([[1, 2], [3]])))'}],
-  'cells': [{'prose': ['`yield from` delegates to another iterable. The caller receives one stream '
+  'cells': [{'kind': 'cell',
+             'prose': ['`yield from` delegates to another iterable. The caller receives one stream '
                        'even though part of it came from a list.'],
              'code': 'def page():\n'
                      '    yield "header"\n'
@@ -4596,19 +3255,16 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    yield "footer"\n'
                      '\n'
                      'print(list(page()))',
-             'output': "['header', 'intro', 'body', 'footer']",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Delegation is useful when flattening nested iterables. `yield from row` '
+             'output': "['header', 'intro', 'body', 'footer']"},
+            {'kind': 'cell',
+             'prose': ['Delegation is useful when flattening nested iterables. `yield from row` '
                        'replaces an inner loop that would yield each item by hand.'],
              'code': 'def flatten(rows):\n'
                      '    for row in rows:\n'
                      '        yield from row\n'
                      '\n'
                      'print(list(flatten([[1, 2], [3]])))',
-             'output': '[1, 2, 3]',
-             'line': 39,
-             'kind': 'cell'}],
+             'output': '[1, 2, 3]'}],
   'code': 'def page():\n'
           '    yield "header"\n'
           '    yield from ["intro", "body"]\n'
@@ -4622,10 +3278,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '        yield from row\n'
           '\n'
           'print(list(flatten([[1, 2], [3]])))\n',
-  'expected_output': "['header', 'intro', 'body', 'footer']\n[1, 2, 3]\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "['header', 'intro', 'body', 'footer']\n[1, 2, 3]\n"},
  {'slug': 'generator-expressions',
   'title': 'Generator Expressions',
   'section': 'Iteration',
@@ -4643,47 +3296,28 @@ EXAMPLES = [{'slug': 'hello-world',
             'Generator expressions produce one-pass iterators.',
             'Use generator expressions when the consumer can process values one at a time.'],
   'see_also': ['comprehensions', 'generators', 'itertools', 'yield-from'],
-  'walkthrough': [{'prose': 'A list comprehension is eager: it builds a list immediately. That is '
-                            'useful when you need to store or reuse the results.',
-                   'code': 'numbers = [1, 2, 3, 4]\n'
-                           'list_squares = [number * number for number in numbers]\n'
-                           'print(list_squares)'},
-                  {'prose': 'A generator expression is lazy: it creates an iterator that produces '
-                            'values as they are consumed. After two `next()` calls, only the '
-                            'remaining squares are left.',
-                   'code': 'stream_squares = (number * number for number in numbers)\n'
-                           'print(next(stream_squares))\n'
-                           'print(next(stream_squares))\n'
-                           'print(list(stream_squares))'},
-                  {'prose': 'Generator expressions are common inside reducing functions. When a '
-                            'generator expression is the only argument, the extra parentheses can '
-                            'be omitted.',
-                   'code': 'print(sum(number * number for number in numbers))'}],
-  'cells': [{'prose': ['A list comprehension is eager: it builds a list immediately. That is '
+  'cells': [{'kind': 'cell',
+             'prose': ['A list comprehension is eager: it builds a list immediately. That is '
                        'useful when you need to store or reuse the results.'],
              'code': 'numbers = [1, 2, 3, 4]\n'
                      'list_squares = [number * number for number in numbers]\n'
                      'print(list_squares)',
-             'output': '[1, 4, 9, 16]',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['A generator expression is lazy: it creates an iterator that produces '
+             'output': '[1, 4, 9, 16]'},
+            {'kind': 'cell',
+             'prose': ['A generator expression is lazy: it creates an iterator that produces '
                        'values as they are consumed. After two `next()` calls, only the remaining '
                        'squares are left.'],
              'code': 'stream_squares = (number * number for number in numbers)\n'
                      'print(next(stream_squares))\n'
                      'print(next(stream_squares))\n'
                      'print(list(stream_squares))',
-             'output': '1\n4\n[9, 16]',
-             'line': 37,
-             'kind': 'cell'},
-            {'prose': ['Generator expressions are common inside reducing functions. When a '
+             'output': '1\n4\n[9, 16]'},
+            {'kind': 'cell',
+             'prose': ['Generator expressions are common inside reducing functions. When a '
                        'generator expression is the only argument, the extra parentheses can be '
                        'omitted.'],
              'code': 'print(sum(number * number for number in numbers))',
-             'output': '30',
-             'line': 54,
-             'kind': 'cell'}],
+             'output': '30'}],
   'code': 'numbers = [1, 2, 3, 4]\n'
           'list_squares = [number * number for number in numbers]\n'
           'print(list_squares)\n'
@@ -4694,10 +3328,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(list(stream_squares))\n'
           '\n'
           'print(sum(number * number for number in numbers))\n',
-  'expected_output': '[1, 4, 9, 16]\n1\n4\n[9, 16]\n30\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '[1, 4, 9, 16]\n1\n4\n[9, 16]\n30\n'},
  {'slug': 'itertools',
   'title': 'Itertools',
   'section': 'Iteration',
@@ -4721,45 +3352,26 @@ EXAMPLES = [{'slug': 'hello-world',
                'generator-expressions',
                'sentinel-iteration',
                'comprehension-patterns'],
-  'walkthrough': [{'prose': '`count()` can produce values forever, so `islice()` takes a finite '
-                            'window. Nothing is materialized until `list()` consumes the iterator.',
-                   'code': 'import itertools\n'
-                           '\n'
-                           'counter = itertools.count(10)\n'
-                           'print(list(itertools.islice(counter, 3)))'},
-                  {'prose': '`chain()` presents several iterables as one stream. This avoids '
-                            'building an intermediate list just to loop over combined inputs.',
-                   'code': 'pages = itertools.chain(["intro", "setup"], ["deploy"])\n'
-                           'print(list(pages))'},
-                  {'prose': 'Iterator helpers compose with ordinary Python expressions. '
-                            '`compress()` keeps items whose corresponding selector is true.',
-                   'code': 'scores = [7, 10, 8, 10]\n'
-                           'high_scores = itertools.compress(scores, [score >= 9 for score in '
-                           'scores])\n'
-                           'print(list(high_scores))'}],
-  'cells': [{'prose': ['`count()` can produce values forever, so `islice()` takes a finite window. '
+  'cells': [{'kind': 'cell',
+             'prose': ['`count()` can produce values forever, so `islice()` takes a finite window. '
                        'Nothing is materialized until `list()` consumes the iterator.'],
              'code': 'import itertools\n'
                      '\n'
                      'counter = itertools.count(10)\n'
                      'print(list(itertools.islice(counter, 3)))',
-             'output': '[10, 11, 12]',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['`chain()` presents several iterables as one stream. This avoids building '
+             'output': '[10, 11, 12]'},
+            {'kind': 'cell',
+             'prose': ['`chain()` presents several iterables as one stream. This avoids building '
                        'an intermediate list just to loop over combined inputs.'],
              'code': 'pages = itertools.chain(["intro", "setup"], ["deploy"])\nprint(list(pages))',
-             'output': "['intro', 'setup', 'deploy']",
-             'line': 38,
-             'kind': 'cell'},
-            {'prose': ['Iterator helpers compose with ordinary Python expressions. `compress()` '
+             'output': "['intro', 'setup', 'deploy']"},
+            {'kind': 'cell',
+             'prose': ['Iterator helpers compose with ordinary Python expressions. `compress()` '
                        'keeps items whose corresponding selector is true.'],
              'code': 'scores = [7, 10, 8, 10]\n'
                      'high_scores = itertools.compress(scores, [score >= 9 for score in scores])\n'
                      'print(list(high_scores))',
-             'output': '[10, 10]',
-             'line': 51,
-             'kind': 'cell'}],
+             'output': '[10, 10]'}],
   'code': 'import itertools\n'
           '\n'
           'counter = itertools.count(10)\n'
@@ -4771,10 +3383,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'scores = [7, 10, 8, 10]\n'
           'high_scores = itertools.compress(scores, [score >= 9 for score in scores])\n'
           'print(list(high_scores))\n',
-  'expected_output': "[10, 11, 12]\n['intro', 'setup', 'deploy']\n[10, 10]\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "[10, 11, 12]\n['intro', 'setup', 'deploy']\n[10, 10]\n"},
  {'slug': 'decorators',
   'title': 'Decorators',
   'section': 'Functions',
@@ -4792,35 +3401,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Decorators can wrap, replace, or register functions.',
             'Use `functools.wraps` in production wrappers that should preserve metadata.'],
   'see_also': ['closures', 'functions', 'callable-types', 'classmethods-and-staticmethods'],
-  'walkthrough': [{'prose': 'A decorator is just a function that takes a function and returns '
-                            'another callable. Applying it manually shows the wrapping step.',
-                   'code': 'from functools import wraps\n'
-                           '\n'
-                           '\n'
-                           'def loud(func):\n'
-                           '    @wraps(func)\n'
-                           '    def wrapper(name):\n'
-                           '        return func(name).upper()\n'
-                           '    return wrapper\n'
-                           '\n'
-                           '\n'
-                           'def greet(name):\n'
-                           '    return f"hello {name}"\n'
-                           '\n'
-                           'manual_greet = loud(greet)\n'
-                           'print(manual_greet("python"))'},
-                  {'prose': 'The `@loud` syntax performs the same rebinding at definition time. '
-                            'After decoration, `welcome` refers to the wrapper returned by `loud`.',
-                   'code': '@loud\n'
-                           'def welcome(name):\n'
-                           '    """Return a welcome message."""\n'
-                           '    return f"welcome {name}"\n'
-                           '\n'
-                           'print(welcome("workers"))'},
-                  {'prose': '`functools.wraps` copies useful metadata from the original function '
-                            'onto the wrapper.',
-                   'code': 'print(welcome.__name__)\nprint(welcome.__doc__)'}],
-  'cells': [{'prose': ['A decorator is just a function that takes a function and returns another '
+  'cells': [{'kind': 'cell',
+             'prose': ['A decorator is just a function that takes a function and returns another '
                        'callable. Applying it manually shows the wrapping step.'],
              'code': 'from functools import wraps\n'
                      '\n'
@@ -4837,10 +3419,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'manual_greet = loud(greet)\n'
                      'print(manual_greet("python"))',
-             'output': 'HELLO PYTHON',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['The `@loud` syntax performs the same rebinding at definition time. After '
+             'output': 'HELLO PYTHON'},
+            {'kind': 'cell',
+             'prose': ['The `@loud` syntax performs the same rebinding at definition time. After '
                        'decoration, `welcome` refers to the wrapper returned by `loud`.'],
              'code': '@loud\n'
                      'def welcome(name):\n'
@@ -4848,15 +3429,12 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    return f"welcome {name}"\n'
                      '\n'
                      'print(welcome("workers"))',
-             'output': 'WELCOME WORKERS',
-             'line': 49,
-             'kind': 'cell'},
-            {'prose': ['`functools.wraps` copies useful metadata from the original function onto '
+             'output': 'WELCOME WORKERS'},
+            {'kind': 'cell',
+             'prose': ['`functools.wraps` copies useful metadata from the original function onto '
                        'the wrapper.'],
              'code': 'print(welcome.__name__)\nprint(welcome.__doc__)',
-             'output': 'welcome\nReturn a welcome message.',
-             'line': 66,
-             'kind': 'cell'}],
+             'output': 'welcome\nReturn a welcome message.'}],
   'code': 'from functools import wraps\n'
           '\n'
           '\n'
@@ -4879,11 +3457,9 @@ EXAMPLES = [{'slug': 'hello-world',
           '    return f"welcome {name}"\n'
           '\n'
           'print(welcome("workers"))\n'
-          'print(welcome.__name__)\n',
-  'expected_output': 'HELLO PYTHON\nWELCOME WORKERS\nwelcome\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+          'print(welcome.__name__)\n'
+          'print(welcome.__doc__)\n',
+  'expected_output': 'HELLO PYTHON\nWELCOME WORKERS\nwelcome\nReturn a welcome message.\n'},
  {'slug': 'classes',
   'title': 'Classes',
   'section': 'Classes',
@@ -4910,72 +3486,8 @@ EXAMPLES = [{'slug': 'hello-world',
                'classmethods-and-staticmethods',
                'bound-and-unbound-methods',
                'dataclasses'],
-  'walkthrough': [{'prose': 'Define a class when data and behavior should travel together. The '
-                            'initializer gives each object its starting state.',
-                   'code': 'class Counter:\n'
-                           '    def __init__(self, start=0):\n'
-                           '        self.value = start\n'
-                           '\n'
-                           'first = Counter()\n'
-                           'second = Counter(10)\n'
-                           'print(first.value)\n'
-                           'print(second.value)'},
-                  {'prose': 'Methods are functions attached to the class. `self` is the particular '
-                            'object receiving the method call, so separate instances keep separate '
-                            'state.',
-                   'code': 'class Counter:\n'
-                           '    def __init__(self, start=0):\n'
-                           '        self.value = start\n'
-                           '\n'
-                           '    def increment(self, amount=1):\n'
-                           '        self.value += amount\n'
-                           '        return self.value\n'
-                           '\n'
-                           'first = Counter()\n'
-                           'second = Counter(10)\n'
-                           'print(first.increment())\n'
-                           'print(second.increment(5))'},
-                  {'prose': 'A name defined directly on the class body is a class attribute, '
-                            'shared by every instance. Reading falls back to the class when the '
-                            'instance has no attribute of that name; assigning to the class itself '
-                            'changes the value for every instance at once.',
-                   'code': 'class Counter:\n'
-                           '    step = 1\n'
-                           '\n'
-                           '    def __init__(self, start=0):\n'
-                           '        self.value = start\n'
-                           '\n'
-                           'first = Counter()\n'
-                           'second = Counter()\n'
-                           'print(first.step)\n'
-                           'Counter.step = 5\n'
-                           'print(second.step)'},
-                  {'prose': 'A mutable class attribute is shared mutable state — the classic '
-                            'footgun. Define per-instance containers in `__init__` so each object '
-                            'owns its own copy.',
-                   'code': 'class Cart:\n'
-                           '    items = []\n'
-                           '\n'
-                           '    def add(self, item):\n'
-                           '        self.items.append(item)\n'
-                           '\n'
-                           'shared_a = Cart()\n'
-                           'shared_b = Cart()\n'
-                           'shared_a.add("apple")\n'
-                           'print(shared_b.items)\n'
-                           '\n'
-                           'class FixedCart:\n'
-                           '    def __init__(self):\n'
-                           '        self.items = []\n'
-                           '\n'
-                           '    def add(self, item):\n'
-                           '        self.items.append(item)\n'
-                           '\n'
-                           'own_a = FixedCart()\n'
-                           'own_b = FixedCart()\n'
-                           'own_a.add("apple")\n'
-                           'print(own_b.items)'}],
-  'cells': [{'prose': ['Define a class when data and behavior should travel together. The '
+  'cells': [{'kind': 'cell',
+             'prose': ['Define a class when data and behavior should travel together. The '
                        'initializer gives each object its starting state.'],
              'code': 'class Counter:\n'
                      '    def __init__(self, start=0):\n'
@@ -4985,10 +3497,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'second = Counter(10)\n'
                      'print(first.value)\n'
                      'print(second.value)',
-             'output': '0\n10',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Methods are functions attached to the class. `self` is the particular '
+             'output': '0\n10'},
+            {'kind': 'cell',
+             'prose': ['Methods are functions attached to the class. `self` is the particular '
                        'object receiving the method call, so separate instances keep separate '
                        'state.'],
              'code': 'class Counter:\n'
@@ -5003,10 +3514,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'second = Counter(10)\n'
                      'print(first.increment())\n'
                      'print(second.increment(5))',
-             'output': '1\n15',
-             'line': 43,
-             'kind': 'cell'},
-            {'prose': ['A name defined directly on the class body is a class attribute, shared by '
+             'output': '1\n15'},
+            {'kind': 'cell',
+             'prose': ['A name defined directly on the class body is a class attribute, shared by '
                        'every instance. Reading falls back to the class when the instance has no '
                        'attribute of that name; assigning to the class itself changes the value '
                        'for every instance at once.'],
@@ -5021,10 +3531,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(first.step)\n'
                      'Counter.step = 5\n'
                      'print(second.step)',
-             'output': '1\n5',
-             'line': 67,
-             'kind': 'cell'},
-            {'prose': ['A mutable class attribute is shared mutable state — the classic footgun. '
+             'output': '1\n5'},
+            {'kind': 'cell',
+             'prose': ['A mutable class attribute is shared mutable state — the classic footgun. '
                        'Define per-instance containers in `__init__` so each object owns its own '
                        'copy.'],
              'code': 'class Cart:\n'
@@ -5049,9 +3558,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'own_b = FixedCart()\n'
                      'own_a.add("apple")\n'
                      'print(own_b.items)',
-             'output': "['apple']\n[]",
-             'line': 90,
-             'kind': 'cell'}],
+             'output': "['apple']\n[]"}],
   'code': 'class Counter:\n'
           '    step = 1\n'
           '\n'
@@ -5095,10 +3602,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'own_b = FixedCart()\n'
           'own_a.add("apple")\n'
           'print(own_b.items)\n',
-  'expected_output': "0\n10\n1\n15\n1\n5\n['apple']\n[]\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "0\n10\n1\n15\n1\n5\n['apple']\n[]\n"},
  {'slug': 'inheritance-and-super',
   'title': 'Inheritance and Super',
   'section': 'Classes',
@@ -5118,27 +3622,8 @@ EXAMPLES = [{'slug': 'hello-world',
                'abstract-base-classes',
                'classmethods-and-staticmethods',
                'special-methods'],
-  'walkthrough': [{'prose': 'A child class names its parent in parentheses. `Dog` instances get '
-                            'the `Animal.__init__` method because `Dog` does not define its own '
-                            'initializer.',
-                   'code': 'class Animal:\n'
-                           '    def __init__(self, name):\n'
-                           '        self.name = name\n'
-                           '\n'
-                           '    def speak(self):\n'
-                           '        return f"{self.name} makes a sound"\n'
-                           '\n'
-                           'class Dog(Animal):\n'
-                           '    def speak(self):\n'
-                           '        base = super().speak()\n'
-                           '        return f"{base}; {self.name} barks"\n'
-                           '\n'
-                           'pet = Dog("Nina")\n'
-                           'print(pet.name)'},
-                  {'prose': '`super()` delegates to the parent implementation. The child method '
-                            'can reuse the parent result and then add specialized behavior.',
-                   'code': 'print(pet.speak())\nprint(isinstance(pet, Animal))'}],
-  'cells': [{'prose': ['A child class names its parent in parentheses. `Dog` instances get the '
+  'cells': [{'kind': 'cell',
+             'prose': ['A child class names its parent in parentheses. `Dog` instances get the '
                        '`Animal.__init__` method because `Dog` does not define its own '
                        'initializer.'],
              'code': 'class Animal:\n'
@@ -5155,15 +3640,12 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'pet = Dog("Nina")\n'
                      'print(pet.name)',
-             'output': 'Nina',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['`super()` delegates to the parent implementation. The child method can '
+             'output': 'Nina'},
+            {'kind': 'cell',
+             'prose': ['`super()` delegates to the parent implementation. The child method can '
                        'reuse the parent result and then add specialized behavior.'],
              'code': 'print(pet.speak())\nprint(isinstance(pet, Animal))',
-             'output': 'Nina makes a sound; Nina barks\nTrue',
-             'line': 48,
-             'kind': 'cell'}],
+             'output': 'Nina makes a sound; Nina barks\nTrue'}],
   'code': 'class Animal:\n'
           '    def __init__(self, name):\n'
           '        self.name = name\n'
@@ -5180,10 +3662,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(pet.name)\n'
           'print(pet.speak())\n'
           'print(isinstance(pet, Animal))\n',
-  'expected_output': 'Nina\nNina makes a sound; Nina barks\nTrue\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'Nina\nNina makes a sound; Nina barks\nTrue\n'},
  {'slug': 'classmethods-and-staticmethods',
   'title': 'Classmethods and Staticmethods',
   'section': 'Classes',
@@ -5210,66 +3689,8 @@ EXAMPLES = [{'slug': 'hello-world',
             "state but still belongs in the class's namespace.",
             'A free function is often the right answer when neither decorator applies.'],
   'see_also': ['classes', 'decorators', 'inheritance-and-super'],
-  'walkthrough': [{'prose': 'An instance method receives the instance as `self` and reads its '
-                            'state. This is the default and the right shape when the work depends '
-                            "on a particular object's data.",
-                   'code': 'class Date:\n'
-                           '    def __init__(self, year, month, day):\n'
-                           '        self.year = year\n'
-                           '        self.month = month\n'
-                           '        self.day = day\n'
-                           '\n'
-                           '    def display(self):\n'
-                           '        return f"{self.year}-{self.month:02d}-{self.day:02d}"\n'
-                           '\n'
-                           'today = Date(2026, 5, 9)\n'
-                           'print(today.display())'},
-                  {'prose': '`@classmethod` makes the method receive the class itself as `cls`. '
-                            'The canonical use is an alternate constructor that parses some other '
-                            'input format and calls `cls(...)`. Because `cls` is the actual class, '
-                            'subclasses calling the same method get an instance of their own type.',
-                   'code': 'class Date:\n'
-                           '    def __init__(self, year, month, day):\n'
-                           '        self.year = year\n'
-                           '        self.month = month\n'
-                           '        self.day = day\n'
-                           '\n'
-                           '    @classmethod\n'
-                           '    def from_string(cls, text):\n'
-                           '        year, month, day = (int(part) for part in text.split("-"))\n'
-                           '        return cls(year, month, day)\n'
-                           '\n'
-                           'later = Date.from_string("2026-12-31")\n'
-                           'print(later.year, later.month, later.day)'},
-                  {'prose': '`@staticmethod` strips the implicit first argument. The function '
-                            'lives on the class for namespacing — like `Date.is_leap_year(2024)` — '
-                            'but does not touch any instance or class state.',
-                   'code': 'class Date:\n'
-                           '    @staticmethod\n'
-                           '    def is_leap_year(year):\n'
-                           '        return year % 4 == 0 and (year % 100 != 0 or year % 400 == 0)\n'
-                           '\n'
-                           'print(Date.is_leap_year(2024))\n'
-                           'print(Date.is_leap_year(2025))'},
-                  {'prose': 'Side by side: instance methods receive the instance, classmethods '
-                            'receive the class, staticmethods receive nothing. Classmethods and '
-                            'staticmethods can be called on either the class or an instance.',
-                   'code': 'class Demo:\n'
-                           '    def instance_method(self):\n'
-                           '        return type(self).__name__\n'
-                           '\n'
-                           '    @classmethod\n'
-                           '    def class_method(cls):\n'
-                           '        return cls.__name__\n'
-                           '\n'
-                           '    @staticmethod\n'
-                           '    def static_method():\n'
-                           '        return "no receiver"\n'
-                           '\n'
-                           'print(Demo().instance_method())\n'
-                           'print(Demo.class_method())\n'
-                           'print(Demo.static_method())'}],
-  'cells': [{'prose': ['An instance method receives the instance as `self` and reads its state. '
+  'cells': [{'kind': 'cell',
+             'prose': ['An instance method receives the instance as `self` and reads its state. '
                        'This is the default and the right shape when the work depends on a '
                        "particular object's data."],
              'code': 'class Date:\n'
@@ -5283,10 +3704,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'today = Date(2026, 5, 9)\n'
                      'print(today.display())',
-             'output': '2026-05-09',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`@classmethod` makes the method receive the class itself as `cls`. The '
+             'output': '2026-05-09'},
+            {'kind': 'cell',
+             'prose': ['`@classmethod` makes the method receive the class itself as `cls`. The '
                        'canonical use is an alternate constructor that parses some other input '
                        'format and calls `cls(...)`. Because `cls` is the actual class, subclasses '
                        'calling the same method get an instance of their own type.'],
@@ -5303,10 +3723,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'later = Date.from_string("2026-12-31")\n'
                      'print(later.year, later.month, later.day)',
-             'output': '2026 12 31',
-             'line': 44,
-             'kind': 'cell'},
-            {'prose': ['`@staticmethod` strips the implicit first argument. The function lives on '
+             'output': '2026 12 31'},
+            {'kind': 'cell',
+             'prose': ['`@staticmethod` strips the implicit first argument. The function lives on '
                        'the class for namespacing — like `Date.is_leap_year(2024)` — but does not '
                        'touch any instance or class state.'],
              'code': 'class Date:\n'
@@ -5316,10 +3735,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(Date.is_leap_year(2024))\n'
                      'print(Date.is_leap_year(2025))',
-             'output': 'True\nFalse',
-             'line': 68,
-             'kind': 'cell'},
-            {'prose': ['Side by side: instance methods receive the instance, classmethods receive '
+             'output': 'True\nFalse'},
+            {'kind': 'cell',
+             'prose': ['Side by side: instance methods receive the instance, classmethods receive '
                        'the class, staticmethods receive nothing. Classmethods and staticmethods '
                        'can be called on either the class or an instance.'],
              'code': 'class Demo:\n'
@@ -5337,9 +3755,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(Demo().instance_method())\n'
                      'print(Demo.class_method())\n'
                      'print(Demo.static_method())',
-             'output': 'Demo\nDemo\nno receiver',
-             'line': 87,
-             'kind': 'cell'}],
+             'output': 'Demo\nDemo\nno receiver'}],
   'code': 'class Date:\n'
           '    def __init__(self, year, month, day):\n'
           '        self.year = year\n'
@@ -5382,10 +3798,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(Demo().instance_method())\n'
           'print(Demo.class_method())\n'
           'print(Demo.static_method())\n',
-  'expected_output': '2026-05-09\n2026-12-31\nTrue\nFalse\nDemo\nDemo\nno receiver\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '2026-05-09\n2026-12-31\nTrue\nFalse\nDemo\nDemo\nno receiver\n'},
  {'slug': 'dataclasses',
   'title': 'Dataclasses',
   'section': 'Classes',
@@ -5404,27 +3817,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Dataclasses generate methods but remain normal Python classes.',
             'Use `field()` for advanced defaults such as per-instance lists or dictionaries.'],
   'see_also': ['structured-data-shapes', 'classes', 'type-hints'],
-  'walkthrough': [{'prose': 'A dataclass uses annotations to define fields. Python generates an '
-                            'initializer, so the class can be constructed without writing '
-                            '`__init__` by hand.',
-                   'code': 'from dataclasses import dataclass\n'
-                           '\n'
-                           '@dataclass\n'
-                           'class User:\n'
-                           '    name: str\n'
-                           '    active: bool = True\n'
-                           '\n'
-                           'user = User("Ada")\n'
-                           'print(user)'},
-                  {'prose': 'The generated instance still exposes ordinary attributes. A dataclass '
-                            'is a regular class with useful methods filled in.',
-                   'code': 'print(user.name)'},
-                  {'prose': 'Defaults can be overridden by keyword. The generated representation '
-                            'includes the field names, which is useful during debugging.',
-                   'code': 'inactive = User("Guido", active=False)\n'
-                           'print(inactive)\n'
-                           'print(inactive.active)'}],
-  'cells': [{'prose': ['A dataclass uses annotations to define fields. Python generates an '
+  'cells': [{'kind': 'cell',
+             'prose': ['A dataclass uses annotations to define fields. Python generates an '
                        'initializer, so the class can be constructed without writing `__init__` by '
                        'hand.'],
              'code': 'from dataclasses import dataclass\n'
@@ -5436,23 +3830,19 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'user = User("Ada")\n'
                      'print(user)',
-             'output': "User(name='Ada', active=True)",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['The generated instance still exposes ordinary attributes. A dataclass is a '
+             'output': "User(name='Ada', active=True)"},
+            {'kind': 'cell',
+             'prose': ['The generated instance still exposes ordinary attributes. A dataclass is a '
                        'regular class with useful methods filled in.'],
              'code': 'print(user.name)',
-             'output': 'Ada',
-             'line': 42,
-             'kind': 'cell'},
-            {'prose': ['Defaults can be overridden by keyword. The generated representation '
+             'output': 'Ada'},
+            {'kind': 'cell',
+             'prose': ['Defaults can be overridden by keyword. The generated representation '
                        'includes the field names, which is useful during debugging.'],
              'code': 'inactive = User("Guido", active=False)\n'
                      'print(inactive)\n'
                      'print(inactive.active)',
-             'output': "User(name='Guido', active=False)\nFalse",
-             'line': 54,
-             'kind': 'cell'}],
+             'output': "User(name='Guido', active=False)\nFalse"}],
   'code': 'from dataclasses import dataclass\n'
           '\n'
           '@dataclass\n'
@@ -5470,10 +3860,7 @@ EXAMPLES = [{'slug': 'hello-world',
   'expected_output': "User(name='Ada', active=True)\n"
                      'Ada\n'
                      "User(name='Guido', active=False)\n"
-                     'False\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     'False\n'},
  {'slug': 'properties',
   'title': 'Properties',
   'section': 'Classes',
@@ -5492,40 +3879,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Callers access a property like an attribute, not like a method.',
             'Use methods instead when work is expensive or action-like.'],
   'see_also': ['classes', 'attribute-access', 'descriptors', 'dataclasses'],
-  'walkthrough': [{'prose': 'A read-only property exposes computed data through attribute access. '
-                            '`area` stays current because it is calculated from `width` and '
-                            '`height` each time it is read.',
-                   'code': 'class Rectangle:\n'
-                           '    def __init__(self, width, height):\n'
-                           '        self.width = width\n'
-                           '        self.height = height\n'
-                           '\n'
-                           '    @property\n'
-                           '    def area(self):\n'
-                           '        return self.width * self.height\n'
-                           '\n'
-                           '    @property\n'
-                           '    def width(self):\n'
-                           '        return self._width\n'
-                           '\n'
-                           '    @width.setter\n'
-                           '    def width(self, value):\n'
-                           '        if value <= 0:\n'
-                           '            raise ValueError("width must be positive")\n'
-                           '        self._width = value\n'
-                           '\n'
-                           'box = Rectangle(3, 4)\n'
-                           'print(box.area)'},
-                  {'prose': 'A setter lets assignment keep normal attribute syntax while the class '
-                            'validates or normalizes the value.',
-                   'code': 'box.width = 5\nprint(box.area)'},
-                  {'prose': 'Validation belongs inside the class when every caller should obey the '
-                            'same rule. Invalid assignment raises an exception at the boundary.',
-                   'code': 'try:\n'
-                           '    box.width = 0\n'
-                           'except ValueError as error:\n'
-                           '    print(error)'}],
-  'cells': [{'prose': ['A read-only property exposes computed data through attribute access. '
+  'cells': [{'kind': 'cell',
+             'prose': ['A read-only property exposes computed data through attribute access. '
                        '`area` stays current because it is calculated from `width` and `height` '
                        'each time it is read.'],
              'code': 'class Rectangle:\n'
@@ -5549,21 +3904,17 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'box = Rectangle(3, 4)\n'
                      'print(box.area)',
-             'output': '12',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['A setter lets assignment keep normal attribute syntax while the class '
+             'output': '12'},
+            {'kind': 'cell',
+             'prose': ['A setter lets assignment keep normal attribute syntax while the class '
                        'validates or normalizes the value.'],
              'code': 'box.width = 5\nprint(box.area)',
-             'output': '20',
-             'line': 55,
-             'kind': 'cell'},
-            {'prose': ['Validation belongs inside the class when every caller should obey the same '
+             'output': '20'},
+            {'kind': 'cell',
+             'prose': ['Validation belongs inside the class when every caller should obey the same '
                        'rule. Invalid assignment raises an exception at the boundary.'],
              'code': 'try:\n    box.width = 0\nexcept ValueError as error:\n    print(error)',
-             'output': 'width must be positive',
-             'line': 68,
-             'kind': 'cell'}],
+             'output': 'width must be positive'}],
   'code': 'class Rectangle:\n'
           '    def __init__(self, width, height):\n'
           '        self.width = width\n'
@@ -5593,10 +3944,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '    box.width = 0\n'
           'except ValueError as error:\n'
           '    print(error)\n',
-  'expected_output': '12\n20\nwidth must be positive\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '12\n20\nwidth must be positive\n'},
  {'slug': 'special-methods',
   'title': 'Special Methods',
   'section': 'Data Model',
@@ -5623,149 +3971,8 @@ EXAMPLES = [{'slug': 'hello-world',
                'operator-overloading',
                'callable-objects',
                'context-managers'],
-  'walkthrough': [{'prose': 'Start with a normal class that stores its data. Special methods build '
-                            'on ordinary instance state.',
-                   'code': 'class Bag:\n'
-                           '    def __init__(self, items):\n'
-                           '        self.items = list(items)\n'
-                           '\n'
-                           'bag = Bag(["a", "b"])\n'
-                           'print(bag.items)'},
-                  {'prose': 'Implement `__len__` to let `len()` ask the object for its size using '
-                            "Python's standard protocol.",
-                   'code': 'class Bag:\n'
-                           '    def __init__(self, items):\n'
-                           '        self.items = list(items)\n'
-                           '\n'
-                           '    def __len__(self):\n'
-                           '        return len(self.items)\n'
-                           '\n'
-                           'bag = Bag(["a", "b"])\n'
-                           'print(len(bag))'},
-                  {'prose': 'Implement `__iter__` to make the object iterable. Then tools such as '
-                            '`list()` can consume it without a custom method name.',
-                   'code': 'class Bag:\n'
-                           '    def __init__(self, items):\n'
-                           '        self.items = list(items)\n'
-                           '\n'
-                           '    def __len__(self):\n'
-                           '        return len(self.items)\n'
-                           '\n'
-                           '    def __iter__(self):\n'
-                           '        return iter(self.items)\n'
-                           '\n'
-                           'bag = Bag(["a", "b"])\n'
-                           'print(list(bag))'},
-                  {'prose': 'Implement `__repr__` to give the object a useful developer-facing '
-                            'representation when it is printed or inspected. With no `__str__` '
-                            'defined, `print()` falls back to `__repr__`.',
-                   'code': 'class Bag:\n'
-                           '    def __init__(self, items):\n'
-                           '        self.items = list(items)\n'
-                           '\n'
-                           '    def __len__(self):\n'
-                           '        return len(self.items)\n'
-                           '\n'
-                           '    def __iter__(self):\n'
-                           '        return iter(self.items)\n'
-                           '\n'
-                           '    def __repr__(self):\n'
-                           '        return f"Bag({self.items!r})"\n'
-                           '\n'
-                           'bag = Bag(["a", "b"])\n'
-                           'print(bag)'},
-                  {'prose': 'Add `__str__` for an end-user representation. `print()` and `str()` '
-                            'prefer `__str__`; `repr()` and the REPL still use `__repr__`. Keep '
-                            '`__repr__` unambiguous for debugging and let `__str__` be the '
-                            'friendly form.',
-                   'code': 'class Bag:\n'
-                           '    def __init__(self, items):\n'
-                           '        self.items = list(items)\n'
-                           '\n'
-                           '    def __repr__(self):\n'
-                           '        return f"Bag({self.items!r})"\n'
-                           '\n'
-                           '    def __str__(self):\n'
-                           '        return ", ".join(self.items)\n'
-                           '\n'
-                           'bag = Bag(["a", "b"])\n'
-                           'print(bag)\n'
-                           'print(repr(bag))'},
-                  {'prose': '`__eq__` decides what equality means for the type. Defining `__eq__` '
-                            'removes the default `__hash__`, so add `__hash__` back when instances '
-                            'should work in sets or as dict keys. `__lt__` enables `<` and, with '
-                            'the rest of the order family, `sorted()`.',
-                   'code': 'class Bag:\n'
-                           '    def __init__(self, items):\n'
-                           '        self.items = list(items)\n'
-                           '\n'
-                           '    def __eq__(self, other):\n'
-                           '        return isinstance(other, Bag) and self.items == other.items\n'
-                           '\n'
-                           '    def __hash__(self):\n'
-                           '        return hash(tuple(self.items))\n'
-                           '\n'
-                           '    def __lt__(self, other):\n'
-                           '        return len(self.items) < len(other.items)\n'
-                           '\n'
-                           'print(Bag(["a", "b"]) == Bag(["a", "b"]))\n'
-                           'print(Bag(["a"]) < Bag(["a", "b"]))\n'
-                           'print(hash(Bag(["a"])) == hash(Bag(["a"])))'},
-                  {'prose': 'The container protocols make instances behave like built-in '
-                            'containers. `__contains__` powers `in`, `__getitem__`/`__setitem__` '
-                            'power subscription, and `__bool__` decides truthiness for `if` and '
-                            '`while`. See [container-protocols](/data-model/container-protocols) '
-                            'for the full surface.',
-                   'code': 'class Bag:\n'
-                           '    def __init__(self, items):\n'
-                           '        self.items = list(items)\n'
-                           '\n'
-                           '    def __contains__(self, item):\n'
-                           '        return item in self.items\n'
-                           '\n'
-                           '    def __getitem__(self, index):\n'
-                           '        return self.items[index]\n'
-                           '\n'
-                           '    def __setitem__(self, index, value):\n'
-                           '        self.items[index] = value\n'
-                           '\n'
-                           '    def __bool__(self):\n'
-                           '        return bool(self.items)\n'
-                           '\n'
-                           'bag = Bag(["a", "b"])\n'
-                           'print("a" in bag)\n'
-                           'print(bag[0])\n'
-                           'bag[1] = "z"\n'
-                           'print(bag.items)\n'
-                           'print(bool(Bag([])))'},
-                  {'prose': '`__call__` makes an instance callable like a function — useful for '
-                            'stateful operations whose configuration deserves a name. `__enter__` '
-                            'and `__exit__` make a class a context manager so it can be used with '
-                            '`with`. The focused [callable-objects](/data-model/callable-objects) '
-                            'and [context-managers](/data-model/context-managers) pages go deeper.',
-                   'code': 'class Multiplier:\n'
-                           '    def __init__(self, factor):\n'
-                           '        self.factor = factor\n'
-                           '\n'
-                           '    def __call__(self, value):\n'
-                           '        return value * self.factor\n'
-                           '\n'
-                           'triple = Multiplier(3)\n'
-                           'print(triple(5))\n'
-                           '\n'
-                           '\n'
-                           'class Trace:\n'
-                           '    def __enter__(self):\n'
-                           '        print("enter")\n'
-                           '        return self\n'
-                           '\n'
-                           '    def __exit__(self, *exc):\n'
-                           '        print("exit")\n'
-                           '        return False\n'
-                           '\n'
-                           'with Trace():\n'
-                           '    print("inside")'}],
-  'cells': [{'prose': ['Start with a normal class that stores its data. Special methods build on '
+  'cells': [{'kind': 'cell',
+             'prose': ['Start with a normal class that stores its data. Special methods build on '
                        'ordinary instance state.'],
              'code': 'class Bag:\n'
                      '    def __init__(self, items):\n'
@@ -5773,10 +3980,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'bag = Bag(["a", "b"])\n'
                      'print(bag.items)',
-             'output': "['a', 'b']",
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Implement `__len__` to let `len()` ask the object for its size using '
+             'output': "['a', 'b']"},
+            {'kind': 'cell',
+             'prose': ['Implement `__len__` to let `len()` ask the object for its size using '
                        "Python's standard protocol."],
              'code': 'class Bag:\n'
                      '    def __init__(self, items):\n'
@@ -5787,10 +3993,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'bag = Bag(["a", "b"])\n'
                      'print(len(bag))',
-             'output': '2',
-             'line': 40,
-             'kind': 'cell'},
-            {'prose': ['Implement `__iter__` to make the object iterable. Then tools such as '
+             'output': '2'},
+            {'kind': 'cell',
+             'prose': ['Implement `__iter__` to make the object iterable. Then tools such as '
                        '`list()` can consume it without a custom method name.'],
              'code': 'class Bag:\n'
                      '    def __init__(self, items):\n'
@@ -5804,10 +4009,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'bag = Bag(["a", "b"])\n'
                      'print(list(bag))',
-             'output': "['a', 'b']",
-             'line': 60,
-             'kind': 'cell'},
-            {'prose': ['Implement `__repr__` to give the object a useful developer-facing '
+             'output': "['a', 'b']"},
+            {'kind': 'cell',
+             'prose': ['Implement `__repr__` to give the object a useful developer-facing '
                        'representation when it is printed or inspected. With no `__str__` defined, '
                        '`print()` falls back to `__repr__`.'],
              'code': 'class Bag:\n'
@@ -5825,10 +4029,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'bag = Bag(["a", "b"])\n'
                      'print(bag)',
-             'output': "Bag(['a', 'b'])",
-             'line': 83,
-             'kind': 'cell'},
-            {'prose': ['Add `__str__` for an end-user representation. `print()` and `str()` prefer '
+             'output': "Bag(['a', 'b'])"},
+            {'kind': 'cell',
+             'prose': ['Add `__str__` for an end-user representation. `print()` and `str()` prefer '
                        '`__str__`; `repr()` and the REPL still use `__repr__`. Keep `__repr__` '
                        'unambiguous for debugging and let `__str__` be the friendly form.'],
              'code': 'class Bag:\n'
@@ -5844,13 +4047,14 @@ EXAMPLES = [{'slug': 'hello-world',
                      'bag = Bag(["a", "b"])\n'
                      'print(bag)\n'
                      'print(repr(bag))',
-             'output': "a, b\nBag(['a', 'b'])",
-             'line': 109,
-             'kind': 'cell'},
-            {'prose': ['`__eq__` decides what equality means for the type. Defining `__eq__` '
+             'output': "a, b\nBag(['a', 'b'])"},
+            {'kind': 'cell',
+             'prose': ['`__eq__` decides what equality means for the type. Defining `__eq__` '
                        'removes the default `__hash__`, so add `__hash__` back when instances '
-                       'should work in sets or as dict keys. `__lt__` enables `<` and, with the '
-                       'rest of the order family, `sorted()`.'],
+                       'should work in sets or as dict keys — but only for types treated as '
+                       'immutable: this `Bag` hashes its current items, so mutating one after '
+                       'adding it to a set makes it unfindable. `__lt__` alone is enough for `<` '
+                       'and for `sorted()`.'],
              'code': 'class Bag:\n'
                      '    def __init__(self, items):\n'
                      '        self.items = list(items)\n'
@@ -5867,13 +4071,12 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(Bag(["a", "b"]) == Bag(["a", "b"]))\n'
                      'print(Bag(["a"]) < Bag(["a", "b"]))\n'
                      'print(hash(Bag(["a"])) == hash(Bag(["a"])))',
-             'output': 'True\nTrue\nTrue',
-             'line': 134,
-             'kind': 'cell'},
-            {'prose': ['The container protocols make instances behave like built-in containers. '
+             'output': 'True\nTrue\nTrue'},
+            {'kind': 'cell',
+             'prose': ['The container protocols make instances behave like built-in containers. '
                        '`__contains__` powers `in`, `__getitem__`/`__setitem__` power '
                        'subscription, and `__bool__` decides truthiness for `if` and `while`. See '
-                       '[container-protocols](/data-model/container-protocols) for the full '
+                       '[container-protocols](/examples/container-protocols) for the full '
                        'surface.'],
              'code': 'class Bag:\n'
                      '    def __init__(self, items):\n'
@@ -5897,14 +4100,13 @@ EXAMPLES = [{'slug': 'hello-world',
                      'bag[1] = "z"\n'
                      'print(bag.items)\n'
                      'print(bool(Bag([])))',
-             'output': "True\na\n['a', 'z']\nFalse",
-             'line': 163,
-             'kind': 'cell'},
-            {'prose': ['`__call__` makes an instance callable like a function — useful for '
+             'output': "True\na\n['a', 'z']\nFalse"},
+            {'kind': 'cell',
+             'prose': ['`__call__` makes an instance callable like a function — useful for '
                        'stateful operations whose configuration deserves a name. `__enter__` and '
                        '`__exit__` make a class a context manager so it can be used with `with`. '
-                       'The focused [callable-objects](/data-model/callable-objects) and '
-                       '[context-managers](/data-model/context-managers) pages go deeper.'],
+                       'The focused [callable-objects](/examples/callable-objects) and '
+                       '[context-managers](/examples/context-managers) pages go deeper.'],
              'code': 'class Multiplier:\n'
                      '    def __init__(self, factor):\n'
                      '        self.factor = factor\n'
@@ -5927,9 +4129,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'with Trace():\n'
                      '    print("inside")',
-             'output': '15\nenter\ninside\nexit',
-             'line': 199,
-             'kind': 'cell'}],
+             'output': '15\nenter\ninside\nexit'}],
   'code': 'class Bag:\n'
           '    def __init__(self, items):\n'
           '        self.items = list(items)\n'
@@ -6018,10 +4218,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '15\n'
                      'enter\n'
                      'inside\n'
-                     'exit\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     'exit\n'},
  {'slug': 'truth-and-size',
   'title': 'Truth and Size',
   'section': 'Data Model',
@@ -6042,29 +4239,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Keep truth tests unsurprising; surprising falsy objects make conditionals harder to '
             'read.'],
   'see_also': ['truthiness', 'special-methods', 'container-protocols'],
-  'walkthrough': [{'prose': '`__len__` lets `len()` ask an object for its size.',
-                   'code': 'class Inbox:\n'
-                           '    def __init__(self, messages):\n'
-                           '        self.messages = list(messages)\n'
-                           '\n'
-                           '    def __len__(self):\n'
-                           '        return len(self.messages)\n'
-                           '\n'
-                           'print(len(Inbox(["hi", "bye"])))'},
-                  {'prose': 'If a class has `__len__` but no `__bool__`, Python uses zero length '
-                            'as false.',
-                   'code': 'print(bool(Inbox([])))'},
-                  {'prose': '`__bool__` expresses truth directly when the answer is not just '
-                            'container size.',
-                   'code': 'class Account:\n'
-                           '    def __init__(self, active):\n'
-                           '        self.active = active\n'
-                           '\n'
-                           '    def __bool__(self):\n'
-                           '        return self.active\n'
-                           '\n'
-                           'print(bool(Account(False)))'}],
-  'cells': [{'prose': ['`__len__` lets `len()` ask an object for its size.'],
+  'cells': [{'kind': 'cell',
+             'prose': ['`__len__` lets `len()` ask an object for its size.'],
              'code': 'class Inbox:\n'
                      '    def __init__(self, messages):\n'
                      '        self.messages = list(messages)\n'
@@ -6073,16 +4249,14 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        return len(self.messages)\n'
                      '\n'
                      'print(len(Inbox(["hi", "bye"])))',
-             'output': '2',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['If a class has `__len__` but no `__bool__`, Python uses zero length as '
+             'output': '2'},
+            {'kind': 'cell',
+             'prose': ['If a class has `__len__` but no `__bool__`, Python uses zero length as '
                        'false.'],
              'code': 'print(bool(Inbox([])))',
-             'output': 'False',
-             'line': 41,
-             'kind': 'cell'},
-            {'prose': ['`__bool__` expresses truth directly when the answer is not just container '
+             'output': 'False'},
+            {'kind': 'cell',
+             'prose': ['`__bool__` expresses truth directly when the answer is not just container '
                        'size.'],
              'code': 'class Account:\n'
                      '    def __init__(self, active):\n'
@@ -6092,9 +4266,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        return self.active\n'
                      '\n'
                      'print(bool(Account(False)))',
-             'output': 'False',
-             'line': 53,
-             'kind': 'cell'}],
+             'output': 'False'}],
   'code': 'class Inbox:\n'
           '    def __init__(self, messages):\n'
           '        self.messages = list(messages)\n'
@@ -6112,10 +4284,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(len(Inbox(["hi", "bye"])))\n'
           'print(bool(Inbox([])))\n'
           'print(bool(Account(False)))\n',
-  'expected_output': '2\nFalse\nFalse\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '2\nFalse\nFalse\n'},
  {'slug': 'container-protocols',
   'title': 'Container Protocols',
   'section': 'Data Model',
@@ -6135,38 +4304,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use `KeyError` and `IndexError` consistently with built-in containers.',
             'If a plain `dict` or `list` is enough, prefer it over a custom container.'],
   'see_also': ['lists', 'dicts', 'special-methods'],
-  'walkthrough': [{'prose': '`__setitem__` gives assignment syntax to a custom container.',
-                   'code': 'class Scores:\n'
-                           '    def __init__(self):\n'
-                           '        self._scores = {}\n'
-                           '\n'
-                           '    def __setitem__(self, name, score):\n'
-                           '        self._scores[name] = score\n'
-                           '\n'
-                           'scores = Scores()\n'
-                           'scores["Ada"] = 98\n'
-                           'print(scores._scores)'},
-                  {'prose': '`__contains__` answers membership tests written with `in`.',
-                   'code': 'class Scores:\n'
-                           '    def __init__(self):\n'
-                           '        self._scores = {"Ada": 98}\n'
-                           '\n'
-                           '    def __contains__(self, name):\n'
-                           '        return name in self._scores\n'
-                           '\n'
-                           'scores = Scores()\n'
-                           'print("Ada" in scores)'},
-                  {'prose': '`__getitem__` connects bracket lookup to your internal storage.',
-                   'code': 'class Scores:\n'
-                           '    def __init__(self):\n'
-                           '        self._scores = {"Ada": 98}\n'
-                           '\n'
-                           '    def __getitem__(self, name):\n'
-                           '        return self._scores[name]\n'
-                           '\n'
-                           'scores = Scores()\n'
-                           'print(scores["Ada"])'}],
-  'cells': [{'prose': ['`__setitem__` gives assignment syntax to a custom container.'],
+  'cells': [{'kind': 'cell',
+             'prose': ['`__setitem__` gives assignment syntax to a custom container.'],
              'code': 'class Scores:\n'
                      '    def __init__(self):\n'
                      '        self._scores = {}\n'
@@ -6177,10 +4316,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'scores = Scores()\n'
                      'scores["Ada"] = 98\n'
                      'print(scores._scores)',
-             'output': "{'Ada': 98}",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`__contains__` answers membership tests written with `in`.'],
+             'output': "{'Ada': 98}"},
+            {'kind': 'cell',
+             'prose': ['`__contains__` answers membership tests written with `in`.'],
              'code': 'class Scores:\n'
                      '    def __init__(self):\n'
                      '        self._scores = {"Ada": 98}\n'
@@ -6190,10 +4328,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'scores = Scores()\n'
                      'print("Ada" in scores)',
-             'output': 'True',
-             'line': 43,
-             'kind': 'cell'},
-            {'prose': ['`__getitem__` connects bracket lookup to your internal storage.'],
+             'output': 'True'},
+            {'kind': 'cell',
+             'prose': ['`__getitem__` connects bracket lookup to your internal storage.'],
              'code': 'class Scores:\n'
                      '    def __init__(self):\n'
                      '        self._scores = {"Ada": 98}\n'
@@ -6203,9 +4340,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'scores = Scores()\n'
                      'print(scores["Ada"])',
-             'output': '98',
-             'line': 63,
-             'kind': 'cell'}],
+             'output': '98'}],
   'code': 'class Scores:\n'
           '    def __init__(self):\n'
           '        self._scores = {}\n'
@@ -6223,10 +4358,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'scores["Ada"] = 98\n'
           'print("Ada" in scores)\n'
           'print(scores["Ada"])\n',
-  'expected_output': 'True\n98\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'True\n98\n'},
  {'slug': 'callable-objects',
   'title': 'Callable Objects',
   'section': 'Data Model',
@@ -6245,31 +4377,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Callable objects are good for named, stateful behavior.',
             'Prefer plain functions when no instance state is needed.'],
   'see_also': ['functions', 'closures', 'callable-types', 'bound-and-unbound-methods'],
-  'walkthrough': [{'prose': 'A callable object starts as ordinary state stored on an instance.',
-                   'code': 'class Multiplier:\n'
-                           '    def __init__(self, factor):\n'
-                           '        self.factor = factor\n'
-                           '        self.calls = 0\n'
-                           '\n'
-                           'double = Multiplier(2)\n'
-                           'print(double.factor)'},
-                  {'prose': '`__call__` makes the instance usable with function-call syntax.',
-                   'code': 'class Multiplier:\n'
-                           '    def __init__(self, factor):\n'
-                           '        self.factor = factor\n'
-                           '        self.calls = 0\n'
-                           '\n'
-                           '    def __call__(self, value):\n'
-                           '        self.calls += 1\n'
-                           '        return value * self.factor\n'
-                           '\n'
-                           'double = Multiplier(2)\n'
-                           'print(double(5))\n'
-                           'print(double(7))'},
-                  {'prose': 'Because the callable is still an object, it can remember state across '
-                            'calls.',
-                   'code': 'print(double.calls)'}],
-  'cells': [{'prose': ['A callable object starts as ordinary state stored on an instance.'],
+  'cells': [{'kind': 'cell',
+             'prose': ['A callable object starts as ordinary state stored on an instance.'],
              'code': 'class Multiplier:\n'
                      '    def __init__(self, factor):\n'
                      '        self.factor = factor\n'
@@ -6277,10 +4386,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'double = Multiplier(2)\n'
                      'print(double.factor)',
-             'output': '2',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['`__call__` makes the instance usable with function-call syntax.'],
+             'output': '2'},
+            {'kind': 'cell',
+             'prose': ['`__call__` makes the instance usable with function-call syntax.'],
              'code': 'class Multiplier:\n'
                      '    def __init__(self, factor):\n'
                      '        self.factor = factor\n'
@@ -6293,15 +4401,12 @@ EXAMPLES = [{'slug': 'hello-world',
                      'double = Multiplier(2)\n'
                      'print(double(5))\n'
                      'print(double(7))',
-             'output': '10\n14',
-             'line': 41,
-             'kind': 'cell'},
-            {'prose': ['Because the callable is still an object, it can remember state across '
+             'output': '10\n14'},
+            {'kind': 'cell',
+             'prose': ['Because the callable is still an object, it can remember state across '
                        'calls.'],
              'code': 'print(double.calls)',
-             'output': '2',
-             'line': 65,
-             'kind': 'cell'}],
+             'output': '2'}],
   'code': 'class Multiplier:\n'
           '    def __init__(self, factor):\n'
           '        self.factor = factor\n'
@@ -6315,10 +4420,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(double(5))\n'
           'print(double(7))\n'
           'print(double.calls)\n',
-  'expected_output': '10\n14\n2\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '10\n14\n2\n'},
  {'slug': 'operator-overloading',
   'title': 'Operator Overloading',
   'section': 'Data Model',
@@ -6338,110 +4440,83 @@ EXAMPLES = [{'slug': 'hello-world',
             'Return `NotImplemented` when an operand type is unsupported.',
             'Implement equality deliberately when value comparison matters.'],
   'see_also': ['operators', 'special-methods', 'equality-and-identity'],
-  'walkthrough': [{'prose': '`__add__` defines how the `+` operator combines two objects.',
-                   'code': 'class Vector:\n'
-                           '    def __init__(self, x, y):\n'
-                           '        self.x = x\n'
-                           '        self.y = y\n'
-                           '\n'
-                           '    def __add__(self, other):\n'
-                           '        return Vector(self.x + other.x, self.y + other.y)\n'
-                           '\n'
-                           '    def __repr__(self):\n'
-                           '        return f"Vector({self.x}, {self.y})"\n'
-                           '\n'
-                           'print(Vector(2, 3) + Vector(4, 5))'},
-                  {'prose': '`__eq__` defines value equality for `==`. Without it, user-defined '
-                            'objects compare by identity.',
-                   'code': 'class Vector:\n'
-                           '    def __init__(self, x, y):\n'
-                           '        self.x = x\n'
-                           '        self.y = y\n'
-                           '\n'
-                           '    def __eq__(self, other):\n'
-                           '        return (self.x, self.y) == (other.x, other.y)\n'
-                           '\n'
-                           'print(Vector(1, 1) == Vector(1, 1))'},
-                  {'prose': 'A useful `__repr__` makes operator results inspectable while '
-                            'debugging.',
-                   'code': 'class Vector:\n'
-                           '    def __init__(self, x, y):\n'
-                           '        self.x = x\n'
-                           '        self.y = y\n'
-                           '\n'
-                           '    def __add__(self, other):\n'
-                           '        return Vector(self.x + other.x, self.y + other.y)\n'
-                           '\n'
-                           '    def __repr__(self):\n'
-                           '        return f"Vector({self.x}, {self.y})"\n'
-                           '\n'
-                           'print(repr(Vector(2, 3) + Vector(4, 5)))'}],
-  'cells': [{'prose': ['`__add__` defines how the `+` operator combines two objects.'],
+  'cells': [{'kind': 'cell',
+             'prose': ['`__add__` defines how the `+` operator combines two objects. Checking the '
+                       'operand type and returning `NotImplemented` for foreign types lets Python '
+                       "try the other operand's reflected method instead of crashing inside "
+                       'yours.'],
              'code': 'class Vector:\n'
                      '    def __init__(self, x, y):\n'
                      '        self.x = x\n'
                      '        self.y = y\n'
                      '\n'
                      '    def __add__(self, other):\n'
+                     '        if not isinstance(other, Vector):\n'
+                     '            return NotImplemented\n'
                      '        return Vector(self.x + other.x, self.y + other.y)\n'
                      '\n'
                      '    def __repr__(self):\n'
                      '        return f"Vector({self.x}, {self.y})"\n'
                      '\n'
                      'print(Vector(2, 3) + Vector(4, 5))',
-             'output': 'Vector(6, 8)',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`__eq__` defines value equality for `==`. Without it, user-defined objects '
-                       'compare by identity.'],
+             'output': 'Vector(6, 8)'},
+            {'kind': 'cell',
+             'prose': ['`__eq__` defines value equality for `==`. Without it, user-defined objects '
+                       'compare by identity. Returning `NotImplemented` for foreign types matters '
+                       'most here: equality against an unrelated value should answer `False`, '
+                       'never raise — Python falls back to identity when both sides decline.'],
              'code': 'class Vector:\n'
                      '    def __init__(self, x, y):\n'
                      '        self.x = x\n'
                      '        self.y = y\n'
                      '\n'
                      '    def __eq__(self, other):\n'
+                     '        if not isinstance(other, Vector):\n'
+                     '            return NotImplemented\n'
                      '        return (self.x, self.y) == (other.x, other.y)\n'
                      '\n'
-                     'print(Vector(1, 1) == Vector(1, 1))',
-             'output': 'True',
-             'line': 45,
-             'kind': 'cell'},
-            {'prose': ['A useful `__repr__` makes operator results inspectable while debugging.'],
+                     'print(Vector(1, 1) == Vector(1, 1))\n'
+                     'print(Vector(1, 1) == 5)',
+             'output': 'True\nFalse'},
+            {'kind': 'cell',
+             'prose': ['A useful `__repr__` makes operator results inspectable while debugging.'],
              'code': 'class Vector:\n'
                      '    def __init__(self, x, y):\n'
                      '        self.x = x\n'
                      '        self.y = y\n'
                      '\n'
                      '    def __add__(self, other):\n'
+                     '        if not isinstance(other, Vector):\n'
+                     '            return NotImplemented\n'
                      '        return Vector(self.x + other.x, self.y + other.y)\n'
                      '\n'
                      '    def __repr__(self):\n'
                      '        return f"Vector({self.x}, {self.y})"\n'
                      '\n'
                      'print(repr(Vector(2, 3) + Vector(4, 5)))',
-             'output': 'Vector(6, 8)',
-             'line': 65,
-             'kind': 'cell'}],
+             'output': 'Vector(6, 8)'}],
   'code': 'class Vector:\n'
           '    def __init__(self, x, y):\n'
           '        self.x = x\n'
           '        self.y = y\n'
           '\n'
           '    def __add__(self, other):\n'
+          '        if not isinstance(other, Vector):\n'
+          '            return NotImplemented\n'
           '        return Vector(self.x + other.x, self.y + other.y)\n'
           '\n'
           '    def __eq__(self, other):\n'
+          '        if not isinstance(other, Vector):\n'
+          '            return NotImplemented\n'
           '        return (self.x, self.y) == (other.x, other.y)\n'
           '\n'
           '    def __repr__(self):\n'
           '        return f"Vector({self.x}, {self.y})"\n'
           '\n'
           'print(Vector(2, 3) + Vector(4, 5))\n'
-          'print(Vector(1, 1) == Vector(1, 1))\n',
-  'expected_output': 'Vector(6, 8)\nTrue\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+          'print(Vector(1, 1) == Vector(1, 1))\n'
+          'print(Vector(1, 1) == 5)\n',
+  'expected_output': 'Vector(6, 8)\nTrue\nFalse\n'},
  {'slug': 'attribute-access',
   'title': 'Attribute Access',
   'section': 'Data Model',
@@ -6463,55 +4538,19 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use `property` or descriptors when the behavior is attached to a known attribute '
             'name.'],
   'see_also': ['properties', 'descriptors', 'special-methods', 'bound-and-unbound-methods'],
-  'walkthrough': [{'prose': 'Normal initialization still needs to set real attributes. Calling '
-                            '`object.__setattr__` avoids recursing through your own hook.',
-                   'code': 'class Settings:\n'
-                           '    def __init__(self, values):\n'
-                           '        self._values = dict(values)\n'
-                           '\n'
-                           'settings = Settings({"theme": "dark"})\n'
-                           'print(settings._values)'},
-                  {'prose': '`__getattr__` runs only for missing attributes, so it can provide '
-                            'fallback lookup.',
-                   'code': 'class Settings:\n'
-                           '    def __init__(self, values):\n'
-                           '        self._values = dict(values)\n'
-                           '\n'
-                           '    def __getattr__(self, name):\n'
-                           '        try:\n'
-                           '            return self._values[name]\n'
-                           '        except KeyError as error:\n'
-                           '            raise AttributeError(name) from error\n'
-                           '\n'
-                           'settings = Settings({"theme": "dark"})\n'
-                           'print(settings.theme)'},
-                  {'prose': '`__setattr__` intercepts assignment. This example stores public names '
-                            'in the backing dictionary.',
-                   'code': 'class Settings:\n'
-                           '    def __init__(self, values):\n'
-                           '        self._values = dict(values)\n'
-                           '\n'
-                           '    def __setattr__(self, name, value):\n'
-                           '        if name.startswith("_"):\n'
-                           '            object.__setattr__(self, name, value)\n'
-                           '        else:\n'
-                           '            self._values[name] = value\n'
-                           '\n'
-                           'settings = Settings({"theme": "dark"})\n'
-                           'settings.volume = 7\n'
-                           'print(settings._values["volume"])'}],
-  'cells': [{'prose': ['Normal initialization still needs to set real attributes. Calling '
-                       '`object.__setattr__` avoids recursing through your own hook.'],
+  'cells': [{'kind': 'cell',
+             'prose': ['The starting point is ordinary: `__init__` stores one real attribute, the '
+                       '`_values` backing dictionary. The hooks in the next cells customize lookup '
+                       'and assignment around it.'],
              'code': 'class Settings:\n'
                      '    def __init__(self, values):\n'
                      '        self._values = dict(values)\n'
                      '\n'
                      'settings = Settings({"theme": "dark"})\n'
                      'print(settings._values)',
-             'output': "{'theme': 'dark'}",
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['`__getattr__` runs only for missing attributes, so it can provide fallback '
+             'output': "{'theme': 'dark'}"},
+            {'kind': 'cell',
+             'prose': ['`__getattr__` runs only for missing attributes, so it can provide fallback '
                        'lookup.'],
              'code': 'class Settings:\n'
                      '    def __init__(self, values):\n'
@@ -6525,11 +4564,12 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'settings = Settings({"theme": "dark"})\n'
                      'print(settings.theme)',
-             'output': 'dark',
-             'line': 40,
-             'kind': 'cell'},
-            {'prose': ['`__setattr__` intercepts assignment. This example stores public names in '
-                       'the backing dictionary.'],
+             'output': 'dark'},
+            {'kind': 'cell',
+             'prose': ['`__setattr__` intercepts every assignment, including the ones in '
+                       '`__init__`. Underscore names are stored as real attributes through '
+                       '`object.__setattr__`, which avoids recursing through your own hook; public '
+                       'names go to the backing dictionary.'],
              'code': 'class Settings:\n'
                      '    def __init__(self, values):\n'
                      '        self._values = dict(values)\n'
@@ -6543,9 +4583,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'settings = Settings({"theme": "dark"})\n'
                      'settings.volume = 7\n'
                      'print(settings._values["volume"])',
-             'output': '7',
-             'line': 63,
-             'kind': 'cell'}],
+             'output': '7'}],
   'code': 'class Settings:\n'
           '    def __init__(self, values):\n'
           '        self._values = dict(values)\n'
@@ -6566,10 +4604,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(settings.theme)\n'
           'settings.volume = 7\n'
           'print(settings._values["volume"])\n',
-  'expected_output': 'dark\n7\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'dark\n7\n'},
  {'slug': 'bound-and-unbound-methods',
   'title': 'Bound and Unbound Methods',
   'section': 'Data Model',
@@ -6591,55 +4626,13 @@ EXAMPLES = [{'slug': 'hello-world',
                   'explains what is happening underneath.'],
   'notes': ['`instance.method` produces a bound method whose `__self__` is the instance.',
             '`Class.method` produces the plain function and requires you to pass the instance.',
+            '"Unbound method" is the historical Python 2 term; since Python 3, `Class.method` is '
+            'simply a function, which is what this page demonstrates.',
             'Each bound method is its own object; storing one captures its instance.',
             'The binding is implemented by the descriptor protocol on the function object.'],
   'see_also': ['classes', 'attribute-access', 'descriptors', 'callable-objects'],
-  'walkthrough': [{'prose': '`instance.method` returns a bound method. The method already '
-                            'remembers the instance through `__self__`, so calling it does not '
-                            'require passing `self` again.',
-                   'code': 'class Counter:\n'
-                           '    def __init__(self, start=0):\n'
-                           '        self.value = start\n'
-                           '\n'
-                           '    def increment(self):\n'
-                           '        self.value += 1\n'
-                           '        return self.value\n'
-                           '\n'
-                           'bound_counter = Counter(10)\n'
-                           'm = bound_counter.increment\n'
-                           'print(m.__self__ is bound_counter)\n'
-                           'print(m())\n'
-                           'print(m())'},
-                  {'prose': '`Class.method` returns the underlying function — there is no `self` '
-                            'attached. Calling it requires passing the instance as the first '
-                            'argument explicitly. Using a fresh counter here makes the output '
-                            'independent of the previous cell.',
-                   'code': 'unbound_counter = Counter(0)\n'
-                           'unbound = Counter.increment\n'
-                           'print(type(unbound).__name__)\n'
-                           'print(unbound(unbound_counter))\n'
-                           'print(unbound(unbound_counter))'},
-                  {'prose': 'Bound methods are first-class values. They can be stored in lists, '
-                            'passed to other functions, and called later. Each bound method '
-                            'carries its own `__self__`, so two methods produced from two '
-                            'different instances stay independent.',
-                   'code': 'handlers = []\n'
-                           'for _ in range(2):\n'
-                           '    handlers.append(Counter().increment)\n'
-                           '\n'
-                           'print(handlers[0]())\n'
-                           'print(handlers[0]())\n'
-                           'print(handlers[1]())'},
-                  {'prose': 'The binding is the descriptor protocol at work. The function lives on '
-                            'the class as a plain function; instance attribute access invokes '
-                            '`__get__`, which returns a bound method that knows the instance.',
-                   'code': 'descriptor_counter = Counter(0)\n'
-                           'func = Counter.__dict__["increment"]\n'
-                           'print(type(func).__name__)\n'
-                           'rebound = func.__get__(descriptor_counter, Counter)\n'
-                           'print(type(rebound).__name__)\n'
-                           'print(rebound.__self__ is descriptor_counter)'}],
-  'cells': [{'prose': ['`instance.method` returns a bound method. The method already remembers the '
+  'cells': [{'kind': 'cell',
+             'prose': ['`instance.method` returns a bound method. The method already remembers the '
                        'instance through `__self__`, so calling it does not require passing `self` '
                        'again.'],
              'code': 'class Counter:\n'
@@ -6655,10 +4648,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(m.__self__ is bound_counter)\n'
                      'print(m())\n'
                      'print(m())',
-             'output': 'True\n11\n12',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['`Class.method` returns the underlying function — there is no `self` '
+             'output': 'True\n11\n12'},
+            {'kind': 'cell',
+             'prose': ['`Class.method` returns the underlying function — there is no `self` '
                        'attached. Calling it requires passing the instance as the first argument '
                        'explicitly. Using a fresh counter here makes the output independent of the '
                        'previous cell.'],
@@ -6667,10 +4659,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(type(unbound).__name__)\n'
                      'print(unbound(unbound_counter))\n'
                      'print(unbound(unbound_counter))',
-             'output': 'function\n1\n2',
-             'line': 49,
-             'kind': 'cell'},
-            {'prose': ['Bound methods are first-class values. They can be stored in lists, passed '
+             'output': 'function\n1\n2'},
+            {'kind': 'cell',
+             'prose': ['Bound methods are first-class values. They can be stored in lists, passed '
                        'to other functions, and called later. Each bound method carries its own '
                        '`__self__`, so two methods produced from two different instances stay '
                        'independent.'],
@@ -6681,10 +4672,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(handlers[0]())\n'
                      'print(handlers[0]())\n'
                      'print(handlers[1]())',
-             'output': '1\n2\n1',
-             'line': 67,
-             'kind': 'cell'},
-            {'prose': ['The binding is the descriptor protocol at work. The function lives on the '
+             'output': '1\n2\n1'},
+            {'kind': 'cell',
+             'prose': ['The binding is the descriptor protocol at work. The function lives on the '
                        'class as a plain function; instance attribute access invokes `__get__`, '
                        'which returns a bound method that knows the instance.'],
              'code': 'descriptor_counter = Counter(0)\n'
@@ -6693,9 +4683,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'rebound = func.__get__(descriptor_counter, Counter)\n'
                      'print(type(rebound).__name__)\n'
                      'print(rebound.__self__ is descriptor_counter)',
-             'output': 'function\nmethod\nTrue',
-             'line': 87,
-             'kind': 'cell'}],
+             'output': 'function\nmethod\nTrue'}],
   'code': 'class Counter:\n'
           '    def __init__(self, start=0):\n'
           '        self.value = start\n'
@@ -6730,10 +4718,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'rebound = func.__get__(descriptor_counter, Counter)\n'
           'print(type(rebound).__name__)\n'
           'print(rebound.__self__ is descriptor_counter)\n',
-  'expected_output': 'True\n11\n12\nfunction\n1\n2\n1\n2\n1\nfunction\nmethod\nTrue\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'True\n11\n12\nfunction\n1\n2\n1\n2\n1\nfunction\nmethod\nTrue\n'},
  {'slug': 'descriptors',
   'title': 'Descriptors',
   'section': 'Data Model',
@@ -6755,41 +4740,8 @@ EXAMPLES = [{'slug': 'hello-world',
             '`property` is usually simpler for one-off managed attributes; descriptors shine when '
             'the behavior is reusable.'],
   'see_also': ['attribute-access', 'properties', 'bound-and-unbound-methods'],
-  'walkthrough': [{'prose': 'A descriptor object lives on the class. `__set_name__` lets it learn '
-                            'which managed attribute it is serving.',
-                   'code': 'class Positive:\n'
-                           '    def __set_name__(self, owner, name):\n'
-                           '        self.private_name = "_" + name\n'
-                           '\n'
-                           '    def __get__(self, obj, owner):\n'
-                           '        if obj is None:\n'
-                           '            return self\n'
-                           '        return getattr(obj, self.private_name)\n'
-                           '\n'
-                           '    def __set__(self, obj, value):\n'
-                           '        if value <= 0:\n'
-                           '            raise ValueError("must be positive")\n'
-                           '        setattr(obj, self.private_name, value)\n'
-                           '\n'
-                           'class Product:\n'
-                           '    price = Positive()\n'
-                           '\n'
-                           'print(Product.price.private_name)'},
-                  {'prose': 'Assigning `item.price` calls `Positive.__set__`, and reading it calls '
-                            '`Positive.__get__`.',
-                   'code': 'class Product:\n'
-                           '    price = Positive()\n'
-                           '\n'
-                           '    def __init__(self, price):\n'
-                           '        self.price = price\n'
-                           '\n'
-                           'item = Product(10)\n'
-                           'print(item.price)\n'
-                           'try:\n'
-                           '    item.price = -1\n'
-                           'except ValueError as error:\n'
-                           '    print(error)'}],
-  'cells': [{'prose': ['A descriptor object lives on the class. `__set_name__` lets it learn which '
+  'cells': [{'kind': 'cell',
+             'prose': ['A descriptor object lives on the class. `__set_name__` lets it learn which '
                        'managed attribute it is serving.'],
              'code': 'class Positive:\n'
                      '    def __set_name__(self, owner, name):\n'
@@ -6809,10 +4761,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    price = Positive()\n'
                      '\n'
                      'print(Product.price.private_name)',
-             'output': '_price',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Assigning `item.price` calls `Positive.__set__`, and reading it calls '
+             'output': '_price'},
+            {'kind': 'cell',
+             'prose': ['Assigning `item.price` calls `Positive.__set__`, and reading it calls '
                        '`Positive.__get__`.'],
              'code': 'class Product:\n'
                      '    price = Positive()\n'
@@ -6826,9 +4777,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    item.price = -1\n'
                      'except ValueError as error:\n'
                      '    print(error)',
-             'output': '10\nmust be positive',
-             'line': 51,
-             'kind': 'cell'}],
+             'output': '10\nmust be positive'}],
   'code': 'class Positive:\n'
           '    def __set_name__(self, owner, name):\n'
           '        self.private_name = "_" + name\n'
@@ -6856,10 +4805,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '    item.price = -1\n'
           'except ValueError as error:\n'
           '    print(error)\n',
-  'expected_output': '10\n_price\nmust be positive\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '10\n_price\nmust be positive\n'},
  {'slug': 'metaclasses',
   'title': 'Metaclasses',
   'section': 'Classes',
@@ -6877,22 +4823,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Most code should prefer class decorators, functions, or ordinary inheritance.',
             'You are most likely to meet metaclasses inside frameworks and ORMs.'],
   'see_also': ['classes', 'inheritance-and-super', 'special-methods'],
-  'walkthrough': [{'prose': 'A metaclass customizes class creation. `__new__` receives the class '
-                            'name, bases, and namespace before the class object exists.',
-                   'code': 'class Tagged(type):\n'
-                           '    def __new__(mcls, name, bases, namespace):\n'
-                           '        namespace["tag"] = name.lower()\n'
-                           '        return super().__new__(mcls, name, bases, namespace)\n'
-                           '\n'
-                           'print(Tagged.__name__)'},
-                  {'prose': 'The `metaclass=` keyword applies that class-building rule. Here the '
-                            'metaclass adds a `tag` attribute to the new class.',
-                   'code': 'class Event(metaclass=Tagged):\n'
-                           '    pass\n'
-                           '\n'
-                           'print(Event.tag)\n'
-                           'print(type(Event).__name__)'}],
-  'cells': [{'prose': ['A metaclass customizes class creation. `__new__` receives the class name, '
+  'cells': [{'kind': 'cell',
+             'prose': ['A metaclass customizes class creation. `__new__` receives the class name, '
                        'bases, and namespace before the class object exists.'],
              'code': 'class Tagged(type):\n'
                      '    def __new__(mcls, name, bases, namespace):\n'
@@ -6900,19 +4832,16 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        return super().__new__(mcls, name, bases, namespace)\n'
                      '\n'
                      'print(Tagged.__name__)',
-             'output': 'Tagged',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['The `metaclass=` keyword applies that class-building rule. Here the '
+             'output': 'Tagged'},
+            {'kind': 'cell',
+             'prose': ['The `metaclass=` keyword applies that class-building rule. Here the '
                        'metaclass adds a `tag` attribute to the new class.'],
              'code': 'class Event(metaclass=Tagged):\n'
                      '    pass\n'
                      '\n'
                      'print(Event.tag)\n'
                      'print(type(Event).__name__)',
-             'output': 'event\nTagged',
-             'line': 39,
-             'kind': 'cell'}],
+             'output': 'event\nTagged'}],
   'code': 'class Tagged(type):\n'
           '    def __new__(mcls, name, bases, namespace):\n'
           '        namespace["tag"] = name.lower()\n'
@@ -6923,10 +4852,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(Event.tag)\n'
           'print(type(Event).__name__)\n',
-  'expected_output': 'event\nTagged\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'event\nTagged\n'},
  {'slug': 'context-managers',
   'title': 'Context Managers',
   'section': 'Data Model',
@@ -6946,47 +4872,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use `finally` when cleanup must happen after errors too.',
             'Returning true from `__exit__` suppresses an exception; do that only intentionally.'],
   'see_also': ['exceptions', 'special-methods', 'descriptors'],
-  'walkthrough': [{'prose': 'A class-based context manager implements `__enter__` and `__exit__`. '
-                            'The value returned by `__enter__` is bound by `as` when the `with` '
-                            'statement uses it.',
-                   'code': 'class Tag:\n'
-                           '    def __init__(self, name):\n'
-                           '        self.name = name\n'
-                           '\n'
-                           '    def __enter__(self):\n'
-                           '        print(f"<{self.name}>")\n'
-                           '        return self\n'
-                           '\n'
-                           '    def __exit__(self, exc_type, exc, tb):\n'
-                           '        print(f"</{self.name}>")\n'
-                           '        return False\n'
-                           '\n'
-                           'with Tag("section"):\n'
-                           '    print("content")'},
-                  {'prose': '`contextlib.contextmanager` writes the same setup/cleanup shape as a '
-                            'generator. Code before `yield` is setup, and code after `yield` is '
-                            'cleanup.',
-                   'code': 'from contextlib import contextmanager\n'
-                           '\n'
-                           '@contextmanager\n'
-                           'def tag(name):\n'
-                           '    print(f"<{name}>")\n'
-                           '    try:\n'
-                           '        yield\n'
-                           '    finally:\n'
-                           '        print(f"</{name}>")\n'
-                           '\n'
-                           'with tag("note"):\n'
-                           '    print("body")'},
-                  {'prose': 'Cleanup still runs when the block raises. Returning `False` from '
-                            '`__exit__`, or letting a generator context manager re-raise, allows '
-                            'the exception to keep propagating.',
-                   'code': 'try:\n'
-                           '    with tag("error"):\n'
-                           '        raise ValueError("boom")\n'
-                           'except ValueError:\n'
-                           '    print("handled")'}],
-  'cells': [{'prose': ['A class-based context manager implements `__enter__` and `__exit__`. The '
+  'cells': [{'kind': 'cell',
+             'prose': ['A class-based context manager implements `__enter__` and `__exit__`. The '
                        'value returned by `__enter__` is bound by `as` when the `with` statement '
                        'uses it.'],
              'code': 'class Tag:\n'
@@ -7003,10 +4890,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'with Tag("section"):\n'
                      '    print("content")',
-             'output': '<section>\ncontent\n</section>',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`contextlib.contextmanager` writes the same setup/cleanup shape as a '
+             'output': '<section>\ncontent\n</section>'},
+            {'kind': 'cell',
+             'prose': ['`contextlib.contextmanager` writes the same setup/cleanup shape as a '
                        'generator. Code before `yield` is setup, and code after `yield` is '
                        'cleanup.'],
              'code': 'from contextlib import contextmanager\n'
@@ -7021,10 +4907,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'with tag("note"):\n'
                      '    print("body")',
-             'output': '<note>\nbody\n</note>',
-             'line': 49,
-             'kind': 'cell'},
-            {'prose': ['Cleanup still runs when the block raises. Returning `False` from '
+             'output': '<note>\nbody\n</note>'},
+            {'kind': 'cell',
+             'prose': ['Cleanup still runs when the block raises. Returning `False` from '
                        '`__exit__`, or letting a generator context manager re-raise, allows the '
                        'exception to keep propagating.'],
              'code': 'try:\n'
@@ -7032,9 +4917,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        raise ValueError("boom")\n'
                      'except ValueError:\n'
                      '    print("handled")',
-             'output': '<error>\n</error>\nhandled',
-             'line': 74,
-             'kind': 'cell'}],
+             'output': '<error>\n</error>\nhandled'}],
   'code': 'from contextlib import contextmanager\n'
           '\n'
           'class Tag:\n'
@@ -7065,10 +4948,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '        raise ValueError("boom")\n'
           'except ValueError:\n'
           '    print("handled")\n',
-  'expected_output': '<section>\ncontent\n</section>\n<error>\n</error>\nhandled\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '<section>\ncontent\n</section>\n<error>\n</error>\nhandled\n'},
  {'slug': 'delete-statements',
   'title': 'Delete Statements',
   'section': 'Data Model',
@@ -7085,36 +4965,22 @@ EXAMPLES = [{'slug': 'hello-world',
             'Assign `None` when absence should remain an explicit value.',
             'Use container methods such as `pop()` when you need the removed value back.'],
   'see_also': ['variables', 'dicts', 'mutability'],
-  'walkthrough': [{'prose': 'Deleting a dictionary key mutates the dictionary. The key is gone; it '
-                            'has not been set to `None`.',
-                   'code': 'profile = {"name": "Ada", "temporary": True}\n'
-                           'del profile["temporary"]\n'
-                           'print(profile)'},
-                  {'prose': 'Deleting a list item removes that position and shifts later items '
-                            'left.',
-                   'code': 'items = ["a", "b", "c"]\ndel items[1]\nprint(items)'},
-                  {'prose': 'Deleting a name removes the binding from the current namespace. It is '
-                            'different from rebinding the name to `None`.',
-                   'code': 'value = "cached"\ndel value\nprint("value" in locals())'}],
-  'cells': [{'prose': ['Deleting a dictionary key mutates the dictionary. The key is gone; it has '
+  'cells': [{'kind': 'cell',
+             'prose': ['Deleting a dictionary key mutates the dictionary. The key is gone; it has '
                        'not been set to `None`.'],
              'code': 'profile = {"name": "Ada", "temporary": True}\n'
                      'del profile["temporary"]\n'
                      'print(profile)',
-             'output': "{'name': 'Ada'}",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Deleting a list item removes that position and shifts later items left.'],
+             'output': "{'name': 'Ada'}"},
+            {'kind': 'cell',
+             'prose': ['Deleting a list item removes that position and shifts later items left.'],
              'code': 'items = ["a", "b", "c"]\ndel items[1]\nprint(items)',
-             'output': "['a', 'c']",
-             'line': 36,
-             'kind': 'cell'},
-            {'prose': ['Deleting a name removes the binding from the current namespace. It is '
+             'output': "['a', 'c']"},
+            {'kind': 'cell',
+             'prose': ['Deleting a name removes the binding from the current namespace. It is '
                        'different from rebinding the name to `None`.'],
              'code': 'value = "cached"\ndel value\nprint("value" in locals())',
-             'output': 'False',
-             'line': 50,
-             'kind': 'cell'}],
+             'output': 'False'}],
   'code': 'profile = {"name": "Ada", "temporary": True}\n'
           'del profile["temporary"]\n'
           'print(profile)\n'
@@ -7126,10 +4992,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'value = "cached"\n'
           'del value\n'
           'print("value" in locals())\n',
-  'expected_output': "{'name': 'Ada'}\n['a', 'c']\nFalse\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "{'name': 'Ada'}\n['a', 'c']\nFalse\n"},
  {'slug': 'exceptions',
   'title': 'Exceptions',
   'section': 'Errors',
@@ -7153,51 +5016,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Avoid bare `except:` and broad `except Exception:` — they hide bugs and absorb '
             'signals like `KeyboardInterrupt`.'],
   'see_also': ['conditionals', 'guard-clauses', 'custom-exceptions', 'warnings'],
-  'walkthrough': [{'prose': 'When no exception is raised, the `else` block runs. Keeping success '
-                            'in `else` makes the `try` block contain only the operation that might '
-                            'fail.',
-                   'code': 'def parse_int(text):\n'
-                           '    return int(text)\n'
-                           '\n'
-                           'text = "42"\n'
-                           'try:\n'
-                           '    number = parse_int(text)\n'
-                           'except ValueError:\n'
-                           '    print(f"{text}: invalid")\n'
-                           'else:\n'
-                           '    print(f"{text}: {number}")\n'
-                           'finally:\n'
-                           '    print(f"checked {text}")'},
-                  {'prose': 'When parsing fails, `int()` raises `ValueError`. Catching that '
-                            'specific exception makes the expected recovery path explicit.',
-                   'code': 'text = "python"\n'
-                           'try:\n'
-                           '    number = parse_int(text)\n'
-                           'except ValueError:\n'
-                           '    print(f"{text}: invalid")\n'
-                           'else:\n'
-                           '    print(f"{text}: {number}")\n'
-                           'finally:\n'
-                           '    print(f"checked {text}")'},
-                  {'prose': 'Bare `except:` and broad `except Exception:` swallow far more than '
-                            'the failure you meant to handle, including `KeyboardInterrupt` (bare) '
-                            'and most programming bugs (broad). Catch the specific class — '
-                            '`ValueError` here — so unexpected failures still surface.',
-                   'code': 'def safe_parse_broken(text):\n'
-                           '    try:\n'
-                           '        return int(text)\n'
-                           '    except Exception:\n'
-                           '        return None\n'
-                           '\n'
-                           'def safe_parse_fixed(text):\n'
-                           '    try:\n'
-                           '        return int(text)\n'
-                           '    except ValueError:\n'
-                           '        return None\n'
-                           '\n'
-                           'print(safe_parse_broken("42"))\n'
-                           'print(safe_parse_fixed("42"))'}],
-  'cells': [{'prose': ['When no exception is raised, the `else` block runs. Keeping success in '
+  'cells': [{'kind': 'cell',
+             'prose': ['When no exception is raised, the `else` block runs. Keeping success in '
                        '`else` makes the `try` block contain only the operation that might fail.'],
              'code': 'def parse_int(text):\n'
                      '    return int(text)\n'
@@ -7211,10 +5031,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    print(f"{text}: {number}")\n'
                      'finally:\n'
                      '    print(f"checked {text}")',
-             'output': '42: 42\nchecked 42',
-             'line': 25,
-             'kind': 'cell'},
-            {'prose': ['When parsing fails, `int()` raises `ValueError`. Catching that specific '
+             'output': '42: 42\nchecked 42'},
+            {'kind': 'cell',
+             'prose': ['When parsing fails, `int()` raises `ValueError`. Catching that specific '
                        'exception makes the expected recovery path explicit.'],
              'code': 'text = "python"\n'
                      'try:\n'
@@ -7225,13 +5044,14 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    print(f"{text}: {number}")\n'
                      'finally:\n'
                      '    print(f"checked {text}")',
-             'output': 'python: invalid\nchecked python',
-             'line': 49,
-             'kind': 'cell'},
-            {'prose': ['Bare `except:` and broad `except Exception:` swallow far more than the '
+             'output': 'python: invalid\nchecked python'},
+            {'kind': 'cell',
+             'prose': ['Bare `except:` and broad `except Exception:` swallow far more than the '
                        'failure you meant to handle, including `KeyboardInterrupt` (bare) and most '
-                       'programming bugs (broad). Catch the specific class — `ValueError` here — '
-                       'so unexpected failures still surface.'],
+                       'programming bugs (broad). The two functions look interchangeable on good '
+                       'input — the divergence appears on a buggy call: passing a list is a '
+                       'programming error, yet the broad version converts it into a quiet `None` '
+                       'while the specific version lets the `TypeError` surface.'],
              'code': 'def safe_parse_broken(text):\n'
                      '    try:\n'
                      '        return int(text)\n'
@@ -7245,10 +5065,14 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        return None\n'
                      '\n'
                      'print(safe_parse_broken("42"))\n'
-                     'print(safe_parse_fixed("42"))',
-             'output': '42\n42',
-             'line': 70,
-             'kind': 'cell'}],
+                     'print(safe_parse_fixed("42"))\n'
+                     'print(safe_parse_broken(["4", "2"]))\n'
+                     '\n'
+                     'try:\n'
+                     '    safe_parse_fixed(["4", "2"])\n'
+                     'except TypeError as error:\n'
+                     '    print(type(error).__name__)',
+             'output': '42\n42\nNone\nTypeError'}],
   'code': 'def parse_int(text):\n'
           '    return int(text)\n'
           '\n'
@@ -7276,11 +5100,21 @@ EXAMPLES = [{'slug': 'hello-world',
           '        return None\n'
           '\n'
           'print(safe_parse_broken("42"))\n'
-          'print(safe_parse_fixed("42"))\n',
-  'expected_output': '42: 42\nchecked 42\npython: invalid\nchecked python\n42\n42\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+          'print(safe_parse_fixed("42"))\n'
+          'print(safe_parse_broken(["4", "2"]))\n'
+          '\n'
+          'try:\n'
+          '    safe_parse_fixed(["4", "2"])\n'
+          'except TypeError as error:\n'
+          '    print(type(error).__name__)\n',
+  'expected_output': '42: 42\n'
+                     'checked 42\n'
+                     'python: invalid\n'
+                     'checked python\n'
+                     '42\n'
+                     '42\n'
+                     'None\n'
+                     'TypeError\n'},
  {'slug': 'assertions',
   'title': 'Assertions',
   'section': 'Errors',
@@ -7300,35 +5134,20 @@ EXAMPLES = [{'slug': 'hello-world',
             'Assertions can be disabled with Python optimization flags, so do not rely on them for '
             'security checks.'],
   'see_also': ['exceptions', 'custom-exceptions', 'type-hints'],
-  'walkthrough': [{'prose': 'When the assertion is true, execution continues normally. The '
-                            "assertion documents the function's internal expectation.",
-                   'code': 'def average(scores):\n'
-                           '    assert scores, "scores must not be empty"\n'
-                           '    return sum(scores) / len(scores)\n'
-                           '\n'
-                           'print(average([8, 10]))'},
-                  {'prose': 'When the assertion is false, Python raises `AssertionError`. This '
-                            'signals a broken assumption, not a normal recovery path.',
-                   'code': 'try:\n'
-                           '    average([])\n'
-                           'except AssertionError as error:\n'
-                           '    print(error)'}],
-  'cells': [{'prose': ['When the assertion is true, execution continues normally. The assertion '
+  'cells': [{'kind': 'cell',
+             'prose': ['When the assertion is true, execution continues normally. The assertion '
                        "documents the function's internal expectation."],
              'code': 'def average(scores):\n'
                      '    assert scores, "scores must not be empty"\n'
                      '    return sum(scores) / len(scores)\n'
                      '\n'
                      'print(average([8, 10]))',
-             'output': '9.0',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['When the assertion is false, Python raises `AssertionError`. This signals '
+             'output': '9.0'},
+            {'kind': 'cell',
+             'prose': ['When the assertion is false, Python raises `AssertionError`. This signals '
                        'a broken assumption, not a normal recovery path.'],
              'code': 'try:\n    average([])\nexcept AssertionError as error:\n    print(error)',
-             'output': 'scores must not be empty',
-             'line': 38,
-             'kind': 'cell'}],
+             'output': 'scores must not be empty'}],
   'code': 'def average(scores):\n'
           '    assert scores, "scores must not be empty"\n'
           '    return sum(scores) / len(scores)\n'
@@ -7339,10 +5158,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '    average([])\n'
           'except AssertionError as error:\n'
           '    print(error)\n',
-  'expected_output': '9.0\nscores must not be empty\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '9.0\nscores must not be empty\n'},
  {'slug': 'exception-chaining',
   'title': 'Exception Chaining',
   'section': 'Errors',
@@ -7359,27 +5175,8 @@ EXAMPLES = [{'slug': 'hello-world',
             "The new exception's `__cause__` points to the original exception.",
             'Chaining keeps user-facing errors clear without losing debugging context.'],
   'see_also': ['exceptions', 'custom-exceptions', 'assertions'],
-  'walkthrough': [{'prose': 'Catch the low-level exception where it happens, then raise a '
-                            'domain-specific exception from it.',
-                   'code': 'class ConfigError(Exception):\n'
-                           '    pass\n'
-                           '\n'
-                           '\n'
-                           'def read_port(text):\n'
-                           '    try:\n'
-                           '        return int(text)\n'
-                           '    except ValueError as error:\n'
-                           '        raise ConfigError("port must be a number") from error\n'
-                           '\n'
-                           'print(ConfigError.__name__)'},
-                  {'prose': 'The caller handles the domain error. The original `ValueError` '
-                            'remains available as `__cause__`.',
-                   'code': 'try:\n'
-                           '    read_port("abc")\n'
-                           'except ConfigError as error:\n'
-                           '    print(error)\n'
-                           '    print(type(error.__cause__).__name__)'}],
-  'cells': [{'prose': ['Catch the low-level exception where it happens, then raise a '
+  'cells': [{'kind': 'cell',
+             'prose': ['Catch the low-level exception where it happens, then raise a '
                        'domain-specific exception from it.'],
              'code': 'class ConfigError(Exception):\n'
                      '    pass\n'
@@ -7392,19 +5189,16 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        raise ConfigError("port must be a number") from error\n'
                      '\n'
                      'print(ConfigError.__name__)',
-             'output': 'ConfigError',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['The caller handles the domain error. The original `ValueError` remains '
+             'output': 'ConfigError'},
+            {'kind': 'cell',
+             'prose': ['The caller handles the domain error. The original `ValueError` remains '
                        'available as `__cause__`.'],
              'code': 'try:\n'
                      '    read_port("abc")\n'
                      'except ConfigError as error:\n'
                      '    print(error)\n'
                      '    print(type(error.__cause__).__name__)',
-             'output': 'port must be a number\nValueError',
-             'line': 44,
-             'kind': 'cell'}],
+             'output': 'port must be a number\nValueError'}],
   'code': 'class ConfigError(Exception):\n'
           '    pass\n'
           '\n'
@@ -7422,10 +5216,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'except ConfigError as error:\n'
           '    print(error)\n'
           '    print(type(error.__cause__).__name__)\n',
-  'expected_output': 'ConfigError\nport must be a number\nValueError\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'ConfigError\nport must be a number\nValueError\n'},
  {'slug': 'exception-groups',
   'title': 'Exception Groups',
   'section': 'Errors',
@@ -7444,35 +5235,17 @@ EXAMPLES = [{'slug': 'hello-world',
             'Each `except*` clause handles matching members of the group.',
             'Exception groups often appear around concurrent work.'],
   'see_also': ['exceptions', 'exception-chaining', 'async-await'],
-  'walkthrough': [{'prose': 'An exception group bundles several exception objects. This is '
-                            'different from an ordinary exception because more than one failure is '
-                            'present.',
-                   'code': 'errors = ExceptionGroup(\n'
-                           '    "batch failed",\n'
-                           '    [ValueError("bad port"), TypeError("bad mode")],\n'
-                           ')\n'
-                           'print(len(errors.exceptions))'},
-                  {'prose': '`except*` handles matching members of the group. The `ValueError` '
-                            'handler sees the value error, and the `TypeError` handler sees the '
-                            'type error.',
-                   'code': 'try:\n'
-                           '    raise errors\n'
-                           'except* ValueError as group:\n'
-                           '    print(type(group).__name__)\n'
-                           '    print(group.exceptions[0])\n'
-                           'except* TypeError as group:\n'
-                           '    print(group.exceptions[0])'}],
-  'cells': [{'prose': ['An exception group bundles several exception objects. This is different '
+  'cells': [{'kind': 'cell',
+             'prose': ['An exception group bundles several exception objects. This is different '
                        'from an ordinary exception because more than one failure is present.'],
              'code': 'errors = ExceptionGroup(\n'
                      '    "batch failed",\n'
                      '    [ValueError("bad port"), TypeError("bad mode")],\n'
                      ')\n'
                      'print(len(errors.exceptions))',
-             'output': '2',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`except*` handles matching members of the group. The `ValueError` handler '
+             'output': '2'},
+            {'kind': 'cell',
+             'prose': ['`except*` handles matching members of the group. The `ValueError` handler '
                        'sees the value error, and the `TypeError` handler sees the type error.'],
              'code': 'try:\n'
                      '    raise errors\n'
@@ -7481,9 +5254,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    print(group.exceptions[0])\n'
                      'except* TypeError as group:\n'
                      '    print(group.exceptions[0])',
-             'output': 'ExceptionGroup\nbad port\nbad mode',
-             'line': 38,
-             'kind': 'cell'}],
+             'output': 'ExceptionGroup\nbad port\nbad mode'}],
   'code': 'errors = ExceptionGroup(\n'
           '    "batch failed",\n'
           '    [ValueError("bad port"), TypeError("bad mode")],\n'
@@ -7497,10 +5268,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '    print(group.exceptions[0])\n'
           'except* TypeError as group:\n'
           '    print(group.exceptions[0])\n',
-  'expected_output': '2\nExceptionGroup\nbad port\nbad mode\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '2\nExceptionGroup\nbad port\nbad mode\n'},
  {'slug': 'warnings',
   'title': 'Warnings',
   'section': 'Errors',
@@ -7520,30 +5288,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use exceptions when the current operation cannot continue.',
             '`stacklevel` should point the warning at the caller rather than inside the helper.'],
   'see_also': ['exceptions', 'logging', 'testing'],
-  'walkthrough': [{'prose': 'Capture warnings in tests when the returned value still matters but '
-                            'the migration notice must be asserted.',
-                   'code': 'import warnings\n'
-                           '\n'
-                           '\n'
-                           'def old_name():\n'
-                           '    warnings.warn("old_name is deprecated", DeprecationWarning, '
-                           'stacklevel=2)\n'
-                           '    return "result"\n'
-                           '\n'
-                           'with warnings.catch_warnings(record=True) as caught:\n'
-                           '    warnings.simplefilter("always", DeprecationWarning)\n'
-                           '    print(old_name())\n'
-                           '    print(caught[0].category.__name__)\n'
-                           '    print(str(caught[0].message))'},
-                  {'prose': 'A filter can promote selected warnings to exceptions, which is useful '
-                            'in CI when deprecated calls should fail the build.',
-                   'code': 'with warnings.catch_warnings():\n'
-                           '    warnings.simplefilter("error", DeprecationWarning)\n'
-                           '    try:\n'
-                           '        old_name()\n'
-                           '    except DeprecationWarning:\n'
-                           '        print("warning became error")'}],
-  'cells': [{'prose': ['Capture warnings in tests when the returned value still matters but the '
+  'cells': [{'kind': 'cell',
+             'prose': ['Capture warnings in tests when the returned value still matters but the '
                        'migration notice must be asserted.'],
              'code': 'import warnings\n'
                      '\n'
@@ -7558,10 +5304,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    print(old_name())\n'
                      '    print(caught[0].category.__name__)\n'
                      '    print(str(caught[0].message))',
-             'output': 'result\nDeprecationWarning\nold_name is deprecated',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['A filter can promote selected warnings to exceptions, which is useful in '
+             'output': 'result\nDeprecationWarning\nold_name is deprecated'},
+            {'kind': 'cell',
+             'prose': ['A filter can promote selected warnings to exceptions, which is useful in '
                        'CI when deprecated calls should fail the build.'],
              'code': 'with warnings.catch_warnings():\n'
                      '    warnings.simplefilter("error", DeprecationWarning)\n'
@@ -7569,9 +5314,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        old_name()\n'
                      '    except DeprecationWarning:\n'
                      '        print("warning became error")',
-             'output': 'warning became error',
-             'line': 47,
-             'kind': 'cell'}],
+             'output': 'warning became error'}],
   'code': 'import warnings\n'
           '\n'
           '\n'
@@ -7591,10 +5334,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '        old_name()\n'
           '    except DeprecationWarning:\n'
           '        print("warning became error")\n',
-  'expected_output': 'result\nDeprecationWarning\nold_name is deprecated\nwarning became error\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'result\nDeprecationWarning\nold_name is deprecated\nwarning became error\n'},
  {'slug': 'modules',
   'title': 'Modules',
   'section': 'Modules',
@@ -7614,55 +5354,31 @@ EXAMPLES = [{'slug': 'hello-world',
             'Place imports near the top of the file.',
             'Imports execute module top-level code once, then reuse the cached module object.'],
   'see_also': ['import-aliases', 'packages'],
-  'walkthrough': [{'prose': 'Importing a module gives access to its namespace. The `math.` prefix '
-                            'makes it clear where `pi` came from.',
-                   'code': 'import math\n'
-                           '\n'
-                           'radius = 3\n'
-                           'area = math.pi * radius ** 2\n'
-                           'print(round(area, 2))'},
-                  {'prose': 'A focused `from ... import ...` brings one definition into the '
-                            'current namespace. This keeps a common operation concise without '
-                            'importing every name.',
-                   'code': 'from statistics import mean\n'
-                           '\n'
-                           'scores = [8, 10, 9]\n'
-                           'print(mean(scores))'},
-                  {'prose': 'Modules are objects too. Their attributes include metadata such as '
-                            "`__name__`, which records the module's import name.",
-                   'code': 'print(math.__name__)'},
-                  {'prose': 'Imported modules are cached in `sys.modules`. Later imports reuse the '
-                            'module object instead of executing the file again.',
-                   'code': 'import sys\nprint("math" in sys.modules)'}],
-  'cells': [{'prose': ['Importing a module gives access to its namespace. The `math.` prefix makes '
+  'cells': [{'kind': 'cell',
+             'prose': ['Importing a module gives access to its namespace. The `math.` prefix makes '
                        'it clear where `pi` came from.'],
              'code': 'import math\n'
                      '\n'
                      'radius = 3\n'
                      'area = math.pi * radius ** 2\n'
                      'print(round(area, 2))',
-             'output': '28.27',
-             'line': 21,
-             'kind': 'cell'},
-            {'prose': ['A focused `from ... import ...` brings one definition into the current '
+             'output': '28.27'},
+            {'kind': 'cell',
+             'prose': ['A focused `from ... import ...` brings one definition into the current '
                        'namespace. This keeps a common operation concise without importing every '
                        'name.'],
              'code': 'from statistics import mean\n\nscores = [8, 10, 9]\nprint(mean(scores))',
-             'output': '9',
-             'line': 37,
-             'kind': 'cell'},
-            {'prose': ['Modules are objects too. Their attributes include metadata such as '
+             'output': '9'},
+            {'kind': 'cell',
+             'prose': ['Modules are objects too. Their attributes include metadata such as '
                        "`__name__`, which records the module's import name."],
              'code': 'print(math.__name__)',
-             'output': 'math',
-             'line': 52,
-             'kind': 'cell'},
-            {'prose': ['Imported modules are cached in `sys.modules`. Later imports reuse the '
+             'output': 'math'},
+            {'kind': 'cell',
+             'prose': ['Imported modules are cached in `sys.modules`. Later imports reuse the '
                        'module object instead of executing the file again.'],
              'code': 'import sys\nprint("math" in sys.modules)',
-             'output': 'True',
-             'line': 64,
-             'kind': 'cell'}],
+             'output': 'True'}],
   'code': 'import math\n'
           'import sys\n'
           'from statistics import mean\n'
@@ -7676,10 +5392,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(math.__name__)\n'
           'print("math" in sys.modules)\n',
-  'expected_output': '28.27\n9\nmath\nTrue\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '28.27\n9\nmath\nTrue\n'},
  {'slug': 'import-aliases',
   'title': 'Import Aliases',
   'section': 'Modules',
@@ -7698,21 +5411,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Prefer plain imports unless an alias improves clarity or follows a strong convention.',
             'Avoid `from module import *` because it makes dependencies harder to see.'],
   'see_also': ['modules', 'functions'],
-  'walkthrough': [{'prose': 'A module alias keeps the namespace but changes the local name. Here '
-                            '`stats` is shorter, but readers can still see that `mean` belongs to '
-                            'the statistics module.',
-                   'code': 'import statistics as stats\n'
-                           '\n'
-                           'scores = [8, 10, 9]\n'
-                           'print(stats.mean(scores))\n'
-                           'print(stats.__name__)'},
-                  {'prose': 'A name imported with `from` can also be aliased. Use this when the '
-                            'local name explains the role better than the original name.',
-                   'code': 'from math import sqrt as square_root\n'
-                           '\n'
-                           'print(square_root(81))\n'
-                           'print(square_root.__name__)'}],
-  'cells': [{'prose': ['A module alias keeps the namespace but changes the local name. Here '
+  'cells': [{'kind': 'cell',
+             'prose': ['A module alias keeps the namespace but changes the local name. Here '
                        '`stats` is shorter, but readers can still see that `mean` belongs to the '
                        'statistics module.'],
              'code': 'import statistics as stats\n'
@@ -7720,18 +5420,15 @@ EXAMPLES = [{'slug': 'hello-world',
                      'scores = [8, 10, 9]\n'
                      'print(stats.mean(scores))\n'
                      'print(stats.__name__)',
-             'output': '9\nstatistics',
-             'line': 21,
-             'kind': 'cell'},
-            {'prose': ['A name imported with `from` can also be aliased. Use this when the local '
+             'output': '9\nstatistics'},
+            {'kind': 'cell',
+             'prose': ['A name imported with `from` can also be aliased. Use this when the local '
                        'name explains the role better than the original name.'],
              'code': 'from math import sqrt as square_root\n'
                      '\n'
                      'print(square_root(81))\n'
                      'print(square_root.__name__)',
-             'output': '9.0\nsqrt',
-             'line': 38,
-             'kind': 'cell'}],
+             'output': '9.0\nsqrt'}],
   'code': 'import statistics as stats\n'
           'from math import sqrt as square_root\n'
           '\n'
@@ -7741,10 +5438,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(square_root(81))\n'
           'print(square_root.__name__)\n',
-  'expected_output': '9\nstatistics\n9.0\nsqrt\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '9\nstatistics\n9.0\nsqrt\n'},
  {'slug': 'packages',
   'title': 'Packages',
   'section': 'Modules',
@@ -7766,75 +5460,30 @@ EXAMPLES = [{'slug': 'hello-world',
             '`__all__` to declare the public surface.',
             'Prefer ordinary imports unless the module name is truly dynamic.'],
   'see_also': ['modules', 'import-aliases', 'virtual-environments'],
-  'walkthrough': [{'prose': 'A package is itself a module. The `json` package exposes a namespace '
-                            'that can contain submodules.',
-                   'code': 'import json\n\nprint(json.__name__)'},
-                  {'prose': 'Dotted imports name a path through a package. Importing '
-                            '`json.decoder` makes that submodule available under the package '
-                            'namespace.',
-                   'code': 'import json.decoder\n'
-                           '\n'
-                           'print(json.decoder.__name__)\n'
-                           'print(json.decoder.JSONDecoder.__name__)'},
-                  {'prose': '`importlib.import_module()` imports by string. It is useful for '
-                            'plugin systems and dynamic imports, but ordinary `import` is clearer '
-                            'when the dependency is known.',
-                   'code': 'import importlib\n'
-                           '\n'
-                           'module = importlib.import_module("json.decoder")\n'
-                           'print(module is json.decoder)'},
-                  {'prose': "Inside a package's `__init__.py`, `from .submodule import name` "
-                            "re-exports a submodule's name at the package root, and `__all__` "
-                            'lists the names that `from package import *` should make visible. '
-                            'This cell builds a temporary `shapes` package on disk to make both '
-                            'forms concrete.',
-                   'code': 'import os\n'
-                           'import sys\n'
-                           'import tempfile\n'
-                           '\n'
-                           'with tempfile.TemporaryDirectory() as tmp:\n'
-                           '    pkg = os.path.join(tmp, "shapes")\n'
-                           '    os.makedirs(pkg)\n'
-                           '    with open(os.path.join(pkg, "__init__.py"), "w") as init:\n'
-                           '        init.write("from .square import area\\n__all__ = '
-                           '[\'area\']\\n")\n'
-                           '    with open(os.path.join(pkg, "square.py"), "w") as square:\n'
-                           '        square.write("def area(side):\\n    return side * side\\n")\n'
-                           '    sys.path.insert(0, tmp)\n'
-                           '    try:\n'
-                           '        import shapes\n'
-                           '        print(shapes.area(3))\n'
-                           '        print(shapes.__all__)\n'
-                           '    finally:\n'
-                           '        sys.path.remove(tmp)\n'
-                           '        sys.modules.pop("shapes", None)\n'
-                           '        sys.modules.pop("shapes.square", None)'}],
-  'cells': [{'prose': ['A package is itself a module. The `json` package exposes a namespace that '
+  'cells': [{'kind': 'cell',
+             'prose': ['A package is itself a module. The `json` package exposes a namespace that '
                        'can contain submodules.'],
              'code': 'import json\n\nprint(json.__name__)',
-             'output': 'json',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Dotted imports name a path through a package. Importing `json.decoder` '
+             'output': 'json'},
+            {'kind': 'cell',
+             'prose': ['Dotted imports name a path through a package. Importing `json.decoder` '
                        'makes that submodule available under the package namespace.'],
              'code': 'import json.decoder\n'
                      '\n'
                      'print(json.decoder.__name__)\n'
                      'print(json.decoder.JSONDecoder.__name__)',
-             'output': 'json.decoder\nJSONDecoder',
-             'line': 36,
-             'kind': 'cell'},
-            {'prose': ['`importlib.import_module()` imports by string. It is useful for plugin '
+             'output': 'json.decoder\nJSONDecoder'},
+            {'kind': 'cell',
+             'prose': ['`importlib.import_module()` imports by string. It is useful for plugin '
                        'systems and dynamic imports, but ordinary `import` is clearer when the '
                        'dependency is known.'],
              'code': 'import importlib\n'
                      '\n'
                      'module = importlib.import_module("json.decoder")\n'
                      'print(module is json.decoder)',
-             'output': 'True',
-             'line': 52,
-             'kind': 'cell'},
-            {'prose': ["Inside a package's `__init__.py`, `from .submodule import name` re-exports "
+             'output': 'True'},
+            {'kind': 'cell',
+             'prose': ["Inside a package's `__init__.py`, `from .submodule import name` re-exports "
                        "a submodule's name at the package root, and `__all__` lists the names that "
                        '`from package import *` should make visible. This cell builds a temporary '
                        '`shapes` package on disk to make both forms concrete.'],
@@ -7858,9 +5507,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        sys.path.remove(tmp)\n'
                      '        sys.modules.pop("shapes", None)\n'
                      '        sys.modules.pop("shapes.square", None)',
-             'output': "9\n['area']",
-             'line': 67,
-             'kind': 'cell'}],
+             'output': "9\n['area']"}],
   'code': 'import importlib\n'
           'import json\n'
           'import json.decoder\n'
@@ -7893,10 +5540,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '        sys.path.remove(tmp)\n'
           '        sys.modules.pop("shapes", None)\n'
           '        sys.modules.pop("shapes.square", None)\n',
-  'expected_output': "json\njson.decoder\nJSONDecoder\nTrue\n9\n['area']\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "json\njson.decoder\nJSONDecoder\nTrue\n9\n['area']\n"},
  {'slug': 'virtual-environments',
   'title': 'Virtual Environments',
   'section': 'Modules',
@@ -7920,22 +5564,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'That runner constraint is separate from the standard Python `venv` workflow you would '
             'use in local projects.'],
   'see_also': ['packages', 'modules', 'import-aliases'],
-  'walkthrough': [{'prose': '`venv.EnvBuilder` exposes the same environment-creation mechanism as '
-                            '`python -m venv`. A temporary directory keeps the example from '
-                            'leaving project files behind.',
-                   'code': 'import pathlib\n'
-                           'import tempfile\n'
-                           'import venv\n'
-                           '\n'
-                           'with tempfile.TemporaryDirectory() as directory:\n'
-                           '    env_path = pathlib.Path(directory) / ".venv"\n'
-                           '    builder = venv.EnvBuilder(with_pip=False)\n'
-                           '    builder.create(env_path)\n'
-                           '\n'
-                           '    config = (env_path / "pyvenv.cfg").read_text()\n'
-                           '    print(env_path.name)\n'
-                           '    print("home" in config)'}],
-  'cells': [{'prose': ['The standard project setup command is `python -m venv .venv`. It creates a '
+  'cells': [{'kind': 'unsupported',
+             'prose': ['The standard project setup command is `python -m venv .venv`. It creates a '
                        'directory with its own interpreter entry points and package install '
                        'location. After activation, `python -m pip install ...` installs into that '
                        'environment rather than into another project. (This workflow is for '
@@ -7947,10 +5577,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'subprocess.run([sys.executable, "-m", "venv", ".venv"], check=True)\n'
                      'subprocess.run([".venv/bin/python", "-m", "pip", "install", "requests"], '
                      'check=True)',
-             'output': '',
-             'line': 23,
-             'kind': 'unsupported'},
-            {'prose': ['`venv.EnvBuilder` exposes the same environment-creation mechanism as '
+             'output': ''},
+            {'kind': 'cell',
+             'prose': ['`venv.EnvBuilder` exposes the same environment-creation mechanism as '
                        '`python -m venv`. A temporary directory keeps the example from leaving '
                        'project files behind.'],
              'code': 'import pathlib\n'
@@ -7965,9 +5594,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    config = (env_path / "pyvenv.cfg").read_text()\n'
                      '    print(env_path.name)\n'
                      '    print("home" in config)',
-             'output': '.venv\nTrue',
-             'line': 35,
-             'kind': 'cell'}],
+             'output': '.venv\nTrue'}],
   'code': 'import pathlib\n'
           'import tempfile\n'
           'import venv\n'
@@ -7980,10 +5607,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '    config = (env_path / "pyvenv.cfg").read_text()\n'
           '    print(env_path.name)\n'
           '    print("home" in config)\n',
-  'expected_output': '.venv\nTrue\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '.venv\nTrue\n'},
  {'slug': 'type-hints',
   'title': 'Type Hints',
   'section': 'Types',
@@ -8002,86 +5626,37 @@ EXAMPLES = [{'slug': 'hello-world',
             'Tools like type checkers and editors use annotations to catch mistakes earlier.',
             'Use `X | Y` for unions and `Optional[X]` for "X or None"; both spellings mean the '
             'same thing.',
-            'Reach for `TypeAlias` when a domain name reads better than a raw primitive type.',
+            'Reach for a `type` alias when a domain name reads better than a raw primitive type.',
             'Use runtime validation when untrusted input must be rejected while the program runs.'],
   'see_also': ['union-and-optional-types',
                'type-aliases',
                'generics-and-typevar',
                'runtime-type-checks'],
-  'walkthrough': [{'prose': 'Type hints document expected parameter and return shapes. Python '
-                            'still runs the function normally at runtime.',
-                   'code': 'def total(numbers: list[int]) -> int:\n'
-                           '    return sum(numbers)\n'
-                           '\n'
-                           'print(total([1, 2, 3]))'},
-                  {'prose': 'Python stores annotations on the function object for tools and '
-                            'introspection. Type checkers use this information without changing '
-                            'the function call syntax.',
-                   'code': 'print(total.__annotations__)'},
-                  {'prose': 'Most hints are not runtime validation. This call passes a string '
-                            'where the hint says `int`; Python still calls the function because '
-                            'the body can format any value.',
-                   'code': 'def label(score: int) -> str:\n'
-                           '    return f"score={score}"\n'
-                           '\n'
-                           'print(label("high"))'},
-                  {'prose': 'Use `X | Y` (PEP 604) to express "either type". `str | None` says the '
-                            'result is a string or absent. `typing.Optional[X]` is the older, '
-                            'still-supported spelling for the same idea — `Optional[X]` is '
-                            'equivalent to `X | None`.',
-                   'code': 'def find(name: str, options: list[str]) -> str | None:\n'
-                           '    return name if name in options else None\n'
-                           '\n'
-                           'print(find("Ada", ["Ada", "Grace"]))\n'
-                           'print(find("Guido", ["Ada", "Grace"]))\n'
-                           '\n'
-                           '\n'
-                           'from typing import Optional\n'
-                           '\n'
-                           'def lookup(name: str) -> Optional[int]:\n'
-                           '    table = {"Ada": 1815, "Grace": 1906}\n'
-                           '    return table.get(name)\n'
-                           '\n'
-                           'print(lookup("Ada"))\n'
-                           'print(lookup("Guido"))'},
-                  {'prose': '`TypeAlias` names a type so it can be reused with intent. `Score: '
-                            'TypeAlias = int` keeps the underlying type at runtime but lets the '
-                            'API talk about a domain concept rather than a primitive.',
-                   'code': 'from typing import TypeAlias\n'
-                           '\n'
-                           'Score: TypeAlias = int\n'
-                           '\n'
-                           'def grade(score: Score) -> str:\n'
-                           '    return "pass" if score >= 50 else "fail"\n'
-                           '\n'
-                           'print(grade(72))'}],
-  'cells': [{'prose': ['Type hints document expected parameter and return shapes. Python still '
+  'cells': [{'kind': 'cell',
+             'prose': ['Type hints document expected parameter and return shapes. Python still '
                        'runs the function normally at runtime.'],
              'code': 'def total(numbers: list[int]) -> int:\n'
                      '    return sum(numbers)\n'
                      '\n'
                      'print(total([1, 2, 3]))',
-             'output': '6',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Python stores annotations on the function object for tools and '
+             'output': '6'},
+            {'kind': 'cell',
+             'prose': ['Python stores annotations on the function object for tools and '
                        'introspection. Type checkers use this information without changing the '
                        'function call syntax.'],
              'code': 'print(total.__annotations__)',
-             'output': "{'numbers': list[int], 'return': <class 'int'>}",
-             'line': 38,
-             'kind': 'cell'},
-            {'prose': ['Most hints are not runtime validation. This call passes a string where the '
+             'output': "{'numbers': list[int], 'return': <class 'int'>}"},
+            {'kind': 'cell',
+             'prose': ['Most hints are not runtime validation. This call passes a string where the '
                        'hint says `int`; Python still calls the function because the body can '
                        'format any value.'],
              'code': 'def label(score: int) -> str:\n'
                      '    return f"score={score}"\n'
                      '\n'
                      'print(label("high"))',
-             'output': 'score=high',
-             'line': 50,
-             'kind': 'cell'},
-            {'prose': ['Use `X | Y` (PEP 604) to express "either type". `str | None` says the '
+             'output': 'score=high'},
+            {'kind': 'cell',
+             'prose': ['Use `X | Y` (PEP 604) to express "either type". `str | None` says the '
                        'result is a string or absent. `typing.Optional[X]` is the older, '
                        'still-supported spelling for the same idea — `Optional[X]` is equivalent '
                        'to `X | None`.'],
@@ -8100,26 +5675,21 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(lookup("Ada"))\n'
                      'print(lookup("Guido"))',
-             'output': 'Ada\nNone\n1815\nNone',
-             'line': 65,
-             'kind': 'cell'},
-            {'prose': ['`TypeAlias` names a type so it can be reused with intent. `Score: '
-                       'TypeAlias = int` keeps the underlying type at runtime but lets the API '
-                       'talk about a domain concept rather than a primitive.'],
-             'code': 'from typing import TypeAlias\n'
-                     '\n'
-                     'Score: TypeAlias = int\n'
+             'output': 'Ada\nNone\n1815\nNone'},
+            {'kind': 'cell',
+             'prose': ['The `type` statement names a type so it can be reused with intent. `type '
+                       'Score = int` keeps the underlying type at runtime but lets the API talk '
+                       'about a domain concept rather than a primitive. Older code spells this '
+                       '`Score: TypeAlias = int`; `typing.TypeAlias` is deprecated since Python '
+                       '3.12, and the type-aliases page covers the modern statement in depth.'],
+             'code': 'type Score = int\n'
                      '\n'
                      'def grade(score: Score) -> str:\n'
                      '    return "pass" if score >= 50 else "fail"\n'
                      '\n'
                      'print(grade(72))',
-             'output': 'pass',
-             'line': 94,
-             'kind': 'cell'}],
-  'code': 'from typing import TypeAlias\n'
-          '\n'
-          'def total(numbers: list[int]) -> int:\n'
+             'output': 'pass'}],
+  'code': 'def total(numbers: list[int]) -> int:\n'
           '    return sum(numbers)\n'
           '\n'
           'print(total([1, 2, 3]))\n'
@@ -8149,7 +5719,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(lookup("Guido"))\n'
           '\n'
           '\n'
-          'Score: TypeAlias = int\n'
+          'type Score = int\n'
           '\n'
           'def grade(score: Score) -> str:\n'
           '    return "pass" if score >= 50 else "fail"\n'
@@ -8162,10 +5732,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'None\n'
                      '1815\n'
                      'None\n'
-                     'pass\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     'pass\n'},
  {'slug': 'runtime-type-checks',
   'title': 'Runtime Type Checks',
   'section': 'Types',
@@ -8185,24 +5752,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Runtime checks inspect objects, not static annotations.',
             'Prefer behavior, protocols, or clear validation over scattered type checks.'],
   'see_also': ['type-hints', 'protocols', 'casts-and-any', 'abstract-base-classes'],
-  'walkthrough': [{'prose': '`type()` reports the exact runtime class. A `Dog` instance is not '
-                            'exactly an `Animal` instance.',
-                   'code': 'class Animal:\n'
-                           '    pass\n'
-                           '\n'
-                           'class Dog(Animal):\n'
-                           '    pass\n'
-                           '\n'
-                           'pet = Dog()\n'
-                           'print(type(pet).__name__)\n'
-                           'print(type(pet) is Animal)'},
-                  {'prose': '`isinstance()` accepts subclasses, which is usually what API '
-                            'boundaries want.',
-                   'code': 'print(isinstance(pet, Dog))\nprint(isinstance(pet, Animal))'},
-                  {'prose': '`issubclass()` checks class relationships rather than individual '
-                            'objects.',
-                   'code': 'print(issubclass(Dog, Animal))'}],
-  'cells': [{'prose': ['`type()` reports the exact runtime class. A `Dog` instance is not exactly '
+  'cells': [{'kind': 'cell',
+             'prose': ['`type()` reports the exact runtime class. A `Dog` instance is not exactly '
                        'an `Animal` instance.'],
              'code': 'class Animal:\n'
                      '    pass\n'
@@ -8213,20 +5764,16 @@ EXAMPLES = [{'slug': 'hello-world',
                      'pet = Dog()\n'
                      'print(type(pet).__name__)\n'
                      'print(type(pet) is Animal)',
-             'output': 'Dog\nFalse',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['`isinstance()` accepts subclasses, which is usually what API boundaries '
+             'output': 'Dog\nFalse'},
+            {'kind': 'cell',
+             'prose': ['`isinstance()` accepts subclasses, which is usually what API boundaries '
                        'want.'],
              'code': 'print(isinstance(pet, Dog))\nprint(isinstance(pet, Animal))',
-             'output': 'True\nTrue',
-             'line': 44,
-             'kind': 'cell'},
-            {'prose': ['`issubclass()` checks class relationships rather than individual objects.'],
+             'output': 'True\nTrue'},
+            {'kind': 'cell',
+             'prose': ['`issubclass()` checks class relationships rather than individual objects.'],
              'code': 'print(issubclass(Dog, Animal))',
-             'output': 'True',
-             'line': 58,
-             'kind': 'cell'}],
+             'output': 'True'}],
   'code': 'class Animal:\n'
           '    pass\n'
           '\n'
@@ -8239,10 +5786,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(type(pet) is Animal)\n'
           'print(isinstance(pet, Animal))\n'
           'print(issubclass(Dog, Animal))\n',
-  'expected_output': 'Dog\nFalse\nTrue\nTrue\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'Dog\nFalse\nTrue\nTrue\n'},
  {'slug': 'union-and-optional-types',
   'title': 'Union and Optional Types',
   'section': 'Types',
@@ -8261,36 +5805,17 @@ EXAMPLES = [{'slug': 'hello-world',
             '`T | None` means absence is an expected case, not an error by itself.',
             'Narrow unions before using behavior that belongs to only one member type.'],
   'see_also': ['none', 'type-hints', 'match-statements'],
-  'walkthrough': [{'prose': 'Use `A | B` when a value may have either type. The function body '
-                            'should use operations that make sense for every member of the union.',
-                   'code': 'def label(value: int | str) -> str:\n'
-                           '    return f"item-{value}"\n'
-                           '\n'
-                           'print(label(3))\n'
-                           'print(label("A"))'},
-                  {'prose': '`str | None` means the function accepts either a string or explicit '
-                            'absence. Check for `None` before calling string methods.',
-                   'code': 'def greeting(name: str | None) -> str:\n'
-                           '    if name is None:\n'
-                           '        return "hello guest"\n'
-                           '    return f"hello {name.upper()}"\n'
-                           '\n'
-                           'print(greeting(None))\n'
-                           'print(greeting("Ada"))'},
-                  {'prose': 'Union annotations are visible at runtime, but Python does not enforce '
-                            'them when the function is called.',
-                   'code': 'print(greeting.__annotations__)'}],
-  'cells': [{'prose': ['Use `A | B` when a value may have either type. The function body should '
+  'cells': [{'kind': 'cell',
+             'prose': ['Use `A | B` when a value may have either type. The function body should '
                        'use operations that make sense for every member of the union.'],
              'code': 'def label(value: int | str) -> str:\n'
                      '    return f"item-{value}"\n'
                      '\n'
                      'print(label(3))\n'
                      'print(label("A"))',
-             'output': 'item-3\nitem-A',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`str | None` means the function accepts either a string or explicit '
+             'output': 'item-3\nitem-A'},
+            {'kind': 'cell',
+             'prose': ['`str | None` means the function accepts either a string or explicit '
                        'absence. Check for `None` before calling string methods.'],
              'code': 'def greeting(name: str | None) -> str:\n'
                      '    if name is None:\n'
@@ -8299,15 +5824,12 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(greeting(None))\n'
                      'print(greeting("Ada"))',
-             'output': 'hello guest\nhello ADA',
-             'line': 39,
-             'kind': 'cell'},
-            {'prose': ['Union annotations are visible at runtime, but Python does not enforce them '
+             'output': 'hello guest\nhello ADA'},
+            {'kind': 'cell',
+             'prose': ['Union annotations are visible at runtime, but Python does not enforce them '
                        'when the function is called.'],
              'code': 'print(greeting.__annotations__)',
-             'output': "{'name': str | None, 'return': <class 'str'>}",
-             'line': 58,
-             'kind': 'cell'}],
+             'output': "{'name': str | None, 'return': <class 'str'>}"}],
   'code': 'def label(value: int | str) -> str:\n'
           '    return f"item-{value}"\n'
           '\n'
@@ -8326,10 +5848,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'item-A\n'
                      'hello guest\n'
                      'hello ADA\n'
-                     "{'name': str | None, 'return': <class 'str'>}\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     "{'name': str | None, 'return': <class 'str'>}\n"},
  {'slug': 'type-aliases',
   'title': 'Type Aliases',
   'section': 'Types',
@@ -8350,24 +5869,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use `NewType` when two values share a runtime representation but should not be mixed '
             'statically.'],
   'see_also': ['type-hints', 'newtype', 'union-and-optional-types'],
-  'walkthrough': [{'prose': 'The `type` statement names an annotation shape. Here `Scores` means a '
-                            'dictionary from user IDs to integer scores.',
-                   'code': 'type UserId = int\n'
-                           'type Scores = dict[UserId, int]\n'
-                           '\n'
-                           '\n'
-                           'def best_user(scores: Scores) -> UserId:\n'
-                           '    return max(scores, key=scores.get)\n'
-                           '\n'
-                           'scores: Scores = {1: 98, 2: 91}\n'
-                           'print(best_user(scores))'},
-                  {'prose': 'Modern aliases are runtime objects that keep their alias name for '
-                            'introspection.',
-                   'code': 'print(UserId.__name__)\nprint(Scores.__name__)'},
-                  {'prose': 'Assignment-style aliases are still common, but they are just ordinary '
-                            'names bound to existing objects.',
-                   'code': 'LegacyName = str\nprint(LegacyName("Ada"))\nprint(LegacyName is str)'}],
-  'cells': [{'prose': ['The `type` statement names an annotation shape. Here `Scores` means a '
+  'cells': [{'kind': 'cell',
+             'prose': ['The `type` statement names an annotation shape. Here `Scores` means a '
                        'dictionary from user IDs to integer scores.'],
              'code': 'type UserId = int\n'
                      'type Scores = dict[UserId, int]\n'
@@ -8378,21 +5881,17 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'scores: Scores = {1: 98, 2: 91}\n'
                      'print(best_user(scores))',
-             'output': '1',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Modern aliases are runtime objects that keep their alias name for '
+             'output': '1'},
+            {'kind': 'cell',
+             'prose': ['Modern aliases are runtime objects that keep their alias name for '
                        'introspection.'],
              'code': 'print(UserId.__name__)\nprint(Scores.__name__)',
-             'output': 'UserId\nScores',
-             'line': 42,
-             'kind': 'cell'},
-            {'prose': ['Assignment-style aliases are still common, but they are just ordinary '
+             'output': 'UserId\nScores'},
+            {'kind': 'cell',
+             'prose': ['Assignment-style aliases are still common, but they are just ordinary '
                        'names bound to existing objects.'],
              'code': 'LegacyName = str\nprint(LegacyName("Ada"))\nprint(LegacyName is str)',
-             'output': 'Ada\nTrue',
-             'line': 56,
-             'kind': 'cell'}],
+             'output': 'Ada\nTrue'}],
   'code': 'type UserId = int\n'
           'type Scores = dict[UserId, int]\n'
           'LegacyName = str\n'
@@ -8405,10 +5904,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(best_user(scores))\n'
           'print(UserId.__name__)\n'
           'print(LegacyName("Ada"))\n',
-  'expected_output': '1\nUserId\nAda\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '1\nUserId\nAda\n'},
  {'slug': 'typed-dicts',
   'title': 'TypedDict',
   'section': 'Types',
@@ -8427,34 +5923,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Type checkers understand required and optional keys.',
             'Runtime behavior is still ordinary dictionary behavior.'],
   'see_also': ['dicts', 'json', 'dataclasses', 'structured-data-shapes'],
-  'walkthrough': [{'prose': 'Use `TypedDict` for JSON-like records that remain dictionaries.',
-                   'code': 'from typing import TypedDict\n'
-                           '\n'
-                           'class User(TypedDict):\n'
-                           '    name: str\n'
-                           '    score: int\n'
-                           '\n'
-                           '\n'
-                           'def describe(user: User) -> str:\n'
-                           '    return f"{user[\'name\']}: {user[\'score\']}"\n'
-                           '\n'
-                           'record: User = {"name": "Ada", "score": 98}\n'
-                           'print(describe(record))'},
-                  {'prose': 'At runtime, a `TypedDict` value is still a plain dictionary.',
-                   'code': 'print(isinstance(record, dict))\nprint(type(record).__name__)'},
-                  {'prose': '`NotRequired` marks a key that type checkers should treat as '
-                            'optional. Runtime lookup still uses normal dictionary tools such as '
-                            '`get()`.',
-                   'code': 'from typing import NotRequired\n'
-                           '\n'
-                           'class UserWithNickname(TypedDict):\n'
-                           '    name: str\n'
-                           '    score: int\n'
-                           '    nickname: NotRequired[str]\n'
-                           '\n'
-                           'record: UserWithNickname = {"name": "Ada", "score": 98}\n'
-                           'print(record.get("nickname", "none"))'}],
-  'cells': [{'prose': ['Use `TypedDict` for JSON-like records that remain dictionaries.'],
+  'cells': [{'kind': 'cell',
+             'prose': ['Use `TypedDict` for JSON-like records that remain dictionaries.'],
              'code': 'from typing import TypedDict\n'
                      '\n'
                      'class User(TypedDict):\n'
@@ -8467,15 +5937,13 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'record: User = {"name": "Ada", "score": 98}\n'
                      'print(describe(record))',
-             'output': 'Ada: 98',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['At runtime, a `TypedDict` value is still a plain dictionary.'],
+             'output': 'Ada: 98'},
+            {'kind': 'cell',
+             'prose': ['At runtime, a `TypedDict` value is still a plain dictionary.'],
              'code': 'print(isinstance(record, dict))\nprint(type(record).__name__)',
-             'output': 'True\ndict',
-             'line': 46,
-             'kind': 'cell'},
-            {'prose': ['`NotRequired` marks a key that type checkers should treat as optional. '
+             'output': 'True\ndict'},
+            {'kind': 'cell',
+             'prose': ['`NotRequired` marks a key that type checkers should treat as optional. '
                        'Runtime lookup still uses normal dictionary tools such as `get()`.'],
              'code': 'from typing import NotRequired\n'
                      '\n'
@@ -8486,9 +5954,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'record: UserWithNickname = {"name": "Ada", "score": 98}\n'
                      'print(record.get("nickname", "none"))',
-             'output': 'none',
-             'line': 60,
-             'kind': 'cell'}],
+             'output': 'none'}],
   'code': 'from typing import NotRequired, TypedDict\n'
           '\n'
           'class User(TypedDict):\n'
@@ -8504,10 +5970,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(describe(record))\n'
           'print(isinstance(record, dict))\n'
           'print(record.get("nickname", "none"))\n',
-  'expected_output': 'Ada: 98\nTrue\nnone\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'Ada: 98\nTrue\nnone\n'},
  {'slug': 'structured-data-shapes',
   'title': 'Structured Data Shapes',
   'section': 'Classes',
@@ -8534,57 +5997,8 @@ EXAMPLES = [{'slug': 'hello-world',
             '`collections.namedtuple` is the older, untyped form of `NamedTuple`; prefer the '
             '`typing` version in new code.'],
   'see_also': ['dataclasses', 'typed-dicts', 'tuples', 'classes'],
-  'walkthrough': [{'prose': 'A dataclass is a normal class with `__init__` and `__repr__` '
-                            'generated from the annotated fields. Instances are mutable, support '
-                            'attribute access, and can carry methods like any other class.',
-                   'code': 'from dataclasses import dataclass\n'
-                           '\n'
-                           '@dataclass\n'
-                           'class UserClass:\n'
-                           '    name: str\n'
-                           '    score: int\n'
-                           '\n'
-                           'a = UserClass("Ada", 98)\n'
-                           'print(a)\n'
-                           'a.score = 100\n'
-                           'print(a.score)'},
-                  {'prose': 'A `NamedTuple` is a tuple subclass with named positions. Instances '
-                            'are immutable, support both `obj.field` and `obj[index]`, and the '
-                            'helper `_replace` produces a modified copy without mutating the '
-                            'original (since assigning to a field would fail).',
-                   'code': 'from typing import NamedTuple\n'
-                           '\n'
-                           'class UserTuple(NamedTuple):\n'
-                           '    name: str\n'
-                           '    score: int\n'
-                           '\n'
-                           'b = UserTuple("Ada", 98)\n'
-                           'print(b)\n'
-                           'print(b.name, b[1])\n'
-                           'print(b._replace(score=100))'},
-                  {'prose': 'A `TypedDict` is a plain dictionary at runtime. The annotations exist '
-                            'only for the type checker, so the value behaves like any `dict` — '
-                            'useful for JSON-shaped data that crosses an API boundary as a '
-                            'mapping.',
-                   'code': 'from typing import TypedDict\n'
-                           '\n'
-                           'class UserDict(TypedDict):\n'
-                           '    name: str\n'
-                           '    score: int\n'
-                           '\n'
-                           'c: UserDict = {"name": "Ada", "score": 98}\n'
-                           'print(c)\n'
-                           'print(c["name"])\n'
-                           'print(type(c).__name__)'},
-                  {'prose': 'Same record, three runtime identities. The dataclass is its own '
-                            'class. The `NamedTuple` is literally a tuple. The `TypedDict` is '
-                            'literally a dict. That difference drives the choice: pick the form '
-                            'whose runtime behavior matches what the rest of the program already '
-                            'expects.',
-                   'code': 'print(isinstance(a, UserClass))\n'
-                           'print(isinstance(b, tuple))\n'
-                           'print(isinstance(c, dict))'}],
-  'cells': [{'prose': ['A dataclass is a normal class with `__init__` and `__repr__` generated '
+  'cells': [{'kind': 'cell',
+             'prose': ['A dataclass is a normal class with `__init__` and `__repr__` generated '
                        'from the annotated fields. Instances are mutable, support attribute '
                        'access, and can carry methods like any other class.'],
              'code': 'from dataclasses import dataclass\n'
@@ -8598,10 +6012,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(a)\n'
                      'a.score = 100\n'
                      'print(a.score)',
-             'output': "UserClass(name='Ada', score=98)\n100",
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['A `NamedTuple` is a tuple subclass with named positions. Instances are '
+             'output': "UserClass(name='Ada', score=98)\n100"},
+            {'kind': 'cell',
+             'prose': ['A `NamedTuple` is a tuple subclass with named positions. Instances are '
                        'immutable, support both `obj.field` and `obj[index]`, and the helper '
                        '`_replace` produces a modified copy without mutating the original (since '
                        'assigning to a field would fail).'],
@@ -8615,10 +6028,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(b)\n'
                      'print(b.name, b[1])\n'
                      'print(b._replace(score=100))',
-             'output': "UserTuple(name='Ada', score=98)\nAda 98\nUserTuple(name='Ada', score=100)",
-             'line': 46,
-             'kind': 'cell'},
-            {'prose': ['A `TypedDict` is a plain dictionary at runtime. The annotations exist only '
+             'output': "UserTuple(name='Ada', score=98)\nAda 98\nUserTuple(name='Ada', score=100)"},
+            {'kind': 'cell',
+             'prose': ['A `TypedDict` is a plain dictionary at runtime. The annotations exist only '
                        'for the type checker, so the value behaves like any `dict` — useful for '
                        'JSON-shaped data that crosses an API boundary as a mapping.'],
              'code': 'from typing import TypedDict\n'
@@ -8631,19 +6043,16 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(c)\n'
                      'print(c["name"])\n'
                      'print(type(c).__name__)',
-             'output': "{'name': 'Ada', 'score': 98}\nAda\ndict",
-             'line': 69,
-             'kind': 'cell'},
-            {'prose': ['Same record, three runtime identities. The dataclass is its own class. The '
+             'output': "{'name': 'Ada', 'score': 98}\nAda\ndict"},
+            {'kind': 'cell',
+             'prose': ['Same record, three runtime identities. The dataclass is its own class. The '
                        '`NamedTuple` is literally a tuple. The `TypedDict` is literally a dict. '
                        'That difference drives the choice: pick the form whose runtime behavior '
                        'matches what the rest of the program already expects.'],
              'code': 'print(isinstance(a, UserClass))\n'
                      'print(isinstance(b, tuple))\n'
                      'print(isinstance(c, dict))',
-             'output': 'True\nTrue\nTrue',
-             'line': 92,
-             'kind': 'cell'}],
+             'output': 'True\nTrue\nTrue'}],
   'code': 'from dataclasses import dataclass\n'
           'from typing import NamedTuple, TypedDict\n'
           '\n'
@@ -8688,10 +6097,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'dict\n'
                      'True\n'
                      'True\n'
-                     'True\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     'True\n'},
  {'slug': 'literal-and-final',
   'title': 'Literal and Final',
   'section': 'Types',
@@ -8712,27 +6118,8 @@ EXAMPLES = [{'slug': 'hello-world',
             '`Final` prevents rebinding in static analysis, not at runtime.',
             'Use enums when the option set needs names, behavior, or iteration over members.'],
   'see_also': ['type-hints', 'constants', 'union-and-optional-types', 'overloads'],
-  'walkthrough': [{'prose': '`Literal` describes exact allowed values. A type checker can reject '
-                            '`"debug"` as a `Mode` even though it is an ordinary string at '
-                            'runtime.',
-                   'code': 'from typing import Final, Literal\n'
-                           '\n'
-                           'Mode = Literal["read", "write"]\n'
-                           '\n'
-                           '\n'
-                           'def open_label(mode: Mode) -> str:\n'
-                           '    return f"opening for {mode}"\n'
-                           '\n'
-                           'print(open_label("write"))'},
-                  {'prose': '`Final` marks a name that should not be rebound. It is stronger '
-                            'documentation than the all-caps constant convention because static '
-                            'tools can flag reassignment.',
-                   'code': 'DEFAULT_MODE: Final[Mode] = "read"\nprint(open_label(DEFAULT_MODE))'},
-                  {'prose': 'The annotation is not a runtime lock. Python still rebinds the name; '
-                            'the mistake is that a type checker and human reader should reject the '
-                            'design.',
-                   'code': 'DEFAULT_MODE = "debug"\nprint(DEFAULT_MODE)'}],
-  'cells': [{'prose': ['`Literal` describes exact allowed values. A type checker can reject '
+  'cells': [{'kind': 'cell',
+             'prose': ['`Literal` describes exact allowed values. A type checker can reject '
                        '`"debug"` as a `Mode` even though it is an ordinary string at runtime.'],
              'code': 'from typing import Final, Literal\n'
                      '\n'
@@ -8743,22 +6130,18 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    return f"opening for {mode}"\n'
                      '\n'
                      'print(open_label("write"))',
-             'output': 'opening for write',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['`Final` marks a name that should not be rebound. It is stronger '
+             'output': 'opening for write'},
+            {'kind': 'cell',
+             'prose': ['`Final` marks a name that should not be rebound. It is stronger '
                        'documentation than the all-caps constant convention because static tools '
                        'can flag reassignment.'],
              'code': 'DEFAULT_MODE: Final[Mode] = "read"\nprint(open_label(DEFAULT_MODE))',
-             'output': 'opening for read',
-             'line': 43,
-             'kind': 'cell'},
-            {'prose': ['The annotation is not a runtime lock. Python still rebinds the name; the '
+             'output': 'opening for read'},
+            {'kind': 'cell',
+             'prose': ['The annotation is not a runtime lock. Python still rebinds the name; the '
                        'mistake is that a type checker and human reader should reject the design.'],
              'code': 'DEFAULT_MODE = "debug"\nprint(DEFAULT_MODE)',
-             'output': 'debug',
-             'line': 56,
-             'kind': 'cell'}],
+             'output': 'debug'}],
   'code': 'from typing import Final, Literal\n'
           '\n'
           'Mode = Literal["read", "write"]\n'
@@ -8773,10 +6156,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'DEFAULT_MODE = "debug"\n'
           'print(DEFAULT_MODE)\n',
-  'expected_output': 'opening for read\nopening for write\ndebug\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'opening for read\nopening for write\ndebug\n'},
  {'slug': 'callable-types',
   'title': 'Callable Types',
   'section': 'Types',
@@ -8795,30 +6175,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'The annotation documents how the callback will be called.',
             'For complex call signatures, protocols can be clearer.'],
   'see_also': ['functions', 'callable-objects', 'protocols'],
-  'walkthrough': [{'prose': 'Use `Callable[[Arg], Return]` for function-shaped values. The '
-                            'callback is passed in and called by the receiving function.',
-                   'code': 'from collections.abc import Callable\n'
-                           '\n'
-                           '\n'
-                           'def apply_twice(value: int, func: Callable[[int], int]) -> int:\n'
-                           '    return func(func(value))\n'
-                           '\n'
-                           '\n'
-                           'def add_one(number: int) -> int:\n'
-                           '    return number + 1\n'
-                           '\n'
-                           'print(apply_twice(3, add_one))'},
-                  {'prose': 'Callable annotations are structural: an object with `__call__` can '
-                            'also satisfy the shape.',
-                   'code': 'class Doubler:\n'
-                           '    def __call__(self, number: int) -> int:\n'
-                           '        return number * 2\n'
-                           '\n'
-                           'print(apply_twice(3, Doubler()))'},
-                  {'prose': 'Runtime callability is a separate question from static annotation. '
-                            '`callable()` checks whether Python can call the object.',
-                   'code': 'print(callable(add_one), callable(Doubler()))'}],
-  'cells': [{'prose': ['Use `Callable[[Arg], Return]` for function-shaped values. The callback is '
+  'cells': [{'kind': 'cell',
+             'prose': ['Use `Callable[[Arg], Return]` for function-shaped values. The callback is '
                        'passed in and called by the receiving function.'],
              'code': 'from collections.abc import Callable\n'
                      '\n'
@@ -8831,25 +6189,21 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    return number + 1\n'
                      '\n'
                      'print(apply_twice(3, add_one))',
-             'output': '5',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Callable annotations are structural: an object with `__call__` can also '
+             'output': '5'},
+            {'kind': 'cell',
+             'prose': ['Callable annotations are structural: an object with `__call__` can also '
                        'satisfy the shape.'],
              'code': 'class Doubler:\n'
                      '    def __call__(self, number: int) -> int:\n'
                      '        return number * 2\n'
                      '\n'
                      'print(apply_twice(3, Doubler()))',
-             'output': '12',
-             'line': 44,
-             'kind': 'cell'},
-            {'prose': ['Runtime callability is a separate question from static annotation. '
+             'output': '12'},
+            {'kind': 'cell',
+             'prose': ['Runtime callability is a separate question from static annotation. '
                        '`callable()` checks whether Python can call the object.'],
              'code': 'print(callable(add_one), callable(Doubler()))',
-             'output': 'True True',
-             'line': 60,
-             'kind': 'cell'}],
+             'output': 'True True'}],
   'code': 'from collections.abc import Callable\n'
           '\n'
           '\n'
@@ -8867,10 +6221,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(apply_twice(3, add_one))\n'
           'print(apply_twice(3, Doubler()))\n'
           'print(callable(add_one), callable(Doubler()))\n',
-  'expected_output': '5\n12\nTrue True\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '5\n12\nTrue True\n'},
  {'slug': 'generics-and-typevar',
   'title': 'Generics and TypeVar',
   'section': 'Types',
@@ -8886,31 +6237,14 @@ EXAMPLES = [{'slug': 'hello-world',
                   'Use generics when a function or class is reusable but still preserves a '
                   'relationship between input and output types.'],
   'notes': ['A `TypeVar` stands for a type chosen by the caller.',
+            'Python 3.12+ also accepts the inline PEP 695 spelling `def first[T](items: list[T]) '
+            '-> T`, which declares the variable without a separate `TypeVar` line; the explicit '
+            'form shown here works everywhere and reads the same way.',
             'Generic functions avoid losing information to `object` or `Any`.',
             'Use generics when input and output types are connected.'],
   'see_also': ['type-hints', 'collections-module', 'casts-and-any'],
-  'walkthrough': [{'prose': 'A `TypeVar` stands for a type chosen by the caller. The return type '
-                            'follows the list element type.',
-                   'code': 'from typing import TypeVar\n'
-                           '\n'
-                           'T = TypeVar("T")\n'
-                           '\n'
-                           '\n'
-                           'def first(items: list[T]) -> T:\n'
-                           '    return items[0]\n'
-                           '\n'
-                           'print(first([1, 2, 3]))\n'
-                           'print(first(["Ada", "Grace"]))'},
-                  {'prose': 'Reusing the same `TypeVar` expresses a relationship between '
-                            'parameters and results.',
-                   'code': 'def pair(left: T, right: T) -> tuple[T, T]:\n'
-                           '    return (left, right)\n'
-                           '\n'
-                           'print(pair("x", "y"))'},
-                  {'prose': '`TypeVar` is visible at runtime, but the relationship is mainly for '
-                            'type checkers.',
-                   'code': 'print(T.__name__)\nprint(first.__annotations__)'}],
-  'cells': [{'prose': ['A `TypeVar` stands for a type chosen by the caller. The return type '
+  'cells': [{'kind': 'cell',
+             'prose': ['A `TypeVar` stands for a type chosen by the caller. The return type '
                        'follows the list element type.'],
              'code': 'from typing import TypeVar\n'
                      '\n'
@@ -8922,24 +6256,20 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(first([1, 2, 3]))\n'
                      'print(first(["Ada", "Grace"]))',
-             'output': '1\nAda',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Reusing the same `TypeVar` expresses a relationship between parameters and '
+             'output': '1\nAda'},
+            {'kind': 'cell',
+             'prose': ['Reusing the same `TypeVar` expresses a relationship between parameters and '
                        'results.'],
              'code': 'def pair(left: T, right: T) -> tuple[T, T]:\n'
                      '    return (left, right)\n'
                      '\n'
                      'print(pair("x", "y"))',
-             'output': "('x', 'y')",
-             'line': 44,
-             'kind': 'cell'},
-            {'prose': ['`TypeVar` is visible at runtime, but the relationship is mainly for type '
+             'output': "('x', 'y')"},
+            {'kind': 'cell',
+             'prose': ['`TypeVar` is visible at runtime, but the relationship is mainly for type '
                        'checkers.'],
              'code': 'print(T.__name__)\nprint(first.__annotations__)',
-             'output': "T\n{'items': list[~T], 'return': ~T}",
-             'line': 59,
-             'kind': 'cell'}],
+             'output': "T\n{'items': list[~T], 'return': ~T}"}],
   'code': 'from typing import TypeVar\n'
           '\n'
           'T = TypeVar("T")\n'
@@ -8956,10 +6286,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(first(["Ada", "Grace"]))\n'
           'print(pair("x", "y"))\n'
           'print(T.__name__)\n',
-  'expected_output': "1\nAda\n('x', 'y')\nT\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "1\nAda\n('x', 'y')\nT\n"},
  {'slug': 'paramspec',
   'title': 'ParamSpec',
   'section': 'Types',
@@ -8977,43 +6304,13 @@ EXAMPLES = [{'slug': 'hello-world',
                   "`TypeVar` keeps the return type tied to the wrapped function's return type."],
   'notes': ["`ParamSpec` preserves a callable's parameter list through transparent wrappers.",
             'Pair `ParamSpec` with a `TypeVar` when the return type should also be preserved.',
+            'Python 3.12+ also accepts the inline PEP 695 spelling `def wrap[**P, R](func: '
+            'Callable[P, R])`, which declares both variables in the signature itself.',
             'If the wrapper changes the public signature, write that new signature directly '
             'instead.'],
   'see_also': ['callable-types', 'decorators', 'generics-and-typevar'],
-  'walkthrough': [{'prose': '`Callable[..., R]` is sometimes too broad. It preserves the return '
-                            'type, but the ellipsis means the callable accepts any argument list '
-                            'as far as the type checker can tell.',
-                   'code': 'from collections.abc import Callable\n'
-                           'from typing import ParamSpec, TypeVar\n'
-                           '\n'
-                           'R = TypeVar("R")\n'
-                           '\n'
-                           '\n'
-                           'def erased(func: Callable[..., R]) -> Callable[..., R]:\n'
-                           '    return func\n'
-                           '\n'
-                           'print(erased.__name__)'},
-                  {'prose': '`ParamSpec` captures the original parameters and lets the wrapper '
-                            'forward exactly that shape.',
-                   'code': 'P = ParamSpec("P")\n'
-                           '\n'
-                           '\n'
-                           'def logged(func: Callable[P, R]) -> Callable[P, R]:\n'
-                           '    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:\n'
-                           '        print("calling", func.__name__)\n'
-                           '        return func(*args, **kwargs)\n'
-                           '    return wrapper\n'
-                           '\n'
-                           'print(logged.__name__)'},
-                  {'prose': 'The decorated function still runs normally. The benefit is static: '
-                            'tools can keep checking that `add` receives two integers.',
-                   'code': '@logged\n'
-                           'def add(left: int, right: int) -> int:\n'
-                           '    return left + right\n'
-                           '\n'
-                           'print(erased(add)(2, 3))\n'
-                           'print(add(2, 3))'}],
-  'cells': [{'prose': ['`Callable[..., R]` is sometimes too broad. It preserves the return type, '
+  'cells': [{'kind': 'cell',
+             'prose': ['`Callable[..., R]` is sometimes too broad. It preserves the return type, '
                        'but the ellipsis means the callable accepts any argument list as far as '
                        'the type checker can tell.'],
              'code': 'from collections.abc import Callable\n'
@@ -9026,10 +6323,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    return func\n'
                      '\n'
                      'print(erased.__name__)',
-             'output': 'erased',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`ParamSpec` captures the original parameters and lets the wrapper forward '
+             'output': 'erased'},
+            {'kind': 'cell',
+             'prose': ['`ParamSpec` captures the original parameters and lets the wrapper forward '
                        'exactly that shape.'],
              'code': 'P = ParamSpec("P")\n'
                      '\n'
@@ -9041,10 +6337,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    return wrapper\n'
                      '\n'
                      'print(logged.__name__)',
-             'output': 'logged',
-             'line': 43,
-             'kind': 'cell'},
-            {'prose': ['The decorated function still runs normally. The benefit is static: tools '
+             'output': 'logged'},
+            {'kind': 'cell',
+             'prose': ['The decorated function still runs normally. The benefit is static: tools '
                        'can keep checking that `add` receives two integers.'],
              'code': '@logged\n'
                      'def add(left: int, right: int) -> int:\n'
@@ -9052,9 +6347,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(erased(add)(2, 3))\n'
                      'print(add(2, 3))',
-             'output': 'calling add\n5\ncalling add\n5',
-             'line': 64,
-             'kind': 'cell'}],
+             'output': 'calling add\n5\ncalling add\n5'}],
   'code': 'from collections.abc import Callable\n'
           'from typing import ParamSpec, TypeVar\n'
           '\n'
@@ -9078,10 +6371,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(erased(add)(2, 3))\n'
           'print(add(2, 3))\n',
-  'expected_output': 'calling add\n5\ncalling add\n5\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'calling add\n5\ncalling add\n5\n'},
  {'slug': 'overloads',
   'title': 'Overloads',
   'section': 'Types',
@@ -9101,28 +6391,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'If all callers can work with one broad return type, a simple union annotation is '
             'usually enough.'],
   'see_also': ['type-hints', 'union-and-optional-types', 'generics-and-typevar'],
-  'walkthrough': [{'prose': 'The overload stubs give static tools precise call shapes: integer in, '
-                            'integer out; string in, string out.',
-                   'code': 'from typing import overload\n'
-                           '\n'
-                           '@overload\n'
-                           'def double(value: int) -> int: ...\n'
-                           '\n'
-                           '@overload\n'
-                           'def double(value: str) -> str: ...\n'
-                           '\n'
-                           'print("static signatures only")'},
-                  {'prose': 'There is still one runtime implementation. It must accept every shape '
-                            'promised by the overloads.',
-                   'code': 'def double(value: int | str) -> int | str:\n'
-                           '    return value * 2\n'
-                           '\n'
-                           'print(double(4))\n'
-                           'print(double("ha"))'},
-                  {'prose': "Only the implementation's annotations are visible on the runtime "
-                            'function. The overload declarations were for the type checker.',
-                   'code': 'print(double.__annotations__)'}],
-  'cells': [{'prose': ['The overload stubs give static tools precise call shapes: integer in, '
+  'cells': [{'kind': 'cell',
+             'prose': ['The overload stubs give static tools precise call shapes: integer in, '
                        'integer out; string in, string out.'],
              'code': 'from typing import overload\n'
                      '\n'
@@ -9133,25 +6403,21 @@ EXAMPLES = [{'slug': 'hello-world',
                      'def double(value: str) -> str: ...\n'
                      '\n'
                      'print("static signatures only")',
-             'output': 'static signatures only',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['There is still one runtime implementation. It must accept every shape '
+             'output': 'static signatures only'},
+            {'kind': 'cell',
+             'prose': ['There is still one runtime implementation. It must accept every shape '
                        'promised by the overloads.'],
              'code': 'def double(value: int | str) -> int | str:\n'
                      '    return value * 2\n'
                      '\n'
                      'print(double(4))\n'
                      'print(double("ha"))',
-             'output': '8\nhaha',
-             'line': 42,
-             'kind': 'cell'},
-            {'prose': ["Only the implementation's annotations are visible on the runtime function. "
+             'output': '8\nhaha'},
+            {'kind': 'cell',
+             'prose': ["Only the implementation's annotations are visible on the runtime function. "
                        'The overload declarations were for the type checker.'],
              'code': 'print(double.__annotations__)',
-             'output': "{'value': int | str, 'return': int | str}",
-             'line': 59,
-             'kind': 'cell'}],
+             'output': "{'value': int | str, 'return': int | str}"}],
   'code': 'from typing import overload\n'
           '\n'
           '@overload\n'
@@ -9166,10 +6432,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(double(4))\n'
           'print(double("ha"))\n'
           'print(double.__annotations__)\n',
-  'expected_output': "8\nhaha\n{'value': int | str, 'return': int | str}\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "8\nhaha\n{'value': int | str, 'return': int | str}\n"},
  {'slug': 'casts-and-any',
   'title': 'Casts and Any',
   'section': 'Types',
@@ -9188,23 +6451,8 @@ EXAMPLES = [{'slug': 'hello-world',
             '`cast()` tells the type checker to trust you without changing the runtime object.',
             'Prefer narrowing with checks when possible.'],
   'see_also': ['type-hints', 'runtime-type-checks', 'typed-dicts'],
-  'walkthrough': [{'prose': '`Any` disables most static checking for a value. The runtime object '
-                            'is still whatever value was actually assigned.',
-                   'code': 'from typing import Any, cast\n'
-                           '\n'
-                           'raw: Any = {"score": "98"}\n'
-                           'score_text = cast(dict[str, str], raw)["score"]\n'
-                           'score = int(score_text)\n'
-                           'print(score + 2)'},
-                  {'prose': '`cast()` does not convert or validate the value. It returns the same '
-                            'object at runtime.',
-                   'code': 'print(cast(list[int], raw) is raw)\nprint(type(raw).__name__)'},
-                  {'prose': 'A real runtime check narrows by inspecting the value. This is safer '
-                            'when the input is untrusted.',
-                   'code': 'value: object = {"score": "98"}\n'
-                           'if isinstance(value, dict):\n'
-                           '    print(value["score"])'}],
-  'cells': [{'prose': ['`Any` disables most static checking for a value. The runtime object is '
+  'cells': [{'kind': 'cell',
+             'prose': ['`Any` disables most static checking for a value. The runtime object is '
                        'still whatever value was actually assigned.'],
              'code': 'from typing import Any, cast\n'
                      '\n'
@@ -9212,23 +6460,19 @@ EXAMPLES = [{'slug': 'hello-world',
                      'score_text = cast(dict[str, str], raw)["score"]\n'
                      'score = int(score_text)\n'
                      'print(score + 2)',
-             'output': '100',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`cast()` does not convert or validate the value. It returns the same '
+             'output': '100'},
+            {'kind': 'cell',
+             'prose': ['`cast()` does not convert or validate the value. It returns the same '
                        'object at runtime.'],
              'code': 'print(cast(list[int], raw) is raw)\nprint(type(raw).__name__)',
-             'output': 'True\ndict',
-             'line': 39,
-             'kind': 'cell'},
-            {'prose': ['A real runtime check narrows by inspecting the value. This is safer when '
+             'output': 'True\ndict'},
+            {'kind': 'cell',
+             'prose': ['A real runtime check narrows by inspecting the value. This is safer when '
                        'the input is untrusted.'],
              'code': 'value: object = {"score": "98"}\n'
                      'if isinstance(value, dict):\n'
                      '    print(value["score"])',
-             'output': '98',
-             'line': 53,
-             'kind': 'cell'}],
+             'output': '98'}],
   'code': 'from typing import Any, cast\n'
           '\n'
           'raw: Any = {"score": "98"}\n'
@@ -9237,11 +6481,12 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(score + 2)\n'
           'print(cast(list[int], raw) is raw)\n'
-          'print(type(raw).__name__)\n',
-  'expected_output': '100\nTrue\ndict\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+          'print(type(raw).__name__)\n'
+          '\n'
+          'value: object = {"score": "98"}\n'
+          'if isinstance(value, dict):\n'
+          '    print(value["score"])\n',
+  'expected_output': '100\nTrue\ndict\n98\n'},
  {'slug': 'newtype',
   'title': 'NewType',
   'section': 'Types',
@@ -9261,26 +6506,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'At runtime, the value is still the underlying type.',
             'Use aliases for readability; use `NewType` for static separation.'],
   'see_also': ['type-aliases', 'type-hints', 'runtime-type-checks'],
-  'walkthrough': [{'prose': '`NewType` helps type checkers distinguish values that share a runtime '
-                            'representation.',
-                   'code': 'from typing import NewType\n'
-                           '\n'
-                           'UserId = NewType("UserId", int)\n'
-                           'OrderId = NewType("OrderId", int)\n'
-                           '\n'
-                           '\n'
-                           'def load_user(user_id: UserId) -> str:\n'
-                           '    return f"user {user_id}"\n'
-                           '\n'
-                           'uid = UserId(42)\n'
-                           'print(load_user(uid))'},
-                  {'prose': 'At runtime, a `NewType` value is the underlying value. It compares '
-                            'like that value and has the same runtime type.',
-                   'code': 'oid = OrderId(42)\nprint(uid == oid)\nprint(type(uid).__name__)'},
-                  {'prose': 'The `NewType` constructor keeps a name for static tools and '
-                            'introspection.',
-                   'code': 'print(UserId.__name__)\nprint(OrderId.__name__)'}],
-  'cells': [{'prose': ['`NewType` helps type checkers distinguish values that share a runtime '
+  'cells': [{'kind': 'cell',
+             'prose': ['`NewType` helps type checkers distinguish values that share a runtime '
                        'representation.'],
              'code': 'from typing import NewType\n'
                      '\n'
@@ -9293,21 +6520,17 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'uid = UserId(42)\n'
                      'print(load_user(uid))',
-             'output': 'user 42',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['At runtime, a `NewType` value is the underlying value. It compares like '
+             'output': 'user 42'},
+            {'kind': 'cell',
+             'prose': ['At runtime, a `NewType` value is the underlying value. It compares like '
                        'that value and has the same runtime type.'],
              'code': 'oid = OrderId(42)\nprint(uid == oid)\nprint(type(uid).__name__)',
-             'output': 'True\nint',
-             'line': 44,
-             'kind': 'cell'},
-            {'prose': ['The `NewType` constructor keeps a name for static tools and '
+             'output': 'True\nint'},
+            {'kind': 'cell',
+             'prose': ['The `NewType` constructor keeps a name for static tools and '
                        'introspection.'],
              'code': 'print(UserId.__name__)\nprint(OrderId.__name__)',
-             'output': 'UserId\nOrderId',
-             'line': 59,
-             'kind': 'cell'}],
+             'output': 'UserId\nOrderId'}],
   'code': 'from typing import NewType\n'
           '\n'
           'UserId = NewType("UserId", int)\n'
@@ -9323,10 +6546,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(uid == oid)\n'
           'print(type(uid).__name__)\n'
           'print(UserId.__name__)\n',
-  'expected_output': 'user 42\nTrue\nint\nUserId\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'user 42\nTrue\nint\nUserId\n'},
  {'slug': 'protocols',
   'title': 'Protocols',
   'section': 'Types',
@@ -9346,35 +6566,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Prefer inheritance when shared implementation matters, and protocols when only '
             'required behavior matters.'],
   'see_also': ['type-hints', 'classes', 'inheritance-and-super', 'abstract-base-classes'],
-  'walkthrough': [{'prose': 'A protocol names required behavior. The ellipsis marks the method '
-                            'body as intentionally unspecified, similar to an interface '
-                            'declaration.',
-                   'code': 'from typing import Protocol\n'
-                           '\n'
-                           'class Greeter(Protocol):\n'
-                           '    def greet(self) -> str:\n'
-                           '        ...\n'
-                           '\n'
-                           'print(Greeter.__name__)'},
-                  {'prose': 'A class can satisfy the protocol without inheriting from it. `Person` '
-                            'has a compatible `greet()` method, so it has the right shape for '
-                            'static type checkers.',
-                   'code': 'class Person:\n'
-                           '    def __init__(self, name):\n'
-                           '        self.name = name\n'
-                           '\n'
-                           '    def greet(self):\n'
-                           '        return f"hello {self.name}"\n'
-                           '\n'
-                           'print(Person("Ada").greet())'},
-                  {'prose': 'Use the protocol as an annotation at the API boundary. The function '
-                            'only cares that the object can greet; it does not care about the '
-                            'concrete class.',
-                   'code': 'def welcome(greeter: Greeter):\n'
-                           '    print(greeter.greet())\n'
-                           '\n'
-                           'welcome(Person("Ada"))'}],
-  'cells': [{'prose': ['A protocol names required behavior. The ellipsis marks the method body as '
+  'cells': [{'kind': 'cell',
+             'prose': ['A protocol names required behavior. The ellipsis marks the method body as '
                        'intentionally unspecified, similar to an interface declaration.'],
              'code': 'from typing import Protocol\n'
                      '\n'
@@ -9383,10 +6576,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        ...\n'
                      '\n'
                      'print(Greeter.__name__)',
-             'output': 'Greeter',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['A class can satisfy the protocol without inheriting from it. `Person` has '
+             'output': 'Greeter'},
+            {'kind': 'cell',
+             'prose': ['A class can satisfy the protocol without inheriting from it. `Person` has '
                        'a compatible `greet()` method, so it has the right shape for static type '
                        'checkers.'],
              'code': 'class Person:\n'
@@ -9397,19 +6589,16 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        return f"hello {self.name}"\n'
                      '\n'
                      'print(Person("Ada").greet())',
-             'output': 'hello Ada',
-             'line': 41,
-             'kind': 'cell'},
-            {'prose': ['Use the protocol as an annotation at the API boundary. The function only '
+             'output': 'hello Ada'},
+            {'kind': 'cell',
+             'prose': ['Use the protocol as an annotation at the API boundary. The function only '
                        'cares that the object can greet; it does not care about the concrete '
                        'class.'],
              'code': 'def welcome(greeter: Greeter):\n'
                      '    print(greeter.greet())\n'
                      '\n'
                      'welcome(Person("Ada"))',
-             'output': 'hello Ada',
-             'line': 60,
-             'kind': 'cell'}],
+             'output': 'hello Ada'}],
   'code': 'from typing import Protocol\n'
           '\n'
           'class Greeter(Protocol):\n'
@@ -9429,10 +6618,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'welcome(Person("Ada"))\n'
           'print(Greeter.__name__)\n',
-  'expected_output': 'hello Ada\nGreeter\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'hello Ada\nGreeter\n'},
  {'slug': 'abstract-base-classes',
   'title': 'Abstract Base Classes',
   'section': 'Classes',
@@ -9460,73 +6646,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Prefer an ABC when shared implementation or explicit opt-in matters; prefer a '
             'Protocol when only behavior at the API boundary matters.'],
   'see_also': ['protocols', 'inheritance-and-super', 'classes'],
-  'walkthrough': [{'prose': '`ABC` plus `@abstractmethod` declares the contract. Trying to '
-                            'construct the base class itself fails because at least one method has '
-                            'no implementation. A concrete `describe()` lives alongside the '
-                            'abstract `area()` so subclasses inherit shared behavior for free.',
-                   'code': 'from abc import ABC, abstractmethod\n'
-                           '\n'
-                           'class Shape(ABC):\n'
-                           '    @abstractmethod\n'
-                           '    def area(self) -> float:\n'
-                           '        ...\n'
-                           '\n'
-                           '    def describe(self) -> str:\n'
-                           '        return f"shape with area {self.area()}"\n'
-                           '\n'
-                           'try:\n'
-                           '    Shape()\n'
-                           'except TypeError as error:\n'
-                           '    print(error)'},
-                  {'prose': 'A subclass that implements every abstract method is concrete and can '
-                            'be instantiated. It also inherits the non-abstract methods from the '
-                            'base class.',
-                   'code': 'class Square(Shape):\n'
-                           '    def __init__(self, side):\n'
-                           '        self.side = side\n'
-                           '\n'
-                           '    def area(self):\n'
-                           '        return self.side ** 2\n'
-                           '\n'
-                           'print(Square(3).area())\n'
-                           'print(Square(3).describe())'},
-                  {'prose': 'A subclass that forgets to implement an abstract method also cannot '
-                            'be instantiated — that is the value the ABC adds. The error fires at '
-                            'construction, not when something later tries to call the missing '
-                            'method.',
-                   'code': 'class Incomplete(Shape):\n'
-                           '    pass\n'
-                           '\n'
-                           'try:\n'
-                           '    Incomplete()\n'
-                           'except TypeError as error:\n'
-                           '    print(error)'},
-                  {'prose': 'Contrast with `Protocol`. A `HasArea` protocol accepts any class with '
-                            'an `area()` method, no inheritance required. `Triangle` does not '
-                            'inherit from `Shape`, so it satisfies the protocol but fails '
-                            '`isinstance(_, Shape)`. `Square` satisfies both because it explicitly '
-                            'inherited from the ABC.',
-                   'code': 'from typing import Protocol\n'
-                           '\n'
-                           'class HasArea(Protocol):\n'
-                           '    def area(self) -> float:\n'
-                           '        ...\n'
-                           '\n'
-                           'class Triangle:\n'
-                           '    def __init__(self, base, height):\n'
-                           '        self.base = base\n'
-                           '        self.height = height\n'
-                           '\n'
-                           '    def area(self):\n'
-                           '        return 0.5 * self.base * self.height\n'
-                           '\n'
-                           'def total_area(shapes: list[HasArea]) -> float:\n'
-                           '    return sum(shape.area() for shape in shapes)\n'
-                           '\n'
-                           'print(total_area([Square(3), Triangle(4, 3)]))\n'
-                           'print(isinstance(Triangle(4, 3), Shape))\n'
-                           'print(isinstance(Square(3), Shape))'}],
-  'cells': [{'prose': ['`ABC` plus `@abstractmethod` declares the contract. Trying to construct '
+  'cells': [{'kind': 'cell',
+             'prose': ['`ABC` plus `@abstractmethod` declares the contract. Trying to construct '
                        'the base class itself fails because at least one method has no '
                        'implementation. A concrete `describe()` lives alongside the abstract '
                        '`area()` so subclasses inherit shared behavior for free.'],
@@ -9545,10 +6666,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'except TypeError as error:\n'
                      '    print(error)',
              'output': "Can't instantiate abstract class Shape without an implementation for "
-                       "abstract method 'area'",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['A subclass that implements every abstract method is concrete and can be '
+                       "abstract method 'area'"},
+            {'kind': 'cell',
+             'prose': ['A subclass that implements every abstract method is concrete and can be '
                        'instantiated. It also inherits the non-abstract methods from the base '
                        'class.'],
              'code': 'class Square(Shape):\n'
@@ -9560,10 +6680,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(Square(3).area())\n'
                      'print(Square(3).describe())',
-             'output': '9\nshape with area 9',
-             'line': 47,
-             'kind': 'cell'},
-            {'prose': ['A subclass that forgets to implement an abstract method also cannot be '
+             'output': '9\nshape with area 9'},
+            {'kind': 'cell',
+             'prose': ['A subclass that forgets to implement an abstract method also cannot be '
                        'instantiated — that is the value the ABC adds. The error fires at '
                        'construction, not when something later tries to call the missing method.'],
              'code': 'class Incomplete(Shape):\n'
@@ -9574,10 +6693,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'except TypeError as error:\n'
                      '    print(error)',
              'output': "Can't instantiate abstract class Incomplete without an implementation for "
-                       "abstract method 'area'",
-             'line': 68,
-             'kind': 'cell'},
-            {'prose': ['Contrast with `Protocol`. A `HasArea` protocol accepts any class with an '
+                       "abstract method 'area'"},
+            {'kind': 'cell',
+             'prose': ['Contrast with `Protocol`. A `HasArea` protocol accepts any class with an '
                        '`area()` method, no inheritance required. `Triangle` does not inherit from '
                        '`Shape`, so it satisfies the protocol but fails `isinstance(_, Shape)`. '
                        '`Square` satisfies both because it explicitly inherited from the ABC.'],
@@ -9601,9 +6719,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(total_area([Square(3), Triangle(4, 3)]))\n'
                      'print(isinstance(Triangle(4, 3), Shape))\n'
                      'print(isinstance(Square(3), Shape))',
-             'output': '15.0\nFalse\nTrue',
-             'line': 86,
-             'kind': 'cell'}],
+             'output': '15.0\nFalse\nTrue'}],
   'code': 'from abc import ABC, abstractmethod\n'
           'from typing import Protocol\n'
           '\n'
@@ -9664,10 +6780,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      "abstract method 'area'\n"
                      '15.0\n'
                      'False\n'
-                     'True\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     'True\n'},
  {'slug': 'enums',
   'title': 'Enums',
   'section': 'Types',
@@ -9686,21 +6799,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Prefer raw strings for open-ended text; prefer enums for a closed set of named '
             'choices.'],
   'see_also': ['literals', 'classes', 'literal-and-final'],
-  'walkthrough': [{'prose': 'An enum member has a symbolic name and an underlying value. The '
-                            'symbolic name is what readers usually care about in code.',
-                   'code': 'from enum import Enum\n'
-                           '\n'
-                           'class Status(Enum):\n'
-                           '    PENDING = "pending"\n'
-                           '    DONE = "done"\n'
-                           '\n'
-                           'current = Status.PENDING\n'
-                           'print(current.name)\n'
-                           'print(current.value)'},
-                  {'prose': 'Compare enum members with enum members, not with raw strings. This '
-                            'keeps the set of valid states explicit.',
-                   'code': 'print(current is Status.PENDING)\nprint(current == "pending")'}],
-  'cells': [{'prose': ['An enum member has a symbolic name and an underlying value. The symbolic '
+  'cells': [{'kind': 'cell',
+             'prose': ['An enum member has a symbolic name and an underlying value. The symbolic '
                        'name is what readers usually care about in code.'],
              'code': 'from enum import Enum\n'
                      '\n'
@@ -9711,15 +6811,12 @@ EXAMPLES = [{'slug': 'hello-world',
                      'current = Status.PENDING\n'
                      'print(current.name)\n'
                      'print(current.value)',
-             'output': 'PENDING\npending',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Compare enum members with enum members, not with raw strings. This keeps '
+             'output': 'PENDING\npending'},
+            {'kind': 'cell',
+             'prose': ['Compare enum members with enum members, not with raw strings. This keeps '
                        'the set of valid states explicit.'],
              'code': 'print(current is Status.PENDING)\nprint(current == "pending")',
-             'output': 'True\nFalse',
-             'line': 43,
-             'kind': 'cell'}],
+             'output': 'True\nFalse'}],
   'code': 'from enum import Enum\n'
           '\n'
           'class Status(Enum):\n'
@@ -9731,10 +6828,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'print(current.value)\n'
           'print(current is Status.PENDING)\n'
           'print(current == "pending")\n',
-  'expected_output': 'PENDING\npending\nTrue\nFalse\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'PENDING\npending\nTrue\nFalse\n'},
  {'slug': 'regular-expressions',
   'title': 'Regular Expressions',
   'section': 'Text',
@@ -9759,39 +6853,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'without rewriting the pattern.',
             'Reach for string methods before regex when the pattern is simple.'],
   'see_also': ['strings', 'string-formatting'],
-  'walkthrough': [{'prose': 'Raw strings keep backslashes readable in regex patterns. Capturing '
-                            'groups return just the pieces inside parentheses.',
-                   'code': 'import re\n'
-                           '\n'
-                           'text = "Ada: 10, Grace: 9"\n'
-                           'pattern = r"([A-Za-z]+): (\\d+)"\n'
-                           '\n'
-                           'for name, score in re.findall(pattern, text):\n'
-                           '    print(name, int(score))'},
-                  {'prose': '`re.search()` finds the first match. A match object exposes captured '
-                            'groups by position.',
-                   'code': 'match = re.search(r"Grace: (\\d+)", text)\nprint(match.group(1))'},
-                  {'prose': 'For a simple substring check, ordinary string membership is clearer '
-                            'than regex.',
-                   'code': 'print("Grace" in text)'},
-                  {'prose': '`re.match` only matches at the start of the string; `re.search` finds '
-                            'the first match anywhere. Picking the right one keeps anchoring '
-                            'intent visible without an explicit `^`.',
-                   'code': 'start = re.match(r"Ada", text)\n'
-                           'print(start is not None)\n'
-                           'print(re.match(r"Grace", text))'},
-                  {'prose': '`re.compile` produces a reusable pattern object whose methods skip '
-                            'the parser on each call. Reach for it when the same pattern runs in a '
-                            'loop.',
-                   'code': 'scoreline = re.compile(pattern)\nprint(scoreline.findall(text))'},
-                  {'prose': 'Flags such as `re.IGNORECASE` adjust matching without changing the '
-                            'pattern. `re.sub` replaces every match with a replacement string and '
-                            'returns the rewritten text.',
-                   'code': 'casey = "ADA: 11"\n'
-                           'print(re.search(r"ada", casey, flags=re.IGNORECASE).group(0))\n'
-                           '\n'
-                           'print(re.sub(r"\\d+", "?", text))'}],
-  'cells': [{'prose': ['Raw strings keep backslashes readable in regex patterns. Capturing groups '
+  'cells': [{'kind': 'cell',
+             'prose': ['Raw strings keep backslashes readable in regex patterns. Capturing groups '
                        'return just the pieces inside parentheses.'],
              'code': 'import re\n'
                      '\n'
@@ -9800,46 +6863,41 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'for name, score in re.findall(pattern, text):\n'
                      '    print(name, int(score))',
-             'output': 'Ada 10\nGrace 9',
-             'line': 21,
-             'kind': 'cell'},
-            {'prose': ['`re.search()` finds the first match. A match object exposes captured '
+             'output': 'Ada 10\nGrace 9'},
+            {'kind': 'cell',
+             'prose': ['`re.search()` finds the first match. A match object exposes captured '
                        'groups by position.'],
              'code': 'match = re.search(r"Grace: (\\d+)", text)\nprint(match.group(1))',
-             'output': '9',
-             'line': 40,
-             'kind': 'cell'},
-            {'prose': ['For a simple substring check, ordinary string membership is clearer than '
+             'output': '9'},
+            {'kind': 'cell',
+             'prose': ['For a simple substring check, ordinary string membership is clearer than '
                        'regex.'],
              'code': 'print("Grace" in text)',
-             'output': 'True',
-             'line': 53,
-             'kind': 'cell'},
-            {'prose': ['`re.match` only matches at the start of the string; `re.search` finds the '
+             'output': 'True'},
+            {'kind': 'cell',
+             'prose': ['`re.match` only matches at the start of the string; `re.search` finds the '
                        'first match anywhere. Picking the right one keeps anchoring intent visible '
                        'without an explicit `^`.'],
              'code': 'start = re.match(r"Ada", text)\n'
                      'print(start is not None)\n'
                      'print(re.match(r"Grace", text))',
-             'output': 'True\nNone',
-             'line': 65,
-             'kind': 'cell'},
-            {'prose': ['`re.compile` produces a reusable pattern object whose methods skip the '
-                       'parser on each call. Reach for it when the same pattern runs in a loop.'],
+             'output': 'True\nNone'},
+            {'kind': 'cell',
+             'prose': ['`re.compile` produces a reusable pattern object and gives the pattern a '
+                       'name. The `re` module also caches recently compiled patterns internally, '
+                       'so the practical wins are readability and a place to attach flags more '
+                       'than raw speed.'],
              'code': 'scoreline = re.compile(pattern)\nprint(scoreline.findall(text))',
-             'output': "[('Ada', '10'), ('Grace', '9')]",
-             'line': 80,
-             'kind': 'cell'},
-            {'prose': ['Flags such as `re.IGNORECASE` adjust matching without changing the '
+             'output': "[('Ada', '10'), ('Grace', '9')]"},
+            {'kind': 'cell',
+             'prose': ['Flags such as `re.IGNORECASE` adjust matching without changing the '
                        'pattern. `re.sub` replaces every match with a replacement string and '
                        'returns the rewritten text.'],
              'code': 'casey = "ADA: 11"\n'
                      'print(re.search(r"ada", casey, flags=re.IGNORECASE).group(0))\n'
                      '\n'
                      'print(re.sub(r"\\d+", "?", text))',
-             'output': 'ADA\nAda: ?, Grace: ?',
-             'line': 93,
-             'kind': 'cell'}],
+             'output': 'ADA\nAda: ?, Grace: ?'}],
   'code': 'import re\n'
           '\n'
           'text = "Ada: 10, Grace: 9"\n'
@@ -9871,10 +6929,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'None\n'
                      "[('Ada', '10'), ('Grace', '9')]\n"
                      'ADA\n'
-                     'Ada: ?, Grace: ?\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     'Ada: ?, Grace: ?\n'},
  {'slug': 'number-parsing',
   'title': 'Number Parsing',
   'section': 'Standard Library',
@@ -9894,31 +6949,17 @@ EXAMPLES = [{'slug': 'hello-world',
             'Catch `ValueError` for recoverable user input; do not hide unexpected data '
             'corruption.'],
   'see_also': ['exceptions', 'strings', 'numbers'],
-  'walkthrough': [{'prose': 'Use `int()` for whole numbers and `float()` for decimal text. Parsed '
-                            'values are real numbers, not strings.',
-                   'code': 'print(int("42"))\nprint(float("3.5"))'},
-                  {'prose': 'Pass a base when the text format says the number is not decimal.',
-                   'code': 'print(int("ff", 16))'},
-                  {'prose': 'Catch `ValueError` at the input boundary when invalid text is normal '
-                            'and recoverable.',
-                   'code': 'texts = ["10", "python", "20"]\n'
-                           'for text in texts:\n'
-                           '    try:\n'
-                           '        print(int(text) * 2)\n'
-                           '    except ValueError:\n'
-                           '        print(f"skip {text!r}")'}],
-  'cells': [{'prose': ['Use `int()` for whole numbers and `float()` for decimal text. Parsed '
+  'cells': [{'kind': 'cell',
+             'prose': ['Use `int()` for whole numbers and `float()` for decimal text. Parsed '
                        'values are real numbers, not strings.'],
              'code': 'print(int("42"))\nprint(float("3.5"))',
-             'output': '42\n3.5',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Pass a base when the text format says the number is not decimal.'],
+             'output': '42\n3.5'},
+            {'kind': 'cell',
+             'prose': ['Pass a base when the text format says the number is not decimal.'],
              'code': 'print(int("ff", 16))',
-             'output': '255',
-             'line': 36,
-             'kind': 'cell'},
-            {'prose': ['Catch `ValueError` at the input boundary when invalid text is normal and '
+             'output': '255'},
+            {'kind': 'cell',
+             'prose': ['Catch `ValueError` at the input boundary when invalid text is normal and '
                        'recoverable.'],
              'code': 'texts = ["10", "python", "20"]\n'
                      'for text in texts:\n'
@@ -9926,9 +6967,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        print(int(text) * 2)\n'
                      '    except ValueError:\n'
                      '        print(f"skip {text!r}")',
-             'output': "20\nskip 'python'\n40",
-             'line': 48,
-             'kind': 'cell'}],
+             'output': "20\nskip 'python'\n40"}],
   'code': 'print(int("42"))\n'
           'print(float("3.5"))\n'
           'print(int("ff", 16))\n'
@@ -9939,10 +6978,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '        print(int(text) * 2)\n'
           '    except ValueError:\n'
           '        print(f"skip {text!r}")\n',
-  'expected_output': "42\n3.5\n255\n20\nskip 'python'\n40\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "42\n3.5\n255\n20\nskip 'python'\n40\n"},
  {'slug': 'custom-exceptions',
   'title': 'Custom Exceptions',
   'section': 'Errors',
@@ -9961,33 +6997,13 @@ EXAMPLES = [{'slug': 'hello-world',
             'everywhere.',
             'Catch custom exceptions at a boundary that can recover or report clearly.'],
   'see_also': ['exceptions', 'exception-chaining', 'warnings', 'logging'],
-  'walkthrough': [{'prose': 'Create a custom exception when a failure has a name in your problem '
-                            'domain. The class can be empty at first.',
-                   'code': 'class EmptyCartError(Exception):\n'
-                           '    pass\n'
-                           '\n'
-                           'print(EmptyCartError.__name__)'},
-                  {'prose': 'Raise the custom exception where the invalid state is detected. '
-                            'Normal inputs still follow the ordinary success path.',
-                   'code': 'def checkout(items):\n'
-                           '    if not items:\n'
-                           '        raise EmptyCartError("cart is empty")\n'
-                           '    return "paid"\n'
-                           '\n'
-                           'print(checkout(["book"]))'},
-                  {'prose': 'Callers can catch the precise error type without accidentally '
-                            'catching unrelated failures.',
-                   'code': 'try:\n'
-                           '    checkout([])\n'
-                           'except EmptyCartError as error:\n'
-                           '    print(error)'}],
-  'cells': [{'prose': ['Create a custom exception when a failure has a name in your problem '
+  'cells': [{'kind': 'cell',
+             'prose': ['Create a custom exception when a failure has a name in your problem '
                        'domain. The class can be empty at first.'],
              'code': 'class EmptyCartError(Exception):\n    pass\n\nprint(EmptyCartError.__name__)',
-             'output': 'EmptyCartError',
-             'line': 23,
-             'kind': 'cell'},
-            {'prose': ['Raise the custom exception where the invalid state is detected. Normal '
+             'output': 'EmptyCartError'},
+            {'kind': 'cell',
+             'prose': ['Raise the custom exception where the invalid state is detected. Normal '
                        'inputs still follow the ordinary success path.'],
              'code': 'def checkout(items):\n'
                      '    if not items:\n'
@@ -9995,15 +7011,12 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    return "paid"\n'
                      '\n'
                      'print(checkout(["book"]))',
-             'output': 'paid',
-             'line': 38,
-             'kind': 'cell'},
-            {'prose': ['Callers can catch the precise error type without accidentally catching '
+             'output': 'paid'},
+            {'kind': 'cell',
+             'prose': ['Callers can catch the precise error type without accidentally catching '
                        'unrelated failures.'],
              'code': 'try:\n    checkout([])\nexcept EmptyCartError as error:\n    print(error)',
-             'output': 'cart is empty',
-             'line': 55,
-             'kind': 'cell'}],
+             'output': 'cart is empty'}],
   'code': 'class EmptyCartError(Exception):\n'
           '    pass\n'
           '\n'
@@ -10021,10 +7034,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '    checkout([])\n'
           'except EmptyCartError as error:\n'
           '    print(error)\n',
-  'expected_output': 'EmptyCartError\npaid\ncart is empty\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'EmptyCartError\npaid\ncart is empty\n'},
  {'slug': 'json',
   'title': 'JSON',
   'section': 'Standard Library',
@@ -10044,32 +7054,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use `sort_keys=True` when stable text output matters.',
             'JSON only represents data shapes, not arbitrary Python objects or behavior.'],
   'see_also': ['dicts', 'typed-dicts', 'strings'],
-  'walkthrough': [{'prose': '`dumps()` encodes Python data as JSON text. `sort_keys=True` keeps '
-                            'dictionary keys in a stable order for reproducible output.',
-                   'code': 'import json\n'
-                           '\n'
-                           'payload = {"language": "Python", "versions": [3, 13], "stable": True, '
-                           '"missing": None}\n'
-                           'text = json.dumps(payload, sort_keys=True)\n'
-                           'print(text)'},
-                  {'prose': 'Formatting options change the JSON text, not the Python value. '
-                            '`indent=2` is useful for human-readable output.',
-                   'code': 'pretty = json.dumps({"language": "Python", "stable": True}, indent=2, '
-                           'sort_keys=True)\n'
-                           'print(pretty.splitlines()[0])\n'
-                           'print(pretty.splitlines()[1])'},
-                  {'prose': '`loads()` decodes JSON text back into Python values. JSON `null` '
-                            'becomes Python `None`.',
-                   'code': 'decoded = json.loads(text)\n'
-                           'print(decoded["language"])\n'
-                           'print(decoded["missing"] is None)'},
-                  {'prose': 'Invalid JSON raises `JSONDecodeError`, so input boundaries should '
-                            'handle decode failures explicitly.',
-                   'code': 'try:\n'
-                           '    json.loads("{bad json}")\n'
-                           'except json.JSONDecodeError as error:\n'
-                           '    print(error.__class__.__name__)'}],
-  'cells': [{'prose': ['`dumps()` encodes Python data as JSON text. `sort_keys=True` keeps '
+  'cells': [{'kind': 'cell',
+             'prose': ['`dumps()` encodes Python data as JSON text. `sort_keys=True` keeps '
                        'dictionary keys in a stable order for reproducible output.'],
              'code': 'import json\n'
                      '\n'
@@ -10078,35 +7064,30 @@ EXAMPLES = [{'slug': 'hello-world',
                      'text = json.dumps(payload, sort_keys=True)\n'
                      'print(text)',
              'output': '{"language": "Python", "missing": null, "stable": true, "versions": [3, '
-                       '13]}',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Formatting options change the JSON text, not the Python value. `indent=2` '
+                       '13]}'},
+            {'kind': 'cell',
+             'prose': ['Formatting options change the JSON text, not the Python value. `indent=2` '
                        'is useful for human-readable output.'],
              'code': 'pretty = json.dumps({"language": "Python", "stable": True}, indent=2, '
                      'sort_keys=True)\n'
                      'print(pretty.splitlines()[0])\n'
                      'print(pretty.splitlines()[1])',
-             'output': '{\n  "language": "Python",',
-             'line': 38,
-             'kind': 'cell'},
-            {'prose': ['`loads()` decodes JSON text back into Python values. JSON `null` becomes '
+             'output': '{\n  "language": "Python",'},
+            {'kind': 'cell',
+             'prose': ['`loads()` decodes JSON text back into Python values. JSON `null` becomes '
                        'Python `None`.'],
              'code': 'decoded = json.loads(text)\n'
                      'print(decoded["language"])\n'
                      'print(decoded["missing"] is None)',
-             'output': 'Python\nTrue',
-             'line': 53,
-             'kind': 'cell'},
-            {'prose': ['Invalid JSON raises `JSONDecodeError`, so input boundaries should handle '
+             'output': 'Python\nTrue'},
+            {'kind': 'cell',
+             'prose': ['Invalid JSON raises `JSONDecodeError`, so input boundaries should handle '
                        'decode failures explicitly.'],
              'code': 'try:\n'
                      '    json.loads("{bad json}")\n'
                      'except json.JSONDecodeError as error:\n'
                      '    print(error.__class__.__name__)',
-             'output': 'JSONDecodeError',
-             'line': 68,
-             'kind': 'cell'}],
+             'output': 'JSONDecodeError'}],
   'code': 'import json\n'
           '\n'
           'payload = {"language": "Python", "versions": [3, 13], "stable": True, "missing": None}\n'
@@ -10131,10 +7112,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '  "language": "Python",\n'
                      'Python\n'
                      'True\n'
-                     'JSONDecodeError\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     'JSONDecodeError\n'},
  {'slug': 'logging',
   'title': 'Logging',
   'section': 'Standard Library',
@@ -10156,42 +7134,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use exceptions for control flow failures, logging for operational evidence, and '
             'warnings for soft compatibility problems.'],
   'see_also': ['exceptions', 'testing', 'modules'],
-  'walkthrough': [{'prose': 'A logger name records which part of the program produced the event. '
-                            'The handler and formatter choose where and how the event is shown.',
-                   'code': 'import logging\n'
-                           'import sys\n'
-                           '\n'
-                           'logger = logging.getLogger("example.worker")\n'
-                           'logger.setLevel(logging.DEBUG)\n'
-                           'handler = logging.StreamHandler(sys.stdout)\n'
-                           'handler.setLevel(logging.INFO)\n'
-                           'parts = ["%(levelname)s", "%(name)s", "%(message)s"]\n'
-                           'formatter = logging.Formatter(":".join(parts))\n'
-                           'handler.setFormatter(formatter)\n'
-                           'logger.handlers[:] = [handler]\n'
-                           'logger.propagate = False\n'
-                           '\n'
-                           'logger.debug("hidden detail")\n'
-                           'logger.info("service started")\n'
-                           'logger.warning("disk almost full")'},
-                  {'prose': 'Levels are thresholds. Raising the handler level to `WARNING` '
-                            'suppresses later `INFO` records without changing the call sites.',
-                   'code': 'import logging\n'
-                           'import sys\n'
-                           '\n'
-                           'logger = logging.getLogger("example.worker")\n'
-                           'logger.setLevel(logging.DEBUG)\n'
-                           'handler = logging.StreamHandler(sys.stdout)\n'
-                           'handler.setLevel(logging.WARNING)\n'
-                           'parts = ["%(levelname)s", "%(name)s", "%(message)s"]\n'
-                           'formatter = logging.Formatter(":".join(parts))\n'
-                           'handler.setFormatter(formatter)\n'
-                           'logger.handlers[:] = [handler]\n'
-                           'logger.propagate = False\n'
-                           '\n'
-                           'logger.info("hidden after threshold change")\n'
-                           'logger.error("write failed")'}],
-  'cells': [{'prose': ['A logger name records which part of the program produced the event. The '
+  'cells': [{'kind': 'cell',
+             'prose': ['A logger name records which part of the program produced the event. The '
                        'handler and formatter choose where and how the event is shown.'],
              'code': 'import logging\n'
                      'import sys\n'
@@ -10210,10 +7154,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      'logger.info("service started")\n'
                      'logger.warning("disk almost full")',
              'output': 'INFO:example.worker:service started\n'
-                       'WARNING:example.worker:disk almost full',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Levels are thresholds. Raising the handler level to `WARNING` suppresses '
+                       'WARNING:example.worker:disk almost full'},
+            {'kind': 'cell',
+             'prose': ['Levels are thresholds. Raising the handler level to `WARNING` suppresses '
                        'later `INFO` records without changing the call sites.'],
              'code': 'import logging\n'
                      'import sys\n'
@@ -10230,9 +7173,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'logger.info("hidden after threshold change")\n'
                      'logger.error("write failed")',
-             'output': 'ERROR:example.worker:write failed',
-             'line': 50,
-             'kind': 'cell'}],
+             'output': 'ERROR:example.worker:write failed'}],
   'code': 'import logging\n'
           'import sys\n'
           '\n'
@@ -10255,10 +7196,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'logger.error("write failed")\n',
   'expected_output': 'INFO:example.worker:service started\n'
                      'WARNING:example.worker:disk almost full\n'
-                     'ERROR:example.worker:write failed\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     'ERROR:example.worker:write failed\n'},
  {'slug': 'testing',
   'title': 'Testing',
   'section': 'Standard Library',
@@ -10278,58 +7216,14 @@ EXAMPLES = [{'slug': 'hello-world',
             'Use broader integration tests when the behavior depends on several components working '
             'together.'],
   'see_also': ['assertions', 'exceptions', 'modules'],
-  'walkthrough': [{'prose': 'A test starts with behavior small enough to name. The function can be '
-                            'ordinary code; the test supplies a representative input and expected '
-                            'result.',
-                   'code': 'def add(left, right):\n    return left + right\n\nprint(add(2, 3))'},
-                  {'prose': '`unittest.TestCase` groups test methods. `setUp` runs before each '
-                            'test method to build per-test fixtures, `assertEqual` checks values, '
-                            'and `assertRaises` asserts that a block raises the expected exception '
-                            'type.',
-                   'code': 'import unittest\n'
-                           '\n'
-                           '\n'
-                           'def divide(left, right):\n'
-                           '    if right == 0:\n'
-                           '        raise ZeroDivisionError("denominator is zero")\n'
-                           '    return left / right\n'
-                           '\n'
-                           '\n'
-                           'class AddTests(unittest.TestCase):\n'
-                           '    def setUp(self):\n'
-                           '        self.zero = 0\n'
-                           '\n'
-                           '    def test_adds_numbers(self):\n'
-                           '        self.assertEqual(add(self.zero + 2, 3), 5)\n'
-                           '\n'
-                           '    def test_adds_empty_strings(self):\n'
-                           '        self.assertEqual(add("", "py"), "py")\n'
-                           '\n'
-                           '    def test_divide_by_zero_raises(self):\n'
-                           '        with self.assertRaises(ZeroDivisionError):\n'
-                           '            divide(1, 0)\n'
-                           '\n'
-                           'print([name for name in dir(AddTests) if name.startswith("test_")])'},
-                  {'prose': 'A runner executes the suite and records whether every assertion '
-                            "passed. Capturing the runner stream keeps this page's output "
-                            'deterministic.',
-                   'code': 'import io\n'
-                           '\n'
-                           'loader = unittest.defaultTestLoader\n'
-                           'suite = loader.loadTestsFromTestCase(AddTests)\n'
-                           'stream = io.StringIO()\n'
-                           'runner = unittest.TextTestRunner(stream=stream, verbosity=0)\n'
-                           'result = runner.run(suite)\n'
-                           'print(result.testsRun)\n'
-                           'print(result.wasSuccessful())'}],
-  'cells': [{'prose': ['A test starts with behavior small enough to name. The function can be '
+  'cells': [{'kind': 'cell',
+             'prose': ['A test starts with behavior small enough to name. The function can be '
                        'ordinary code; the test supplies a representative input and expected '
                        'result.'],
              'code': 'def add(left, right):\n    return left + right\n\nprint(add(2, 3))',
-             'output': '5',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['`unittest.TestCase` groups test methods. `setUp` runs before each test '
+             'output': '5'},
+            {'kind': 'cell',
+             'prose': ['`unittest.TestCase` groups test methods. `setUp` runs before each test '
                        'method to build per-test fixtures, `assertEqual` checks values, and '
                        '`assertRaises` asserts that a block raises the expected exception type.'],
              'code': 'import unittest\n'
@@ -10357,10 +7251,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print([name for name in dir(AddTests) if name.startswith("test_")])',
              'output': "['test_adds_empty_strings', 'test_adds_numbers', "
-                       "'test_divide_by_zero_raises']",
-             'line': 37,
-             'kind': 'cell'},
-            {'prose': ['A runner executes the suite and records whether every assertion passed. '
+                       "'test_divide_by_zero_raises']"},
+            {'kind': 'cell',
+             'prose': ['A runner executes the suite and records whether every assertion passed. '
                        "Capturing the runner stream keeps this page's output deterministic."],
              'code': 'import io\n'
                      '\n'
@@ -10371,9 +7264,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'result = runner.run(suite)\n'
                      'print(result.testsRun)\n'
                      'print(result.wasSuccessful())',
-             'output': '3\nTrue',
-             'line': 72,
-             'kind': 'cell'}],
+             'output': '3\nTrue'}],
   'code': 'import io\n'
           'import unittest\n'
           '\n'
@@ -10409,10 +7300,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'result = runner.run(suite)\n'
           'print(result.testsRun)\n'
           'print(result.wasSuccessful())\n',
-  'expected_output': '3\nTrue\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '3\nTrue\n'},
  {'slug': 'subprocesses',
   'title': 'Subprocesses',
   'section': 'Standard Library',
@@ -10435,41 +7323,27 @@ EXAMPLES = [{'slug': 'hello-world',
   'notes': ['Use a list of arguments instead of shell strings when possible.',
             'Capture output when the parent program needs to inspect it.',
             '`check=True` turns non-zero exits into exceptions.',
-            'If you run this in local/server Python, the child process is real; on this site, the '
-            'runnable evidence preserves the API shape without spawning a process.'],
+            'The output shown here was produced by really spawning the child under standard '
+            "CPython when the example was verified; the site's in-browser sandbox cannot create "
+            'processes, so live runs of this page fail there.'],
   'see_also': ['virtual-environments', 'networking', 'threads-and-processes'],
-  'walkthrough': [{'prose': '`subprocess.run()` starts a child process and waits for it. '
-                            "`capture_output=True` stores the child's standard output and error "
-                            'streams on the result object.',
-                   'code': 'import subprocess\n'
-                           'import sys\n'
-                           '\n'
-                           'result = subprocess.run(\n'
-                           '    [sys.executable, "-c", "print(\'child process\')"],\n'
-                           '    text=True,\n'
-                           '    capture_output=True,\n'
-                           '    check=True,\n'
-                           ')\n'
-                           '\n'
-                           'print(result.stdout.strip())\n'
-                           'print(result.returncode)'}],
-  'cells': [{'prose': ['`subprocess.run` spawns a child Python interpreter, captures its stdout '
+  'cells': [{'kind': 'unsupported',
+             'prose': ['`subprocess.run` spawns a child Python interpreter, captures its stdout '
                        'and stderr (`capture_output=True`), decodes them as text (`text=True`), '
                        'and raises `CalledProcessError` if the child exits non-zero '
                        '(`check=True`). The returned `result` holds the captured streams and exit '
-                       'code as portable evidence the child ran. (This fragment runs in standard '
-                       'Python only — the Python By Example runner does not provide child '
-                       'processes.)'],
+                       'code as portable evidence the child ran. (The in-browser Run button cannot '
+                       'spawn child processes, so pressing Run on this page fails in the sandbox; '
+                       'the verified output below comes from standard CPython at build time.)'],
              'code': 'result = subprocess.run(\n'
                      '    [sys.executable, "-c", "print(\'child process\')"],\n'
                      '    text=True,\n'
                      '    capture_output=True,\n'
                      '    check=True,\n'
                      ')',
-             'output': '',
-             'line': 23,
-             'kind': 'unsupported'},
-            {'prose': ['`subprocess.run()` starts a child process and waits for it. '
+             'output': ''},
+            {'kind': 'cell',
+             'prose': ['`subprocess.run()` starts a child process and waits for it. '
                        "`capture_output=True` stores the child's standard output and error streams "
                        'on the result object.'],
              'code': 'import subprocess\n'
@@ -10484,9 +7358,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(result.stdout.strip())\n'
                      'print(result.returncode)',
-             'output': 'child process\n0',
-             'line': 36,
-             'kind': 'cell'}],
+             'output': 'child process\n0'}],
   'code': 'import subprocess\n'
           'import sys\n'
           '\n'
@@ -10499,10 +7371,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '\n'
           'print(result.stdout.strip())\n'
           'print(result.returncode)\n',
-  'expected_output': 'child process\n0\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': 'child process\n0\n'},
  {'slug': 'threads-and-processes',
   'title': 'Threads and Processes',
   'section': 'Standard Library',
@@ -10524,40 +7393,27 @@ EXAMPLES = [{'slug': 'hello-world',
             'boundary.',
             'Prefer `asyncio` for coroutine-based I/O and executors for ordinary blocking '
             'callables.',
-            'The displayed executor names are standard Python concepts; the site avoids actually '
-            'creating host threads or processes in the live runner.'],
+            'The thread-pool output here was produced by real worker threads under standard '
+            "CPython when the example was verified; the site's in-browser sandbox cannot create "
+            'threads or processes, so live runs of this page fail there.'],
   'see_also': ['async-await', 'subprocesses', 'networking'],
-  'walkthrough': [{'prose': 'A thread pool runs ordinary callables while sharing memory with the '
-                            'current process. `map()` returns results in input order.',
-                   'code': 'from concurrent.futures import ProcessPoolExecutor, '
-                           'ThreadPoolExecutor\n'
-                           '\n'
-                           '\n'
-                           'def square(number):\n'
-                           '    return number * number\n'
-                           '\n'
-                           'with ThreadPoolExecutor(max_workers=2) as pool:\n'
-                           '    print(list(pool.map(square, [1, 2, 3])))'},
-                  {'prose': 'A process pool uses separate Python processes. That boundary is '
-                            'heavier, but it can run CPU-bound work outside the current '
-                            'interpreter.',
-                   'code': 'print(ProcessPoolExecutor.__name__)'}],
-  'cells': [{'prose': ['`ThreadPoolExecutor` runs `square` across two worker threads sharing the '
+  'cells': [{'kind': 'unsupported',
+             'prose': ['`ThreadPoolExecutor` runs `square` across two worker threads sharing the '
                        'same interpreter (and the GIL); `ProcessPoolExecutor` runs `pow` across '
                        'two child processes with isolated memory. Each `pool.map` returns an '
                        'iterator over results in input order, and the surrounding `with` block '
-                       'joins the workers when the body exits. (This fragment runs in standard '
-                       'Python only — the Python By Example runner does not provide native threads '
-                       'or child processes.)'],
+                       'joins the workers when the body exits. (The in-browser Run button cannot '
+                       'create native threads or child processes, so pressing Run on this page '
+                       'fails in the sandbox; the verified thread-pool output below comes from '
+                       'standard CPython at build time.)'],
              'code': 'with ThreadPoolExecutor(max_workers=2) as pool:\n'
                      '    print(list(pool.map(square, [1, 2, 3])))\n'
                      '\n'
                      'with ProcessPoolExecutor(max_workers=2) as pool:\n'
                      '    print(list(pool.map(pow, [4, 5], [2, 2])))',
-             'output': '',
-             'line': 23,
-             'kind': 'unsupported'},
-            {'prose': ['A thread pool runs ordinary callables while sharing memory with the '
+             'output': ''},
+            {'kind': 'cell',
+             'prose': ['A thread pool runs ordinary callables while sharing memory with the '
                        'current process. `map()` returns results in input order.'],
              'code': 'from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor\n'
                      '\n'
@@ -10567,15 +7423,12 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'with ThreadPoolExecutor(max_workers=2) as pool:\n'
                      '    print(list(pool.map(square, [1, 2, 3])))',
-             'output': '[1, 4, 9]',
-             'line': 35,
-             'kind': 'cell'},
-            {'prose': ['A process pool uses separate Python processes. That boundary is heavier, '
+             'output': '[1, 4, 9]'},
+            {'kind': 'cell',
+             'prose': ['A process pool uses separate Python processes. That boundary is heavier, '
                        'but it can run CPU-bound work outside the current interpreter.'],
              'code': 'print(ProcessPoolExecutor.__name__)',
-             'output': 'ProcessPoolExecutor',
-             'line': 54,
-             'kind': 'cell'}],
+             'output': 'ProcessPoolExecutor'}],
   'code': 'from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor\n'
           '\n'
           '\n'
@@ -10586,10 +7439,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '    print(list(pool.map(square, [1, 2, 3])))\n'
           '\n'
           'print(ProcessPoolExecutor.__name__)\n',
-  'expected_output': '[1, 4, 9]\nProcessPoolExecutor\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': '[1, 4, 9]\nProcessPoolExecutor\n'},
  {'slug': 'networking',
   'title': 'Networking',
   'section': 'Standard Library',
@@ -10614,36 +7464,20 @@ EXAMPLES = [{'slug': 'hello-world',
             'Cloudflare Workers support HTTP-style networking through platform APIs; this example '
             'avoids outbound calls so the editable lesson stays deterministic and safe.'],
   'see_also': ['bytes-and-bytearray', 'subprocesses', 'async-await'],
-  'walkthrough': [{'prose': 'The complete version adds two things: a `try`/`finally` so both '
-                            'endpoints close even if `recv` or the surrounding work raises, and a '
-                            'second `print` that `decode`s the received bytes back into a Python '
-                            "`str` for display. The first `print` shows the raw bytes `b'ping'`; "
-                            'the second shows the decoded text `ping`.',
-                   'code': 'import socket\n'
-                           '\n'
-                           'left, right = socket.socketpair()\n'
-                           'try:\n'
-                           '    message = "ping"\n'
-                           '    left.sendall(message.encode("utf-8"))\n'
-                           '    data = right.recv(16)\n'
-                           '    print(data)\n'
-                           '    print(data.decode("utf-8"))\n'
-                           'finally:\n'
-                           '    left.close()\n'
-                           '    right.close()'}],
-  'cells': [{'prose': ['`socketpair()` returns two connected endpoints. `sendall` writes encoded '
+  'cells': [{'kind': 'unsupported',
+             'prose': ['`socketpair()` returns two connected endpoints. `sendall` writes encoded '
                        'bytes into one end, and `recv` reads up to 16 bytes off the other. The '
                        'byte boundary is the whole point: `"ping".encode("utf-8")` produces '
-                       "`b'ping'`, which is what the socket actually moves. (This fragment runs in "
-                       'standard Python only — the Python By Example runner does not expose '
-                       'arbitrary sockets and disables outbound access for edited examples.)'],
+                       "`b'ping'`, which is what the socket actually moves. (The in-browser Run "
+                       'button cannot open sockets — the sandbox disables outbound access — so '
+                       'pressing Run on this page fails; the verified output below comes from a '
+                       'real socket pair under standard CPython at build time.)'],
              'code': 'left, right = socket.socketpair()\n'
                      'left.sendall("ping".encode("utf-8"))\n'
                      'data = right.recv(16)',
-             'output': '',
-             'line': 23,
-             'kind': 'unsupported'},
-            {'prose': ['The complete version adds two things: a `try`/`finally` so both endpoints '
+             'output': ''},
+            {'kind': 'cell',
+             'prose': ['The complete version adds two things: a `try`/`finally` so both endpoints '
                        'close even if `recv` or the surrounding work raises, and a second `print` '
                        'that `decode`s the received bytes back into a Python `str` for display. '
                        "The first `print` shows the raw bytes `b'ping'`; the second shows the "
@@ -10660,9 +7494,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'finally:\n'
                      '    left.close()\n'
                      '    right.close()',
-             'output': "b'ping'\nping",
-             'line': 33,
-             'kind': 'cell'}],
+             'output': "b'ping'\nping"}],
   'code': 'import socket\n'
           '\n'
           'left, right = socket.socketpair()\n'
@@ -10675,10 +7507,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'finally:\n'
           '    left.close()\n'
           '    right.close()\n',
-  'expected_output': "b'ping'\nping\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "b'ping'\nping\n"},
  {'slug': 'datetime',
   'title': 'Dates and Times',
   'section': 'Standard Library',
@@ -10697,53 +7526,8 @@ EXAMPLES = [{'slug': 'hello-world',
             '`timedelta` for durations.',
             'Prefer ISO 8601 strings for interchange; use `strftime` for human-facing display.'],
   'see_also': ['string-formatting', 'json', 'number-parsing'],
-  'walkthrough': [{'prose': 'The `datetime` module separates calendar dates, clock times, combined '
-                            'datetimes, and durations. Import the types you need explicitly.',
-                   'code': 'from datetime import date, datetime, time, timedelta, timezone\n'
-                           '\n'
-                           'release_day = date(2026, 5, 4)\n'
-                           'meeting_time = time(12, 30)\n'
-                           'created_at = datetime.combine(release_day, meeting_time, '
-                           'tzinfo=timezone.utc)\n'
-                           '\n'
-                           'print(release_day.isoformat())\n'
-                           'print(meeting_time.isoformat())\n'
-                           'print(created_at.isoformat())'},
-                  {'prose': 'Use `date` for a calendar day and `time` for a time of day. Combine '
-                            'them into a timezone-aware `datetime` when you mean an instant.',
-                   'code': 'from datetime import date, datetime, time, timedelta, timezone\n'
-                           '\n'
-                           'release_day = date(2026, 5, 4)\n'
-                           'meeting_time = time(12, 30)\n'
-                           'created_at = datetime.combine(release_day, meeting_time, '
-                           'tzinfo=timezone.utc)\n'
-                           '\n'
-                           'print(release_day.isoformat())\n'
-                           'print(meeting_time.isoformat())\n'
-                           'print(created_at.isoformat())'},
-                  {'prose': '`isoformat()` produces stable machine-readable text. It is a good '
-                            'default for examples, APIs, and logs.',
-                   'code': 'from datetime import date, datetime, time, timedelta, timezone\n'
-                           '\n'
-                           'release_day = date(2026, 5, 4)\n'
-                           'meeting_time = time(12, 30)\n'
-                           'created_at = datetime.combine(release_day, meeting_time, '
-                           'tzinfo=timezone.utc)\n'
-                           '\n'
-                           'print(release_day.isoformat())\n'
-                           'print(meeting_time.isoformat())\n'
-                           'print(created_at.isoformat())'},
-                  {'prose': 'Use `timedelta` for durations. Adding one to a `datetime` produces '
-                            'another `datetime` without manually changing calendar fields.',
-                   'code': 'expires_at = created_at + timedelta(days=7, hours=2)\n'
-                           'print(expires_at.isoformat())'},
-                  {'prose': 'Use `strftime()` for human-facing formatting and `fromisoformat()` '
-                            'when reading ISO 8601 text back into a `datetime`.',
-                   'code': 'print(created_at.strftime("%Y-%m-%d %H:%M %Z"))\n'
-                           'iso_text = "2026-05-04T12:30:00+00:00"\n'
-                           'parsed = datetime.fromisoformat(iso_text)\n'
-                           'print(parsed == created_at)'}],
-  'cells': [{'prose': ['The `datetime` module separates calendar dates, clock times, combined '
+  'cells': [{'kind': 'cell',
+             'prose': ['The `datetime` module separates calendar dates, clock times, combined '
                        'datetimes, and durations. Import the types you need explicitly.',
                        'Use `date` for a calendar day and `time` for a time of day. Combine them '
                        'into a timezone-aware `datetime` when you mean an instant.',
@@ -10759,25 +7543,21 @@ EXAMPLES = [{'slug': 'hello-world',
                      'print(release_day.isoformat())\n'
                      'print(meeting_time.isoformat())\n'
                      'print(created_at.isoformat())',
-             'output': '2026-05-04\n12:30:00\n2026-05-04T12:30:00+00:00',
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Use `timedelta` for durations. Adding one to a `datetime` produces another '
+             'output': '2026-05-04\n12:30:00\n2026-05-04T12:30:00+00:00'},
+            {'kind': 'cell',
+             'prose': ['Use `timedelta` for durations. Adding one to a `datetime` produces another '
                        '`datetime` without manually changing calendar fields.'],
              'code': 'expires_at = created_at + timedelta(days=7, hours=2)\n'
                      'print(expires_at.isoformat())',
-             'output': '2026-05-11T14:30:00+00:00',
-             'line': 48,
-             'kind': 'cell'},
-            {'prose': ['Use `strftime()` for human-facing formatting and `fromisoformat()` when '
+             'output': '2026-05-11T14:30:00+00:00'},
+            {'kind': 'cell',
+             'prose': ['Use `strftime()` for human-facing formatting and `fromisoformat()` when '
                        'reading ISO 8601 text back into a `datetime`.'],
              'code': 'print(created_at.strftime("%Y-%m-%d %H:%M %Z"))\n'
                      'iso_text = "2026-05-04T12:30:00+00:00"\n'
                      'parsed = datetime.fromisoformat(iso_text)\n'
                      'print(parsed == created_at)',
-             'output': '2026-05-04 12:30 UTC\nTrue',
-             'line': 61,
-             'kind': 'cell'}],
+             'output': '2026-05-04 12:30 UTC\nTrue'}],
   'code': 'from datetime import date, datetime, time, timedelta, timezone\n'
           '\n'
           'release_day = date(2026, 5, 4)\n'
@@ -10800,10 +7580,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '2026-05-04T12:30:00+00:00\n'
                      '2026-05-11T14:30:00+00:00\n'
                      '2026-05-04 12:30 UTC\n'
-                     'True\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+                     'True\n'},
  {'slug': 'csv-data',
   'title': 'CSV Data',
   'section': 'Standard Library',
@@ -10823,28 +7600,8 @@ EXAMPLES = [{'slug': 'hello-world',
             'Reach for JSON when records need nested lists, dictionaries, booleans, or numbers '
             'that preserve their type.'],
   'see_also': ['strings', 'dicts', 'json'],
-  'walkthrough': [{'prose': '`DictReader` uses the header row as dictionary keys. The values are '
-                            'still strings because CSV is text.',
-                   'code': 'import csv\n'
-                           'import io\n'
-                           '\n'
-                           'text = "name,score\\nAda,98\\nGrace,95\\n"\n'
-                           'rows = list(csv.DictReader(io.StringIO(text)))\n'
-                           '\n'
-                           'print(rows[0])\n'
-                           'print(type(rows[0]["score"]).__name__)'},
-                  {'prose': 'Convert numeric fields at the boundary where the program leaves CSV '
-                            'text and starts doing arithmetic.',
-                   'code': 'print(sum(int(row["score"]) for row in rows))'},
-                  {'prose': '`DictWriter` turns dictionaries back into row-shaped text with the '
-                            'same column order.',
-                   'code': 'output = io.StringIO(newline="")\n'
-                           'writer = csv.DictWriter(output, fieldnames=["name", "passed"])\n'
-                           'writer.writeheader()\n'
-                           'writer.writerow({"name": "Ada", "passed": True})\n'
-                           '\n'
-                           'print(output.getvalue().splitlines()[1])'}],
-  'cells': [{'prose': ['`DictReader` uses the header row as dictionary keys. The values are still '
+  'cells': [{'kind': 'cell',
+             'prose': ['`DictReader` uses the header row as dictionary keys. The values are still '
                        'strings because CSV is text.'],
              'code': 'import csv\n'
                      'import io\n'
@@ -10854,16 +7611,14 @@ EXAMPLES = [{'slug': 'hello-world',
                      '\n'
                      'print(rows[0])\n'
                      'print(type(rows[0]["score"]).__name__)',
-             'output': "{'name': 'Ada', 'score': '98'}\nstr",
-             'line': 22,
-             'kind': 'cell'},
-            {'prose': ['Convert numeric fields at the boundary where the program leaves CSV text '
+             'output': "{'name': 'Ada', 'score': '98'}\nstr"},
+            {'kind': 'cell',
+             'prose': ['Convert numeric fields at the boundary where the program leaves CSV text '
                        'and starts doing arithmetic.'],
              'code': 'print(sum(int(row["score"]) for row in rows))',
-             'output': '193',
-             'line': 42,
-             'kind': 'cell'},
-            {'prose': ['`DictWriter` turns dictionaries back into row-shaped text with the same '
+             'output': '193'},
+            {'kind': 'cell',
+             'prose': ['`DictWriter` turns dictionaries back into row-shaped text with the same '
                        'column order.'],
              'code': 'output = io.StringIO(newline="")\n'
                      'writer = csv.DictWriter(output, fieldnames=["name", "passed"])\n'
@@ -10871,9 +7626,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      'writer.writerow({"name": "Ada", "passed": True})\n'
                      '\n'
                      'print(output.getvalue().splitlines()[1])',
-             'output': 'Ada,True',
-             'line': 54,
-             'kind': 'cell'}],
+             'output': 'Ada,True'}],
   'code': 'import csv\n'
           'import io\n'
           '\n'
@@ -10887,10 +7640,7 @@ EXAMPLES = [{'slug': 'hello-world',
           'writer.writeheader()\n'
           'writer.writerow({"name": "Ada", "passed": True})\n'
           'print(output.getvalue().splitlines()[1])\n',
-  'expected_output': "{'name': 'Ada', 'score': '98'}\n193\nAda,True\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "{'name': 'Ada', 'score': '98'}\n193\nAda,True\n"},
  {'slug': 'async-await',
   'title': 'Async Await',
   'section': 'Async',
@@ -10913,86 +7663,39 @@ EXAMPLES = [{'slug': 'hello-world',
             'bindings.',
             'Prefer ordinary functions when there is no awaitable work to coordinate.'],
   'see_also': ['async-iteration-and-context', 'functions', 'context-managers'],
-  'walkthrough': [{'prose': 'An `async def` function returns a coroutine object when called. The '
-                            'function body has not produced its final result yet.',
-                   'code': 'import asyncio\n'
-                           '\n'
-                           'async def fetch_title(slug):\n'
-                           '    await asyncio.sleep(0)\n'
-                           '    return slug.replace("-", " ").title()\n'
-                           '\n'
-                           'coroutine = fetch_title("async-await")\n'
-                           'print(coroutine.__class__.__name__)\n'
-                           'coroutine.close()'},
-                  {'prose': 'Use `await` inside another coroutine to get the eventual result. '
-                            '`asyncio.run()` starts an event loop for the top-level coroutine.',
-                   'code': 'async def main():\n'
-                           '    title = await fetch_title("async-await")\n'
-                           '    print(title)\n'
-                           '\n'
-                           'asyncio.run(main())'},
-                  {'prose': '`asyncio.gather()` awaits several awaitables and returns their '
-                            'results in order. This is the shape used when independent I/O '
-                            'operations can progress together.',
-                   'code': 'async def main():\n'
-                           '    titles = await asyncio.gather(fetch_title("json"), '
-                           'fetch_title("datetime"))\n'
-                           '    print(titles)\n'
-                           '\n'
-                           'asyncio.run(main())'},
-                  {'prose': '`async with` and `async for` are the asynchronous forms of context '
-                            'managers and iteration. A class implements `__aenter__`/`__aexit__` '
-                            'to act as an async context manager; an `async def` function with '
-                            '`yield` becomes an async generator. The dedicated [async iteration '
-                            'and context](/iteration/async-iteration-and-context) page explains '
-                            'the protocols in depth.',
-                   'code': 'class Session:\n'
-                           '    async def __aenter__(self):\n'
-                           '        print("open")\n'
-                           '        return self\n'
-                           '\n'
-                           '    async def __aexit__(self, *_):\n'
-                           '        print("close")\n'
-                           '        return False\n'
-                           '\n'
-                           '\n'
-                           'async def stream():\n'
-                           '    for slug in ["json", "datetime"]:\n'
-                           '        await asyncio.sleep(0)\n'
-                           '        yield slug\n'
-                           '\n'
-                           '\n'
-                           'async def driver():\n'
-                           '    async with Session():\n'
-                           '        async for slug in stream():\n'
-                           '            print(slug)\n'
-                           '\n'
-                           'asyncio.run(driver())'}],
-  'cells': [{'prose': ['An `async def` function returns a coroutine object when called. The '
+  'cells': [{'kind': 'cell',
+             'prose': ['An ordinary `def` function computes its result immediately: calling it '
+                       'runs the body and hands the value straight back. This synchronous form is '
+                       'the baseline the rest of the page contrasts against.'],
+             'code': 'def slug_to_title(slug):\n'
+                     '    return slug.replace("-", " ").title()\n'
+                     '\n'
+                     'print(slug_to_title("async-await"))',
+             'output': 'Async Await'},
+            {'kind': 'cell',
+             'prose': ['An `async def` function returns a coroutine object when called. The '
                        'function body has not produced its final result yet.'],
              'code': 'import asyncio\n'
                      '\n'
                      'async def fetch_title(slug):\n'
                      '    await asyncio.sleep(0)\n'
-                     '    return slug.replace("-", " ").title()\n'
+                     '    return slug_to_title(slug)\n'
                      '\n'
                      'coroutine = fetch_title("async-await")\n'
                      'print(coroutine.__class__.__name__)\n'
                      'coroutine.close()',
-             'output': 'coroutine',
-             'line': 24,
-             'kind': 'cell'},
-            {'prose': ['Use `await` inside another coroutine to get the eventual result. '
+             'output': 'coroutine'},
+            {'kind': 'cell',
+             'prose': ['Use `await` inside another coroutine to get the eventual result. '
                        '`asyncio.run()` starts an event loop for the top-level coroutine.'],
              'code': 'async def main():\n'
                      '    title = await fetch_title("async-await")\n'
                      '    print(title)\n'
                      '\n'
                      'asyncio.run(main())',
-             'output': 'Async Await',
-             'line': 44,
-             'kind': 'cell'},
-            {'prose': ['`asyncio.gather()` awaits several awaitables and returns their results in '
+             'output': 'Async Await'},
+            {'kind': 'cell',
+             'prose': ['`asyncio.gather()` awaits several awaitables and returns their results in '
                        'order. This is the shape used when independent I/O operations can progress '
                        'together.'],
              'code': 'async def main():\n'
@@ -11001,14 +7704,13 @@ EXAMPLES = [{'slug': 'hello-world',
                      '    print(titles)\n'
                      '\n'
                      'asyncio.run(main())',
-             'output': "['Json', 'Datetime']",
-             'line': 60,
-             'kind': 'cell'},
-            {'prose': ['`async with` and `async for` are the asynchronous forms of context '
+             'output': "['Json', 'Datetime']"},
+            {'kind': 'cell',
+             'prose': ['`async with` and `async for` are the asynchronous forms of context '
                        'managers and iteration. A class implements `__aenter__`/`__aexit__` to act '
                        'as an async context manager; an `async def` function with `yield` becomes '
                        'an async generator. The dedicated [async iteration and '
-                       'context](/iteration/async-iteration-and-context) page explains the '
+                       'context](/examples/async-iteration-and-context) page explains the '
                        'protocols in depth.'],
              'code': 'class Session:\n'
                      '    async def __aenter__(self):\n'
@@ -11032,14 +7734,15 @@ EXAMPLES = [{'slug': 'hello-world',
                      '            print(slug)\n'
                      '\n'
                      'asyncio.run(driver())',
-             'output': 'open\njson\ndatetime\nclose',
-             'line': 76,
-             'kind': 'cell'}],
+             'output': 'open\njson\ndatetime\nclose'}],
   'code': 'import asyncio\n'
+          '\n'
+          'def slug_to_title(slug):\n'
+          '    return slug.replace("-", " ").title()\n'
           '\n'
           'async def fetch_title(slug):\n'
           '    await asyncio.sleep(0)\n'
-          '    return slug.replace("-", " ").title()\n'
+          '    return slug_to_title(slug)\n'
           '\n'
           'async def main():\n'
           '    title = await fetch_title("async-await")\n'
@@ -11072,10 +7775,7 @@ EXAMPLES = [{'slug': 'hello-world',
           '            print(slug)\n'
           '\n'
           'asyncio.run(driver())\n',
-  'expected_output': "Async Await\n['Json', 'Datetime']\nopen\njson\ndatetime\nclose\n",
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None},
+  'expected_output': "Async Await\n['Json', 'Datetime']\nopen\njson\ndatetime\nclose\n"},
  {'slug': 'async-iteration-and-context',
   'title': 'Async Iteration and Context',
   'section': 'Async',
@@ -11095,36 +7795,8 @@ EXAMPLES = [{'slug': 'hello-world',
             '`async with` awaits asynchronous setup and cleanup.',
             'These forms are common around I/O-shaped resources.'],
   'see_also': ['async-await', 'iterators', 'context-managers'],
-  'walkthrough': [{'prose': 'An async generator can `await` before yielding each value. `async '
-                            'for` consumes those values with the asynchronous iteration protocol.',
-                   'code': 'import asyncio\n'
-                           '\n'
-                           'async def titles():\n'
-                           '    for slug in ["values", "async-await"]:\n'
-                           '        await asyncio.sleep(0)\n'
-                           '        yield slug.replace("-", " ").title()\n'
-                           '\n'
-                           'print(titles.__name__)'},
-                  {'prose': 'An async context manager defines `__aenter__` and `__aexit__`. `async '
-                            'with` awaits setup and cleanup around the block.',
-                   'code': 'class Session:\n'
-                           '    async def __aenter__(self):\n'
-                           '        print("open")\n'
-                           '        return self\n'
-                           '\n'
-                           '    async def __aexit__(self, exc_type, exc, tb):\n'
-                           '        print("close")\n'
-                           '\n'
-                           'print(Session.__name__)'},
-                  {'prose': 'The top-level coroutine combines both protocols: open the async '
-                            'resource, then consume the async stream inside it.',
-                   'code': 'async def main():\n'
-                           '    async with Session():\n'
-                           '        async for title in titles():\n'
-                           '            print(title)\n'
-                           '\n'
-                           'asyncio.run(main())'}],
-  'cells': [{'prose': ['An async generator can `await` before yielding each value. `async for` '
+  'cells': [{'kind': 'cell',
+             'prose': ['An async generator can `await` before yielding each value. `async for` '
                        'consumes those values with the asynchronous iteration protocol.'],
              'code': 'import asyncio\n'
                      '\n'
@@ -11134,10 +7806,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        yield slug.replace("-", " ").title()\n'
                      '\n'
                      'print(titles.__name__)',
-             'output': 'titles',
-             'line': 24,
-             'kind': 'cell'},
-            {'prose': ['An async context manager defines `__aenter__` and `__aexit__`. `async '
+             'output': 'titles'},
+            {'kind': 'cell',
+             'prose': ['An async context manager defines `__aenter__` and `__aexit__`. `async '
                        'with` awaits setup and cleanup around the block.'],
              'code': 'class Session:\n'
                      '    async def __aenter__(self):\n'
@@ -11148,10 +7819,9 @@ EXAMPLES = [{'slug': 'hello-world',
                      '        print("close")\n'
                      '\n'
                      'print(Session.__name__)',
-             'output': 'Session',
-             'line': 43,
-             'kind': 'cell'},
-            {'prose': ['The top-level coroutine combines both protocols: open the async resource, '
+             'output': 'Session'},
+            {'kind': 'cell',
+             'prose': ['The top-level coroutine combines both protocols: open the async resource, '
                        'then consume the async stream inside it.'],
              'code': 'async def main():\n'
                      '    async with Session():\n'
@@ -11159,9 +7829,7 @@ EXAMPLES = [{'slug': 'hello-world',
                      '            print(title)\n'
                      '\n'
                      'asyncio.run(main())',
-             'output': 'open\nValues\nAsync Await\nclose',
-             'line': 63,
-             'kind': 'cell'}],
+             'output': 'open\nValues\nAsync Await\nclose'}],
   'code': 'import asyncio\n'
           '\n'
           'async def titles():\n'
@@ -11183,7 +7851,4 @@ EXAMPLES = [{'slug': 'hello-world',
           '            print(title)\n'
           '\n'
           'asyncio.run(main())\n',
-  'expected_output': 'open\nValues\nAsync Await\nclose\n',
-  'min_python': None,
-  'version_sensitive': False,
-  'version_notes': None}]
+  'expected_output': 'open\nValues\nAsync Await\nclose\n'}]

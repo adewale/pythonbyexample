@@ -59,13 +59,25 @@ class AppTests(unittest.TestCase):
         self.assertIn("dict.items()", pairs[3][0])
         self.assertIn("scores.items()", pairs[3][1])
 
-    def test_every_example_executes_without_error(self):
+    # Environment-shaped examples carry hand-written expected_output
+    # (their real output depends on subprocess/socket/thread timing), so
+    # for them executing without error is the contract.
+    ENVIRONMENT_SHAPED_SLUGS = {
+        "networking",
+        "subprocesses",
+        "threads-and-processes",
+        "virtual-environments",
+    }
+
+    def test_every_example_executes_and_matches_expected_output(self):
         for example in list_examples():
             with self.subTest(slug=example["slug"]):
                 stdout = io.StringIO()
                 with contextlib.redirect_stdout(stdout):
                     exec(example["code"], {"__name__": "__main__"})
-                self.assertIsInstance(stdout.getvalue(), str)
+                if example["slug"] in self.ENVIRONMENT_SHAPED_SLUGS:
+                    continue
+                self.assertEqual(stdout.getvalue(), example["expected_output"])
 
     def test_language_surface_has_good_initial_coverage(self):
         sections = {example["section"] for example in list_examples()}

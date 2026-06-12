@@ -1,10 +1,21 @@
 #!/usr/bin/env python3
-"""Verify Markdown examples against the frozen golden catalog."""
+"""Verify the loader's parsed catalog against the reviewed snapshot.
+
+tests/fixtures/golden_examples.py is a structural snapshot of the
+teaching structure readers get: every example's metadata, program,
+expected output, and cell sequence (prose, code, output, kind). This
+gate fails whenever the live loader's output stops matching it.
+
+What that buys: an accidental loader/parser/renderer change cannot
+silently rewrite the parsed structure — it surfaces here as drift
+across many examples, while a deliberate content edit surfaces only for
+the files actually touched. Refreshes are explicit and reviewed:
+scripts/refresh_golden_fixture.py regenerates the snapshot and prints a
+structural summary; commit it alongside the content change it reflects.
+"""
 from __future__ import annotations
 
-import contextlib
 import importlib.util
-import io
 import sys
 from pathlib import Path
 
@@ -12,15 +23,12 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.example_loader import load_examples  # noqa: E402
+from scripts.refresh_golden_fixture import (  # noqa: E402
+    EXAMPLE_FIELDS,
+    snapshot_example,
+)
 
 GOLDEN = ROOT / "tests" / "fixtures" / "golden_examples.py"
-
-
-def run(code: str) -> str:
-    stdout = io.StringIO()
-    with contextlib.redirect_stdout(stdout):
-        exec(compile(code, "<parity>", "exec", dont_inherit=True), {"__name__": "__main__"})
-    return stdout.getvalue()
 
 
 def load_golden():
@@ -32,42 +40,34 @@ def load_golden():
     return module.EXAMPLES
 
 
-def comparable_cells(example: dict) -> list[tuple[tuple[str, ...], str, str]]:
-    # Import lazily so this script compares against the same rendering grouping
-    # that the website used before the Markdown switch.
-    from src.app import _walkthrough_cells  # noqa: PLC0415
-
-    return [(tuple(cell["prose"]), cell["code"], cell["output"]) for cell in _walkthrough_cells(example)]
-
-
-def markdown_cells(example: dict) -> list[tuple[tuple[str, ...], str, str]]:
-    return [(tuple(cell["prose"]), cell["code"], cell["output"]) for cell in example["cells"]]
-
-
 def main() -> int:
     golden = load_golden()
-    _, markdown = load_examples()
+    _, examples = load_examples()
+    current = [snapshot_example(example) for example in examples]
     errors: list[str] = []
-    rows: list[str] = []
-    if [e["slug"] for e in golden] != [e["slug"] for e in markdown]:
-        errors.append("example order differs")
-    for old, new in zip(golden, markdown):
-        slug = old["slug"]
-        for field in ["slug", "title", "section", "summary", "doc_url", "code", "expected_output", "notes"]:
-            if old.get(field) != new.get(field):
-                errors.append(f"{slug}: field differs: {field}")
-        if run(old["code"]) != run(new["code"]):
-            errors.append(f"{slug}: stdout differs")
-        old_cells = comparable_cells(old)
-        new_cells = markdown_cells(new)
-        if old_cells != new_cells:
-            errors.append(f"{slug}: teaching-structure difference")
-        rows.append(f"{slug}: cells={len(new_cells)}")
-    print("\n".join(rows))
+    if [row["slug"] for row in golden] != [row["slug"] for row in current]:
+        errors.append("example order differs from the snapshot")
+    by_slug = {row["slug"]: row for row in golden}
+    for row in current:
+        slug = row["slug"]
+        old = by_slug.get(slug)
+        if old is None:
+            errors.append(f"{slug}: not in the snapshot")
+            continue
+        for field in EXAMPLE_FIELDS:
+            if old.get(field) != row[field]:
+                errors.append(f"{slug}: field differs from snapshot: {field}")
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
+        print(
+            "If these differences are intentional content edits, regenerate the "
+            "snapshot with scripts/refresh_golden_fixture.py and review its summary. "
+            "If you changed the loader or parser, the drift above is the regression.",
+            file=sys.stderr,
+        )
         return 1
+    print(f"{len(current)} examples match the structural snapshot")
     print("100% golden parity")
     return 0
 

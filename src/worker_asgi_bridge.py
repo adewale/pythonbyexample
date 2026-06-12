@@ -52,7 +52,8 @@ def request_to_scope(req, env, ws=False, *, state=None):
     # Support both JS and Python http.client.HTTPMessage headers.
     req_headers = req.headers.items() if isinstance(req, Request) else req.headers
 
-    headers = [(k.lower().encode(), v.encode()) for k, v in req_headers]
+    # ASGI header bytes are latin-1 per the spec, not UTF-8.
+    headers = [(k.lower().encode("latin-1"), v.encode("latin-1")) for k, v in req_headers]
     url = URL.new(req.url)
     assert url.protocol[-1] == ":"
     scheme = url.protocol[:-1]
@@ -168,7 +169,8 @@ async def process_request(
         if got["type"] == "http.response.start":
             status = got["status"]
             # Like above, we need to convert byte-pairs into string explicitly.
-            headers = [(k.decode(), v.decode()) for k, v in got["headers"]]
+            # ASGI header bytes are latin-1 per the spec, not UTF-8.
+            headers = [(k.decode("latin-1"), v.decode("latin-1")) for k, v in got["headers"]]
 
         elif got["type"] == "http.response.body":
             body = got["body"]
@@ -261,7 +263,7 @@ async def process_websocket(app: Any, req: "Request | js.Request") -> js.Respons
         queue.put_nowait(msg)
 
     server.onopen = onopen
-    server.onopen = onclose
+    server.onclose = onclose
     server.onmessage = onmessage
 
     async def ws_send(got):
@@ -289,6 +291,23 @@ async def process_websocket(app: Any, req: "Request | js.Request") -> js.Respons
     return Response.new(None, status=101, webSocket=client)
 
 
+# One lifespan per application object, started on first request. Running
+# startup/shutdown around every request is both wasteful and semantically
+# wrong (a startup handler would re-run per request); Worker isolates are
+# torn down by the platform, so there is no orderly shutdown point and the
+# shutdown callable is intentionally dropped.
+_app_lifespans: dict[int, Future] = {}
+
+
+def _ensure_application_started(app: Any) -> Future:
+    key = id(app)
+    started = _app_lifespans.get(key)
+    if started is None:
+        started = ensure_future(start_application(app))
+        _app_lifespans[key] = started
+    return started
+
+
 async def fetch(
     app: Any,
     req: "Request | js.Request",
@@ -298,14 +317,12 @@ async def fetch(
     state: dict | None = None,
 ) -> js.Response:
     logger.debug("ASGI request: %s %s", req.method, req.url)
-    shutdown = await start_application(app)
+    await _ensure_application_started(app)
     try:
-        result = await process_request(app, req, env, ctx, state=state)
+        return await process_request(app, req, env, ctx, state=state)
     except Exception:
         logger.exception("ASGI request failed")
         raise
-    await shutdown()
-    return result
 
 
 async def websocket(app: Any, req: "Request | js.Request") -> js.Response:

@@ -9,7 +9,7 @@ from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_DIR = ROOT / "src" / "example_sources"
-FRONTMATTER_ORDER = ["slug", "title", "section", "summary", "doc_path", "scope_first_pass", "see_also", "min_python", "version_sensitive", "version_notes"]
+FRONTMATTER_ORDER = ["slug", "title", "section", "summary", "doc_path", "scope_first_pass", "standalone_cells", "see_also", "expected_output", "min_python", "version_sensitive", "version_notes"]
 
 
 def toml_value(value: Any) -> str:

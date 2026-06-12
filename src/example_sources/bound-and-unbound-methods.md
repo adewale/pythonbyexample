@@ -143,6 +143,7 @@ True
 :::note
 - `instance.method` produces a bound method whose `__self__` is the instance.
 - `Class.method` produces the plain function and requires you to pass the instance.
+- "Unbound method" is the historical Python 2 term; since Python 3, `Class.method` is simply a function, which is what this page demonstrates.
 - Each bound method is its own object; storing one captures its instance.
 - The binding is implemented by the descriptor protocol on the function object.
 :::

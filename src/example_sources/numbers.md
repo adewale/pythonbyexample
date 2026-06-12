@@ -26,6 +26,7 @@ z = 2 + 3j
 
 print(count + 5)
 print(count / 4)
+print(ratio * 2)
 print(count // 4)
 print(count % 4)
 print(2 ** 5)

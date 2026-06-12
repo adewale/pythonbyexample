@@ -34,7 +34,7 @@ print(ProcessPoolExecutor.__name__)
 :::
 
 :::unsupported
-`ThreadPoolExecutor` runs `square` across two worker threads sharing the same interpreter (and the GIL); `ProcessPoolExecutor` runs `pow` across two child processes with isolated memory. Each `pool.map` returns an iterator over results in input order, and the surrounding `with` block joins the workers when the body exits. (This fragment runs in standard Python only — the Python By Example runner does not provide native threads or child processes.)
+`ThreadPoolExecutor` runs `square` across two worker threads sharing the same interpreter (and the GIL); `ProcessPoolExecutor` runs `pow` across two child processes with isolated memory. Each `pool.map` returns an iterator over results in input order, and the surrounding `with` block joins the workers when the body exits. (The in-browser Run button cannot create native threads or child processes, so pressing Run on this page fails in the sandbox; the verified thread-pool output below comes from standard CPython at build time.)
 
 ```python
 with ThreadPoolExecutor(max_workers=2) as pool:
@@ -80,5 +80,5 @@ ProcessPoolExecutor
 - Threads share memory, so mutable shared state needs care.
 - Processes avoid shared interpreter state but require values to cross a process boundary.
 - Prefer `asyncio` for coroutine-based I/O and executors for ordinary blocking callables.
-- The displayed executor names are standard Python concepts; the site avoids actually creating host threads or processes in the live runner.
+- The thread-pool output here was produced by real worker threads under standard CPython when the example was verified; the site's in-browser sandbox cannot create threads or processes, so live runs of this page fail there.
 :::

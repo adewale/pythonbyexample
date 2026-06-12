@@ -1723,7 +1723,7 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "A context manager pairs setup with reliable cleanup; the raise path still routes through __exit__.",
     )],
     "async-await": [(
-        "cell-0", "async-swimlane",
+        "cell-1", "async-swimlane",
         "On await, the coroutine yields to the loop; the loop runs other work and resumes when the awaitable is ready.",
     )],
     "iterators": [(

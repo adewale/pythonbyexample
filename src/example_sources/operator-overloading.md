@@ -25,9 +25,13 @@ class Vector:
         self.y = y
 
     def __add__(self, other):
+        if not isinstance(other, Vector):
+            return NotImplemented
         return Vector(self.x + other.x, self.y + other.y)
 
     def __eq__(self, other):
+        if not isinstance(other, Vector):
+            return NotImplemented
         return (self.x, self.y) == (other.x, other.y)
 
     def __repr__(self):
@@ -35,11 +39,12 @@ class Vector:
 
 print(Vector(2, 3) + Vector(4, 5))
 print(Vector(1, 1) == Vector(1, 1))
+print(Vector(1, 1) == 5)
 ```
 :::
 
 :::cell
-`__add__` defines how the `+` operator combines two objects.
+`__add__` defines how the `+` operator combines two objects. Checking the operand type and returning `NotImplemented` for foreign types lets Python try the other operand's reflected method instead of crashing inside yours.
 
 ```python
 class Vector:
@@ -48,6 +53,8 @@ class Vector:
         self.y = y
 
     def __add__(self, other):
+        if not isinstance(other, Vector):
+            return NotImplemented
         return Vector(self.x + other.x, self.y + other.y)
 
     def __repr__(self):
@@ -62,7 +69,7 @@ Vector(6, 8)
 :::
 
 :::cell
-`__eq__` defines value equality for `==`. Without it, user-defined objects compare by identity.
+`__eq__` defines value equality for `==`. Without it, user-defined objects compare by identity. Returning `NotImplemented` for foreign types matters most here: equality against an unrelated value should answer `False`, never raise — Python falls back to identity when both sides decline.
 
 ```python
 class Vector:
@@ -71,13 +78,17 @@ class Vector:
         self.y = y
 
     def __eq__(self, other):
+        if not isinstance(other, Vector):
+            return NotImplemented
         return (self.x, self.y) == (other.x, other.y)
 
 print(Vector(1, 1) == Vector(1, 1))
+print(Vector(1, 1) == 5)
 ```
 
 ```output
 True
+False
 ```
 :::
 
@@ -91,6 +102,8 @@ class Vector:
         self.y = y
 
     def __add__(self, other):
+        if not isinstance(other, Vector):
+            return NotImplemented
         return Vector(self.x + other.x, self.y + other.y)
 
     def __repr__(self):

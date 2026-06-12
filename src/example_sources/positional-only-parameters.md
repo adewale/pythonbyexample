@@ -27,7 +27,12 @@ def scale(value, /, factor=2, *, clamp=False):
 
 print(scale(4))
 print(scale(4, factor=3))
-print(scale(4, clamp=True))
+print(scale(4, factor=3, clamp=True))
+
+try:
+    scale(value=4)
+except TypeError as error:
+    print(type(error).__name__)
 ```
 :::
 
@@ -52,14 +57,29 @@ print(scale(4, factor=3))
 :::
 
 :::cell
-Parameters after `*` are keyword-only. That makes options such as `clamp` explicit at the call site.
+Parameters after `*` are keyword-only. That makes options such as `clamp` explicit at the call site — here `4 * 3` would be `12`, and the clamp visibly caps the result at `10`.
 
 ```python
-print(scale(4, clamp=True))
+print(scale(4, factor=3, clamp=True))
 ```
 
 ```output
-8
+10
+```
+:::
+
+:::cell
+The restriction is enforced, not advisory: passing the positional-only `value` by keyword raises `TypeError` at the call site.
+
+```python
+try:
+    scale(value=4)
+except TypeError as error:
+    print(type(error).__name__)
+```
+
+```output
+TypeError
 ```
 :::
 

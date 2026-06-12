@@ -35,9 +35,7 @@ print(bool(42))
 :::
 
 :::cell
-Truthiness is one of Python's most important conveniences: conditions can test objects directly instead of requiring explicit boolean comparisons everywhere.
-
-Empty containers, numeric zero, None, and False are false; most other values are true. This makes common checks such as if items: concise and idiomatic.
+An empty list is false, so `not items` reads as "items is empty". The condition tests the object directly — no `len(items) == 0` comparison is needed.
 
 ```python
 items = []
@@ -53,7 +51,7 @@ no items
 :::
 
 :::cell
-Use truthiness when it reads naturally, but choose explicit comparisons when the distinction matters, such as checking whether a value is exactly None.
+A non-empty string is true, so `if name:` asks "did we get a name?" in one word. Reach for an explicit comparison instead when the distinction matters — `if name is not None:` treats an empty string differently from a missing one.
 
 ```python
 if name:
@@ -66,7 +64,7 @@ has a name
 :::
 
 :::cell
-Use truthiness when it reads naturally, but choose explicit comparisons when the distinction matters, such as checking whether a value is exactly None.
+`bool()` reveals the truth value any condition would use. Zero-like numbers convert to `False`; other numbers convert to `True`.
 
 ```python
 print(bool(0))

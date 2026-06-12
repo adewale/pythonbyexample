@@ -44,7 +44,7 @@ print(settings._values["volume"])
 :::
 
 :::cell
-Normal initialization still needs to set real attributes. Calling `object.__setattr__` avoids recursing through your own hook.
+The starting point is ordinary: `__init__` stores one real attribute, the `_values` backing dictionary. The hooks in the next cells customize lookup and assignment around it.
 
 ```python
 class Settings:
@@ -84,7 +84,7 @@ dark
 :::
 
 :::cell
-`__setattr__` intercepts assignment. This example stores public names in the backing dictionary.
+`__setattr__` intercepts every assignment, including the ones in `__init__`. Underscore names are stored as real attributes through `object.__setattr__`, which avoids recursing through your own hook; public names go to the backing dictionary.
 
 ```python
 class Settings:
