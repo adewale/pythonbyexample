@@ -7,6 +7,7 @@ cookie scope, expiry handling, or fail-open mode selection fails here.
 """
 from __future__ import annotations
 
+import asyncio
 import sys
 import time
 import types
@@ -190,6 +191,119 @@ class HtmlCacheKeyTests(unittest.TestCase):
     def test_layout_options_bypass_cache(self):
         self.assertFalse(main.should_cache_get_url("https://example.dev/layout-options/x"))
         self.assertTrue(main.should_cache_get_url("https://example.dev/examples/values"))
+
+
+def post_request(body: bytes, *, env=None, headers: dict[str, str] | None = None) -> Request:
+    raw_headers = [(b"content-type", b"application/x-www-form-urlencoded")]
+    for key, value in (headers or {}).items():
+        raw_headers.append((key.lower().encode(), value.encode()))
+
+    async def receive():
+        return {"type": "http.request", "body": body, "more_body": False}
+
+    return Request(
+        {
+            "type": "http",
+            "method": "POST",
+            "path": "/examples/values",
+            "query_string": b"",
+            "headers": raw_headers,
+            "env": env,
+        },
+        receive,
+    )
+
+
+class RunExampleFlowTests(unittest.TestCase):
+    """Behavioral tests of the POST /examples/{slug} handler branches:
+    verification-required, missing-site-key, too-large, and
+    verify-then-set-clearance. Exercises the real run_example handler with
+    a constructed Request; the Dynamic Worker run and Turnstile siteverify
+    HTTP call are stubbed so only the handler's control flow is under test.
+    """
+
+    def _run(self, request):
+        return asyncio.run(main.run_example("values", request))
+
+    def setUp(self):
+        self._saved = {name: getattr(main, name) for name in ("_run_example", "_verify_turnstile")}
+
+    def tearDown(self):
+        for name, value in self._saved.items():
+            setattr(main, name, value)
+
+    def _stub_run(self, output="OUT"):
+        async def _fake_run_example(request, slug, code):
+            self._ran_code = code
+            return output
+        main._run_example = _fake_run_example
+
+    def test_verification_required_path_does_not_run_code(self):
+        self._ran_code = None
+        self._stub_run()
+        env = session_env(TURNSTILE_SITE_KEY="site-key")
+        response = self._run(post_request(b"code=print(1)", env=env))
+        body = response.body.decode()
+        # The retriable-challenge marker is rendered as a real attribute
+        # (the bare string also lives in the page's static JS selector).
+        self.assertIn('data-turnstile-required="true"', body)
+        self.assertIn("Verification required", body)
+        self.assertIsNone(self._ran_code, "code must not run before verification")
+
+    def test_missing_site_key_message(self):
+        self._stub_run()
+        env = session_env()  # secret set, but no TURNSTILE_SITE_KEY
+        response = self._run(post_request(b"code=print(1)", env=env))
+        body = response.body.decode()
+        self.assertIn("TURNSTILE_SITE_KEY is not configured", body)
+        self.assertNotIn('data-turnstile-required="true"', body)
+
+    def test_oversize_body_rejected_with_413(self):
+        self._stub_run()
+        big = b"code=" + b"x" * (main.MAX_SUBMITTED_BODY_BYTES + 1)
+        response = self._run(post_request(big, env=session_env(TURNSTILE_CHALLENGE_MODE="off")))
+        self.assertEqual(response.status_code, 413)
+        self.assertIn("too large", response.body.decode().lower())
+
+    def test_off_mode_runs_without_challenge(self):
+        self._ran_code = None
+        self._stub_run(output="ran-output")
+        response = self._run(
+            post_request(b"code=print(42)", env=session_env(TURNSTILE_CHALLENGE_MODE="off"))
+        )
+        self.assertEqual(self._ran_code, "print(42)")
+        self.assertIn("ran-output", response.body.decode())
+
+    def test_verified_token_sets_clearance_cookie(self):
+        self._ran_code = None
+        self._stub_run(output="verified-run")
+
+        async def _fake_verify(request, token):
+            return True, "ok", "success"
+
+        main._verify_turnstile = _fake_verify
+        env = session_env(TURNSTILE_SITE_KEY="site-key")
+        response = self._run(post_request(b"code=print(1)&cf-turnstile-response=tok", env=env))
+        self.assertEqual(self._ran_code, "print(1)")
+        set_cookie = response.headers.get("set-cookie", "")
+        self.assertIn(f"{main.TURNSTILE_CLEARANCE_COOKIE}=", set_cookie)
+
+
+class DynamicWorkerCodeTests(unittest.TestCase):
+    """Behavioral coverage of build_dynamic_worker_code: the generated
+    module embeds the submitted code as a string literal (so a
+    closing-quote injection cannot break out) and defines the entrypoint.
+    """
+
+    def test_generated_module_embeds_code_and_entrypoint(self):
+        from app import build_dynamic_worker_code
+
+        module = build_dynamic_worker_code("print('hi <b>')")
+        self.assertIn(repr("print('hi <b>')"), module)
+        self.assertIn("class Default(WorkerEntrypoint)", module)
+        self.assertIn("async def fetch", module)
+        tricky = build_dynamic_worker_code("x = '''end'''")
+        self.assertIn(repr("x = '''end'''"), tricky)
 
 
 if __name__ == "__main__":
