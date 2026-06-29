@@ -1,9 +1,9 @@
 # Rubric saturation analysis
 
-After six iteration passes, the figure system has 109 examples
-attached (one per slug on `main`) and 109 figures in
-`src/marginalia.py FIGURES`. Coverage is 100%. Distribution against
-`docs/example-figure-rubric.md`:
+After six iteration passes, the figure system attaches a figure to
+every example (one banner per slug on `main`) from the 124 paint
+functions in `src/marginalia.py FIGURES`. Coverage is 100%.
+Distribution against `docs/example-figure-rubric.md`:
 
 | band | count | composition |
 |---|---:|---|
@@ -27,10 +27,10 @@ at 8.5 by design:
 A figure loses up to 1.0 when its placeholders (`a`, `b`, `xs`) do
 not match the cell's specific names (`first`, `second`, `factor`,
 `numbers`). For a library of 109 figures across 109 cells, matching
-running variables one-for-one would require 109 bespoke paint
-functions; reuse becomes impossible. Today 12 figures are reused
-across multiple slugs precisely because they capture a *general*
-mechanism (`iter-protocol` covers `iterators`,
+running variables one-for-one would require a bespoke paint
+function per cell; reuse becomes impossible. Today 7 figures are
+reused across multiple slugs precisely because they capture a
+*general* mechanism (`iter-protocol` covers `iterators`,
 `iterator-vs-iterable`, `iterating-over-iterables`,
 `container-protocols`). Every reuse pays a tax against this
 criterion.

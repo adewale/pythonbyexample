@@ -602,6 +602,11 @@ class FigureSizeContract(unittest.TestCase):
     """
 
     BANNER_MAX_WIDTH = 640  # cell-banner--1 / journey-section-figure max-width
+    # When scaled to the banner width the SVG keeps its aspect ratio, so its
+    # displayed height is BANNER_MAX_WIDTH * vb_h/vb_w. A figure taller than
+    # this at full width reads as a portrait column dominating the page; the
+    # tallest shipped figure displays at ~341px, so 440 leaves real headroom.
+    BANNER_MAX_DISPLAY_HEIGHT = 440
 
     def test_every_figure_fits_the_banner(self):
         from src.marginalia_grammar import Canvas as _C
@@ -613,6 +618,20 @@ class FigureSizeContract(unittest.TestCase):
                 failures.append(
                     f"{name}: rendered width {rendered}px exceeds "
                     f"{self.BANNER_MAX_WIDTH}px banner ceiling"
+                )
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+    def test_no_figure_is_too_tall_at_banner_width(self):
+        failures: list[str] = []
+        for name, (_, w, h) in ALL_FIGURES.items():
+            vb_w = w + 2 * PAD_X
+            vb_h = h + PAD_TOP + PAD_BOTTOM
+            display_width = min(self.BANNER_MAX_WIDTH, round(vb_w * Canvas.INTRINSIC_SCALE))
+            display_height = display_width * vb_h / vb_w
+            if display_height > self.BANNER_MAX_DISPLAY_HEIGHT:
+                failures.append(
+                    f"{name}: displays {display_height:.0f}px tall at banner width, "
+                    f"exceeds {self.BANNER_MAX_DISPLAY_HEIGHT}px"
                 )
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
@@ -728,6 +747,41 @@ class FigureWellFormedXMLContract(unittest.TestCase):
         texts = [el.text for el in tree.iter() if el.tag.endswith("text")]
         self.assertIn("a < b & c", texts)
         self.assertIn('x <= "y"', texts)
+
+
+class FigureLineTextCollisionContract(unittest.TestCase):
+    """Contract 12: no SOLID line passes through a text label's interior.
+
+    A solid stroke crossing a label reads as an accidental strike-through.
+    DASHED lines are excluded: the grammar uses dashed strikes through
+    labels deliberately (e.g. crossing out `.append` to show a rejected
+    mutation), so only solid `<line>` elements are policed. Empty text
+    elements render nothing and are skipped.
+    """
+
+    INTERIOR_SLACK = 2.0
+
+    def test_no_solid_line_crosses_a_label(self):
+        failures: list[str] = []
+        for name, (paint, w, h) in ALL_FIGURES.items():
+            canvas = Canvas(w=w, h=h)
+            paint(canvas)
+            parts = parse_parts(canvas.parts)
+            texts = [
+                (text_bbox(attrs, content), content)
+                for kind, attrs, content in parts
+                if kind == "text" and content.strip()
+            ]
+            for kind, attrs, _content in parts:
+                if kind != "line" or "stroke-dasharray" in attrs:
+                    continue
+                lx, ly, lw, lh = line_bbox(attrs)
+                for (tx, ty, tw, th), content in texts:
+                    overlap_w = min(lx + lw, tx + tw) - max(lx, tx)
+                    overlap_h = min(ly + lh, ty + th) - max(ly, ty)
+                    if overlap_w > self.INTERIOR_SLACK and overlap_h > self.INTERIOR_SLACK:
+                        failures.append(f"{name}: solid line crosses label {content!r}")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
 
 if __name__ == "__main__":

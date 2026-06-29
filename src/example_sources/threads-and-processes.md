@@ -33,20 +33,8 @@ print(ProcessPoolExecutor.__name__)
 ```
 :::
 
-:::unsupported
-`ThreadPoolExecutor` runs `square` across two worker threads sharing the same interpreter (and the GIL); `ProcessPoolExecutor` runs `pow` across two child processes with isolated memory. Each `pool.map` returns an iterator over results in input order, and the surrounding `with` block joins the workers when the body exits. (The in-browser Run button cannot create native threads or child processes, so pressing Run on this page fails in the sandbox; the verified thread-pool output below comes from standard CPython at build time.)
-
-```python
-with ThreadPoolExecutor(max_workers=2) as pool:
-    print(list(pool.map(square, [1, 2, 3])))
-
-with ProcessPoolExecutor(max_workers=2) as pool:
-    print(list(pool.map(pow, [4, 5], [2, 2])))
-```
-:::
-
 :::cell
-A thread pool runs ordinary callables while sharing memory with the current process. `map()` returns results in input order.
+`ThreadPoolExecutor` runs `square` across worker threads that share this interpreter and its GIL; `map()` returns results in input order, and the `with` block joins the workers when the body exits. The in-browser sandbox cannot create native threads, so pressing Run here fails; this thread-pool output was produced under standard CPython at build time.
 
 ```python
 from concurrent.futures import ProcessPoolExecutor, ThreadPoolExecutor
@@ -65,7 +53,7 @@ with ThreadPoolExecutor(max_workers=2) as pool:
 :::
 
 :::cell
-A process pool uses separate Python processes. That boundary is heavier, but it can run CPU-bound work outside the current interpreter.
+`ProcessPoolExecutor` is the heavier boundary: separate Python processes with isolated memory, for CPU-bound work that the GIL would otherwise serialise. The sandbox cannot spawn processes either, so this cell only inspects the class name rather than running a pool.
 
 ```python
 print(ProcessPoolExecutor.__name__)
@@ -80,5 +68,5 @@ ProcessPoolExecutor
 - Threads share memory, so mutable shared state needs care.
 - Processes avoid shared interpreter state but require values to cross a process boundary.
 - Prefer `asyncio` for coroutine-based I/O and executors for ordinary blocking callables.
-- The thread-pool output here was produced by real worker threads under standard CPython when the example was verified; the site's in-browser sandbox cannot create threads or processes, so live runs of this page fail there.
+- The thread-pool output came from real worker threads under standard CPython at build time; the in-browser sandbox cannot create threads or processes, so live runs of this page fail there.
 :::

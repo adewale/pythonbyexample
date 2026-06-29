@@ -53,7 +53,6 @@ GAP_L = 16
 DOT_R = 2.5
 TICK_LEN = 6
 NODE_R = 14
-ARROW_OPEN = 5
 ARROW_CLOSED = 7
 
 NAME_W = 60
@@ -174,19 +173,6 @@ class Canvas:
     def tick(self, x, y, *, length=TICK_LEN):
         self.hairline(x, y - length / 2, x, y + length / 2)
 
-    def open_arrow(self, x1, y1, x2, y2):
-        """Axis-style arrow: hairline ending in tiny open V."""
-        self.hairline(x1, y1, x2, y2)
-        dx, dy = x2 - x1, y2 - y1
-        L = math.hypot(dx, dy) or 1
-        ux, uy = dx / L, dy / L
-        bx, by = x2 - ARROW_OPEN * ux, y2 - ARROW_OPEN * uy
-        px, py = -uy * (ARROW_OPEN / 2), ux * (ARROW_OPEN / 2)
-        self._add(
-            f'<path d="M{x2},{y2} L{bx + px},{by + py} M{x2},{y2} L{bx - px},{by - py}" '
-            f'stroke="{INK}" stroke-width="{W_HAIRLINE}" fill="none"/>'
-        )
-
     def closed_arrow(self, x1, y1, x2, y2, *, emphasis=False):
         """Becomes-this / dispatches-to: line + filled wedge.
 
@@ -305,7 +291,7 @@ class Canvas:
         self.dashed(x, y_top, x, y_bot)
         return x
 
-    def register(self, x, y, w, *, divisions=None, between=False):
+    def register(self, x, y, w, *, divisions=None):
         """Hairline with regular ticks."""
         self.hairline(x, y, x + w, y)
         if divisions is None:
@@ -313,10 +299,6 @@ class Canvas:
         step = w / divisions
         for i in range(divisions + 1):
             self.tick(x + i * step, y)
-        if between:
-            for i in range(divisions):
-                self.hairline(x + i * step + step / 2, y - TICK_LEN / 3,
-                              x + i * step + step / 2, y + TICK_LEN / 3)
 
     def node(self, x, y, label, *, r=NODE_R, ghost=False):
         weight = W_GHOST if ghost else W_STROKE
@@ -400,12 +382,6 @@ class Canvas:
         self.closed_arrow(148, 28, 208, 28, emphasis=False)
         self.frame(210, 10, third_w, 36, label=third_label)
         self.mono(210 + third_w / 2, 32, third_value)
-
-    def dispatch(self, x, y, src, dst, *, src_w=70, dst_w=120):
-        """Source form → method form."""
-        self.object_box(x, y, "", src, w=src_w, soft=False)
-        self.closed_arrow(x + src_w + 4, y + OBJECT_H / 2, x + src_w + 36, y + OBJECT_H / 2)
-        self.object_box(x + src_w + 40, y, "", dst, w=dst_w, soft=True)
 
     def connect(self, ax, ay, ar, bx, by, br, *, kind="stroke", offset=0):
         """Edge between two circles, terminating tangentially at each boundary.

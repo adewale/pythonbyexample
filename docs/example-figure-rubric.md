@@ -161,7 +161,13 @@ the figure can merge.
 - **Banner-fit, enforced.** Every figure's RENDERED width —
   INTRINSIC_SCALE · (Canvas.w + 2 · PAD_X) — must fit the 640px
   ceiling of `.cell-banner--1` / `.journey-section-figure`
-  (`clamp(280px, 65-70vw, 640px)` in site.css). *Contract 8.*
+  (`clamp(280px, 65-70vw, 640px)` in site.css). The figure must also not
+  display taller than 440px at that banner width, or it reads as a
+  portrait column rather than a margin banner. *Contract 8.*
+- **No solid line strikes a label.** A solid `<line>` may not cross a
+  text label's interior (reads as an accidental strike-through);
+  deliberate *dashed* strikes through a label are allowed. *Contract 12
+  — FigureLineTextCollisionContract.*
 - **Twin consistency.** When two figures depict parallel concepts
   (`kw-only-separator` ↔ `positional-only-separator`,
   `class-triangle` ↔ `metaclass-triangle`), their metrics must

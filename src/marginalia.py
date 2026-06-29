@@ -494,7 +494,9 @@ def control_stop_boundary(c: Canvas) -> None:
         c.cell(i * 28, 36, item, w=28, h=24, ghost=(i > 2))
     c.gate(84, 32, 64)
     c.label(70, 24, "first true", anchor="middle")
-    c.closed_arrow(84, 48, 130, 78, emphasis=False)
+    # Start the arrow below the cell row so its diagonal does not strike
+    # through the "d"/"e" labels on the way to the answer box.
+    c.closed_arrow(84, 62, 130, 78, emphasis=False)
     c.cell(132, 66, "answer", w=74, h=24, soft=True)
 
 

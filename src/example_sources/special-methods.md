@@ -43,7 +43,7 @@ class Bag:
         return hash(tuple(self.items))
 
     def __lt__(self, other):
-        return len(self.items) < len(other.items)
+        return self.items < other.items
 
     def __contains__(self, item):
         return item in self.items
@@ -209,7 +209,7 @@ Bag(['a', 'b'])
 :::
 
 :::cell
-`__eq__` decides what equality means for the type. Defining `__eq__` removes the default `__hash__`, so add `__hash__` back when instances should work in sets or as dict keys — but only for types treated as immutable: this `Bag` hashes its current items, so mutating one after adding it to a set makes it unfindable. `__lt__` alone is enough for `<` and for `sorted()`.
+`__eq__` decides what equality means for the type, comparing contents. `__lt__` orders by those same contents, so ordering stays consistent with equality (define one comparison and `functools.total_ordering` can fill in the rest; `__lt__` alone is enough for `<` and `sorted()`). Defining `__eq__` removes the default `__hash__`, so add it back only for types you treat as immutable: this `Bag` hashes its current items, so the last two lines show the hazard — a `Bag` found in a set becomes unfindable once its items change, because its hash no longer points at the bucket it was stored in.
 
 ```python
 class Bag:
@@ -223,17 +223,23 @@ class Bag:
         return hash(tuple(self.items))
 
     def __lt__(self, other):
-        return len(self.items) < len(other.items)
+        return self.items < other.items
 
 print(Bag(["a", "b"]) == Bag(["a", "b"]))
 print(Bag(["a"]) < Bag(["a", "b"]))
-print(hash(Bag(["a"])) == hash(Bag(["a"])))
+
+bag = Bag(["a"])
+seen = {bag}
+print(bag in seen)
+bag.items.append("b")
+print(bag in seen)
 ```
 
 ```output
 True
 True
 True
+False
 ```
 :::
 
