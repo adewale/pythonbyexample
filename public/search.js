@@ -50,7 +50,23 @@ function wireSearch() {
 
   function hideResults() {
     results.hidden = true;
-    results.innerHTML = '';
+    results.replaceChildren();
+  }
+
+  // Result nodes are built with textContent so catalog fields can never
+  // be parsed as markup.
+  function resultNode(entry) {
+    const item = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `/examples/${encodeURIComponent(entry.slug)}`;
+    const title = document.createElement('strong');
+    title.textContent = entry.title;
+    const meta = document.createElement('span');
+    meta.className = 'meta';
+    meta.textContent = ` · ${entry.section}`;
+    link.append(title, meta);
+    item.appendChild(link);
+    return item;
   }
 
   function renderResults() {
@@ -58,16 +74,17 @@ function wireSearch() {
     const matches = rankExamples(input.value, entries);
     if (!matches.length) {
       if (input.value.trim()) {
-        results.innerHTML = '<li class="search-empty">No matching examples.</li>';
+        const empty = document.createElement('li');
+        empty.className = 'search-empty';
+        empty.textContent = 'No matching examples.';
+        results.replaceChildren(empty);
         results.hidden = false;
       } else {
         hideResults();
       }
       return;
     }
-    results.innerHTML = matches
-      .map((entry) => `<li><a href="/examples/${entry.slug}"><strong>${entry.title}</strong><span class="meta"> · ${entry.section}</span></a></li>`)
-      .join('');
+    results.replaceChildren(...matches.map(resultNode));
     results.hidden = false;
   }
 

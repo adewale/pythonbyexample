@@ -14,6 +14,11 @@ function expect(condition, message) {
   if (!condition) failures.push(message);
 }
 
+// Result nodes must be built with textContent, never innerHTML, so
+// catalog fields can never be parsed as markup (DOM injection guard).
+const searchSource = readFileSync(path.join(root, 'public', 'search.js'), 'utf8');
+expect(!searchSource.includes('innerHTML'), 'search.js must not use innerHTML');
+
 const closures = rankExamples('closures', entries);
 expect(closures[0]?.slug === 'closures', `exact title should rank first, got ${closures[0]?.slug}`);
 
