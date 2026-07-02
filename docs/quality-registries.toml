@@ -316,6 +316,7 @@ journey = "iteration"
 section = "See the protocol behind `for`."
 support = [
   "iterating-over-iterables",
+  "iterator-vs-iterable",
   "iterators",
   "generators",
 ]
@@ -434,12 +435,14 @@ support = [
   "inheritance-and-super",
   "dataclasses",
   "properties",
+  "classmethods-and-staticmethods",
   "special-methods",
   "truth-and-size",
   "container-protocols",
   "callable-objects",
   "operator-overloading",
   "attribute-access",
+  "bound-and-unbound-methods",
   "descriptors",
   "metaclasses",
 ]
@@ -456,6 +459,7 @@ section = "Keep runtime and static analysis separate."
 support = [
   "type-hints",
   "protocols",
+  "abstract-base-classes",
   "enums",
   "runtime-type-checks",
 ]
@@ -473,6 +477,7 @@ support = [
   "union-and-optional-types",
   "type-aliases",
   "typed-dicts",
+  "structured-data-shapes",
   "literal-and-final",
   "callable-types",
 ]

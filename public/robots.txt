@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /layout-options/
+Disallow: /prototyping/
+
+Sitemap: https://www.pythonbyexample.dev/sitemap.xml

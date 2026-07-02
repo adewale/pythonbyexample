@@ -2031,6 +2031,17 @@ def _render_svg(figure_name: str) -> str:
     return canvas.to_svg()
 
 
+def render_first_figure(slug: str) -> str:
+    """SVG for the example's first attached figure. Empty if none.
+
+    Used by scripts/build_social_cards.py to reuse the curated figure
+    set for social-card images.
+    """
+    for _anchor, name, _caption in ATTACHMENTS.get(slug, []):
+        return _render_svg(name)
+    return ""
+
+
 def render_for_anchor(slug: str, anchor: str) -> str:
     """HTML for a banner row sitting AFTER the named cell. Empty if none.
 

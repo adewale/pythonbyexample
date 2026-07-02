@@ -13,6 +13,8 @@ ASSETS = {
     "SITE_CSS": "site.css",
     "SYNTAX_JS": "syntax-highlight.js",
     "EDITOR_JS": "editor.js",
+    "SEARCH_JS": "search.js",
+    "SEARCH_INDEX": "search-index.json",
 }
 
 
@@ -68,8 +70,14 @@ def main() -> None:
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/editor.*.js\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
+        "/search.*.js\n"
+        "  Cache-Control: public, max-age=31536000, immutable\n\n"
+        "/search-index.*.json\n"
+        "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/favicon.svg\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
+        "/og/*\n"
+        "  Cache-Control: public, max-age=86400\n\n"
         "/prototyping/*\n"
         "  Cache-Control: no-cache, must-revalidate\n"
     )

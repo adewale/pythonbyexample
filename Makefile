@@ -1,4 +1,4 @@
-.PHONY: test embed-examples build check-generated fingerprint browser-layout-test seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy lint
+.PHONY: test embed-examples build-search-index build check-generated fingerprint browser-layout-test search-ranking-test social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy lint
 
 test:
 	uv run --python 3.13 python -m unittest discover -s tests -v
@@ -6,16 +6,26 @@ test:
 embed-examples:
 	scripts/embed_example_sources.py
 
-build: embed-examples fingerprint
+build-search-index: embed-examples
+	uv run --python 3.13 scripts/build_search_index.py
+
+build: embed-examples build-search-index fingerprint
 
 check-generated: build
-	git diff --exit-code src/example_sources_data.py src/asset_manifest.py public/_headers
+	git diff --exit-code src/example_sources_data.py src/asset_manifest.py public/_headers public/search-index.json
 
-fingerprint: embed-examples
+fingerprint: embed-examples build-search-index
 	scripts/fingerprint_assets.py
 
 browser-layout-test:
 	scripts/check_browser_layout.mjs
+
+search-ranking-test:
+	scripts/check_search_ranking.mjs
+
+social-cards:
+	uv run --python 3.13 scripts/build_social_cards.py
+	scripts/build_social_cards.mjs
 
 seo-cache-lint:
 	scripts/lint_seo_cache.py
@@ -64,7 +74,7 @@ verify-python-version: build
 lint:
 	uv run ruff check src tests scripts
 
-verify: build test seo-cache-lint verify-examples quality-checks browser-layout-test lint check-generated
+verify: build test seo-cache-lint verify-examples quality-checks browser-layout-test search-ranking-test lint check-generated
 
 dev:
 	uv run pywrangler dev --port 9696

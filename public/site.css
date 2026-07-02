@@ -1,8 +1,10 @@
-:root { color-scheme: light; --accent: #FF4801; --accent-hover: #FF7038; --accent-soft: rgba(255, 72, 1, 0.08); --text: #521000; --muted: rgba(82, 16, 0, 0.7); --page: #F5F1EB; --surface: #FFFBF5; --surface-2: #FFFDFB; --surface-3: #FEF7ED; --hairline: #EBD5C1; --hairline-soft: rgba(235, 213, 193, 0.5); --space-1: .5rem; --space-2: .75rem; --space-3: 1rem; --space-4: 1.5rem; --space-5: 2rem; --space-6: 3rem; }
+:root { color-scheme: light; --accent: #FF4801; --accent-hover: #FF7038; --accent-soft: rgba(255, 72, 1, 0.08); --text: #521000; --muted: rgba(82, 16, 0, 0.7); --page: #F5F1EB; --surface: #FFFBF5; --surface-2: #FFFDFB; --surface-3: #FEF7ED; --hairline: #EBD5C1; --hairline-soft: rgba(235, 213, 193, 0.5); --header-veil: rgba(245, 241, 235, 0.82); --header-veil-0: rgba(245, 241, 235, 0); --header-veil-solid: rgba(245, 241, 235, 0.95); --figure-paper: #F5F1EB; --space-1: .5rem; --space-2: .75rem; --space-3: 1rem; --space-4: 1.5rem; --space-5: 2rem; --space-6: 3rem; }
     * { box-sizing: border-box; }
     html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
     body { max-width: 1040px; margin: 0 auto; padding: var(--space-4); color: var(--text); font: 16px/1.6 FT Kunst Grotesk, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif; background: radial-gradient(circle at top left, rgba(255, 72, 1, 0.10), transparent 34rem), var(--page); }
-    header { position: sticky; top: 0; z-index: 2; margin: 0 calc(-1 * var(--space-4)) var(--space-5); padding: var(--space-2) var(--space-4); backdrop-filter: blur(16px); background: rgba(245, 241, 235, 0.82); }
+    header { position: sticky; top: 0; z-index: 2; margin: 0 calc(-1 * var(--space-4)) var(--space-5); padding: var(--space-2) var(--space-4); backdrop-filter: blur(16px); background: var(--header-veil); }
+    .skip-link { position: absolute; left: -9999px; }
+    .skip-link:focus { position: fixed; left: var(--space-3); top: var(--space-3); z-index: 10; padding: .6rem 1rem; border: 1px solid var(--accent); border-radius: .5rem; background: var(--surface); color: var(--text); }
     nav { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
     nav a { color: inherit; text-decoration: underline; text-decoration-color: var(--hairline); text-underline-offset: .22em; transition-property: color, text-decoration-color; transition-duration: 160ms; transition-timing-function: cubic-bezier(0.2, 0, 0, 1); }
     nav a:hover { color: var(--accent); text-decoration-color: var(--accent); }
@@ -38,7 +40,7 @@
         .hero h1 { animation: hero-h1-morph linear forwards; animation-timeline: scroll(root); animation-range: 0 240px; }
         .hero p { animation: hero-p-fade linear forwards; animation-timeline: scroll(root); animation-range: 0 140px; }
         body:has(.hero) { padding-top: var(--space-2); }
-        body:has(.hero) header { opacity: 0; background: rgba(245, 241, 235, 0); box-shadow: none; margin-bottom: var(--space-2); animation: header-emerge linear forwards; animation-timeline: scroll(root); animation-range: 40px 240px; }
+        body:has(.hero) header { opacity: 0; background: var(--header-veil-0); box-shadow: none; margin-bottom: var(--space-2); animation: header-emerge linear forwards; animation-timeline: scroll(root); animation-range: 40px 240px; }
         body:has(.hero) header .brand { filter: blur(4px); transform: scale(0.88); animation: brand-focus linear forwards; animation-timeline: scroll(root); animation-range: 80px 240px; }
       }
     }
@@ -55,8 +57,17 @@
       to { filter: blur(0); transform: scale(1); }
     }
     @keyframes header-emerge {
-      to { opacity: 1; background: rgba(245, 241, 235, 0.95); box-shadow: 0 1px 8px rgba(82, 16, 0, 0.06); }
+      to { opacity: 1; background: var(--header-veil-solid); box-shadow: 0 1px 8px rgba(82, 16, 0, 0.06); }
     }
+    .site-search { position: relative; max-width: 44rem; margin: 0 0 var(--space-5); }
+    .site-search input { width: 100%; min-height: 44px; padding: .6rem 1rem; border: 1px solid var(--hairline); border-radius: .75rem; background: var(--surface-2); color: var(--text); font: inherit; transition: border-color 160ms cubic-bezier(0.2, 0, 0, 1), box-shadow 160ms cubic-bezier(0.2, 0, 0, 1); }
+    .site-search input:focus { outline: 0; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    .site-search input::placeholder { color: var(--muted); }
+    .search-results { position: absolute; inset-inline: 0; top: 100%; z-index: 3; margin: .35rem 0 0; padding: .35rem; list-style: none; border: 1px solid var(--hairline); border-radius: .75rem; background: var(--surface-2); box-shadow: 0 12px 42px rgba(0, 0, 0, .14); }
+    .search-results li { margin: 0; }
+    .search-results a { display: block; padding: .5rem .65rem; border-radius: .5rem; color: var(--text); text-decoration: none; }
+    .search-results a:hover, .search-results a:focus { background: var(--accent-soft); outline: 0; }
+    .search-results .search-empty { padding: .5rem .65rem; color: var(--muted); }
     .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--space-3); }
     .home-section { margin-top: var(--space-6); }
     .home-section:first-of-type { margin-top: 0; }
@@ -160,3 +171,30 @@
     .cell-banner--1 { margin-block: var(--space-6); }
     .cell-banner--1 figure { width: 100%; max-width: clamp(280px, 65vw, 640px); }
     .cell-banner--1 figcaption { max-width: 42ch; }
+    /* Dark palette: same warm hue family as the light theme, inverted.
+       Marginalia figures keep their locked light palette, so in dark
+       mode each SVG sits on a light "paper" chip instead of being
+       recoloured — the grammar stays untouched. Shiki emits dual-theme
+       CSS variables; the swap below activates the dark set. */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        color-scheme: dark;
+        --accent: #FF6B2E;
+        --accent-hover: #FF8A57;
+        --accent-soft: rgba(255, 107, 46, 0.14);
+        --text: #F3E7DC;
+        --muted: rgba(243, 231, 220, 0.72);
+        --page: #1B120B;
+        --surface: #241810;
+        --surface-2: #281B12;
+        --surface-3: #2F2015;
+        --hairline: #43301F;
+        --hairline-soft: rgba(67, 48, 31, 0.6);
+        --header-veil: rgba(27, 18, 11, 0.82);
+        --header-veil-0: rgba(27, 18, 11, 0);
+        --header-veil-solid: rgba(27, 18, 11, 0.95);
+      }
+      .cell-banner figure svg, .journey-section-figure svg { padding: var(--space-2); border-radius: .5rem; background: var(--figure-paper); }
+      .button { color: #FFF7EF; }
+      .shiki, .shiki span { color: var(--shiki-dark) !important; }
+    }
