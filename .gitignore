@@ -9,3 +9,6 @@ dist/
 
 python_modules/
 .venv-workers/
+
+# Social-card HTML intermediates (rasterized output lives in public/og/)
+build/

@@ -15,7 +15,11 @@ Production: <https://www.pythonbyexample.dev> (`workers.dev` remains enabled as 
 - Workers Assets for static files
 - Fingerprinted CSS/JS assets with immutable cache headers
 - Versioned Worker Cache API keys for rendered HTML
-- SEO metadata and canonical URLs for home and example pages
+- SEO metadata, canonical URLs, JSON-LD structured data, and a sitemap for home and example pages
+- Client-side example search on the home page (press `/` to focus)
+- Dark mode via `prefers-color-scheme`, including dual-theme code highlighting
+- Per-example social-card images composed from the marginalia figure set
+- Learner-behavior reporting from Worker wide events (`docs/learner-analytics.md`)
 
 ## Attribution
 
@@ -185,6 +189,17 @@ scripts/format_examples.py --check
 scripts/check_example_migration_parity.py
 make check-generated
 ```
+
+After adding an example (or changing a title, summary, or figure), also
+regenerate its social card so the SEO linter finds the image:
+
+```bash
+make social-cards
+```
+
+This composes a 1200x630 card per example from its marginalia figure and
+rasterizes it to `public/og/<slug>.jpg` with headless Chrome (set
+`CHROME_PATH` if Chrome is not at the default location).
 
 `src/example_sources_data.py` is generated and committed so Cloudflare Workers can load examples in production. Do not edit it by hand.
 

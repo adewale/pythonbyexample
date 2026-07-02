@@ -10,7 +10,13 @@ ROOT = Path(__file__).resolve().parents[1]
 SRC = ROOT / "src"
 
 
-class MainObservabilityTests(unittest.TestCase):
+class MainModuleHarness(unittest.TestCase):
+    """Imports src/main.py with stubbed FastAPI/Workers modules.
+
+    Subclass this to test main.py handlers directly; the stub Response
+    classes record content, status, and headers for assertions.
+    """
+
     def setUp(self):
         self.saved_modules = {
             name: sys.modules.get(name)
@@ -83,8 +89,11 @@ class MainObservabilityTests(unittest.TestCase):
         fastapi_responses = types.ModuleType("fastapi.responses")
 
         class Response:
-            def __init__(self, *args, **kwargs):
-                pass
+            def __init__(self, content=None, status_code=200, headers=None, media_type=None, **kwargs):
+                self.content = content
+                self.status_code = status_code
+                self.headers = headers or {}
+                self.media_type = media_type
 
         class HTMLResponse(Response):
             pass
@@ -129,6 +138,8 @@ class MainObservabilityTests(unittest.TestCase):
         sys.modules.pop("main", None)
         return importlib.import_module("main")
 
+
+class MainObservabilityTests(MainModuleHarness):
     def test_run_example_marks_dynamic_worker_http_500_as_worker_error(self):
         main = self.import_main()
         destroyed = []

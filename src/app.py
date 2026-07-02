@@ -10,11 +10,11 @@ from pathlib import Path
 try:
     from .asset_manifest import ASSET_PATHS
     from .examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
-    from .marginalia import render_for_anchor, render_for_section
+    from .marginalia import render_banner, render_for_section
 except ImportError:  # Cloudflare Python Workers import sibling modules from main's directory.
     from asset_manifest import ASSET_PATHS
     from examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
-    from marginalia import render_for_anchor, render_for_section
+    from marginalia import render_banner, render_for_section
 
 
 class AppResponse:
@@ -191,6 +191,7 @@ JOURNEYS = [
                 "summary": "The important mental shift is that loops consume producers through a protocol rather than special-casing lists.",
                 "items": [
                     ("example", "iterating-over-iterables", "separate value producers from value consumers"),
+                    ("example", "iterator-vs-iterable", "distinguish re-iterable collections from one-pass iterators"),
                     ("example", "iterators", "use `iter()` and `next()` to expose the protocol behind `for`"),
                     ("example", "generators", "write functions that produce values lazily"),
                 ],
@@ -283,12 +284,14 @@ JOURNEYS = [
                     ("example", "inheritance-and-super", "reuse and extend behavior through parent classes"),
                     ("example", "dataclasses", "generate common methods for data containers"),
                     ("example", "properties", "keep attribute syntax while adding computation or validation"),
+                    ("example", "classmethods-and-staticmethods", "choose between instance, class, and static behavior on a class"),
                     ("example", "special-methods", "connect objects to Python syntax and built-ins"),
                     ("example", "truth-and-size", "make objects work with truth tests and `len()`"),
                     ("example", "container-protocols", "support membership, lookup, and assignment syntax"),
                     ("example", "callable-objects", "make stateful instances callable like functions"),
                     ("example", "operator-overloading", "define operators only when the operation is unsurprising"),
                     ("example", "attribute-access", "customize fallback lookup and assignment carefully"),
+                    ("example", "bound-and-unbound-methods", "explain how attribute access turns a function into a bound method"),
                     ("example", "descriptors", "explain the protocol behind methods, properties, and managed attributes"),
                     ("example", "metaclasses", "customize class creation when ordinary class tools are not enough"),
                 ],
@@ -306,6 +309,7 @@ JOURNEYS = [
                 "items": [
                     ("example", "type-hints", "document expected types and feed type checkers"),
                     ("example", "protocols", "describe required behavior by structural shape"),
+                    ("example", "abstract-base-classes", "contrast runtime-enforced nominal interfaces with structural protocols"),
                     ("example", "enums", "name a fixed set of symbolic values"),
                     ("example", "runtime-type-checks", "show `type()`, `isinstance()`, and `issubclass()` without turning Python into Java"),
                 ],
@@ -317,6 +321,7 @@ JOURNEYS = [
                     ("example", "union-and-optional-types", "show `X | Y` and `None`-aware APIs"),
                     ("example", "type-aliases", "name complex types with `type` statements or aliases"),
                     ("example", "typed-dicts", "type dictionary records that come from JSON"),
+                    ("example", "structured-data-shapes", "choose between dataclass, NamedTuple, and TypedDict for records"),
                     ("example", "literal-and-final", "express constrained values and names that should not be rebound"),
                     ("example", "callable-types", "type functions that are passed as arguments"),
                 ],
@@ -440,14 +445,39 @@ def _meta_description(text: str) -> str:
     return text[:172].rsplit(" ", 1)[0] + "…"
 
 
-def _layout(title: str, content: str, description: str | None = None, path: str = "/", og_type: str = "website", include_editor: bool = False) -> str:
+def _social_image_tags(image_url: str | None) -> str:
+    if not image_url:
+        return '<meta name="twitter:card" content="summary">'
+    escaped = html.escape(image_url)
+    return (
+        f'<meta property="og:image" content="{escaped}">'
+        '<meta property="og:image:width" content="1200">'
+        '<meta property="og:image:height" content="630">'
+        '<meta name="twitter:card" content="summary_large_image">'
+        f'<meta name="twitter:image" content="{escaped}">'
+    )
+
+
+def _structured_data_script(data: dict) -> str:
+    # JSON-LD lives inside a <script> element, so escape the characters
+    # that could terminate the element or open a new one mid-payload.
+    payload = json.dumps(data, ensure_ascii=False)
+    payload = payload.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
+    return f'<script type="application/ld+json">{payload}</script>'
+
+
+def _layout(title: str, content: str, description: str | None = None, path: str = "/", og_type: str = "website", include_editor: bool = False, include_search: bool = False, structured_data: dict | None = None, og_image: str | None = None) -> str:
     description = _meta_description(description or "Learn Python with concise, editable examples that run in isolated Cloudflare Dynamic Python Workers.")
     canonical_url = f"{SITE_URL}{path}"
     page_title = title if title == "Python By Example" else f"{title} · Python By Example"
     editor_script = f'<script type="module" src="{html.escape(ASSET_PATHS["EDITOR_JS"])}"></script>' if include_editor else ""
+    if include_search:
+        editor_script += f'<script type="module" src="{html.escape(ASSET_PATHS["SEARCH_JS"])}"></script>'
     return _replace(
         _template("layout.html"),
         {
+            "STRUCTURED_DATA": _structured_data_script(structured_data) if structured_data else "",
+            "SOCIAL_IMAGE_TAGS": _social_image_tags(og_image),
             "PAGE_TITLE": html.escape(page_title),
             "TITLE": html.escape(title),
             "REFERENCE_URL": html.escape(REFERENCE_URL),
@@ -496,14 +526,28 @@ def render_home() -> str:
         )
     content = _replace(
         _template("home.html"),
-        {"PYTHON_VERSION": html.escape(PYTHON_VERSION), "CARDS": "".join(sections_html)},
+        {
+            "PYTHON_VERSION": html.escape(PYTHON_VERSION),
+            "SEARCH_INDEX": html.escape(ASSET_PATHS["SEARCH_INDEX"]),
+            "CARDS": "".join(sections_html),
+        },
     )
     return _layout(
         "Python By Example",
         content,
+        include_search=True,
         description="Learn Python 3.13 with concise, editable examples, expected output, official documentation links, and Cloudflare Dynamic Worker execution.",
         path="/",
         og_type="website",
+        og_image=f"{SITE_URL}/og/home.jpg",
+        structured_data={
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Python By Example",
+            "url": f"{SITE_URL}/",
+            "description": f"Concise, editable Python {PYTHON_VERSION} examples with verified output and official documentation links.",
+            "inLanguage": "en",
+        },
     )
 
 
@@ -531,7 +575,7 @@ def render_journeys_index():
     return _layout(
         "Python learning journeys",
         content,
-        description="Curated Python By Example journeys that compose individual examples into larger mental maps, with explicit placeholders for missing topics.",
+        description="Curated Python By Example journeys that compose individual examples into larger mental maps with per-section learner outcomes.",
         path="/journeys",
     )
 
@@ -571,8 +615,21 @@ def render_journey_page(journey):
     return _layout(
         journey["title"],
         content,
-        description=f'{journey["summary"]} A curated Python By Example journey with explicit placeholders for missing examples.',
+        description=f'{journey["summary"]} A curated Python By Example journey with per-section learner outcomes.',
         path=f'/journeys/{journey["slug"]}',
+    )
+
+
+def render_sitemap() -> str:
+    paths = ["/", "/journeys"]
+    paths.extend(f'/journeys/{journey["slug"]}' for journey in JOURNEYS)
+    paths.extend(f'/examples/{example["slug"]}' for example in list_examples())
+    entries = "".join(f"<url><loc>{html.escape(SITE_URL + path)}</loc></url>" for path in paths)
+    return (
+        '<?xml version="1.0" encoding="UTF-8"?>\n'
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'
+        f"{entries}"
+        "</urlset>\n"
     )
 
 
@@ -714,6 +771,28 @@ def _render_cell(step):
     return f'<section class="lesson-step lp-cell"><div class="lp-prose">{prose_html}</div><div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">{source}</code></pre></div><div class="cell-output"><p class="cell-label">Output</p><pre><code>{html.escape(step["output"])}</code></pre></div></div></section>'
 
 
+def _render_walkthrough(slug: str, walkthrough: list[dict]) -> str:
+    """Interleave cells with their figure banners.
+
+    Banners slot into the positions from docs/visual-explainer-spec.md:
+    `before` the first cell, `after-cell-N`, and `after-walkthrough`.
+    A page with no attached figures renders cells only.
+    """
+    parts: list[str] = []
+    before = render_banner(slug, "before")
+    if before:
+        parts.append(before)
+    for i, step in enumerate(walkthrough):
+        parts.append(_render_cell(step))
+        banner_html = render_banner(slug, f"after-cell-{i}")
+        if banner_html:
+            parts.append(banner_html)
+    after = render_banner(slug, "after-walkthrough")
+    if after:
+        parts.append(after)
+    return "".join(parts)
+
+
 def _turnstile_challenge_container(site_key: str | None) -> str:
     if not site_key:
         return ""
@@ -752,13 +831,7 @@ def render_example_page(
         if next_example
         else "<span></span>"
     )
-    walkthrough_parts: list[str] = []
-    for i, step in enumerate(walkthrough):
-        walkthrough_parts.append(_render_cell(step))
-        banner_html = render_for_anchor(example["slug"], f"cell-{i}")
-        if banner_html:
-            walkthrough_parts.append(banner_html)
-    walkthrough_html = "".join(walkthrough_parts)
+    walkthrough_html = _render_walkthrough(example["slug"], walkthrough)
     notes_html = "".join(f"<li>{note}</li>" for note in notes)
     see_also_examples = [get_example(slug) for slug in example.get("see_also", [])]
     see_also_links = "".join(
@@ -797,6 +870,26 @@ def render_example_page(
         path=f'/examples/{example["slug"]}',
         og_type="article",
         include_editor=True,
+        og_image=f'{SITE_URL}/og/{example["slug"]}.jpg',
+        structured_data={
+            "@context": "https://schema.org",
+            "@type": ["TechArticle", "LearningResource"],
+            "name": example["title"],
+            "headline": example["title"],
+            "description": example["summary"],
+            "url": f'{SITE_URL}/examples/{example["slug"]}',
+            "inLanguage": "en",
+            "programmingLanguage": "Python",
+            "learningResourceType": "Example",
+            "teaches": example["summary"],
+            "articleSection": example["section"],
+            "isAccessibleForFree": True,
+            "isPartOf": {
+                "@type": "WebSite",
+                "name": "Python By Example",
+                "url": f"{SITE_URL}/",
+            },
+        },
     )
 
 
@@ -806,6 +899,8 @@ def route(url: str, method: str = "GET", turnstile_site_key: str | None = None) 
     path = ("/" + path_part.split("?", 1)[0]).rstrip("/") or "/"
     if method == "GET" and path == "/favicon.svg":
         return AppResponse(FAVICON_SVG, headers={"Content-Type": "image/svg+xml; charset=utf-8"})
+    if method == "GET" and path == "/sitemap.xml":
+        return AppResponse(render_sitemap(), headers={"Content-Type": "application/xml; charset=utf-8"})
     if method == "GET" and path == "/":
         return AppResponse(render_home(), headers={"Content-Type": "text/html; charset=utf-8"})
     if method == "GET" and path == "/layout-options/mobile-run-first":

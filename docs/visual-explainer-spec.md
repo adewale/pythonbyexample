@@ -147,36 +147,37 @@ remain unchanged — no reflow, no cognitive context-switch.
 
 ## Anchors and attachments
 
-`src/marginalia.py` declares which figures attach where. The data shape
-will move from per-cell injection toward per-position banners:
+`src/marginalia.py` declares which figures attach where. `ATTACHMENTS`
+remains the single registry; its anchor vocabulary is the position
+grammar. Multiple tuples on the same position share one banner as a
+small multiple:
 
 ```python
-# proposed shape — banners keyed by position, each holding 1+ figures
-BANNERS = {
-    "mutability": {
-        "after-cell-0": [
-            ("aliasing-mutation",
-             "Two names share one mutable list — appending through one "
-             "name changes the object visible through both."),
-            ("tuple-no-mutation",
-             "By contrast, a tuple is frozen — aliases share a value "
-             "no method can change in place."),
-        ],
-    },
+# implemented shape — the mutability pair renders as one two-figure banner
+ATTACHMENTS = {
+    "mutability": [
+        ("cell-0", "aliasing-mutation",
+         "Two names share one mutable list — appending through one "
+         "name changes the object visible through both."),
+        ("cell-0", "tuple-no-mutation",
+         "By contrast, a tuple is frozen — its contents cannot change "
+         "in place, so aliasing carries no mutation hazard."),
+    ],
 }
 ```
 
-Banner positions:
+Banner positions (anchor spellings in parentheses):
 
-| position           | renders                              |
-|--------------------|--------------------------------------|
-| `before`           | once, before the first cell           |
-| `after-cell-0`, …  | once, after cell N (zero-indexed)     |
-| `after-walkthrough`| once, after the last cell             |
+| position                            | renders                           |
+|-------------------------------------|-----------------------------------|
+| `before`                            | once, before the first cell       |
+| `after-cell-N` (or legacy `cell-N`) | once, after cell N (zero-indexed) |
+| `after-walkthrough`                 | once, after the last cell         |
 
-Each position is a list, not a single figure: the same banner may hold
-multiple figures as a small multiple. Most slugs will start empty.
-Adding a banner is a one-line edit in `src/marginalia.py`.
+`render_banner(slug, position)` resolves both anchor spellings and
+returns one `.cell-banner` row holding every figure attached to that
+position. Adding a banner figure is a one-line edit in
+`src/marginalia.py`.
 
 ## Authoring model
 
@@ -242,11 +243,11 @@ explicitly. Re-introducing either is a defect.
   Aligned with `public/site.css` design tokens; figures use the four
   palette constants and never pick colours directly.
 - `src/marginalia.py` — figure registry (`FIGURES`) and attachment map.
-  Exports `render_for_anchor(slug, anchor)` for the current cell-inline
-  layout; banner-rendering helpers will land alongside.
-- `src/app.py` — `_render_walkthrough_cell` is the current rendering
-  helper; the banner-between rollout will rename or replace it with a
-  walkthrough-level renderer that interleaves cells and banners.
+  Exports `render_banner(slug, position)` for the position grammar
+  (`render_for_anchor` remains as an anchor-spelling wrapper).
+- `src/app.py` — `_render_walkthrough` is the walkthrough-level
+  renderer: it interleaves cells with `before`, `after-cell-N`, and
+  `after-walkthrough` banners.
 - `public/site.css` — `.cell-banner` rules. Production uses the
   banner-between grammar; cells always render with the prose|code
   2-column grid and never receive a `has-figure` class.

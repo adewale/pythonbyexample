@@ -2,6 +2,8 @@ import ast
 import contextlib
 import importlib
 import io
+import json
+import re
 import sys
 import unittest
 from pathlib import Path
@@ -490,6 +492,233 @@ class AppTests(unittest.TestCase):
         self.assertIn("contextlib.redirect_stdout", code)
         self.assertIn('print("ok")', code)
         self.assertNotIn("globalOutbound", code)
+
+
+class DarkModeAndAccessibilityTests(unittest.TestCase):
+    def test_css_defines_a_dark_palette(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn("@media (prefers-color-scheme: dark)", css)
+        self.assertIn("color-scheme: dark", css)
+        dark_block = css.split("@media (prefers-color-scheme: dark)", 1)[1]
+        for token in ["--text:", "--muted:", "--page:", "--surface:", "--hairline:"]:
+            self.assertIn(token, dark_block)
+
+    def test_dark_mode_keeps_marginalia_figures_on_light_paper(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        dark_block = css.split("@media (prefers-color-scheme: dark)", 1)[1]
+        self.assertIn("--figure-paper", css)
+        self.assertIn(".cell-banner figure svg", dark_block)
+        self.assertIn(".journey-section-figure svg", dark_block)
+
+    def test_shiki_highlights_with_dual_light_dark_themes(self):
+        js = (ROOT / "public" / "syntax-highlight.js").read_text()
+        self.assertIn("github-light", js)
+        self.assertIn("github-dark", js)
+        self.assertIn("themes:", js)
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn("--shiki-dark", css)
+
+    def test_editor_picks_a_dark_highlight_style_in_dark_mode(self):
+        js = (ROOT / "public" / "editor.js").read_text()
+        self.assertIn("prefers-color-scheme: dark", js)
+        self.assertIn("oneDarkHighlightStyle", js)
+
+    def test_every_page_offers_a_skip_link_to_main_content(self):
+        for page in [render_home(), render_example_page(get_example("hello-world"))]:
+            self.assertIn('<a class="skip-link" href="#main-content">Skip to main content</a>', page)
+            self.assertIn('<main id="main-content">', page)
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn(".skip-link", css)
+        self.assertIn(".skip-link:focus", css)
+
+
+class BannerTests(unittest.TestCase):
+    def test_mutability_renders_a_two_figure_small_multiple_banner(self):
+        page = render_example_page(get_example("mutability"))
+        self.assertIn('class="cell-banner cell-banner--2"', page)
+        self.assertIn("Two names share one mutable list", page)
+        self.assertIn("a tuple is frozen", page)
+        self.assertEqual(page.count("<figcaption>"), 2)
+
+    def test_render_banner_accepts_position_grammar_and_legacy_anchors(self):
+        from src.marginalia import render_banner, render_for_anchor
+
+        by_position = render_banner("mutability", "after-cell-0")
+        self.assertIn("cell-banner--2", by_position)
+        self.assertEqual(render_for_anchor("mutability", "cell-0"), by_position)
+        self.assertEqual(render_banner("mutability", "before"), "")
+        self.assertEqual(render_banner("mutability", "after-walkthrough"), "")
+
+    def test_before_and_after_walkthrough_positions_render_around_cells(self):
+        from unittest import mock
+
+        from src import app as app_module
+
+        def fake_banner(slug, position):
+            if slug != "hello-world":
+                return ""
+            return {"before": '<div class="cell-banner cell-banner--1">BEFORE-BANNER</div>',
+                    "after-walkthrough": '<div class="cell-banner cell-banner--1">AFTER-BANNER</div>'}.get(position, "")
+
+        with mock.patch.object(app_module, "render_banner", fake_banner):
+            page = app_module.render_example_page(get_example("hello-world"))
+        first_cell = page.index("lesson-step lp-cell")
+        self.assertLess(page.index("BEFORE-BANNER"), first_cell)
+        self.assertGreater(page.index("AFTER-BANNER"), page.rindex("lesson-step lp-cell"))
+
+    def test_curated_pair_banners_render_on_contrast_cells(self):
+        positional = render_example_page(get_example("positional-only-parameters"))
+        self.assertIn('cell-banner--2', positional)
+        self.assertIn("positional-only", positional)
+        self.assertIn("must be named at the call site", positional)
+
+        metaclasses = render_example_page(get_example("metaclasses"))
+        self.assertIn('cell-banner--2', metaclasses)
+        self.assertIn("the same triangle one level down", metaclasses)
+
+        tuples_page = render_example_page(get_example("tuples"))
+        self.assertIn('cell-banner--2', tuples_page)
+        self.assertEqual(tuples_page.count('class="cell-banner'), 1)
+
+    def test_iterator_vs_iterable_gains_a_one_pass_figure(self):
+        page = render_example_page(get_example("iterator-vs-iterable"))
+        self.assertEqual(page.count('class="cell-banner'), 2)
+        self.assertIn("drains it", page)
+
+    def test_no_page_renders_an_empty_banner(self):
+        for example in list_examples():
+            with self.subTest(slug=example["slug"]):
+                page = render_example_page(example)
+                self.assertNotIn('<div class="cell-banner cell-banner--0"></div>', page)
+                self.assertNotIn('cell-banner--0', page)
+
+
+class SearchTests(unittest.TestCase):
+    def test_search_index_covers_every_example(self):
+        index = json.loads((ROOT / "public" / "search-index.json").read_text())
+        slugs = {entry["slug"] for entry in index}
+        self.assertEqual(slugs, {example["slug"] for example in list_examples()})
+        for entry in index:
+            for key in ("slug", "title", "section", "summary", "text"):
+                self.assertIn(key, entry)
+            self.assertEqual(entry["text"], entry["text"].lower())
+
+    def test_home_page_offers_search_with_fingerprinted_assets(self):
+        home = render_home()
+        self.assertIn('id="site-search-input"', home)
+        self.assertIn('type="search"', home)
+        self.assertIn('id="site-search-results"', home)
+        index_match = re.search(r'data-search-index="(/search-index\.[0-9a-f]{12}\.json)"', home)
+        self.assertIsNotNone(index_match)
+        self.assertTrue((ROOT / "public" / index_match.group(1).lstrip("/")).exists())
+        script_match = re.search(r'<script type="module" src="(/search\.[0-9a-f]{12}\.js)"></script>', home)
+        self.assertIsNotNone(script_match)
+        self.assertTrue((ROOT / "public" / script_match.group(1).lstrip("/")).exists())
+
+    def test_example_pages_do_not_load_search_assets(self):
+        page = render_example_page(get_example("hello-world"))
+        self.assertNotIn("search-index", page)
+        self.assertNotIn("/search.", page)
+
+    def test_search_assets_get_immutable_cache_headers(self):
+        headers = (ROOT / "public" / "_headers").read_text()
+        self.assertIn("/search.*.js", headers)
+        self.assertIn("/search-index.*.json", headers)
+
+    def test_search_css_styles_light_and_dark(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn(".site-search", css)
+        self.assertIn(".search-results", css)
+
+
+class SocialCardTests(unittest.TestCase):
+    def test_example_pages_reference_per_slug_social_cards(self):
+        example = get_example("closures")
+        page = render_example_page(example)
+        self.assertIn('<meta property="og:image" content="https://www.pythonbyexample.dev/og/closures.jpg">', page)
+        self.assertIn('<meta name="twitter:card" content="summary_large_image">', page)
+        self.assertIn('<meta name="twitter:image" content="https://www.pythonbyexample.dev/og/closures.jpg">', page)
+        self.assertIn('<meta property="og:image:width" content="1200">', page)
+
+    def test_home_page_references_home_social_card(self):
+        home = render_home()
+        self.assertIn('<meta property="og:image" content="https://www.pythonbyexample.dev/og/home.jpg">', home)
+        self.assertIn('<meta name="twitter:card" content="summary_large_image">', home)
+
+    def test_pages_without_cards_fall_back_to_summary_twitter_card(self):
+        from src.app import JOURNEYS, render_journey_page
+
+        page = render_journey_page(JOURNEYS[0])
+        self.assertIn('<meta name="twitter:card" content="summary">', page)
+        self.assertNotIn("og:image", page)
+
+    def test_social_card_image_exists_for_every_example(self):
+        for example in list_examples():
+            with self.subTest(slug=example["slug"]):
+                self.assertTrue((ROOT / "public" / "og" / f"{example['slug']}.jpg").exists())
+        self.assertTrue((ROOT / "public" / "og" / "home.jpg").exists())
+
+    def test_card_html_composes_title_section_and_figure(self):
+        from scripts.build_social_cards import render_social_card_html
+
+        card = render_social_card_html(get_example("closures"))
+        self.assertIn("<svg", card)
+        self.assertIn("Closures", card)
+        self.assertIn("Functions", card)
+        self.assertIn("pythonbyexample.dev", card)
+
+
+class DiscoverabilityTests(unittest.TestCase):
+    def test_sitemap_lists_every_page_with_canonical_urls(self):
+        response = route("https://example.test/sitemap.xml")
+        self.assertEqual(response.status, 200)
+        self.assertEqual(response.headers["Content-Type"], "application/xml; charset=utf-8")
+        self.assertIn('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', response.body)
+        self.assertIn("<loc>https://www.pythonbyexample.dev/</loc>", response.body)
+        self.assertIn("<loc>https://www.pythonbyexample.dev/journeys</loc>", response.body)
+        from src.app import JOURNEYS
+
+        for journey in JOURNEYS:
+            self.assertIn(f"<loc>https://www.pythonbyexample.dev/journeys/{journey['slug']}</loc>", response.body)
+        for example in list_examples():
+            self.assertIn(f"<loc>https://www.pythonbyexample.dev/examples/{example['slug']}</loc>", response.body)
+        self.assertEqual(
+            response.body.count("<loc>"),
+            2 + len(JOURNEYS) + len(list_examples()),
+        )
+
+    def test_example_pages_carry_learning_resource_json_ld(self):
+        example = get_example("closures")
+        page = render_example_page(example)
+        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S)
+        self.assertIsNotNone(match)
+        data = json.loads(match.group(1))
+        self.assertEqual(data["@context"], "https://schema.org")
+        self.assertEqual(data["@type"], ["TechArticle", "LearningResource"])
+        self.assertEqual(data["name"], example["title"])
+        self.assertEqual(data["url"], "https://www.pythonbyexample.dev/examples/closures")
+        self.assertEqual(data["programmingLanguage"], "Python")
+        self.assertEqual(data["learningResourceType"], "Example")
+        self.assertEqual(data["isPartOf"]["@type"], "WebSite")
+
+    def test_home_page_carries_website_json_ld(self):
+        page = render_home()
+        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S)
+        self.assertIsNotNone(match)
+        data = json.loads(match.group(1))
+        self.assertEqual(data["@type"], "WebSite")
+        self.assertEqual(data["url"], "https://www.pythonbyexample.dev/")
+
+    def test_json_ld_escapes_script_closing_sequences(self):
+        from src.app import _structured_data_script
+
+        script = _structured_data_script({"name": "</script><script>alert(1)"})
+        self.assertNotIn("</script><script>", script.removesuffix("</script>"))
+
+    def test_robots_txt_references_sitemap(self):
+        robots = (ROOT / "public" / "robots.txt").read_text()
+        self.assertIn("Sitemap: https://www.pythonbyexample.dev/sitemap.xml", robots)
+        self.assertIn("User-agent: *", robots)
 
 
 if __name__ == "__main__":

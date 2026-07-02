@@ -7,7 +7,8 @@ for (const block of blocks) {
   try {
     const highlighted = await codeToHtml(source, {
       lang: 'python',
-      theme: 'github-light',
+      themes: { light: 'github-light', dark: 'github-dark' },
+      defaultColor: 'light',
     });
     const wrapper = document.createElement('div');
     wrapper.innerHTML = highlighted;

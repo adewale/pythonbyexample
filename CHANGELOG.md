@@ -6,6 +6,24 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ## Unreleased
 
+### Added
+
+- Banner position grammar from `docs/visual-explainer-spec.md` is now production: `render_banner(slug, position)` supports `before`, `after-cell-N` (legacy anchor `cell-N`), and `after-walkthrough`, with multiple figures per position rendering as one small-multiple banner. The mutability page ships the canonical two-figure pair (aliased mutation vs. frozen tuple).
+- Curated pair banners on contrast cells: `positional-only-parameters` shows the `/` and `*` separator twins side by side, `metaclasses` pairs the metaclass triangle with the familiar class triangle, and `tuples` pairs the frozen tuple with the growing list on the intent-contrast cell. `iterator-vs-iterable` gains the one-pass caret figure on the exhaustion cell.
+
+- `/sitemap.xml` route listing home, journeys, and all example pages; `public/robots.txt` with a Sitemap directive.
+- JSON-LD structured data: `WebSite` on the home page, `TechArticle`/`LearningResource` on every example page, enforced by the SEO linter.
+- Client-side example search on the home page: a build-step JSON index (`make build-search-index`), fingerprinted `search.js`/`search-index.json` assets, `/` keyboard shortcut, and a Node ranking check (`make search-ranking-test`).
+- Dark mode via `prefers-color-scheme`: inverted warm palette, dual-theme Shiki highlighting, a dark CodeMirror highlight style, and marginalia figures rendered on a light paper chip so the locked grammar stays untouched.
+- Skip-to-content link on every page.
+- Per-example social-card images composed from each example's marginalia figure (`make social-cards`), referenced by `og:image`/`twitter:card` on home and example pages and checked by the SEO linter.
+- Learner-behavior report (`scripts/learner_report.py` + `docs/learner-analytics.md`) aggregating exported Worker wide events into most-read pages, most-run examples with edited/error shares and execution percentiles, journey traffic, and missing-example 404s.
+
+### Changed
+
+- Journeys now reference every example: `iterator-vs-iterable`, `classmethods-and-staticmethods`, `bound-and-unbound-methods`, `abstract-base-classes`, and `structured-data-shapes` joined their natural sections, with journey-outcome support lists updated.
+- Journey meta descriptions no longer claim gap placeholders; all previously declared gaps are filled.
+
 ## 2026-05-16
 
 ### Added

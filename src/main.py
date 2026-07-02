@@ -390,6 +390,10 @@ async def _run_example(request: Request, slug, code):
 @app.get("/{path:path}")
 async def not_found(path: str, request: Request):
     response = route(str(request.url), method="GET")
+    # Non-HTML routes (such as /sitemap.xml) set their own Content-Type;
+    # wrapping them in HTMLResponse would discard it.
+    if response.headers:
+        return Response(response.body, status_code=response.status, headers=response.headers)
     return _html(response.body, response.status)
 
 

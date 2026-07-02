@@ -1543,6 +1543,11 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
             "aliasing-mutation",
             "Two names share one mutable list — appending through one name changes the object visible through both.",
         ),
+        (
+            "cell-0",
+            "tuple-no-mutation",
+            "By contrast, a tuple is frozen — its contents cannot change in place, so aliasing carries no mutation hazard.",
+        ),
     ],
     "variables": [
         (
@@ -1665,10 +1670,18 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "cell-0", "kw-only-separator",
         "A bare `*` divides positional or keyword arguments from keyword-only ones; callers must pass `c` and `d` by name.",
     )],
-    "positional-only-parameters": [(
-        "cell-0", "positional-only-separator",
-        "A bare `/` divides positional-only arguments from positional-or-keyword ones; callers cannot name `a` or `b`.",
-    )],
+    "positional-only-parameters": [
+        (
+            "cell-0",
+            "positional-only-separator",
+            "A bare `/` divides positional-only arguments from positional-or-keyword ones; callers cannot name `a` or `b`.",
+        ),
+        (
+            "cell-0",
+            "kw-only-separator",
+            "In the same signature, the bare `*` works the other way: parameters after it, such as `clamp`, must be named at the call site.",
+        ),
+    ],
     "closures": [(
         "cell-0", "closure-cell",
         "The inner function keeps a reference into the outer scope's cell, so the captured factor survives the outer return.",
@@ -1710,10 +1723,18 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "cell-0", "operator-dispatch",
         "Defining `__add__` on a class lets `+` dispatch into the class's own behavior.",
     )],
-    "iterator-vs-iterable": [(
-        "cell-0", "iter-protocol",
-        "An iterable knows how to produce an iterator (via iter()); the iterator knows how to produce values (via next()).",
-    )],
+    "iterator-vs-iterable": [
+        (
+            "cell-0",
+            "iter-protocol",
+            "An iterable knows how to produce an iterator (via iter()); the iterator knows how to produce values (via next()).",
+        ),
+        (
+            "cell-1",
+            "iterator-unroll",
+            "The iterator's caret only moves forward — after the first `list(stream)` drains it, nothing is left for the second.",
+        ),
+    ],
     "type-aliases": [(
         "cell-0", "type-alias-name",
         "A type alias names a complex annotation once so call sites read as the domain meaning, not the type composition.",
@@ -1796,10 +1817,18 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "cell-0", "property-fork",
         "When x is a property, attribute access routes through fget/fset instead of touching __dict__.",
     )],
-    "metaclasses": [(
-        "cell-0", "metaclass-triangle",
-        "A metaclass is the type of a class, just as a class is the type of its instances; type is the default metaclass.",
-    )],
+    "metaclasses": [
+        (
+            "cell-0",
+            "metaclass-triangle",
+            "A metaclass is the type of a class, just as a class is the type of its instances; type is the default metaclass.",
+        ),
+        (
+            "cell-0",
+            "class-triangle",
+            "The class makes instances — the same triangle one level down, with type as the default apex.",
+        ),
+    ],
     "modules": [(
         "cell-0", "sys-path-resolution",
         "An import walks sys.path entry by entry; the first directory containing the module wins.",
@@ -1848,10 +1877,18 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "cell-0", "set-buckets",
         "Sets are hash buckets without values; `x in s` averages O(1) regardless of size.",
     )],
-    "tuples": [(
-        "cell-0", "tuple-frozen",
-        "Tuples are ordered, immutable sequences; positions matter, contents do not change once constructed.",
-    )],
+    "tuples": [
+        (
+            "cell-3",
+            "tuple-frozen",
+            "Tuples are ordered, immutable sequences; positions matter, contents do not change once constructed.",
+        ),
+        (
+            "cell-3",
+            "list-append",
+            "A list is the other intent: a variable number of similar items, growing in place with `.append`.",
+        ),
+    ],
     "values": [(
         "cell-0", "value-types",
         "Every literal is an object with a type; the type carries the behaviour, not the variable name.",
@@ -2031,16 +2068,44 @@ def _render_svg(figure_name: str) -> str:
     return canvas.to_svg()
 
 
-def render_for_anchor(slug: str, anchor: str) -> str:
-    """HTML for a banner row sitting AFTER the named cell. Empty if none.
+def render_first_figure(slug: str) -> str:
+    """SVG for the example's first attached figure. Empty if none.
+
+    Used by scripts/build_social_cards.py to reuse the curated figure
+    set for social-card images.
+    """
+    for _anchor, name, _caption in ATTACHMENTS.get(slug, []):
+        return _render_svg(name)
+    return ""
+
+
+def _normalize_position(anchor: str) -> str:
+    """Map an attachment anchor to a banner position.
+
+    The position grammar (docs/visual-explainer-spec.md) is `before`,
+    `after-cell-N`, and `after-walkthrough`. The legacy anchor `cell-N`
+    means the banner after cell N, so both spellings resolve to the
+    same position.
+    """
+    if anchor.startswith("cell-"):
+        return f"after-{anchor}"
+    return anchor
+
+
+def render_banner(slug: str, position: str) -> str:
+    """HTML for the banner row at a position. Empty if nothing attaches.
 
     Cells always keep their prose|code 2-column grid. Figures live in
-    banner rows that span both columns BETWEEN cells (and after the
-    walkthrough for single-cell examples). Multiple figures attached to
-    the same cell share one banner as a small multiple.
+    banner rows that span both columns: before the first cell, between
+    cells, or after the walkthrough. Multiple figures attached to the
+    same position share one banner as a small multiple.
     """
     attachments = ATTACHMENTS.get(slug, [])
-    matched = [(name, caption) for (a, name, caption) in attachments if a == anchor]
+    matched = [
+        (name, caption)
+        for (anchor, name, caption) in attachments
+        if _normalize_position(anchor) == position
+    ]
     if not matched:
         return ""
     figures: list[str] = []
@@ -2049,6 +2114,11 @@ def render_for_anchor(slug: str, anchor: str) -> str:
         figures.append(f"<figure>{_render_svg(name)}{cap}</figure>")
     count_class = f" cell-banner--{len(matched)}"
     return f'<div class="cell-banner{count_class}">{"".join(figures)}</div>'
+
+
+def render_for_anchor(slug: str, anchor: str) -> str:
+    """Anchor-spelling compatibility wrapper around render_banner."""
+    return render_banner(slug, _normalize_position(anchor))
 
 
 # ─── Journey-section figures ──────────────────────────────────────────
