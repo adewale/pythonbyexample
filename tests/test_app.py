@@ -566,6 +566,25 @@ class BannerTests(unittest.TestCase):
         self.assertLess(page.index("BEFORE-BANNER"), first_cell)
         self.assertGreater(page.index("AFTER-BANNER"), page.rindex("lesson-step lp-cell"))
 
+    def test_curated_pair_banners_render_on_contrast_cells(self):
+        positional = render_example_page(get_example("positional-only-parameters"))
+        self.assertIn('cell-banner--2', positional)
+        self.assertIn("positional-only", positional)
+        self.assertIn("must be named at the call site", positional)
+
+        metaclasses = render_example_page(get_example("metaclasses"))
+        self.assertIn('cell-banner--2', metaclasses)
+        self.assertIn("the same triangle one level down", metaclasses)
+
+        tuples_page = render_example_page(get_example("tuples"))
+        self.assertIn('cell-banner--2', tuples_page)
+        self.assertEqual(tuples_page.count('class="cell-banner'), 1)
+
+    def test_iterator_vs_iterable_gains_a_one_pass_figure(self):
+        page = render_example_page(get_example("iterator-vs-iterable"))
+        self.assertEqual(page.count('class="cell-banner'), 2)
+        self.assertIn("drains it", page)
+
     def test_no_page_renders_an_empty_banner(self):
         for example in list_examples():
             with self.subTest(slug=example["slug"]):

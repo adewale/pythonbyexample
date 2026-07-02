@@ -1670,10 +1670,18 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "cell-0", "kw-only-separator",
         "A bare `*` divides positional or keyword arguments from keyword-only ones; callers must pass `c` and `d` by name.",
     )],
-    "positional-only-parameters": [(
-        "cell-0", "positional-only-separator",
-        "A bare `/` divides positional-only arguments from positional-or-keyword ones; callers cannot name `a` or `b`.",
-    )],
+    "positional-only-parameters": [
+        (
+            "cell-0",
+            "positional-only-separator",
+            "A bare `/` divides positional-only arguments from positional-or-keyword ones; callers cannot name `a` or `b`.",
+        ),
+        (
+            "cell-0",
+            "kw-only-separator",
+            "In the same signature, the bare `*` works the other way: parameters after it, such as `clamp`, must be named at the call site.",
+        ),
+    ],
     "closures": [(
         "cell-0", "closure-cell",
         "The inner function keeps a reference into the outer scope's cell, so the captured factor survives the outer return.",
@@ -1715,10 +1723,18 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "cell-0", "operator-dispatch",
         "Defining `__add__` on a class lets `+` dispatch into the class's own behavior.",
     )],
-    "iterator-vs-iterable": [(
-        "cell-0", "iter-protocol",
-        "An iterable knows how to produce an iterator (via iter()); the iterator knows how to produce values (via next()).",
-    )],
+    "iterator-vs-iterable": [
+        (
+            "cell-0",
+            "iter-protocol",
+            "An iterable knows how to produce an iterator (via iter()); the iterator knows how to produce values (via next()).",
+        ),
+        (
+            "cell-1",
+            "iterator-unroll",
+            "The iterator's caret only moves forward — after the first `list(stream)` drains it, nothing is left for the second.",
+        ),
+    ],
     "type-aliases": [(
         "cell-0", "type-alias-name",
         "A type alias names a complex annotation once so call sites read as the domain meaning, not the type composition.",
@@ -1801,10 +1817,18 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "cell-0", "property-fork",
         "When x is a property, attribute access routes through fget/fset instead of touching __dict__.",
     )],
-    "metaclasses": [(
-        "cell-0", "metaclass-triangle",
-        "A metaclass is the type of a class, just as a class is the type of its instances; type is the default metaclass.",
-    )],
+    "metaclasses": [
+        (
+            "cell-0",
+            "metaclass-triangle",
+            "A metaclass is the type of a class, just as a class is the type of its instances; type is the default metaclass.",
+        ),
+        (
+            "cell-0",
+            "class-triangle",
+            "The class makes instances — the same triangle one level down, with type as the default apex.",
+        ),
+    ],
     "modules": [(
         "cell-0", "sys-path-resolution",
         "An import walks sys.path entry by entry; the first directory containing the module wins.",
@@ -1853,10 +1877,18 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
         "cell-0", "set-buckets",
         "Sets are hash buckets without values; `x in s` averages O(1) regardless of size.",
     )],
-    "tuples": [(
-        "cell-0", "tuple-frozen",
-        "Tuples are ordered, immutable sequences; positions matter, contents do not change once constructed.",
-    )],
+    "tuples": [
+        (
+            "cell-3",
+            "tuple-frozen",
+            "Tuples are ordered, immutable sequences; positions matter, contents do not change once constructed.",
+        ),
+        (
+            "cell-3",
+            "list-append",
+            "A list is the other intent: a variable number of similar items, growing in place with `.append`.",
+        ),
+    ],
     "values": [(
         "cell-0", "value-types",
         "Every literal is an object with a type; the type carries the behaviour, not the variable name.",
