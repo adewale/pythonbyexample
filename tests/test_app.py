@@ -532,6 +532,48 @@ class DarkModeAndAccessibilityTests(unittest.TestCase):
         self.assertIn(".skip-link:focus", css)
 
 
+class BannerTests(unittest.TestCase):
+    def test_mutability_renders_a_two_figure_small_multiple_banner(self):
+        page = render_example_page(get_example("mutability"))
+        self.assertIn('class="cell-banner cell-banner--2"', page)
+        self.assertIn("Two names share one mutable list", page)
+        self.assertIn("a tuple is frozen", page)
+        self.assertEqual(page.count("<figcaption>"), 2)
+
+    def test_render_banner_accepts_position_grammar_and_legacy_anchors(self):
+        from src.marginalia import render_banner, render_for_anchor
+
+        by_position = render_banner("mutability", "after-cell-0")
+        self.assertIn("cell-banner--2", by_position)
+        self.assertEqual(render_for_anchor("mutability", "cell-0"), by_position)
+        self.assertEqual(render_banner("mutability", "before"), "")
+        self.assertEqual(render_banner("mutability", "after-walkthrough"), "")
+
+    def test_before_and_after_walkthrough_positions_render_around_cells(self):
+        from unittest import mock
+
+        from src import app as app_module
+
+        def fake_banner(slug, position):
+            if slug != "hello-world":
+                return ""
+            return {"before": '<div class="cell-banner cell-banner--1">BEFORE-BANNER</div>',
+                    "after-walkthrough": '<div class="cell-banner cell-banner--1">AFTER-BANNER</div>'}.get(position, "")
+
+        with mock.patch.object(app_module, "render_banner", fake_banner):
+            page = app_module.render_example_page(get_example("hello-world"))
+        first_cell = page.index("lesson-step lp-cell")
+        self.assertLess(page.index("BEFORE-BANNER"), first_cell)
+        self.assertGreater(page.index("AFTER-BANNER"), page.rindex("lesson-step lp-cell"))
+
+    def test_no_page_renders_an_empty_banner(self):
+        for example in list_examples():
+            with self.subTest(slug=example["slug"]):
+                page = render_example_page(example)
+                self.assertNotIn('<div class="cell-banner cell-banner--0"></div>', page)
+                self.assertNotIn('cell-banner--0', page)
+
+
 class SearchTests(unittest.TestCase):
     def test_search_index_covers_every_example(self):
         index = json.loads((ROOT / "public" / "search-index.json").read_text())

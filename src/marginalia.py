@@ -1543,6 +1543,11 @@ ATTACHMENTS: dict[str, list[tuple[str, str, str | None]]] = {
             "aliasing-mutation",
             "Two names share one mutable list — appending through one name changes the object visible through both.",
         ),
+        (
+            "cell-0",
+            "tuple-no-mutation",
+            "By contrast, a tuple is frozen — its contents cannot change in place, so aliasing carries no mutation hazard.",
+        ),
     ],
     "variables": [
         (
@@ -2042,16 +2047,33 @@ def render_first_figure(slug: str) -> str:
     return ""
 
 
-def render_for_anchor(slug: str, anchor: str) -> str:
-    """HTML for a banner row sitting AFTER the named cell. Empty if none.
+def _normalize_position(anchor: str) -> str:
+    """Map an attachment anchor to a banner position.
+
+    The position grammar (docs/visual-explainer-spec.md) is `before`,
+    `after-cell-N`, and `after-walkthrough`. The legacy anchor `cell-N`
+    means the banner after cell N, so both spellings resolve to the
+    same position.
+    """
+    if anchor.startswith("cell-"):
+        return f"after-{anchor}"
+    return anchor
+
+
+def render_banner(slug: str, position: str) -> str:
+    """HTML for the banner row at a position. Empty if nothing attaches.
 
     Cells always keep their prose|code 2-column grid. Figures live in
-    banner rows that span both columns BETWEEN cells (and after the
-    walkthrough for single-cell examples). Multiple figures attached to
-    the same cell share one banner as a small multiple.
+    banner rows that span both columns: before the first cell, between
+    cells, or after the walkthrough. Multiple figures attached to the
+    same position share one banner as a small multiple.
     """
     attachments = ATTACHMENTS.get(slug, [])
-    matched = [(name, caption) for (a, name, caption) in attachments if a == anchor]
+    matched = [
+        (name, caption)
+        for (anchor, name, caption) in attachments
+        if _normalize_position(anchor) == position
+    ]
     if not matched:
         return ""
     figures: list[str] = []
@@ -2060,6 +2082,11 @@ def render_for_anchor(slug: str, anchor: str) -> str:
         figures.append(f"<figure>{_render_svg(name)}{cap}</figure>")
     count_class = f" cell-banner--{len(matched)}"
     return f'<div class="cell-banner{count_class}">{"".join(figures)}</div>'
+
+
+def render_for_anchor(slug: str, anchor: str) -> str:
+    """Anchor-spelling compatibility wrapper around render_banner."""
+    return render_banner(slug, _normalize_position(anchor))
 
 
 # ─── Journey-section figures ──────────────────────────────────────────

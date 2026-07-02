@@ -469,9 +469,14 @@ class FigureAnchorContract(unittest.TestCase):
                 continue
             cells = ex.get("walkthrough", [])
             for anchor, name, _ in items:
-                match = _re.match(r"cell-(\d+)$", anchor)
+                if anchor in ("before", "after-walkthrough"):
+                    continue
+                match = _re.match(r"(?:after-)?cell-(\d+)$", anchor)
                 if not match:
-                    failures.append(f"{slug}: anchor {anchor!r} is not cell-N")
+                    failures.append(
+                        f"{slug}: anchor {anchor!r} is not cell-N, after-cell-N, "
+                        "before, or after-walkthrough"
+                    )
                     continue
                 if int(match.group(1)) >= len(cells):
                     failures.append(

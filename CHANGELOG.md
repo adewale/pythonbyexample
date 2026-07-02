@@ -8,6 +8,8 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ### Added
 
+- Banner position grammar from `docs/visual-explainer-spec.md` is now production: `render_banner(slug, position)` supports `before`, `after-cell-N` (legacy anchor `cell-N`), and `after-walkthrough`, with multiple figures per position rendering as one small-multiple banner. The mutability page ships the canonical two-figure pair (aliased mutation vs. frozen tuple).
+
 - `/sitemap.xml` route listing home, journeys, and all example pages; `public/robots.txt` with a Sitemap directive.
 - JSON-LD structured data: `WebSite` on the home page, `TechArticle`/`LearningResource` on every example page, enforced by the SEO linter.
 - Client-side example search on the home page: a build-step JSON index (`make build-search-index`), fingerprinted `search.js`/`search-index.json` assets, `/` keyboard shortcut, and a Node ranking check (`make search-ranking-test`).

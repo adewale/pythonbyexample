@@ -10,11 +10,11 @@ from pathlib import Path
 try:
     from .asset_manifest import ASSET_PATHS
     from .examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
-    from .marginalia import render_for_anchor, render_for_section
+    from .marginalia import render_banner, render_for_section
 except ImportError:  # Cloudflare Python Workers import sibling modules from main's directory.
     from asset_manifest import ASSET_PATHS
     from examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
-    from marginalia import render_for_anchor, render_for_section
+    from marginalia import render_banner, render_for_section
 
 
 class AppResponse:
@@ -771,6 +771,28 @@ def _render_cell(step):
     return f'<section class="lesson-step lp-cell"><div class="lp-prose">{prose_html}</div><div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">{source}</code></pre></div><div class="cell-output"><p class="cell-label">Output</p><pre><code>{html.escape(step["output"])}</code></pre></div></div></section>'
 
 
+def _render_walkthrough(slug: str, walkthrough: list[dict]) -> str:
+    """Interleave cells with their figure banners.
+
+    Banners slot into the positions from docs/visual-explainer-spec.md:
+    `before` the first cell, `after-cell-N`, and `after-walkthrough`.
+    A page with no attached figures renders cells only.
+    """
+    parts: list[str] = []
+    before = render_banner(slug, "before")
+    if before:
+        parts.append(before)
+    for i, step in enumerate(walkthrough):
+        parts.append(_render_cell(step))
+        banner_html = render_banner(slug, f"after-cell-{i}")
+        if banner_html:
+            parts.append(banner_html)
+    after = render_banner(slug, "after-walkthrough")
+    if after:
+        parts.append(after)
+    return "".join(parts)
+
+
 def _turnstile_challenge_container(site_key: str | None) -> str:
     if not site_key:
         return ""
@@ -809,13 +831,7 @@ def render_example_page(
         if next_example
         else "<span></span>"
     )
-    walkthrough_parts: list[str] = []
-    for i, step in enumerate(walkthrough):
-        walkthrough_parts.append(_render_cell(step))
-        banner_html = render_for_anchor(example["slug"], f"cell-{i}")
-        if banner_html:
-            walkthrough_parts.append(banner_html)
-    walkthrough_html = "".join(walkthrough_parts)
+    walkthrough_html = _render_walkthrough(example["slug"], walkthrough)
     notes_html = "".join(f"<li>{note}</li>" for note in notes)
     see_also_examples = [get_example(slug) for slug in example.get("see_also", [])]
     see_also_links = "".join(
