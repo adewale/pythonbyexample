@@ -795,6 +795,14 @@ class SocialCardTests(unittest.TestCase):
         self.assertIn("Python learning journeys", cards["journeys"])
         self.assertIn("Python By Example · Journeys", cards["journeys"])
 
+    def test_card_html_includes_about_page(self):
+        from scripts.build_social_cards import card_html
+
+        cards = card_html()
+        self.assertIn("about", cards)
+        self.assertIn("How this site is made", cards["about"])
+        self.assertIn("Python By Example · About", cards["about"])
+
     def test_runtime_journeys_and_edge_labels_load_from_editorial_registry(self):
         from src import app as app_module
         from src.editorial_registry import journeys, see_also_edge_labels
@@ -865,6 +873,9 @@ class AboutPageTests(unittest.TestCase):
         self.assertIn("<title>About · Python By Example</title>", page)
         self.assertIn('<link rel="canonical" href="https://www.pythonbyexample.dev/about">', page)
         self.assertIn('<meta property="og:url" content="https://www.pythonbyexample.dev/about">', page)
+        self.assertIn('<meta property="og:image" content="https://www.pythonbyexample.dev/og/about.jpg">', page)
+        self.assertIn('<meta name="twitter:image" content="https://www.pythonbyexample.dev/og/about.jpg">', page)
+        self.assertTrue((ROOT / "public" / "og" / "about.jpg").exists())
         match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S)
         self.assertIsNotNone(match)
         data = json.loads(match.group(1))

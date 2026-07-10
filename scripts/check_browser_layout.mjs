@@ -7,7 +7,7 @@ import path from 'node:path';
 const chromePath = process.env.CHROME_PATH || (process.platform === 'darwin'
   ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
   : '/usr/bin/google-chrome');
-const target = process.argv[2] || 'http://127.0.0.1:9696/layout-options/mobile-run-first';
+const target = process.argv[2] || 'http://127.0.0.1:9696/examples/values';
 const url = `${target}${target.includes('?') ? '&' : '?'}browser_layout_check=${Date.now()}`;
 const port = 9333 + Math.floor(Math.random() * 1000);
 const profile = await mkdtemp(path.join(tmpdir(), 'pythonbyexample-chrome-'));
@@ -45,6 +45,7 @@ let nextId = 1;
 function connect(wsUrl) {
   const socket = new WebSocket(wsUrl);
   const pending = new Map();
+  const listeners = new Map();
   socket.addEventListener('message', event => {
     const message = JSON.parse(event.data);
     if (message.id && pending.has(message.id)) {
@@ -52,7 +53,9 @@ function connect(wsUrl) {
       pending.delete(message.id);
       if (message.error) reject(new Error(JSON.stringify(message.error)));
       else resolve(message.result);
+      return;
     }
+    for (const listener of listeners.get(message.method) || []) listener(message.params);
   });
   const opened = new Promise((resolve, reject) => {
     socket.addEventListener('open', resolve, { once: true });
@@ -64,6 +67,12 @@ function connect(wsUrl) {
       const id = nextId++;
       socket.send(JSON.stringify({ id, method, params }));
       return new Promise((resolve, reject) => pending.set(id, { resolve, reject }));
+    },
+    on(method, listener) {
+      const handlers = listeners.get(method) || new Set();
+      handlers.add(listener);
+      listeners.set(method, handlers);
+      return () => handlers.delete(listener);
     },
     close() { socket.close(); },
   };
@@ -89,7 +98,7 @@ try {
   let pageReady = false;
   for (let i = 0; i < 300; i++) {
     const ready = await client.send('Runtime.evaluate', {
-      expression: `location.href === ${JSON.stringify(url)} && document.readyState === 'complete' && !!document.querySelector('.lesson-step code') && !!window.pythonByExampleEditor && !!document.querySelector('.cm-content')`,
+      expression: `location.href === ${JSON.stringify(url)} && document.readyState === 'complete' && !!document.querySelector('.lesson-step code') && !!window.pythonByExampleEditor && !!document.querySelector('.cm-content') && !!document.querySelector('.copy-button') && !!document.querySelector('.share-button')`,
       returnByValue: true,
     });
     if (ready.result.value) {
@@ -159,6 +168,104 @@ try {
     returnByValue: true,
   });
 
+  async function evaluateValue(expression) {
+    const result = await client.send('Runtime.evaluate', { expression, awaitPromise: true, returnByValue: true });
+    if (result.exceptionDetails) throw new Error(`Browser evaluation failed: ${result.exceptionDetails.text}`);
+    return result.result.value;
+  }
+
+  async function waitFor(expression, label, attempts = 300) {
+    for (let i = 0; i < attempts; i++) {
+      if (await evaluateValue(expression)) return;
+      await sleep(100);
+    }
+    throw new Error(`Timed out waiting for ${label}`);
+  }
+
+  // Exercise the public browser contracts rather than merely asserting source
+  // strings: copy text, fragment sharing/restoration, resize, and arrow guards.
+  await client.send('Page.navigate', { url: target });
+  await waitFor("document.readyState === 'complete' && !!window.pythonByExampleEditor && !!document.querySelector('.copy-button') && !!document.querySelector('.share-button')", 'feature test page');
+  const share = await evaluateValue(`(async () => {
+    const writes = [];
+    window.__pbeClipboardWrites = writes;
+    try {
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => writes.push(text) } });
+    } catch (_) {}
+    document.execCommand = command => {
+      if (command !== 'copy') return false;
+      writes.push(document.activeElement?.value || '');
+      return true;
+    };
+    const code = Array.from({ length: 80 }, (_, index) => 'print("π ' + index + '")').join('\\n');
+    window.pythonByExampleEditor.setValue(code);
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    document.querySelector('.share-button').click();
+    await new Promise(resolve => setTimeout(resolve, 50));
+    return { code, url: writes.at(-1) || '', editorHeight: document.querySelector('.cm-editor').getBoundingClientRect().height };
+  })()`);
+
+  const sharedReloadUrl = new URL(share.url);
+  sharedReloadUrl.searchParams.set('browser_share_test', Date.now());
+  await client.send('Page.navigate', { url: sharedReloadUrl.href });
+  await waitFor(`document.readyState === 'complete' && !!window.pythonByExampleEditor && document.getElementById('code-editor')?.value === ${JSON.stringify(share.code)}`, 'shared-code restoration');
+  const restored = await evaluateValue(`({
+    editorHeight: document.querySelector('.cm-editor').getBoundingClientRect().height,
+    notice: document.querySelector('.output-panel code')?.textContent,
+  })`);
+  const sourceCopy = await evaluateValue(`(async () => {
+    const writes = window.__pbeClipboardWrites = [];
+    try {
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: async text => writes.push(text) } });
+    } catch (_) {}
+    document.execCommand = command => {
+      if (command !== 'copy') return false;
+      writes.push(document.activeElement?.value || '');
+      return true;
+    };
+    const source = document.querySelector('.cell-source');
+    const expected = source.querySelector('pre').textContent;
+    const button = source.querySelector('.copy-button');
+    button.click();
+    await new Promise(resolve => setTimeout(resolve, 50));
+    return { expected, copied: writes.at(-1) || '', state: button.className, status: button.querySelector('.copy-status')?.textContent };
+  })()`);
+  const arrow = await evaluateValue(`(async () => {
+    const textarea = document.getElementById('code-editor');
+    const modifiedPath = location.pathname;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await new Promise(resolve => setTimeout(resolve, 50));
+    const blockedModified = location.pathname === modifiedPath;
+    window.pythonByExampleEditor.setValue(textarea.dataset.originalCode || textarea.defaultValue);
+    const next = document.querySelector('.example-nav a[rel="next"]')?.href || '';
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    return { blockedModified, next };
+  })()`);
+  await waitFor(`location.href === ${JSON.stringify(arrow.next)} && !!window.pythonByExampleEditor && !!document.querySelector('.cm-content')`, 'clean arrow navigation');
+  const editableBlocked = await evaluateValue(`(async () => {
+    const path = location.pathname;
+    document.querySelector('.cm-content').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await new Promise(resolve => setTimeout(resolve, 50));
+    return location.pathname === path;
+  })()`);
+
+  // Keep esm.sh import requests pending. The runner has no imports and is
+  // emitted after its markup, so its controls must attach before the editor's
+  // CDN graph can let DOMContentLoaded fire.
+  let heldCdnRequests = 0;
+  const removePauseListener = client.on('Fetch.requestPaused', () => { heldCdnRequests += 1; });
+  await client.send('Fetch.enable', { patterns: [{ urlPattern: 'https://esm.sh/*' }] });
+  const offlineCode = Array.from({ length: 80 }, (_, index) => `print(${index})`).join('\n');
+  const offlineUrl = `${target}#code=${Buffer.from(offlineCode, 'utf8').toString('base64')}`;
+  await client.send('Page.navigate', { url: offlineUrl });
+  await waitFor(`!!document.querySelector('.share-button') && !!document.querySelector('.copy-button') && document.getElementById('code-editor')?.value === ${JSON.stringify(offlineCode)}`, 'runner controls while CDN is pending');
+  const offlineRunner = await evaluateValue(`({
+    editorLoaded: !!window.pythonByExampleEditor,
+    fallbackHeight: document.getElementById('code-editor').getBoundingClientRect().height,
+  })`);
+  removePauseListener();
+  await client.send('Fetch.disable');
+
   const failures = [];
   if (interaction.result.value?.ariaLabel !== 'Editable Python example code') {
     failures.push('CodeMirror editor is missing its accessible name');
@@ -170,8 +277,28 @@ try {
     if (block.ratio > 1.25) failures.push(`block ${block.index} visual line height ratio ${block.ratio.toFixed(2)} > 1.25`);
   }
   if (!metrics.loadedShiki) failures.push('Shiki did not load');
+  if (!share.url.includes('#code=')) failures.push('Copy link did not copy a shared-code fragment');
+  if (restored.notice !== 'This link included edited code. Press Run to execute it.') failures.push('Shared-code recipient notice did not render');
+  if (restored.editorHeight < 1000) failures.push(`Shared CodeMirror payload did not resize the editor (${restored.editorHeight}px)`);
+  if (sourceCopy.copied !== sourceCopy.expected || !sourceCopy.state.includes('copied') || sourceCopy.status !== 'Copied') {
+    failures.push('Source copy button did not copy its exact source or report success');
+  }
+  if (!arrow.blockedModified) failures.push('Arrow navigation discarded edited code');
+  if (!arrow.next) failures.push('Clean example has no next navigation target');
+  if (!editableBlocked) failures.push('Arrow navigation fired from the editable CodeMirror surface');
+  if (heldCdnRequests === 0) failures.push('CDN-pending runner test did not hold an esm.sh request');
+  if (offlineRunner.editorLoaded) failures.push('CDN-pending test unexpectedly loaded CodeMirror');
+  if (offlineRunner.fallbackHeight < 1000) failures.push(`Shared fallback textarea did not resize (${offlineRunner.fallbackHeight}px)`);
 
-  console.log(JSON.stringify({ runnerInteraction: interaction.result.value }, null, 2));
+  console.log(JSON.stringify({
+    runnerInteraction: interaction.result.value,
+    share: { codeLength: share.code.length, urlLength: share.url.length, editorHeight: share.editorHeight },
+    restored,
+    sourceCopy: { copiedLength: sourceCopy.copied.length, state: sourceCopy.state, status: sourceCopy.status },
+    arrow,
+    offlineRunner,
+    heldCdnRequests,
+  }, null, 2));
   client.close();
   if (failures.length) {
     console.error(`Browser layout check failed: ${failures.join('; ')}`);

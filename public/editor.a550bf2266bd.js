@@ -34,15 +34,28 @@ if (textarea && form) {
   textarea.insertAdjacentElement('afterend', view.dom);
   textarea.hidden = true;
 
+  function resize() {
+    view.dom.style.minHeight = '';
+    const minimum = Number.parseFloat(getComputedStyle(view.dom).minHeight) || 0;
+    view.dom.style.minHeight = `${Math.max(minimum, view.contentDOM.scrollHeight)}px`;
+  }
+
+  function scheduleResize() {
+    requestAnimationFrame(resize);
+  }
+
   function setValue(value) {
     view.dispatch({ changes: { from: 0, to: view.state.doc.length, insert: value } });
     textarea.value = value;
+    scheduleResize();
   }
+
+  resize();
 
   function syncTextarea() {
     textarea.value = view.state.doc.toString();
   }
 
   form.addEventListener('submit', syncTextarea);
-  window.pythonByExampleEditor = { setValue, syncTextarea, focus: () => view.focus() };
+  window.pythonByExampleEditor = { setValue, syncTextarea, resize: scheduleResize, focus: () => view.focus() };
 }

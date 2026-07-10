@@ -20,7 +20,8 @@ build: embed-examples embed-editorial-registry build-search-index fingerprint pr
 
 check-generated: build check-social-cards
 	git diff --exit-code src/example_sources_data.py src/editorial_registry_data.py src/asset_manifest.py public/_headers public/prototyping public/search-index.json
-	test -z "$$(git status --porcelain public/prototyping public/*.css public/*.js public/*.json)"
+	# Tracked generated changes may be staged for commit; reject only untracked output here because git diff above already catches unstaged tracked drift.
+	test -z "$$(git ls-files --others --exclude-standard -- public/prototyping public/*.css public/*.js public/*.json)"
 
 fingerprint: embed-examples embed-editorial-registry build-search-index
 	$(PY) scripts/fingerprint_assets.py

@@ -201,18 +201,12 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
     description = _meta_description(description or "Learn Python with concise, editable examples that run in isolated Cloudflare Dynamic Python Workers.")
     canonical_url = f"{SITE_URL}{path}"
     page_title = title if title == "Python By Example" else f"{title} · Python By Example"
-    # runner.js loads async: ordered module scripts each wait for the
-    # previous one to settle, and the CDN-backed highlighter and editor
-    # modules sit ahead of it in the head. Without async, Run/Reset and
-    # the share wiring stall behind two esm.sh round-trips (and never
-    # attach if the CDN is unreachable). runner.js imports nothing and
-    # guards its own DOM readiness, so early execution is safe.
-    editor_scripts = (
-        f'<script type="module" src="{html.escape(ASSET_PATHS["EDITOR_JS"])}"></script>'
-        f'<script type="module" async src="{html.escape(ASSET_PATHS["RUNNER_JS"])}"></script>'
-        if include_editor
-        else ""
-    )
+    # The CDN-backed editor stays in the head, but the dependency-free runner
+    # is emitted after page content. Its async module can then attach Run,
+    # Reset, share, and navigation without waiting for the editor's esm.sh
+    # graph or for DOMContentLoaded (which that graph delays).
+    editor_scripts = f'<script type="module" src="{html.escape(ASSET_PATHS["EDITOR_JS"])}"></script>' if include_editor else ""
+    runner_script = f'<script type="module" async src="{html.escape(ASSET_PATHS["RUNNER_JS"])}"></script>' if include_editor else ""
     if include_search:
         editor_scripts += f'<script type="module" src="{html.escape(ASSET_PATHS["SEARCH_JS"])}"></script>'
     return _replace(
@@ -230,6 +224,7 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
             "SITE_CSS": html.escape(ASSET_PATHS["SITE_CSS"]),
             "SYNTAX_JS": html.escape(ASSET_PATHS["SYNTAX_JS"]),
             "EDITOR_SCRIPTS": editor_scripts,
+            "RUNNER_SCRIPT": runner_script,
             "CONTENT": content,
         },
     )
@@ -396,6 +391,7 @@ def render_about() -> str:
         content,
         description=f"How Python By Example is made: verified output for every example, an isolated Python {PYTHON_VERSION} runner, a locked figure grammar, and the design tokens behind every page.",
         path="/about",
+        og_image=f"{SITE_URL}/og/about.jpg",
         structured_data={
             "@context": "https://schema.org",
             "@type": "AboutPage",

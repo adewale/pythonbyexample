@@ -4,8 +4,16 @@ function initializeRunner() {
   if (!textarea || !form) return;
 
   const originalCode = textarea.dataset.originalCode ?? textarea.defaultValue;
+  const resizeFallbackEditor = () => {
+    // When the CDN-backed editor is unavailable, keep a shared multi-line
+    // payload visible in the native textarea instead of leaving it at the
+    // authored example's height.
+    textarea.style.height = 'auto';
+    textarea.style.height = `${Math.max(textarea.scrollHeight, 18 * 16)}px`;
+  };
   const setCode = (value) => {
     textarea.value = value;
+    resizeFallbackEditor();
     window.pythonByExampleEditor?.setValue(value);
   };
 
@@ -17,17 +25,12 @@ function initializeRunner() {
     });
   }
 
+  let sharedCodeLoaded = false;
   const hash = new URL(window.location.href).hash;
   if (hash.startsWith('#code=')) {
     try {
       setCode(decodeURIComponent(escape(atob(hash.slice(6)))));
-      if (textarea.value !== originalCode) {
-        const panel = document.querySelector('.output-panel');
-        const heading = panel && panel.querySelector('h3');
-        const code = panel && panel.querySelector('code');
-        if (heading) heading.textContent = 'Output';
-        if (code) code.textContent = 'This link included edited code. Press Run to execute it.';
-      }
+      sharedCodeLoaded = textarea.value !== originalCode;
     } catch (_) {
       // Ignore malformed share fragments and leave the authored example intact.
     }
@@ -82,6 +85,10 @@ function initializeRunner() {
 
   const outputPanel = document.querySelector('.output-panel');
   if (!outputPanel) return;
+  if (sharedCodeLoaded) {
+    outputPanel.querySelector('h3').textContent = 'Output';
+    outputPanel.querySelector('code').textContent = 'This link included edited code. Press Run to execute it.';
+  }
   const challengeBox = document.querySelector('[data-turnstile-sitekey]');
   let turnstileWidgetId = null;
   let loadingTurnstile = null;
@@ -190,11 +197,10 @@ function initializeRunner() {
   });
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeRunner, { once: true });
-} else {
-  initializeRunner();
-}
+// layout.html emits this async module after the page content, so its targets
+// are already parsed. Do not wait for DOMContentLoaded: the head's CDN-backed
+// editor module can otherwise hold that event while Run/Reset/share remain dead.
+initializeRunner();
 
 // Left/right arrows page through the catalog via the existing
 // rel=prev/next links. Modifier keys and any editable surface are

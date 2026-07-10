@@ -16,6 +16,7 @@ from app import (
     JOURNEYS_BY_SLUG,
     build_dynamic_worker_code,
     get_example,
+    render_about,
     render_cell_output_flow_option,
     render_example_not_found,
     render_example_page,
@@ -236,6 +237,11 @@ async def mobile_run_first_option():
 @app.get("/layout-options/cell-output-flow", response_class=HTMLResponse)
 async def cell_output_flow_option():
     return _html(render_cell_output_flow_option(get_example("values")))
+
+
+@app.get("/about", response_class=HTMLResponse)
+async def about_page():
+    return _html(render_about())
 
 
 @app.get("/journeys", response_class=HTMLResponse)
@@ -501,6 +507,8 @@ async def not_found(path: str, request: Request):
             render_sitemap(),
             headers={"Content-Type": "application/xml; charset=utf-8"},
         )
+    if path == "about":
+        return _html(render_about())
     if path == "journeys":
         return _html(render_journeys_index())
     if path.startswith("journeys/"):
