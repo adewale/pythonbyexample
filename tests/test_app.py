@@ -417,14 +417,14 @@ class AppTests(unittest.TestCase):
         self.assertIn("Submitted code is too large", runner)
         self.assertIn("catch (error)", runner)
 
-    def test_regeneration_workflow_opens_a_verified_bot_pr_not_a_main_push(self):
-        workflow = (ROOT / ".github" / "workflows" / "regenerate-generated-files.yml").read_text()
-        self.assertIn("actions/create-github-app-token", workflow)
-        self.assertIn("make check-social-cards", workflow)
-        self.assertIn("make social-cards", workflow)
-        self.assertIn("gh pr create", workflow)
-        self.assertIn("Unexpected generated path(s)", workflow)
-        self.assertNotIn("git push origin main", workflow)
+    def test_generated_drift_is_blocked_before_commit_and_merge(self):
+        hook = (ROOT / ".githooks" / "pre-commit").read_text()
+        installer = (ROOT / "scripts" / "install-git-hooks.sh").read_text()
+        verify_workflow = (ROOT / ".github" / "workflows" / "verify.yml").read_text()
+        self.assertIn("make check-generated", hook)
+        self.assertIn(".githooks/pre-commit", installer)
+        self.assertIn("make verify", verify_workflow)
+        self.assertFalse((ROOT / ".github" / "workflows" / "regenerate-generated-files.yml").exists())
 
     def test_conditionals_are_substantive_not_bare_minimum(self):
         example = get_example("conditionals")

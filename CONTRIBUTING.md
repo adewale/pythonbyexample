@@ -96,7 +96,7 @@ The single source of truth for the registries is `docs/quality-registries.toml`.
 
 Deployment uses repository secrets: `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` (Preview workflow), plus optional `PBE_SMOKE_BYPASS_SECRET` so deploy smoke tests can run edited-code POSTs past the Turnstile challenge. Runtime Worker secrets (`TURNSTILE_SECRET_KEY`, `TURNSTILE_CLEARANCE_SECRET`, `PBE_SMOKE_BYPASS_SECRET`) are managed with `wrangler secret put`; see `docs/turnstile-runner-protection-spec.md`.
 
-The generated-artifact workflow opens a bot PR instead of pushing to `main`. Before enabling it, install a GitHub App with repository `Contents` and `Pull requests` read/write permissions, save `REGENERATOR_APP_ID` and `REGENERATOR_APP_PRIVATE_KEY` as Actions secrets, and require the `Verify / verify` check on `main` without a bot bypass. Repository YAML cannot configure those protections.
+Generated output is prevented from drifting before merge: install the local hooks with `scripts/install-git-hooks.sh`, and keep `main` protected so pull requests require the `verify` status check to pass against the current base. CI enforces the same `make check-generated` contract for contributors without local hooks.
 
 ## Style expectations
 

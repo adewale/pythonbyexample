@@ -8,3 +8,6 @@ make build >/dev/null
 if ! git diff --quiet src/example_sources_data.py src/editorial_registry_data.py src/asset_manifest.py public/_headers public/prototyping; then
   echo "post-rewrite: generated files regenerated; stage and amend if needed"
 fi
+if ! make check-social-cards >/dev/null; then
+  echo "post-rewrite: social-card provenance is stale; run make social-cards before committing"
+fi
