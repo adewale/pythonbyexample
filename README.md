@@ -41,6 +41,7 @@ The project uses:
 - [FastAPI](https://fastapi.tiangolo.com/) for application routing.
 - [Shiki](https://github.com/shikijs/shiki) for read-only syntax highlighting.
 - [CodeMirror](https://codemirror.net/) for the editable example editor.
+- [Lucide](https://lucide.dev/) for the copy/check/x glyphs on the code-cell copy button.
 
 Python documentation links point to the official [Python documentation](https://docs.python.org/3.13/).
 

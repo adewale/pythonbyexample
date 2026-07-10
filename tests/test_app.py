@@ -888,6 +888,30 @@ class CopyButtonTests(unittest.TestCase):
         self.assertIn(".copy-button", css)
         self.assertIn(".copy-button.copied", css)
 
+    def test_copy_button_renders_lucide_glyphs_as_current_color_masks(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn(".copy-icon", css)
+        self.assertIn("background: currentColor", css)
+        self.assertIn("rect x='9' y='9' width='13' height='13' rx='2'", css)
+        self.assertIn("polyline points='20 6 9 17 4 12'", css)
+        self.assertIn("M18 6 6 18M6 6l12 12", css)
+        self.assertIn("-webkit-mask", css)
+        self.assertIn("mask-image", css)
+        self.assertIn(".copy-button::before", css)
+        self.assertIn("copy-pop", css)
+        self.assertIn(
+            "@media (prefers-reduced-motion: no-preference) { .copy-button.copied .copy-icon",
+            css,
+        )
+
+    def test_copy_button_announces_status_through_hidden_live_text(self):
+        js = (ROOT / "public" / "syntax-highlight.js").read_text()
+        self.assertIn("copy-status", js)
+        self.assertIn("aria-live", js)
+        self.assertIn("'copied', 'failed'", js)
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn(".copy-status { position: absolute; left: -9999px; }", css)
+
 
 class KeyboardNavTests(unittest.TestCase):
     def test_runner_script_navigates_with_arrow_keys(self):

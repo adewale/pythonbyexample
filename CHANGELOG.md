@@ -9,7 +9,7 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 ### Added
 
 - `/about` page describing how the site is made — the verified-output pipeline, the runner sandbox, the figure grammar, and the quality gates — with a design-language section that renders the live CSS tokens (color swatches, spacing scale, type specimens, and a real walkthrough cell as a specimen). Linked from the nav on every page and listed in the sitemap.
-- Copy buttons on read-only source cells: injected client-side onto `.cell-source` wrappers (so no-JS pages render no dead buttons), clipboard API with a hidden-textarea fallback, and a quiet token-styled treatment that sharpens on hover or focus.
+- Copy buttons on read-only source cells: injected client-side onto `.cell-source` wrappers (so no-JS pages render no dead buttons), clipboard API with a hidden-textarea fallback, and a quiet icon-in-pill treatment — the Lucide copy glyph drawn as a `currentColor` CSS mask (checkmark on success, x on failure), a visually hidden live region announcing the result, and a ~44px tap target around the small pill. These are the site's first and only UI icons; every other action stays text.
 - Keyboard navigation on example pages: `←`/`→` follow the existing `rel="prev"`/`rel="next"` links, ignoring keystrokes with modifiers or focus inside the editor, inputs, or any editable surface.
 - "Copy link" button in the runner toolbar: copies a URL embedding the editor's current code as the `#code=` fragment the page has decoded since the first commit (the clean page URL when the code is unedited). The decoder now resizes the editor after loading a shared payload.
 

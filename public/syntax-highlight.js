@@ -23,24 +23,32 @@ for (const source of document.querySelectorAll('.cell-source')) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'copy-button';
-  button.textContent = 'Copy';
+  button.title = 'Copy';
   button.setAttribute('aria-label', 'Copy this source fragment');
+  button.setAttribute('aria-live', 'polite');
+  const icon = document.createElement('span');
+  icon.className = 'copy-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  const status = document.createElement('span');
+  status.className = 'copy-status';
+  button.append(icon, status);
   let restore = null;
   button.addEventListener('click', async () => {
     const code = source.querySelector('pre code') || source.querySelector('pre');
     if (!code) return;
     clearTimeout(restore);
+    button.classList.remove('copied', 'failed');
     try {
       await copyText(code.textContent);
-      button.textContent = 'Copied';
       button.classList.add('copied');
+      status.textContent = 'Copied';
     } catch (error) {
-      button.classList.remove('copied');
-      button.textContent = 'Copy failed';
+      button.classList.add('failed');
+      status.textContent = 'Copy failed';
     }
     restore = setTimeout(() => {
-      button.textContent = 'Copy';
-      button.classList.remove('copied');
+      button.classList.remove('copied', 'failed');
+      status.textContent = '';
     }, 1600);
   });
   source.append(button);

@@ -110,9 +110,21 @@
     .cell-source pre, .cell-source .shiki-block, .cell-output pre { margin: 0; padding: 0; border-left: 0; border-radius: 0; background: transparent !important; color: var(--text); box-shadow: none; white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: visible; }
     .cell-source .shiki-block .line { display: inline; }
     .cell-source { position: relative; }
-    .copy-button { position: absolute; top: -0.2rem; right: 0; padding: .12rem .6rem; border: 1px solid var(--hairline); border-radius: 9999px; background: var(--surface-2); color: var(--muted); font-size: .74rem; cursor: pointer; transition-property: color, border-color; transition-duration: 150ms; }
+    /* Icon-in-pill copy affordance. The glyphs are Lucide copy/check/x
+       drawn as currentColor masks, so every token state (muted, hover,
+       accent-on-copied, dark mode) flows through with no extra rules.
+       The ::before overlay expands the tap target to ~44px without
+       growing the visible pill. */
+    .copy-button { position: absolute; top: -0.35rem; right: 0; display: grid; place-items: center; width: 1.9rem; height: 1.65rem; padding: 0; border: 1px solid var(--hairline); border-radius: 9999px; background: var(--surface-2); color: var(--muted); cursor: pointer; transition-property: color, border-color; transition-duration: 150ms; }
+    .copy-button::before { content: ""; position: absolute; inset: -0.55rem; }
     .copy-button:hover, .copy-button:focus-visible { color: var(--text); border-color: var(--accent); }
     .copy-button.copied { color: var(--accent); border-color: var(--accent); }
+    .copy-icon { display: block; width: 14px; height: 14px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E") center/contain no-repeat; mask: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Crect x='9' y='9' width='13' height='13' rx='2'/%3E%3Cpath d='M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1'/%3E%3C/svg%3E") center/contain no-repeat; }
+    .copy-button.copied .copy-icon { -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E"); }
+    .copy-button.failed .copy-icon { -webkit-mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E"); mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M18 6 6 18M6 6l12 12'/%3E%3C/svg%3E"); }
+    .copy-status { position: absolute; left: -9999px; }
+    @media (prefers-reduced-motion: no-preference) { .copy-button.copied .copy-icon { animation: copy-pop 150ms cubic-bezier(0, 0, 0.2, 1); } }
+    @keyframes copy-pop { from { transform: scale(0.6); opacity: 0; } }
     .cell-output { margin-top: var(--space-3); padding: var(--space-3) 0 0; border-top: 1px solid var(--hairline-soft); background: transparent; }
     .unsupported-cell .cell-code-stack { border-left-style: dashed; }
     .notebook-notes { margin-top: var(--space-5); }
