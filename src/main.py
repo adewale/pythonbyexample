@@ -11,9 +11,25 @@ from fastapi.responses import HTMLResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from workers import WorkerEntrypoint, python_from_rpc
 
-from app import FAVICON_SVG, build_dynamic_worker_code, get_example, render_example_page, route
+from app import (
+    FAVICON_SVG,
+    JOURNEYS_BY_SLUG,
+    build_dynamic_worker_code,
+    get_example,
+    render_cell_output_flow_option,
+    render_example_not_found,
+    render_example_page,
+    render_home,
+    render_journey_not_found,
+    render_journey_page,
+    render_journeys_index,
+    render_mobile_run_first_option,
+    render_not_found,
+    render_sitemap,
+)
 from asset_manifest import HTML_CACHE_VERSION
 from examples import PYTHON_VERSION
+from security import CONTENT_SECURITY_POLICY, STRICT_TRANSPORT_SECURITY
 
 import observability
 import worker_asgi_bridge as asgi
@@ -50,7 +66,7 @@ def _to_js_object(value):
 
 
 def _html(body, status=200):
-    return HTMLResponse(body, status_code=status)
+    return HTMLResponse(body, status_code=status, headers={"Content-Type": "text/html; charset=utf-8"})
 
 
 def _wide_event(request: Request) -> dict | None:
@@ -90,7 +106,8 @@ SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
     "Referrer-Policy": "strict-origin-when-cross-origin",
     "X-Frame-Options": "DENY",
-    "Content-Security-Policy": "frame-ancestors 'none'",
+    "Strict-Transport-Security": STRICT_TRANSPORT_SECURITY,
+    "Content-Security-Policy": CONTENT_SECURITY_POLICY,
 }
 
 
@@ -103,12 +120,16 @@ def _apply_security_headers(response) -> None:
 
 
 def html_cache_key_url(url: str, turnstile_site_key: str = "") -> str:
-    separator = "&" if "?" in url else "?"
+    parsed = urlparse(url)
+    # Routes ignore ordinary query strings, so the Worker cache key must ignore
+    # them too. This prevents tracking or cache-busting parameters from creating
+    # unbounded copies of identical HTML.
+    base_url = parsed._replace(path=parsed.path or "/", params="", query="", fragment="").geturl()
     turnstile_fragment = ""
     if turnstile_site_key:
         digest = hashlib.sha256(turnstile_site_key.encode("utf-8")).hexdigest()[:8]
         turnstile_fragment = f"&__turnstile={digest}"
-    return f"{url}{separator}__html_v={HTML_CACHE_VERSION}{turnstile_fragment}"
+    return f"{base_url}?__html_v={HTML_CACHE_VERSION}{turnstile_fragment}"
 
 
 @app.get("/favicon.svg")
@@ -117,9 +138,8 @@ async def favicon():
 
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    response = route(str(request.url), method="GET")
-    return _html(response.body, response.status)
+async def home():
+    return _html(render_home())
 
 
 def _env_text(request: Request, name: str) -> str:
@@ -208,10 +228,35 @@ def _set_turnstile_clearance(response: HTMLResponse, request: Request) -> None:
     )
 
 
+@app.get("/layout-options/mobile-run-first", response_class=HTMLResponse)
+async def mobile_run_first_option():
+    return _html(render_mobile_run_first_option(get_example("values")))
+
+
+@app.get("/layout-options/cell-output-flow", response_class=HTMLResponse)
+async def cell_output_flow_option():
+    return _html(render_cell_output_flow_option(get_example("values")))
+
+
+@app.get("/journeys", response_class=HTMLResponse)
+async def journeys_index():
+    return _html(render_journeys_index())
+
+
+@app.get("/journeys/{slug}", response_class=HTMLResponse)
+async def journey_page(slug: str):
+    journey = JOURNEYS_BY_SLUG.get(slug)
+    if journey is None:
+        return _html(render_journey_not_found(), 404)
+    return _html(render_journey_page(journey))
+
+
 @app.get("/examples/{slug}", response_class=HTMLResponse)
 async def example_page(slug: str, request: Request):
-    response = route(str(request.url), method="GET", turnstile_site_key=_turnstile_site_key(request))
-    return _html(response.body, response.status)
+    example = get_example(slug)
+    if example is None:
+        return _html(render_example_not_found(slug), 404)
+    return _html(render_example_page(example, turnstile_site_key=_turnstile_site_key(request)))
 
 
 @app.post("/examples/{slug}", response_class=HTMLResponse)
@@ -427,12 +472,21 @@ async def _run_example(request: Request, slug, code):
 
 @app.get("/{path:path}")
 async def not_found(path: str, request: Request):
-    response = route(str(request.url), method="GET")
-    # Non-HTML routes (such as /sitemap.xml) set their own Content-Type;
-    # wrapping them in HTMLResponse would discard it.
-    if response.headers:
-        return Response(response.body, status_code=response.status, headers=response.headers)
-    return _html(response.body, response.status)
+    # FastAPI dispatches the explicit routes above in production. Keep these
+    # fallbacks for direct Worker calls to the catch-all as well.
+    if path == "sitemap.xml":
+        return Response(
+            render_sitemap(),
+            headers={"Content-Type": "application/xml; charset=utf-8"},
+        )
+    if path == "journeys":
+        return _html(render_journeys_index())
+    if path.startswith("journeys/"):
+        journey = JOURNEYS_BY_SLUG.get(path.removeprefix("journeys/"))
+        if journey is not None:
+            return _html(render_journey_page(journey))
+        return _html(render_journey_not_found(), 404)
+    return _html(render_not_found(), 404)
 
 
 class Default(WorkerEntrypoint):
@@ -466,6 +520,7 @@ class Default(WorkerEntrypoint):
                         asgi_request,
                         self.env,
                         state={"wide_event": event},
+                        max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
                     )
                     _apply_security_headers(response)
                     if getattr(response, "status", 200) == 200:
@@ -484,6 +539,7 @@ class Default(WorkerEntrypoint):
                     asgi_request,
                     self.env,
                     state={"wide_event": event},
+                    max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
                 )
                 _apply_security_headers(response)
                 response.headers.set("Cache-Control", "no-store")
@@ -495,6 +551,7 @@ class Default(WorkerEntrypoint):
                 asgi_request,
                 self.env,
                 state={"wide_event": event},
+                max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
             )
             _apply_security_headers(response)
             return response

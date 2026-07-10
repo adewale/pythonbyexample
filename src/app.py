@@ -4,6 +4,7 @@ import contextlib
 import difflib
 import html
 import io
+import json
 import re
 from pathlib import Path
 
@@ -638,6 +639,27 @@ def render_sitemap() -> str:
         f"{entries}"
         "</urlset>\n"
     )
+
+
+def render_example_not_found(slug: str) -> str:
+    recommendations = "".join(
+        f'<li><a class="text-link" href="/examples/{html.escape(item["slug"])}">{html.escape(item["title"])}</a></li>'
+        for item in _recommended_examples(slug)
+    )
+    content = (
+        "<h1>Example not found</h1>"
+        '<p class="meta">Try one of these nearby examples.</p>'
+        f"<h2>Recommended examples</h2><ul>{recommendations}</ul>"
+    )
+    return _layout("Not Found", content)
+
+
+def render_journey_not_found() -> str:
+    return _layout("Not Found", "<h1>Journey not found</h1>")
+
+
+def render_not_found() -> str:
+    return _layout("Not Found", "<h1>Not found</h1>")
 
 
 def _example_neighbors(slug):

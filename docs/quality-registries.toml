@@ -796,6 +796,11 @@ description = "separate value producers from value consumers"
 
 [[journeys.sections.items]]
 kind = "example"
+value = "iterator-vs-iterable"
+description = "distinguish re-iterable collections from one-pass iterators"
+
+[[journeys.sections.items]]
+kind = "example"
 value = "iterators"
 description = "use `iter()` and `next()` to expose the protocol behind `for`"
 
@@ -1014,6 +1019,11 @@ description = "keep attribute syntax while adding computation or validation"
 
 [[journeys.sections.items]]
 kind = "example"
+value = "classmethods-and-staticmethods"
+description = "choose between instance, class, and static behavior on a class"
+
+[[journeys.sections.items]]
+kind = "example"
 value = "special-methods"
 description = "connect objects to Python syntax and built-ins"
 
@@ -1041,6 +1051,11 @@ description = "define operators only when the operation is unsurprising"
 kind = "example"
 value = "attribute-access"
 description = "customize fallback lookup and assignment carefully"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "bound-and-unbound-methods"
+description = "explain how attribute access turns a function into a bound method"
 
 [[journeys.sections.items]]
 kind = "example"
@@ -1073,6 +1088,11 @@ description = "describe required behavior by structural shape"
 
 [[journeys.sections.items]]
 kind = "example"
+value = "abstract-base-classes"
+description = "contrast runtime-enforced nominal interfaces with structural protocols"
+
+[[journeys.sections.items]]
+kind = "example"
 value = "enums"
 description = "name a fixed set of symbolic values"
 
@@ -1099,6 +1119,11 @@ description = "name complex types with `type` statements or aliases"
 kind = "example"
 value = "typed-dicts"
 description = "type dictionary records that come from JSON"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "structured-data-shapes"
+description = "choose between dataclass, NamedTuple, and TypedDict for records"
 
 [[journeys.sections.items]]
 kind = "example"
@@ -1335,6 +1360,12 @@ figure = "aliasing-mutation"
 caption = "Two names share one mutable list — appending through one name changes the object visible through both."
 
 [[figure_attachments]]
+slug = "mutability"
+anchor = "cell-0"
+figure = "tuple-no-mutation"
+caption = "By contrast, a tuple is frozen — its contents cannot change in place, so aliasing carries no mutation hazard."
+
+[[figure_attachments]]
 slug = "variables"
 anchor = "cell-0"
 figure = "variables-bind"
@@ -1467,6 +1498,12 @@ figure = "positional-only-separator"
 caption = "A bare `/` divides positional-only arguments from positional-or-keyword ones; callers cannot name `a` or `b`."
 
 [[figure_attachments]]
+slug = "positional-only-parameters"
+anchor = "cell-0"
+figure = "kw-only-separator"
+caption = "In the same signature, the bare `*` works the other way: parameters after it, such as `clamp`, must be named at the call site."
+
+[[figure_attachments]]
 slug = "closures"
 anchor = "cell-0"
 figure = "closure-cell"
@@ -1531,6 +1568,12 @@ slug = "iterator-vs-iterable"
 anchor = "cell-0"
 figure = "iter-protocol"
 caption = "An iterable knows how to produce an iterator (via iter()); the iterator knows how to produce values (via next())."
+
+[[figure_attachments]]
+slug = "iterator-vs-iterable"
+anchor = "cell-1"
+figure = "iterator-unroll"
+caption = "The iterator's caret only moves forward — after the first `list(stream)` drains it, nothing is left for the second."
 
 [[figure_attachments]]
 slug = "type-aliases"
@@ -1659,6 +1702,12 @@ figure = "metaclass-triangle"
 caption = "A metaclass is the type of a class, just as a class is the type of its instances; type is the default metaclass."
 
 [[figure_attachments]]
+slug = "metaclasses"
+anchor = "cell-0"
+figure = "class-triangle"
+caption = "The class makes instances — the same triangle one level down, with type as the default apex."
+
+[[figure_attachments]]
 slug = "modules"
 anchor = "cell-0"
 figure = "sys-path-resolution"
@@ -1732,9 +1781,15 @@ caption = "Sets are hash buckets without values; `x in s` averages O(1) regardle
 
 [[figure_attachments]]
 slug = "tuples"
-anchor = "cell-0"
+anchor = "cell-3"
 figure = "tuple-frozen"
 caption = "Tuples are ordered, immutable sequences; positions matter, contents do not change once constructed."
+
+[[figure_attachments]]
+slug = "tuples"
+anchor = "cell-3"
+figure = "list-append"
+caption = "A list is the other intent: a variable number of similar items, growing in place with `.append`."
 
 [[figure_attachments]]
 slug = "values"
