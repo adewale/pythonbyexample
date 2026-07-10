@@ -249,6 +249,24 @@ try {
     return location.pathname === path;
   })()`);
 
+  async function searchWidthAt(label, width, height, mobile) {
+    await client.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile });
+    await client.send('Page.navigate', { url: `${new URL(target).origin}/?browser_search_width=${label}` });
+    await waitFor("document.readyState === 'complete' && !!document.querySelector('.site-search')", `${label} search page`);
+    return evaluateValue(`(() => {
+      const search = document.querySelector('.site-search').getBoundingClientRect();
+      const main = document.querySelector('main').getBoundingClientRect();
+      const input = document.querySelector('.site-search input').getBoundingClientRect();
+      return { label: ${JSON.stringify(label)}, searchWidth: search.width, mainWidth: main.width, inputWidth: input.width };
+    })()`);
+  }
+
+  const searchWidths = [];
+  searchWidths.push(await searchWidthAt('desktop', 1200, 900, false));
+  searchWidths.push(await searchWidthAt('mobile-portrait', 390, 844, true));
+  searchWidths.push(await searchWidthAt('mobile-landscape', 844, 390, true));
+  await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 1800, deviceScaleFactor: 2, mobile: true });
+
   // Keep esm.sh import requests pending. The runner has no imports and is
   // emitted after its markup, so its controls must attach before the editor's
   // CDN graph can let DOMContentLoaded fire.
@@ -286,6 +304,11 @@ try {
   if (!arrow.blockedModified) failures.push('Arrow navigation discarded edited code');
   if (!arrow.next) failures.push('Clean example has no next navigation target');
   if (!editableBlocked) failures.push('Arrow navigation fired from the editable CodeMirror surface');
+  for (const measurement of searchWidths) {
+    if (Math.abs(measurement.searchWidth - measurement.mainWidth) > 1 || Math.abs(measurement.inputWidth - measurement.searchWidth) > 1) {
+      failures.push(`${measurement.label} search is not full width (${measurement.searchWidth}px search, ${measurement.mainWidth}px main, ${measurement.inputWidth}px input)`);
+    }
+  }
   if (heldCdnRequests === 0) failures.push('CDN-pending runner test did not hold an esm.sh request');
   if (offlineRunner.editorLoaded) failures.push('CDN-pending test unexpectedly loaded CodeMirror');
   if (offlineRunner.fallbackHeight < 1000) failures.push(`Shared fallback textarea did not resize (${offlineRunner.fallbackHeight}px)`);
@@ -296,6 +319,7 @@ try {
     restored,
     sourceCopy: { copiedLength: sourceCopy.copied.length, state: sourceCopy.state, status: sourceCopy.status },
     arrow,
+    searchWidths,
     offlineRunner,
     heldCdnRequests,
   }, null, 2));
