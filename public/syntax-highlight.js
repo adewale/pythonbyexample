@@ -1,7 +1,7 @@
 // Copy affordance for read-only source blocks. The button attaches to
-// the .cell-source wrapper (not the <pre>) so the Shiki replacement
-// below leaves it in place, and it is injected client-side so no-JS
-// pages render no dead buttons.
+// the .cell-source wrapper (not the <pre>) so Shiki replacement leaves it
+// in place, and it is injected client-side so no-JS pages render no dead
+// controls.
 async function copyText(text) {
   if (navigator.clipboard && window.isSecureContext) {
     await navigator.clipboard.writeText(text);
@@ -42,7 +42,7 @@ for (const source of document.querySelectorAll('.cell-source')) {
       await copyText(code.textContent);
       button.classList.add('copied');
       status.textContent = 'Copied';
-    } catch (error) {
+    } catch (_) {
       button.classList.add('failed');
       status.textContent = 'Copy failed';
     }
@@ -54,33 +54,42 @@ for (const source of document.querySelectorAll('.cell-source')) {
   source.append(button);
 }
 
-// Shiki is imported dynamically so a CDN failure degrades to plain
-// server-rendered code while the copy buttons above keep working.
-let codeToHtml = null;
-try {
-  ({ codeToHtml } = await import('https://esm.sh/shiki@1.29.2'));
-} catch (error) {
-  codeToHtml = null;
-}
+// Read-only Python cells are the only pages that need Shiki. Avoid even
+// requesting the CDN module on the home, About, and other code-free pages.
+const sourceBlocks = [...document.querySelectorAll('pre code.language-python')].map((code) => ({
+  source: code.textContent,
+  pre: code.closest('pre'),
+}));
 
-const blocks = codeToHtml ? document.querySelectorAll('pre code.language-python') : [];
-
-for (const block of blocks) {
-  const source = block.textContent;
+if (sourceBlocks.length) {
+  let codeToHtml = null;
   try {
-    const highlighted = await codeToHtml(source, {
-      lang: 'python',
-      themes: { light: 'github-light', dark: 'github-dark' },
-      defaultColor: 'light',
-    });
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = highlighted;
-    const shikiPre = wrapper.firstElementChild;
-    if (!shikiPre) continue;
-    shikiPre.classList.add('shiki-block');
-    const currentPre = block.closest('pre');
-    currentPre.replaceWith(shikiPre);
-  } catch (error) {
-    block.dataset.highlightFailed = 'true';
+    ({ codeToHtml } = await import('https://esm.sh/shiki@1.29.2'));
+  } catch (_) {
+    // Plain server-rendered code remains readable when the optional CDN fails.
+  }
+
+  if (codeToHtml) {
+    const themePreference = window.matchMedia('(prefers-color-scheme: dark)');
+    const highlight = async () => {
+      const theme = themePreference.matches ? 'github-dark' : 'github-light';
+      for (const block of sourceBlocks) {
+        try {
+          const highlighted = await codeToHtml(block.source, { lang: 'python', theme });
+          const wrapper = document.createElement('div');
+          wrapper.innerHTML = highlighted;
+          const shikiPre = wrapper.firstElementChild;
+          if (!shikiPre || !block.pre?.isConnected) continue;
+          shikiPre.classList.add('shiki-block');
+          block.pre.replaceWith(shikiPre);
+          block.pre = shikiPre;
+        } catch (_) {
+          block.pre?.setAttribute('data-highlight-failed', 'true');
+        }
+      }
+    };
+
+    await highlight();
+    themePreference.addEventListener?.('change', highlight);
   }
 }

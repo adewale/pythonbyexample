@@ -38,14 +38,12 @@ see_also = [
 ]
 ```
 
-The loader exposes `see_also`, the example renderer displays a compact `See also` section, and tests verify that every linked slug exists and does not point to itself.
+The loader exposes `see_also`, the example renderer displays a compact `See also` section with registry-backed edge labels such as `contrast` and `next depth`, and tests verify that every linked slug exists and does not point to itself. The same graph supplies bounded recommendations on missing-example pages.
 
 ## Graph audit
 
 `scripts/audit_example_graph.py` reports orphan pages, high in-degree pages, and reciprocal links. Its `--check` mode runs in `make quality-checks` and fails the build on broken targets, self-links, out-degree above 4, or orphaned examples.
 
-## Future improvements
+## Review rule
 
-- Show short edge labels later, e.g. `contrast`, `prerequisite`, `next depth`.
-- Use graph data to recommend examples on 404 pages or search results.
-- Keep the first version minimal until we know the links improve reading rather than distracting from the code.
+Keep labels and recommendations minimal. Each edge still needs editorial review: passing graph checks proves structural integrity, not that a link improves the lesson.

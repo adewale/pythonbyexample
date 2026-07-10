@@ -40,36 +40,80 @@ class WorkerAsgiBridgeScopeTests(unittest.TestCase):
                     search=f"?{parsed.query}" if parsed.query else "",
                 )
 
-        # Minimal JS-runtime fakes used by process_request's non-streaming path.
+        # Minimal JS-runtime fakes used by HTTP and WebSocket bridge paths.
         class Response:
-            def __init__(self, body, headers, status):
+            def __init__(self, body, headers, status, web_socket=None):
                 self.body = body
                 self.headers = headers
                 self.status = status
+                self.webSocket = web_socket
 
             @classmethod
-            def new(cls, body, *, headers=None, status=200):
-                return cls(body, headers, status)
+            def new(cls, body, *, headers=None, status=200, webSocket=None):
+                return cls(body, headers, status, webSocket)
 
         class Object:
             @staticmethod
             def fromEntries(pairs):
                 return dict(pairs)
 
+        class WebSocketServer:
+            def __init__(self):
+                self.accepted = False
+                self.onopen = None
+                self.onclose = None
+                self.onmessage = None
+                self.sent = []
+                self.closed = None
+
+            def accept(self):
+                self.accepted = True
+
+            def send(self, value):
+                self.sent.append(value)
+
+            def close(self, code=1000, reason=""):
+                self.closed = (code, reason)
+
+        class WebSocketPair:
+            @classmethod
+            def new(cls):
+                client = SimpleNamespace(name="client")
+                server = WebSocketServer()
+                self.ws_server = server
+                return SimpleNamespace(object_values=lambda: (client, server))
+
         js.URL = URL
         js.Response = Response
         js.Object = Object
         js.TransformStream = object  # only referenced on the streaming path
+        js.WebSocketPair = WebSocketPair
         sys.modules["js"] = js
 
         ffi = types.ModuleType("pyodide.ffi")
+        self.released_buffers = 0
+        test_case = self
+
+        class _JSBytes:
+            def __init__(self, value):
+                self.value = value
+
+            def slice(self):
+                return self.value
+
+        class _Buffer:
+            def __init__(self, value):
+                self.data = _JSBytes(value)
+
+            def release(self):
+                test_case.released_buffers += 1
 
         class _Proxy:
             def __init__(self, obj):
                 self._obj = obj
 
             def getBuffer(self):
-                return SimpleNamespace(data=self._obj)
+                return _Buffer(self._obj)
 
             def destroy(self):
                 pass
@@ -146,6 +190,29 @@ class WorkerAsgiBridgeScopeTests(unittest.TestCase):
         self.assertEqual(response.body, b"echo:ping")
         self.assertEqual(response.headers.get("content-type"), "text/plain")
         self.assertEqual(response.headers.get("x-trace"), "abc")
+        self.assertEqual(self.released_buffers, 1)
+
+    def test_latin1_headers_round_trip_through_scope_and_response(self):
+        async def app(scope, receive, send):
+            self.assertIn((b"x-label", b"caf\xe9"), scope["headers"])
+            await send(
+                {
+                    "type": "http.response.start",
+                    "status": 200,
+                    "headers": [(b"x-label", b"caf\xe9")],
+                }
+            )
+            await send({"type": "http.response.body", "body": b"ok", "more_body": False})
+
+        req = self._fake_request(
+            url="https://x.dev/examples/values",
+            headers={"X-Label": "café"},
+            body_chunks=[],
+        )
+        response = asyncio.run(
+            self.bridge.process_request(app, req, SimpleNamespace(), None, state={})
+        )
+        self.assertEqual(response.headers["x-label"], "café")
 
     def test_process_request_propagates_app_exception(self):
         async def app(scope, receive, send):
@@ -201,6 +268,84 @@ class WorkerAsgiBridgeScopeTests(unittest.TestCase):
         self.assertIsNot(scope["state"], state)
         self.assertIs(scope["state"]["wide_event"], wide_event)
         self.assertEqual(scope["state"]["cache"], "bypass")
+
+    def test_websocket_close_callback_delivers_disconnect_event(self):
+        received = []
+
+        async def app(scope, receive, send):
+            self.assertEqual(scope["type"], "websocket")
+            received.append(await receive())
+            received.append(await receive())
+
+        req = self._fake_request(
+            method="GET",
+            url="https://x.dev/socket",
+            headers={},
+            body_chunks=[],
+        )
+
+        async def scenario():
+            response = await self.bridge.process_websocket(app, req)
+            await asyncio.sleep(0)
+            self.ws_server.onclose(SimpleNamespace(code=1001, reason="leaving"))
+            for _ in range(20):
+                if len(received) == 2:
+                    break
+                await asyncio.sleep(0)
+            return response
+
+        response = asyncio.run(scenario())
+        self.assertEqual(response.status, 101)
+        self.assertEqual(received[0], {"type": "websocket.connect"})
+        self.assertEqual(
+            received[1],
+            {"type": "websocket.disconnect", "code": 1001, "reason": "leaving"},
+        )
+
+    def test_websocket_application_close_closes_server_socket(self):
+        async def app(scope, receive, send):
+            await receive()
+            await send({"type": "websocket.close", "code": 1008, "reason": "policy"})
+
+        req = self._fake_request(
+            method="GET",
+            url="https://x.dev/socket",
+            headers={},
+            body_chunks=[],
+        )
+        response = asyncio.run(self.bridge.process_websocket(app, req))
+        self.assertEqual(response.status, 101)
+        self.assertEqual(self.ws_server.closed, (1008, "policy"))
+
+    def test_fetch_starts_lifespan_once_per_application(self):
+        calls = {"startup": 0, "request": 0}
+        app = object()
+        self.bridge._app_lifespans.clear()
+
+        async def start_application(_app):
+            self.assertIs(_app, app)
+            calls["startup"] += 1
+
+        async def process_request(_app, req, env, ctx, **kwargs):
+            self.assertIs(_app, app)
+            calls["request"] += 1
+            return SimpleNamespace(status=200)
+
+        self.bridge.start_application = start_application
+        self.bridge.process_request = process_request
+        req = self._fake_request(
+            method="GET",
+            url="https://x.dev/",
+            headers={},
+            body_chunks=[],
+        )
+
+        async def scenario():
+            await self.bridge.fetch(app, req, SimpleNamespace())
+            await self.bridge.fetch(app, req, SimpleNamespace())
+
+        asyncio.run(scenario())
+        self.assertEqual(calls, {"startup": 1, "request": 2})
 
     def test_bridge_has_pre_asgi_body_cap_hook(self):
         bridge_source = (ROOT / "src" / "worker_asgi_bridge.py").read_text()

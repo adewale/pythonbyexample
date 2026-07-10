@@ -1,3 +1,6 @@
+const MAX_SHARE_FRAGMENT_CHARS = 24000;
+const TURNSTILE_ACTION = 'run-example';
+
 function initializeRunner() {
   const textarea = document.getElementById('code-editor');
   const form = document.querySelector('form.runner-editor');
@@ -17,22 +20,30 @@ function initializeRunner() {
     window.pythonByExampleEditor?.setValue(value);
   };
 
+  let cancelActiveRun = () => {};
   const resetButton = form.querySelector('[data-reset]');
   if (resetButton) {
     resetButton.addEventListener('click', () => {
+      cancelActiveRun();
       setCode(originalCode);
       window.pythonByExampleEditor?.focus();
     });
   }
 
   let sharedCodeLoaded = false;
+  let sharedCodeRejected = false;
   const hash = new URL(window.location.href).hash;
   if (hash.startsWith('#code=')) {
-    try {
-      setCode(decodeURIComponent(escape(atob(hash.slice(6)))));
-      sharedCodeLoaded = textarea.value !== originalCode;
-    } catch (_) {
-      // Ignore malformed share fragments and leave the authored example intact.
+    const encodedCode = hash.slice(6);
+    if (encodedCode.length > MAX_SHARE_FRAGMENT_CHARS) {
+      sharedCodeRejected = true;
+    } else {
+      try {
+        setCode(decodeURIComponent(escape(atob(encodedCode))));
+        sharedCodeLoaded = textarea.value !== originalCode;
+      } catch (_) {
+        sharedCodeRejected = true;
+      }
     }
   }
 
@@ -85,9 +96,11 @@ function initializeRunner() {
 
   const outputPanel = document.querySelector('.output-panel');
   if (!outputPanel) return;
-  if (sharedCodeLoaded) {
+  if (sharedCodeLoaded || sharedCodeRejected) {
     outputPanel.querySelector('h3').textContent = 'Output';
-    outputPanel.querySelector('code').textContent = 'This link included edited code. Press Run to execute it.';
+    outputPanel.querySelector('code').textContent = sharedCodeLoaded
+      ? 'This link included edited code. Press Run to execute it.'
+      : 'The shared-code fragment was invalid or too large, so the authored example was kept.';
   }
   const challengeBox = document.querySelector('[data-turnstile-sitekey]');
   let turnstileWidgetId = null;
@@ -101,8 +114,20 @@ function initializeRunner() {
       script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
       script.async = true;
       script.defer = true;
-      script.onload = resolve;
-      script.onerror = () => reject(new Error('Turnstile failed to load'));
+      script.onload = () => {
+        if (window.turnstile) {
+          resolve();
+          return;
+        }
+        loadingTurnstile = null;
+        script.remove();
+        reject(new Error('Turnstile loaded without its browser API'));
+      };
+      script.onerror = () => {
+        loadingTurnstile = null;
+        script.remove();
+        reject(new Error('Turnstile failed to load; press Run to retry'));
+      };
       document.head.appendChild(script);
     });
     return loadingTurnstile;
@@ -126,27 +151,30 @@ function initializeRunner() {
     challengeBox.innerHTML = '';
   }
 
-  async function requestTurnstileToken() {
+  async function requestTurnstileToken(signal) {
     if (!challengeBox) throw new Error('Turnstile challenge is not configured');
     await loadTurnstile();
+    if (signal.aborted) throw new DOMException('Run cancelled', 'AbortError');
     challengeBox.hidden = false;
     return new Promise((resolve, reject) => {
+      let settled = false;
+      const finish = (callback, value) => {
+        if (settled) return;
+        settled = true;
+        signal.removeEventListener('abort', onAbort);
+        removeTurnstile();
+        callback(value);
+      };
+      const onAbort = () => finish(reject, new DOMException('Run cancelled', 'AbortError'));
+      signal.addEventListener('abort', onAbort, { once: true });
       challengeBox.innerHTML = '';
       turnstileWidgetId = turnstile.render(challengeBox, {
         sitekey: challengeBox.dataset.turnstileSitekey,
+        action: TURNSTILE_ACTION,
         execution: 'execute',
-        callback: (token) => {
-          removeTurnstile();
-          resolve(token);
-        },
-        'error-callback': () => {
-          removeTurnstile();
-          reject(new Error('Turnstile challenge failed'));
-        },
-        'expired-callback': () => {
-          removeTurnstile();
-          reject(new Error('Turnstile challenge expired'));
-        },
+        callback: token => finish(resolve, token),
+        'error-callback': () => finish(reject, new Error('Turnstile challenge failed')),
+        'expired-callback': () => finish(reject, new Error('Turnstile challenge expired')),
       });
       turnstile.execute(turnstileWidgetId);
     });
@@ -162,37 +190,68 @@ function initializeRunner() {
       || `HTTP ${response.status}`;
   }
 
-  async function submitRun(turnstileToken = '') {
-    outputPanel.removeAttribute('data-output-placeholder');
+  let latestRunId = 0;
+  let activeController = null;
+  const runButton = form.querySelector('button[type="submit"]');
+
+  async function submitRun(runId, signal, turnstileToken = '') {
     window.pythonByExampleEditor?.syncTextarea();
-    outputPanel.querySelector('code').textContent = 'Running in a Dynamic Python Worker…';
     const formData = new FormData(form);
     if (turnstileToken) formData.set('cf-turnstile-response', turnstileToken);
     const response = await fetch(form.action, {
       method: 'POST',
       body: new URLSearchParams(formData),
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      signal,
     });
     const html = await response.text();
+    if (runId !== latestRunId) return;
     if (!response.ok) throw new Error(responseErrorMessage(response, html));
     const document = new DOMParser().parseFromString(html, 'text/html');
     const challengeRequired = document.querySelector('[data-turnstile-required]');
     if (challengeRequired) {
       outputPanel.querySelector('code').textContent = challengeRequired.textContent
         || 'Verification required before running edited code…';
-      return submitRun(await requestTurnstileToken());
+      const token = await requestTurnstileToken(signal);
+      if (runId !== latestRunId) return;
+      return submitRun(runId, signal, token);
     }
     const nextOutput = document.querySelector('.output-panel');
     if (nextOutput) outputPanel.innerHTML = nextOutput.innerHTML;
   }
 
+  cancelActiveRun = () => {
+    latestRunId += 1;
+    activeController?.abort();
+    activeController = null;
+    removeTurnstile();
+    form.removeAttribute('aria-busy');
+    if (runButton) runButton.disabled = false;
+  };
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    activeController?.abort();
+    const runId = ++latestRunId;
+    const controller = new AbortController();
+    activeController = controller;
+    outputPanel.removeAttribute('data-output-placeholder');
+    outputPanel.querySelector('code').textContent = 'Running in a Dynamic Python Worker…';
+    form.setAttribute('aria-busy', 'true');
+    if (runButton) runButton.disabled = true;
     try {
-      await submitRun();
+      await submitRun(runId, controller.signal);
     } catch (error) {
-      removeTurnstile();
-      outputPanel.querySelector('code').textContent = `Run failed: ${error.message}`;
+      if (runId === latestRunId && error.name !== 'AbortError') {
+        removeTurnstile();
+        outputPanel.querySelector('code').textContent = `Run failed: ${error.message}`;
+      }
+    } finally {
+      if (runId === latestRunId) {
+        activeController = null;
+        form.removeAttribute('aria-busy');
+        if (runButton) runButton.disabled = false;
+      }
     }
   });
 }

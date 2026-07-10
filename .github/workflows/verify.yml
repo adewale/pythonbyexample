@@ -27,10 +27,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install dependencies
-        run: uv sync --all-groups
-      - name: Pin Wrangler for local Worker runtime
-        run: npm install --global wrangler@4.90.0
+      - name: Install locked dependencies
+        run: |
+          uv sync --locked --all-groups
+          npm ci --ignore-scripts
       - name: Start local Worker for browser checks
         run: |
           uv run --group workers pywrangler dev --port 9696 > /tmp/pythonbyexample-ci.log 2>&1 &
@@ -50,6 +50,7 @@ jobs:
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: |
+          npm audit --audit-level=high
           make verify
           scripts/format_examples.py --check
           make verify-python-version VERSION=3.13

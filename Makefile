@@ -1,8 +1,14 @@
 # All Python tooling runs through uv pinned to 3.13 so the suite works on any
 # machine regardless of the system python3 (examples use 3.12+ `type` syntax).
 PY := uv run --python 3.13
+NODE_DEPS_STAMP := node_modules/.package-lock.json
 
-.PHONY: test embed-examples embed-editorial-registry build-search-index build check-generated fingerprint prototypes browser-layout-test search-ranking-test social-cards check-social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported check-program-covers-cells check-prose-duplication check-inline-links score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes audit-example-graph quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy lint
+.PHONY: node-deps test embed-examples embed-editorial-registry build-search-index build check-generated fingerprint prototypes browser-layout-test search-ranking-test social-cards check-social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported check-program-covers-cells check-prose-duplication check-inline-links score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes audit-example-graph quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy lint
+
+$(NODE_DEPS_STAMP): package.json package-lock.json
+	npm ci --ignore-scripts
+
+node-deps: $(NODE_DEPS_STAMP)
 
 test:
 	$(PY) python -m unittest discover -s tests -v
@@ -104,12 +110,12 @@ lint:
 
 verify: build test seo-cache-lint verify-examples quality-checks browser-layout-test search-ranking-test lint check-generated
 
-dev:
+dev: node-deps
 	uv run --group workers pywrangler dev --port 9696
 
 smoke-deployment:
 	$(PY) scripts/smoke_deployment.py $(URL)
 
-deploy: check-generated
+deploy: node-deps check-generated
 	uv run --group workers pywrangler sync
 	uv run --group workers pywrangler deploy

@@ -182,10 +182,50 @@ try {
     throw new Error(`Timed out waiting for ${label}`);
   }
 
-  // Exercise the public browser contracts rather than merely asserting source
-  // strings: copy text, fragment sharing/restoration, resize, and arrow guards.
+  // Exercise public browser contracts rather than asserting implementation
+  // strings: run ordering/reset, sharing bounds, copy, resize, and arrow guards.
   await client.send('Page.navigate', { url: target });
   await waitFor("document.readyState === 'complete' && !!window.pythonByExampleEditor && !!document.querySelector('.copy-button') && !!document.querySelector('.share-button')", 'feature test page');
+  const runnerAsset = await evaluateValue(`document.querySelector('script[src*="/runner."]')?.src`);
+  const runnerOrdering = await evaluateValue(`(async () => {
+    const form = document.querySelector('form.runner-editor');
+    const output = document.querySelector('.output-panel code');
+    const pending = [];
+    const originalFetch = window.fetch;
+    window.fetch = () => new Promise(resolve => pending.push(resolve));
+    const response = text => ({
+      ok: true,
+      status: 200,
+      text: async () => '<section class="output-panel"><h3>Output</h3><pre><code>' + text + '</code></pre></section>',
+    });
+    window.pythonByExampleEditor.setValue('print("first")');
+    form.requestSubmit();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    window.pythonByExampleEditor.setValue('print("second")');
+    form.requestSubmit();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    if (pending.length !== 2) {
+      window.fetch = originalFetch;
+      return { error: 'concurrent submissions did not create two requests', count: pending.length };
+    }
+    pending[1](response('second result'));
+    await new Promise(resolve => setTimeout(resolve, 0));
+    pending[0](response('stale first result'));
+    await new Promise(resolve => setTimeout(resolve, 20));
+    const finalOutput = document.querySelector('.output-panel code')?.textContent;
+    const reset = form.querySelector('[data-reset]');
+    reset.click();
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const resetValue = document.getElementById('code-editor').value;
+    window.fetch = originalFetch;
+    return {
+      finalOutput,
+      resetType: reset.type,
+      resetValue,
+      originalCode: document.getElementById('code-editor').dataset.originalCode,
+      busy: form.hasAttribute('aria-busy'),
+    };
+  })()`);
   const share = await evaluateValue(`(async () => {
     const writes = [];
     window.__pbeClipboardWrites = writes;
@@ -265,7 +305,62 @@ try {
   searchWidths.push(await searchWidthAt('desktop', 1200, 900, false));
   searchWidths.push(await searchWidthAt('mobile-portrait', 390, 844, true));
   searchWidths.push(await searchWidthAt('mobile-landscape', 844, 390, true));
+  const searchFailure = await evaluateValue(`(async () => {
+    const originalFetch = window.fetch;
+    window.fetch = async () => ({ ok: false, status: 503, json: async () => ({}) });
+    const input = document.getElementById('site-search-input');
+    input.focus();
+    input.value = 'decorator';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    await new Promise(resolve => setTimeout(resolve, 50));
+    const state = {
+      status: document.getElementById('site-search-status')?.textContent,
+      outlineWidth: getComputedStyle(input).outlineWidth,
+      shikiRequests: performance.getEntriesByType('resource').filter(entry => entry.name.includes('esm.sh/shiki')).length,
+    };
+    window.fetch = originalFetch;
+    return state;
+  })()`);
   await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 1800, deviceScaleFactor: 2, mobile: true });
+
+  // Theme changes are a live OS preference, not a reload-only setting.
+  await client.send('Emulation.setEmulatedMedia', {
+    media: 'screen',
+    features: [{ name: 'prefers-color-scheme', value: 'light' }],
+  });
+  await client.send('Page.navigate', { url: `${target}?browser_theme=light` });
+  await waitFor("document.readyState === 'complete' && !!document.querySelector('.shiki-block') && !!document.querySelector('.cm-editor')", 'light theme page');
+  const lightTheme = await evaluateValue(`({
+    shikiColor: getComputedStyle(document.querySelector('.shiki-block span')).color,
+    editorColors: [...new Set([...document.querySelectorAll('.cm-line span')].map(node => getComputedStyle(node).color))].sort(),
+  })`);
+  await client.send('Emulation.setEmulatedMedia', {
+    media: 'screen',
+    features: [{ name: 'prefers-color-scheme', value: 'dark' }],
+  });
+  await waitFor(`getComputedStyle(document.querySelector('.shiki-block span')).color !== ${JSON.stringify(lightTheme.shikiColor)}`, 'live dark-theme Shiki rerender');
+  const darkTheme = await evaluateValue(`(() => {
+    const parse = color => color.match(/[\\d.]+/g).slice(0, 3).map(Number);
+    const luminance = color => {
+      const channels = parse(color).map(value => {
+        const normalized = value / 255;
+        return normalized <= .04045 ? normalized / 12.92 : ((normalized + .055) / 1.055) ** 2.4;
+      });
+      return .2126 * channels[0] + .7152 * channels[1] + .0722 * channels[2];
+    };
+    const button = document.querySelector('button[type="submit"]');
+    const style = getComputedStyle(button);
+    const a = luminance(style.color);
+    const b = luminance(style.backgroundColor);
+    document.querySelector('.cm-content').focus();
+    const editorStyle = getComputedStyle(document.querySelector('.cm-editor'));
+    return {
+      shikiColor: getComputedStyle(document.querySelector('.shiki-block span')).color,
+      editorColors: [...new Set([...document.querySelectorAll('.cm-line span')].map(node => getComputedStyle(node).color))].sort(),
+      runContrast: (Math.max(a, b) + .05) / (Math.min(a, b) + .05),
+      editorOutlineWidth: editorStyle.outlineWidth,
+    };
+  })()`);
 
   // Keep esm.sh import requests pending. The runner has no imports and is
   // emitted after its markup, so its controls must attach before the editor's
@@ -284,6 +379,90 @@ try {
   removePauseListener();
   await client.send('Fetch.disable');
 
+  const oversizedUrl = new URL(target);
+  oversizedUrl.searchParams.set('browser_oversized_fragment', Date.now());
+  oversizedUrl.hash = `code=${'A'.repeat(24001)}`;
+  await client.send('Page.navigate', { url: oversizedUrl.href });
+  await waitFor("!!document.querySelector('.share-button')", 'oversized-fragment page');
+  const fragmentBound = await evaluateValue(`({
+    unchanged: document.getElementById('code-editor').value === document.getElementById('code-editor').dataset.originalCode,
+    notice: document.querySelector('.output-panel code')?.textContent,
+  })`);
+
+  // Build a dependency-free runner fixture on a code-free page. The first
+  // Turnstile script load fails; the second must create a fresh script,
+  // execute with the fixed action, and submit the returned token.
+  await client.send('Page.navigate', { url: `${new URL(target).origin}/?browser_turnstile_retry=${Date.now()}` });
+  await waitFor("document.readyState === 'complete'", 'Turnstile retry fixture page');
+  const turnstileRetry = await evaluateValue(`(async () => {
+    document.body.innerHTML = \`
+      <main>
+        <form class="runner-editor" action="/examples/values">
+          <textarea id="code-editor" name="code" data-original-code="print(1)">print(2)</textarea>
+          <div data-turnstile-sitekey="test-key" hidden></div>
+          <div class="playground-toolbar">
+            <button type="submit">Run</button>
+            <button type="reset" data-reset>Reset</button>
+          </div>
+        </form>
+        <section class="output-panel"><h3>Output</h3><pre><code>Ready</code></pre></section>
+      </main>\`;
+    const nativeAppend = document.head.appendChild.bind(document.head);
+    const nativeFetch = window.fetch;
+    let scriptAttempts = 0;
+    let renderAction = '';
+    let widgetOptions = null;
+    document.head.appendChild = node => {
+      if (node.tagName === 'SCRIPT' && node.src.includes('challenges.cloudflare.com/turnstile')) {
+        scriptAttempts += 1;
+        setTimeout(() => {
+          if (scriptAttempts === 1) {
+            node.onerror?.(new Event('error'));
+            return;
+          }
+          window.turnstile = {
+            render: (_box, options) => { widgetOptions = options; renderAction = options.action; return 7; },
+            execute: () => queueMicrotask(() => widgetOptions.callback('retry-token')),
+            remove: () => {},
+            reset: () => {},
+          };
+          node.onload?.(new Event('load'));
+        }, 0);
+        return node;
+      }
+      return nativeAppend(node);
+    };
+    let fetchCount = 0;
+    let submittedToken = '';
+    window.fetch = async (_url, options) => {
+      fetchCount += 1;
+      submittedToken = options.body.get('cf-turnstile-response') || submittedToken;
+      const html = fetchCount < 3
+        ? '<div data-turnstile-required>Verification required</div>'
+        : '<section class="output-panel"><h3>Output</h3><pre><code>retry succeeded</code></pre></section>';
+      return { ok: true, status: 200, text: async () => html };
+    };
+    await import(${JSON.stringify(runnerAsset)} + '?retry=' + Date.now());
+    const form = document.querySelector('form.runner-editor');
+    const output = () => document.querySelector('.output-panel code')?.textContent || '';
+    const waitUntil = async predicate => {
+      for (let i = 0; i < 100; i++) {
+        if (predicate()) return true;
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+      return false;
+    };
+    form.requestSubmit();
+    await waitUntil(() => output().includes('press Run to retry'));
+    const firstFailure = output();
+    form.requestSubmit();
+    await waitUntil(() => output().includes('retry succeeded'));
+    const finalOutput = output();
+    document.head.appendChild = nativeAppend;
+    window.fetch = nativeFetch;
+    return { scriptAttempts, fetchCount, renderAction, submittedToken, firstFailure, finalOutput };
+  })()`);
+
   const failures = [];
   if (interaction.result.value?.ariaLabel !== 'Editable Python example code') {
     failures.push('CodeMirror editor is missing its accessible name');
@@ -295,6 +474,9 @@ try {
     if (block.ratio > 1.25) failures.push(`block ${block.index} visual line height ratio ${block.ratio.toFixed(2)} > 1.25`);
   }
   if (!metrics.loadedShiki) failures.push('Shiki did not load');
+  if (runnerOrdering.error) failures.push(runnerOrdering.error);
+  if (runnerOrdering.finalOutput !== 'second result') failures.push(`Stale run overwrote the latest output (${runnerOrdering.finalOutput})`);
+  if (runnerOrdering.resetType !== 'reset' || runnerOrdering.resetValue !== runnerOrdering.originalCode || runnerOrdering.busy) failures.push('Native Reset did not restore code and cancel runner state');
   if (!share.url.includes('#code=')) failures.push('Copy link did not copy a shared-code fragment');
   if (restored.notice !== 'This link included edited code. Press Run to execute it.') failures.push('Shared-code recipient notice did not render');
   if (restored.editorHeight < 1000) failures.push(`Shared CodeMirror payload did not resize the editor (${restored.editorHeight}px)`);
@@ -309,18 +491,34 @@ try {
       failures.push(`${measurement.label} search is not full width (${measurement.searchWidth}px search, ${measurement.mainWidth}px main, ${measurement.inputWidth}px input)`);
     }
   }
+  if (!searchFailure.status?.includes('temporarily unavailable')) failures.push('Search fetch failure was not announced');
+  if (Number.parseFloat(searchFailure.outlineWidth) < 3) failures.push('Search focus indicator is too weak');
+  if (searchFailure.shikiRequests !== 0) failures.push('Code-free homepage unnecessarily loaded Shiki');
+  if (lightTheme.shikiColor === darkTheme.shikiColor) failures.push('Shiki did not react to the OS theme change');
+  if (JSON.stringify(lightTheme.editorColors) === JSON.stringify(darkTheme.editorColors)) failures.push('CodeMirror did not react to the OS theme change');
+  if (darkTheme.runContrast < 4.5) failures.push(`Dark Run-button contrast is ${darkTheme.runContrast.toFixed(2)}:1`);
+  if (Number.parseFloat(darkTheme.editorOutlineWidth) < 3) failures.push('CodeMirror focus indicator is too weak');
   if (heldCdnRequests === 0) failures.push('CDN-pending runner test did not hold an esm.sh request');
   if (offlineRunner.editorLoaded) failures.push('CDN-pending test unexpectedly loaded CodeMirror');
   if (offlineRunner.fallbackHeight < 1000) failures.push(`Shared fallback textarea did not resize (${offlineRunner.fallbackHeight}px)`);
+  if (!fragmentBound.unchanged || !fragmentBound.notice?.includes('invalid or too large')) failures.push('Oversized shared-code fragment was decoded or not announced');
+  if (turnstileRetry.scriptAttempts !== 2 || !turnstileRetry.firstFailure.includes('press Run to retry') || turnstileRetry.finalOutput !== 'retry succeeded') failures.push('Transient Turnstile CDN failure was cached instead of retried');
+  if (turnstileRetry.renderAction !== 'run-example' || turnstileRetry.submittedToken !== 'retry-token') failures.push('Turnstile browser action/token contract failed');
 
   console.log(JSON.stringify({
     runnerInteraction: interaction.result.value,
+    runnerOrdering,
     share: { codeLength: share.code.length, urlLength: share.url.length, editorHeight: share.editorHeight },
     restored,
     sourceCopy: { copiedLength: sourceCopy.copied.length, state: sourceCopy.state, status: sourceCopy.status },
     arrow,
     searchWidths,
+    searchFailure,
+    lightTheme,
+    darkTheme,
     offlineRunner,
+    fragmentBound,
+    turnstileRetry,
     heldCdnRequests,
   }, null, 2));
   client.close();

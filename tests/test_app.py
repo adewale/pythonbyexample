@@ -376,7 +376,7 @@ class AppTests(unittest.TestCase):
         self.assertNotIn('border-style: dashed', html)
         self.assertIn('class="playground-toolbar"', html)
         self.assertIn('type="submit">Run', html)
-        self.assertIn('type="button" data-reset', html)
+        self.assertIn('type="reset" data-reset', html)
         self.assertNotIn('data-copy', html)
         self.assertNotIn('data-share', html)
         self.assertIn('output-panel', html)
@@ -430,6 +430,15 @@ class AppTests(unittest.TestCase):
         self.assertIn("make check-generated", hook)
         self.assertIn(".githooks/pre-commit", installer)
         self.assertIn("make verify", verify_workflow)
+        self.assertIn("uv sync --locked --all-groups", verify_workflow)
+        self.assertIn("npm ci --ignore-scripts", verify_workflow)
+        preview_workflow = (ROOT / ".github" / "workflows" / "preview.yml").read_text()
+        self.assertIn("uv sync --locked --all-groups", preview_workflow)
+        self.assertIn("npm exec -- wrangler whoami", preview_workflow)
+        package = json.loads((ROOT / "package.json").read_text())
+        lock = json.loads((ROOT / "package-lock.json").read_text())
+        self.assertEqual(package["devDependencies"]["wrangler"], "4.110.0")
+        self.assertEqual(lock["packages"][""]["devDependencies"]["wrangler"], "4.110.0")
         self.assertFalse((ROOT / ".github" / "workflows" / "regenerate-generated-files.yml").exists())
 
     def test_conditionals_are_substantive_not_bare_minimum(self):
@@ -567,18 +576,12 @@ class DarkModeAndAccessibilityTests(unittest.TestCase):
         self.assertIn(".cell-banner figure svg", dark_block)
         self.assertIn(".journey-section-figure svg", dark_block)
 
-    def test_shiki_highlights_with_dual_light_dark_themes(self):
-        js = (ROOT / "public" / "syntax-highlight.js").read_text()
-        self.assertIn("github-light", js)
-        self.assertIn("github-dark", js)
-        self.assertIn("themes:", js)
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn("--shiki-dark", css)
-
-    def test_editor_picks_a_dark_highlight_style_in_dark_mode(self):
-        js = (ROOT / "public" / "editor.js").read_text()
-        self.assertIn("prefers-color-scheme: dark", js)
-        self.assertIn("oneDarkHighlightStyle", js)
+    def test_optional_highlighters_retain_readable_server_fallbacks(self):
+        page = render_example_page(get_example("values"))
+        self.assertIn('<pre><code class="language-python">', page)
+        self.assertIn('aria-label="Editable Python example code"', page)
+        self.assertIn('<script type="module" src="/syntax-highlight.', page)
+        self.assertIn('<script type="module" src="/editor.', page)
 
     def test_every_page_offers_a_skip_link_to_main_content(self):
         for page in [render_home(), render_example_page(get_example("hello-world"))]:
@@ -859,6 +862,18 @@ class DiscoverabilityTests(unittest.TestCase):
         script = _structured_data_script({"name": "</script><script>alert(1)"})
         self.assertNotIn("</script><script>", script.removesuffix("</script>"))
 
+    def test_404_pages_omit_canonical_and_og_url_metadata(self):
+        for response in (
+            route("https://example.test/no-such-page"),
+            route("https://example.test/examples/no-such-example"),
+            route("https://example.test/journeys/no-such-journey"),
+        ):
+            with self.subTest(body=response.body[:80]):
+                self.assertEqual(response.status, 404)
+                self.assertNotIn('rel="canonical"', response.body)
+                self.assertNotIn('property="og:url"', response.body)
+                self.assertIn('<meta name="robots" content="noindex">', response.body)
+
     def test_robots_txt_references_sitemap(self):
         robots = (ROOT / "public" / "robots.txt").read_text()
         self.assertIn("Sitemap: https://www.pythonbyexample.dev/sitemap.xml", robots)
@@ -998,15 +1013,6 @@ class KeyboardNavTests(unittest.TestCase):
         self.assertIn("code === originalCode ? pageUrl : pageUrl + '#code='", js)
         self.assertIn(".playground-toolbar", js)
         self.assertIn("aria-live", js)
-
-    def test_share_encoder_mirrors_the_day_one_decoder(self):
-        js = (ROOT / "public" / "runner.js").read_text()
-        self.assertIn("decodeURIComponent(escape(atob(hash.slice(6))))", js)
-        self.assertIn("btoa(unescape(encodeURIComponent(code)))", js)
-
-    def test_hash_decode_syncs_the_enhanced_editor(self):
-        js = (ROOT / "public" / "runner.js").read_text()
-        self.assertIn("setCode(decodeURIComponent(escape(atob(hash.slice(6)))))", js)
 
     def test_shared_link_recipients_see_a_status_notice(self):
         js = (ROOT / "public" / "runner.js").read_text()

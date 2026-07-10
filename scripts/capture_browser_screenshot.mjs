@@ -14,6 +14,8 @@ const url = `${target}${target.includes('?') ? '&' : '?'}screenshot_test=${Date.
 const width = Number(process.env.WIDTH || 2040);
 const height = Number(process.env.HEIGHT || 626);
 const captureSelector = process.env.CAPTURE_SELECTOR || '.literate-program';
+const colorScheme = process.env.COLOR_SCHEME || '';
+const focusSelector = process.env.FOCUS_SELECTOR || '';
 const port = 9444 + Math.floor(Math.random() * 1000);
 const profile = await mkdtemp(path.join(tmpdir(), 'pythonbyexample-shot-chrome-'));
 
@@ -82,6 +84,12 @@ try {
   await client.send('Network.setCacheDisabled', { cacheDisabled: true });
   await client.send('Page.enable');
   await client.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
+  if (colorScheme) {
+    await client.send('Emulation.setEmulatedMedia', {
+      media: 'screen',
+      features: [{ name: 'prefers-color-scheme', value: colorScheme }],
+    });
+  }
   await client.send('Page.navigate', { url });
 
   for (let i = 0; i < 100; i++) {
@@ -90,6 +98,13 @@ try {
       returnByValue: true,
     });
     if (ready.result.value) break;
+    await sleep(100);
+  }
+
+  if (focusSelector) {
+    await client.send('Runtime.evaluate', {
+      expression: `document.querySelector(${JSON.stringify(focusSelector)})?.focus()`,
+    });
     await sleep(100);
   }
 

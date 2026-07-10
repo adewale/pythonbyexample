@@ -67,9 +67,11 @@ This project is developed with red-green-refactor TDD:
 2. Implement the smallest change that makes it pass.
 3. Refactor while keeping tests green.
 
-Install dependencies with `uv`, then run:
+Install the exact committed Python and Node dependency sets, then run:
 
 ```bash
+uv sync --locked --all-groups
+npm ci --ignore-scripts
 make test
 ```
 
@@ -81,10 +83,10 @@ After cloning, install the local git hooks once so merges and rebases regenerate
 ./scripts/install-git-hooks.sh
 ```
 
-Run locally on Workers:
+Run locally on Workers with the repository-pinned Wrangler:
 
 ```bash
-uv run --group workers pywrangler dev --port 9696
+make dev
 ```
 
 Open:
@@ -98,7 +100,7 @@ http://localhost:9696
 Run a local Worker before the full browser-backed verification:
 
 ```bash
-uv run --group workers pywrangler dev --port 9696
+make dev
 ```
 
 Then run the main checks before deploying or pushing:
@@ -197,8 +199,8 @@ make check-generated
 
 After adding an example or journey (or changing card title, summary, figure,
 or card CSS), regenerate social cards. `make check-generated` verifies the
-committed card-input provenance and exact JPEG set, without byte-comparing
-Chrome's platform-variable raster output:
+committed card-input provenance, exact JPEG set, JPEG decodability, and 1200×630
+dimensions without byte-comparing Chrome's platform-variable raster output:
 
 ```bash
 make social-cards
@@ -228,4 +230,6 @@ Use the active Cloudflare-supported Python version.
 - The parent Worker uses a `LOADER` Worker Loader binding.
 - Dynamic Worker IDs include Python version, example slug, and submitted code hash.
 - Dynamic Workers run with `globalOutbound: null` and tight CPU/subrequest limits.
-- POST example runs are never cached.
+- POST example runs carry `Cache-Control: no-store` and are never cached.
+- Wrangler is an exact dev dependency in `package-lock.json`; `make dev` and `make deploy` install/use that local version through Pywrangler.
+- Production still requires the account-level WAF/rate-limit rule documented in `docs/turnstile-runner-protection-spec.md`; repository settings alone do not prove that external control is active.

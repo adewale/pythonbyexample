@@ -15,6 +15,8 @@ import json
 import sys
 from pathlib import Path
 
+from PIL import Image, UnidentifiedImageError
+
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
@@ -110,6 +112,19 @@ def provenance(cards: dict[str, str]) -> dict[str, object]:
     return {"version": PROVENANCE_VERSION, "inputs": {f"{name}.jpg": hashlib.sha256(source.encode()).hexdigest() for name, source in sorted(cards.items())}}
 
 
+def jpeg_dimensions(path: Path) -> tuple[int, int]:
+    """Decode enough of a JPEG to verify integrity and return its dimensions."""
+    try:
+        with Image.open(path) as image:
+            if image.format != "JPEG":
+                raise ValueError(f"expected JPEG format, got {image.format or 'unknown'}")
+            dimensions = image.size
+            image.load()
+    except (OSError, UnidentifiedImageError) as exc:
+        raise ValueError(str(exc)) from exc
+    return dimensions
+
+
 def check_current(cards: dict[str, str]) -> list[str]:
     failures: list[str] = []
     expected = provenance(cards)
@@ -125,6 +140,17 @@ def check_current(cards: dict[str, str]) -> list[str]:
         failures.append(f"missing social card {name}; run make social-cards")
     for name in sorted(actual_files - expected_files):
         failures.append(f"unexpected stale social card {name}; run make social-cards")
+    for name in sorted(expected_files & actual_files):
+        try:
+            dimensions = jpeg_dimensions(OUTPUT_DIR / name)
+        except (OSError, ValueError) as exc:
+            failures.append(f"invalid JPEG social card {name}: {exc}; run make social-cards")
+            continue
+        if dimensions != (CARD_WIDTH, CARD_HEIGHT):
+            failures.append(
+                f"social card {name} is {dimensions[0]}x{dimensions[1]}, "
+                f"expected {CARD_WIDTH}x{CARD_HEIGHT}; run make social-cards"
+            )
     return failures
 
 

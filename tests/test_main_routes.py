@@ -46,3 +46,6 @@ class CatchAllResponseHeaderTests(MainModuleHarness):
             main.not_found("no-such-page", self.request("https://example.test/no-such-page"))
         )
         self.assertEqual(response.status_code, 404)
+        self.assertNotIn('rel="canonical"', response.content)
+        self.assertNotIn('property="og:url"', response.content)
+        self.assertIn('<meta name="robots" content="noindex">', response.content)
