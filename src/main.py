@@ -276,8 +276,20 @@ async def run_example(slug: str, request: Request):
             ),
             413,
         )
-    body = raw_body.decode("utf-8")
-    form = parse_qs(body)
+    try:
+        body = raw_body.decode("utf-8")
+        form = parse_qs(body, encoding="utf-8", errors="strict")
+    except UnicodeDecodeError:
+        if event := _wide_event(request):
+            event["example"] = {"slug": example["slug"], "code_bytes": len(raw_body), "rejected": "invalid_utf8"}
+        return _html(
+            render_example_page(
+                example,
+                output="Submitted code must be valid UTF-8. Fix the encoding and try again.",
+                turnstile_site_key=_turnstile_site_key(request),
+            ),
+            400,
+        )
     submitted = form.get("code", [example["code"]])[0]
     submitted_bytes = submitted.encode("utf-8")
     if event := _wide_event(request):
@@ -384,8 +396,15 @@ async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str, st
             }
         ),
     )
-    response = await js_fetch(verify_request)
-    result = json.loads(await response.text())
+    try:
+        response = await js_fetch(verify_request)
+        if int(getattr(response, "status", 0) or 0) < 200 or int(getattr(response, "status", 0) or 0) >= 300:
+            raise ValueError("Turnstile Siteverify returned a non-success status")
+        result = json.loads(await response.text())
+        if not isinstance(result, dict):
+            raise ValueError("Turnstile Siteverify returned a non-object payload")
+    except Exception:
+        return False, "Turnstile verification failed. Please refresh the challenge and try again.", "fail"
     if result.get("success") is True:
         return True, "", "pass"
     return False, "Turnstile verification failed. Please refresh the challenge and try again.", "fail"
@@ -443,7 +462,10 @@ async def _run_example(request: Request, slug, code):
         status_code = int(getattr(response, "status", 200) or 200)
         worker_event["status_code"] = status_code
         output = await response.text()
-        if status_code >= 500:
+        if status_code == 413:
+            worker_event["outcome"] = "rejected"
+            worker_event["rejected"] = "output_too_large"
+        elif status_code >= 500:
             worker_event["outcome"] = "error"
             worker_event["error"] = {
                 "type": "DynamicWorkerHTTPError",

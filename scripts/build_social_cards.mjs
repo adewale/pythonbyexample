@@ -3,7 +3,7 @@
 // headless Chrome session. Run scripts/build_social_cards.py first
 // (or use `make social-cards`, which runs both).
 import { spawn } from 'node:child_process';
-import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, mkdir, readdir, readFile, rm, unlink, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -11,7 +11,9 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const cardDir = path.join(root, 'build', 'social-cards');
 const outputDir = path.join(root, 'public', 'og');
-const chromePath = process.env.CHROME_PATH || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+const chromePath = process.env.CHROME_PATH || (process.platform === 'darwin'
+  ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
+  : '/usr/bin/google-chrome');
 const width = 1200;
 const height = 630;
 const port = 9444 + Math.floor(Math.random() * 1000);
@@ -84,6 +86,10 @@ try {
   await client.send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
 
   await mkdir(outputDir, { recursive: true });
+  const expected = new Set(Object.keys(manifest).map(name => `${name}.jpg`));
+  for (const name of await readdir(outputDir)) {
+    if (name.endsWith('.jpg') && !expected.has(name)) await unlink(path.join(outputDir, name));
+  }
   let written = 0;
   for (const [name, file] of Object.entries(manifest)) {
     await client.send('Page.navigate', { url: `file://${path.join(cardDir, file)}` });

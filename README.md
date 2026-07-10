@@ -2,7 +2,7 @@
 
 Python By Example is a Go By Example-inspired learning site for Python 3.13. It presents small literate examples with prose, source fragments, expected output, official Python documentation links, and an editable runner.
 
-Production: <https://www.pythonbyexample.dev> (`workers.dev` remains enabled as a fallback).
+Production: <https://www.pythonbyexample.dev> (`workers.dev` is disabled so the custom-domain WAF and rate-limit posture cannot be bypassed).
 
 ## Features
 
@@ -100,7 +100,6 @@ Then run the main checks before deploying or pushing:
 
 ```bash
 make verify
-scripts/check_example_migration_parity.py
 scripts/format_examples.py --check
 make verify-python-version VERSION=3.13
 git diff --check
@@ -161,7 +160,6 @@ Run checks, then deploy:
 
 ```bash
 make verify
-scripts/check_example_migration_parity.py
 scripts/format_examples.py --check
 make deploy
 ```
@@ -189,20 +187,21 @@ After editing examples, run:
 make build
 make verify-examples
 scripts/format_examples.py --check
-scripts/check_example_migration_parity.py
 make check-generated
 ```
 
-After adding an example (or changing a title, summary, or figure), also
-regenerate its social card so the SEO linter finds the image:
+After adding an example or journey (or changing card title, summary, figure,
+or card CSS), regenerate social cards. `make check-generated` verifies the
+committed card-input provenance and exact JPEG set, without byte-comparing
+Chrome's platform-variable raster output:
 
 ```bash
 make social-cards
 ```
 
-This composes a 1200x630 card per example from its marginalia figure and
-rasterizes it to `public/og/<slug>.jpg` with headless Chrome (set
-`CHROME_PATH` if Chrome is not at the default location).
+This composes 1200x630 cards for home, examples, and journeys, records their
+deterministic HTML-input hashes in `public/og/manifest.json`, and rasterizes
+JPEGs under `public/og/` with headless Chrome (set `CHROME_PATH` if needed).
 
 `make quality-checks` runs the registry, confusable-pair, broad-tour,
 footgun, notes, program/cell, prose-duplication, inline-link, scoring,

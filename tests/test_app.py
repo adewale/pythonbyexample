@@ -417,10 +417,14 @@ class AppTests(unittest.TestCase):
         self.assertIn("Submitted code is too large", runner)
         self.assertIn("catch (error)", runner)
 
-    def test_regeneration_workflow_discards_stale_generated_output_before_retry(self):
+    def test_regeneration_workflow_opens_a_verified_bot_pr_not_a_main_push(self):
         workflow = (ROOT / ".github" / "workflows" / "regenerate-generated-files.yml").read_text()
-        self.assertIn("git reset --hard HEAD~1", workflow)
-        self.assertNotIn("git reset --soft HEAD~1", workflow)
+        self.assertIn("actions/create-github-app-token", workflow)
+        self.assertIn("make check-social-cards", workflow)
+        self.assertIn("make social-cards", workflow)
+        self.assertIn("gh pr create", workflow)
+        self.assertIn("Unexpected generated path(s)", workflow)
+        self.assertNotIn("git push origin main", workflow)
 
     def test_conditionals_are_substantive_not_bare_minimum(self):
         example = get_example("conditionals")
@@ -692,17 +696,25 @@ class SocialCardTests(unittest.TestCase):
         self.assertIn('<meta property="og:image" content="https://www.pythonbyexample.dev/og/home.jpg">', home)
         self.assertIn('<meta name="twitter:card" content="summary_large_image">', home)
 
-    def test_pages_without_cards_fall_back_to_summary_twitter_card(self):
+    def test_journey_pages_reference_social_cards_and_collection_json_ld(self):
         from src.app import JOURNEYS, render_journey_page
 
-        page = render_journey_page(JOURNEYS[0])
-        self.assertIn('<meta name="twitter:card" content="summary">', page)
-        self.assertNotIn("og:image", page)
+        journey = JOURNEYS[0]
+        page = render_journey_page(journey)
+        self.assertIn(f'https://www.pythonbyexample.dev/og/journey-{journey["slug"]}.jpg', page)
+        self.assertIn('<meta name="twitter:card" content="summary_large_image">', page)
+        data = json.loads(re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S).group(1))
+        self.assertEqual(data["@type"], "CollectionPage")
+        self.assertEqual(data["url"], f'https://www.pythonbyexample.dev/journeys/{journey["slug"]}')
 
-    def test_social_card_image_exists_for_every_example(self):
+    def test_social_card_image_exists_for_every_published_page(self):
         for example in list_examples():
             with self.subTest(slug=example["slug"]):
                 self.assertTrue((ROOT / "public" / "og" / f"{example['slug']}.jpg").exists())
+        from src.app import JOURNEYS
+        for journey in JOURNEYS:
+            with self.subTest(slug=journey["slug"]):
+                self.assertTrue((ROOT / "public" / "og" / f"journey-{journey['slug']}.jpg").exists())
         self.assertTrue((ROOT / "public" / "og" / "home.jpg").exists())
 
     def test_card_html_composes_title_section_and_figure(self):
@@ -713,6 +725,13 @@ class SocialCardTests(unittest.TestCase):
         self.assertIn("Closures", card)
         self.assertIn("Functions", card)
         self.assertIn("pythonbyexample.dev", card)
+
+    def test_runtime_journeys_and_edge_labels_load_from_editorial_registry(self):
+        from src import app as app_module
+        from src.editorial_registry import journeys, see_also_edge_labels
+
+        self.assertEqual(app_module.JOURNEYS, journeys())
+        self.assertEqual(app_module.SEE_ALSO_EDGE_LABELS, see_also_edge_labels())
 
 
 class DiscoverabilityTests(unittest.TestCase):

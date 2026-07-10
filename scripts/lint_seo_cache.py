@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts.fingerprint_assets import ASSETS, PUBLIC, html_version  # noqa: E402
-from src.app import SITE_URL, list_examples, render_example_page, render_home, render_sitemap  # noqa: E402
+from src.app import JOURNEYS, SITE_URL, list_examples, render_example_page, render_home, render_journey_page, render_sitemap  # noqa: E402
 from src.asset_manifest import ASSET_PATHS, HTML_CACHE_VERSION  # noqa: E402
 
 META_DESCRIPTION_RE = re.compile(r'<meta name="description" content="([^"]+)">')
@@ -77,6 +77,10 @@ def assert_sitemap(failures: list[str]) -> None:
         url = f"{SITE_URL}/examples/{example['slug']}"
         if f"<loc>{url}</loc>" not in sitemap:
             fail(f"sitemap: missing {url}", failures)
+    for journey in JOURNEYS:
+        url = f"{SITE_URL}/journeys/{journey['slug']}"
+        if f"<loc>{url}</loc>" not in sitemap:
+            fail(f"sitemap: missing {url}", failures)
     if f"<loc>{SITE_URL}/</loc>" not in sitemap:
         fail("sitemap: missing home URL", failures)
     robots = (ROOT / "public" / "robots.txt").read_text()
@@ -128,11 +132,18 @@ def main() -> int:
             f"/examples/{example['slug']}",
             failures,
         )
+    for journey in JOURNEYS:
+        assert_page_metadata(
+            f"journey:{journey['slug']}",
+            render_journey_page(journey),
+            f"/journeys/{journey['slug']}",
+            failures,
+        )
     if failures:
         for failure in failures:
             print(f"FAIL: {failure}", file=sys.stderr)
         return 1
-    print(f"SEO/cache lint passed for 1 home page and {len(list_examples())} example pages.")
+    print(f"SEO/cache lint passed for 1 home page, {len(JOURNEYS)} journeys, and {len(list_examples())} example pages.")
     return 0
 
 

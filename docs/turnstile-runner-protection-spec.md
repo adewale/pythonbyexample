@@ -397,7 +397,15 @@ Privacy note: Cloudflare documents that using Invisible mode requires referencin
 
 ## Remaining TODO
 
-### 1. Add Cloudflare Rate Limiting rule (optional, recommended for cost caps)
+### 1. Required production Cloudflare Rate Limiting rule
+
+Before deploying the custom domain, a zone administrator must create and enable
+this rule, record its zone, rule ID, plan, expression, characteristics,
+threshold/period, mitigation/action, deployment date, and a controlled 429
+Security Events result in the release record. `wrangler.jsonc` deploys the
+Worker only; it cannot declare or verify zone WAF rate-limiting rules. The
+production configuration disables `workers.dev` so the custom-domain WAF rule
+is not bypassed by a public fallback hostname.
 
 Cloudflare Dashboard:
 

@@ -274,6 +274,22 @@ class RunExampleFlowTests(unittest.TestCase):
         self.assertEqual(self._ran_code, "print(42)")
         self.assertIn("ran-output", response.body.decode())
 
+    def test_invalid_raw_or_percent_encoded_utf8_is_rejected_before_execution(self):
+        for body in (b"code=\xff", b"code=%FF"):
+            with self.subTest(body=body):
+                self._ran_code = None
+                self._stub_run()
+                response = self._run(post_request(body, env=session_env(TURNSTILE_CHALLENGE_MODE="off")))
+                self.assertEqual(response.status_code, 400)
+                self.assertIn("valid UTF-8", response.body.decode())
+                self.assertIsNone(self._ran_code)
+
+    def test_valid_unicode_form_reaches_runner(self):
+        self._stub_run(output="ok")
+        response = self._run(post_request("code=print%28%27%E2%82%AC%27%29".encode(), env=session_env(TURNSTILE_CHALLENGE_MODE="off")))
+        self.assertEqual(self._ran_code, "print('€')")
+        self.assertEqual(response.status_code, 200)
+
     def test_verified_token_sets_clearance_cookie(self):
         self._ran_code = None
         self._stub_run(output="verified-run")
@@ -287,6 +303,58 @@ class RunExampleFlowTests(unittest.TestCase):
         self.assertEqual(self._ran_code, "print(1)")
         set_cookie = response.headers.get("set-cookie", "")
         self.assertIn(f"{main.TURNSTILE_CLEARANCE_COOKIE}=", set_cookie)
+
+
+class TurnstileSiteverifyTests(unittest.TestCase):
+    def setUp(self):
+        self.saved_fetch = main.js_fetch
+        self.saved_request = main.JsRequest
+        main.JsRequest = type("Request", (), {"new": staticmethod(lambda url, options: (url, options))})
+
+    def tearDown(self):
+        main.js_fetch = self.saved_fetch
+        main.JsRequest = self.saved_request
+
+    def test_transport_status_and_payload_failures_fail_closed(self):
+        class Response:
+            def __init__(self, status, body):
+                self.status, self.body = status, body
+            async def text(self):
+                return self.body
+
+        async def failing(_request):
+            raise RuntimeError("network down")
+
+        request = make_request(env=session_env())
+        for fetch in (
+            failing,
+            lambda _request: _awaitable(Response(500, '{"success": true}')),
+            lambda _request: _awaitable(Response(200, "not json")),
+            lambda _request: _awaitable(Response(200, "[]")),
+            lambda _request: _awaitable(Response(200, '{"success": false}')),
+        ):
+            with self.subTest(fetch=fetch):
+                main.js_fetch = fetch
+                ok, message, outcome = asyncio.run(main._verify_turnstile(request, "token"))
+                self.assertFalse(ok)
+                self.assertIn("verification failed", message)
+                self.assertEqual(outcome, "fail")
+
+    def test_successful_siteverify_requires_true_success_flag(self):
+        class Response:
+            status = 200
+            async def text(self):
+                return '{"success": true}'
+
+        main.js_fetch = lambda _request: _awaitable(Response())
+        ok, message, outcome = asyncio.run(main._verify_turnstile(make_request(env=session_env()), "token"))
+        self.assertTrue(ok)
+        self.assertEqual(message, "")
+        self.assertEqual(outcome, "pass")
+
+
+async def _awaitable(value):
+    return value
 
 
 class DynamicWorkerCodeTests(unittest.TestCase):
@@ -304,6 +372,42 @@ class DynamicWorkerCodeTests(unittest.TestCase):
         self.assertIn("async def fetch", module)
         tricky = build_dynamic_worker_code("x = '''end'''")
         self.assertIn(repr("x = '''end'''"), tricky)
+
+    def test_generated_worker_enforces_utf8_output_cap(self):
+        from app import DYNAMIC_OUTPUT_LIMIT_MESSAGE, MAX_DYNAMIC_OUTPUT_BYTES, build_dynamic_worker_code
+
+        saved_workers = sys.modules.get("workers")
+        fake_workers = types.ModuleType("workers")
+
+        class Response:
+            def __init__(self, body, status=200, headers=None):
+                self.body, self.status, self.headers = body, status, headers or {}
+
+        fake_workers.Response = Response
+        fake_workers.WorkerEntrypoint = object
+        sys.modules["workers"] = fake_workers
+        try:
+            namespace = {}
+            exec(build_dynamic_worker_code(f"print('€' * {(MAX_DYNAMIC_OUTPUT_BYTES - 1) // 3})"), namespace)
+            under = asyncio.run(namespace["Default"]().fetch(None))
+            self.assertEqual(under.status, 200)
+            self.assertLessEqual(len(under.body.encode()), MAX_DYNAMIC_OUTPUT_BYTES)
+            namespace = {}
+            exec(build_dynamic_worker_code(f"print('x' * {MAX_DYNAMIC_OUTPUT_BYTES + 1})"), namespace)
+            over = asyncio.run(namespace["Default"]().fetch(None))
+            self.assertEqual(over.status, 413)
+            self.assertEqual(over.body, DYNAMIC_OUTPUT_LIMIT_MESSAGE)
+            namespace = {}
+            exec(build_dynamic_worker_code(f"raise ValueError('x' * {MAX_DYNAMIC_OUTPUT_BYTES + 1})"), namespace)
+            huge_error = asyncio.run(namespace["Default"]().fetch(None))
+            self.assertEqual(huge_error.status, 413)
+            self.assertEqual(huge_error.body, DYNAMIC_OUTPUT_LIMIT_MESSAGE)
+            self.assertLessEqual(len(huge_error.body.encode()), MAX_DYNAMIC_OUTPUT_BYTES)
+        finally:
+            if saved_workers is None:
+                sys.modules.pop("workers", None)
+            else:
+                sys.modules["workers"] = saved_workers
 
 
 if __name__ == "__main__":

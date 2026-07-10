@@ -2,7 +2,7 @@
 # machine regardless of the system python3 (examples use 3.12+ `type` syntax).
 PY := uv run --python 3.13
 
-.PHONY: test embed-examples embed-editorial-registry build-search-index build check-generated fingerprint prototypes browser-layout-test search-ranking-test social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported check-program-covers-cells check-prose-duplication check-inline-links score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes audit-example-graph quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy lint
+.PHONY: test embed-examples embed-editorial-registry build-search-index build check-generated fingerprint prototypes browser-layout-test search-ranking-test social-cards check-social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported check-program-covers-cells check-prose-duplication check-inline-links score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes audit-example-graph quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy lint
 
 test:
 	$(PY) python -m unittest discover -s tests -v
@@ -18,7 +18,7 @@ build-search-index: embed-examples
 
 build: embed-examples embed-editorial-registry build-search-index fingerprint prototypes
 
-check-generated: build
+check-generated: build check-social-cards
 	git diff --exit-code src/example_sources_data.py src/editorial_registry_data.py src/asset_manifest.py public/_headers public/prototyping public/search-index.json
 	test -z "$$(git status --porcelain public/prototyping public/*.css public/*.js public/*.json)"
 
@@ -38,6 +38,9 @@ search-ranking-test:
 social-cards:
 	$(PY) scripts/build_social_cards.py
 	scripts/build_social_cards.mjs
+
+check-social-cards:
+	$(PY) scripts/build_social_cards.py --check
 
 seo-cache-lint:
 	$(PY) scripts/lint_seo_cache.py
