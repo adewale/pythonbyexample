@@ -207,10 +207,13 @@ all aimed at the scorecard's engagement and return lines:
 **Now (days; mostly small, single-surface changes)**
 
 1. Share-this-code link + copy buttons on code blocks.
+   *(Copy buttons shipped 2026-07-10; the share link is still open.)*
 2. `/about` page + edit-on-GitHub links.
+   *(`/about` shipped 2026-07-10; edit-on-GitHub links are still open.)*
 3. `/llms.txt`, per-example Markdown endpoints, Atom feed.
 4. Search-console registration + the first weekly learner-report
-   ritual.
+   ritual. *(Google Search Console ownership verified 2026-07-10;
+   sitemap submission waits on the next deploy.)*
 
 **Next (weeks)**
 
@@ -218,6 +221,8 @@ all aimed at the scorecard's engagement and return lines:
    variables, command-line arguments, `random`, `time` — ordered by
    observed 404s, gated by the rubric.
 6. Example → journey breadcrumbs; keyboard prev/next.
+   *(Keyboard prev/next shipped 2026-07-10; breadcrumbs are still
+   open.)*
 7. "X vs Y" contrasts index from the confusable-pair registry.
 8. "Try it" nudges on the ten most-run pages; measure edited share.
 9. First launch moment, once 1–3 are live.

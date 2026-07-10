@@ -18,6 +18,7 @@ from urllib.parse import urljoin
 
 SMOKE_PATHS = [
     "/",
+    "/about",
     "/examples/values",
     "/examples/async-await",
     "/examples/networking",

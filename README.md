@@ -21,6 +21,9 @@ Production: <https://www.pythonbyexample.dev> (`workers.dev` is disabled so the 
 - Per-example social-card images composed from the marginalia figure set
 - Learner-behavior reporting from Worker wide events (`docs/learner-analytics.md`)
 - A quality-gate suite for registries, rubric scores, coverage, and teaching structure that fails builds when content regresses
+- `/about` page describing the verification pipeline, runner sandbox, figure grammar, and live design tokens
+- Copy buttons on read-only source cells
+- Keyboard prev/next navigation (`←`/`→`) on example pages
 
 ## Attribution
 
