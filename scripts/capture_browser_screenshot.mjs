@@ -13,6 +13,7 @@ const output = process.env.OUTPUT || (args.has('--inject-shiki') ? '/tmp/pythonb
 const url = `${target}${target.includes('?') ? '&' : '?'}screenshot_test=${Date.now()}`;
 const width = Number(process.env.WIDTH || 2040);
 const height = Number(process.env.HEIGHT || 626);
+const captureSelector = process.env.CAPTURE_SELECTOR || '.literate-program';
 const port = 9444 + Math.floor(Math.random() * 1000);
 const profile = await mkdtemp(path.join(tmpdir(), 'pythonbyexample-shot-chrome-'));
 
@@ -85,7 +86,7 @@ try {
 
   for (let i = 0; i < 100; i++) {
     const ready = await client.send('Runtime.evaluate', {
-      expression: "document.readyState === 'complete' && !!document.querySelector('.literate-program')",
+      expression: `document.readyState === 'complete' && !!document.querySelector(${JSON.stringify(captureSelector)})`,
       returnByValue: true,
     });
     if (ready.result.value) break;
@@ -119,7 +120,8 @@ try {
   const data = await client.send('Runtime.evaluate', {
     returnByValue: true,
     expression: `(() => {
-      const program = document.querySelector('.literate-program');
+      const program = document.querySelector(${JSON.stringify(captureSelector)});
+      if (!program) throw new Error('capture selector did not match an element');
       const rect = program.getBoundingClientRect();
       const steps = [...document.querySelectorAll('.lesson-step')].map((step, index) => {
         const pre = step.querySelector('pre');
