@@ -1,0 +1,75 @@
+<article class="example-shell about-page">
+  <div class="example-top"><a class="text-link" href="/">↑ All examples</a><a class="text-link" href="/journeys">Journeys</a></div>
+  <section class="example-intro">
+    <p class="eyebrow">About</p>
+    <h1>How this site is made</h1>
+    <p class="meta">__EXAMPLE_COUNT__ examples and __JOURNEY_COUNT__ journeys, all on Python __PYTHON_VERSION__. Those counts are computed from the catalog when this page renders, not typed into this sentence.</p>
+  </section>
+  <section class="about-section">
+    <h2>One concept per page</h2>
+    <p>Python By Example teaches Python through small literate programs. Each page holds one concept. Prose sits beside the source it explains, and each source fragment is followed by the output it produced. Links point at the official Python __PYTHON_VERSION__ documentation instead of restating it. __JOURNEY_COUNT__ journeys arrange the same examples into longer arcs, each section with named learner outcomes.</p>
+  </section>
+  <section class="about-section">
+    <h2>Every page runs</h2>
+    <p>The complete program at the bottom of each example is editable. Run sends it to an isolated Cloudflare Dynamic Worker with outbound network disabled and a one-second CPU budget. The output panel shows the real stdout of the code you ran, and the measured execution time below it.</p>
+  </section>
+  <section class="about-section">
+    <h2>Output is verified, not promised</h2>
+    <p>The expected output beside each fragment is not written by hand. A build step executes every teaching cell and every complete program, then fails if the recorded output differs from what actually printed. Cells the sandbox cannot execute are labelled as standard Python instead of pretending to run.</p>
+  </section>
+  <section class="about-section">
+    <h2>The figures</h2>
+    <p>The small diagrams are composed from a locked drawing grammar: one palette, fixed stroke weights, a short list of shapes, and no escape hatch for raw SVG. Geometry tests check every figure for clipping and collisions before it ships. Some pages have no figure on purpose; each omission carries a recorded reason.</p>
+  </section>
+  <section class="about-section">
+    <h2>The quality gates</h2>
+    <p>A written rubric scores every example, with a target of 9.0 and a hard minimum of 8.5. A page below target must name the work that remains; Hello World carries the only standing waiver, because first programs are traditionally tiny. Separate checks cover confusable pairs (iterator vs iterable, <code class="syntax-inline">is</code> vs <code class="syntax-inline">==</code>), documented footguns, journey outcomes, and the links between examples.</p>
+  </section>
+  <section class="about-section">
+    <h2>The design language</h2>
+    <p>Every page draws from the tokens below, and this section reads them from the same stylesheet it documents. In dark mode the warm palette inverts; <code class="syntax-inline">--figure-paper</code> stays light, so figures sit on a paper chip instead of being recoloured, and the terminal tokens keep the runner's output chip dark in both schemes.</p>
+    <p class="cell-label">Color</p>
+    <ul class="token-grid">
+      <li class="token"><span class="token-swatch" style="--swatch: var(--accent)"></span><code>--accent</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--accent-text)"></span><code>--accent-text</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--accent-action)"></span><code>--accent-action</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--accent-hover)"></span><code>--accent-hover</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--accent-soft)"></span><code>--accent-soft</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--text)"></span><code>--text</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--muted)"></span><code>--muted</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--page)"></span><code>--page</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--surface)"></span><code>--surface</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--surface-2)"></span><code>--surface-2</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--surface-3)"></span><code>--surface-3</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--hairline)"></span><code>--hairline</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--hairline-soft)"></span><code>--hairline-soft</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--header-veil)"></span><code>--header-veil</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--header-veil-0)"></span><code>--header-veil-0</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--header-veil-solid)"></span><code>--header-veil-solid</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--figure-paper)"></span><code>--figure-paper</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--terminal-bg)"></span><code>--terminal-bg</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--terminal-ink)"></span><code>--terminal-ink</code></li>
+    </ul>
+    <p class="cell-label">Spacing</p>
+    <ul class="token-grid">
+      <li class="token"><span class="token-bar" style="width: var(--space-1)"></span><code>--space-1</code></li>
+      <li class="token"><span class="token-bar" style="width: var(--space-2)"></span><code>--space-2</code></li>
+      <li class="token"><span class="token-bar" style="width: var(--space-3)"></span><code>--space-3</code></li>
+      <li class="token"><span class="token-bar" style="width: var(--space-4)"></span><code>--space-4</code></li>
+      <li class="token"><span class="token-bar" style="width: var(--space-5)"></span><code>--space-5</code></li>
+      <li class="token"><span class="token-bar" style="width: var(--space-6)"></span><code>--space-6</code></li>
+    </ul>
+    <p class="cell-label">Type</p>
+    <div class="type-specimen">
+      <p>Names bind to objects; objects carry the type. <span class="meta">Prose sets 100%/1.6 in your platform's system face, respecting your browser's text-size setting; code sets your platform's monospace.</span></p>
+    </div>
+    <p class="cell-label">The rail</p>
+    <div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">value = 21 * 2
+print(f"value = {value}")</code></pre></div><div class="cell-output"><p class="cell-label">Output</p><pre><code>value = 42</code></pre></div></div>
+    <p>The block above is not a screenshot. It is the same markup every walkthrough cell uses: monospace source on the accent rail, output under a hairline, and a copy button added when JavaScript is available.</p>
+  </section>
+  <section class="about-section">
+    <h2>Lineage and stack</h2>
+    <p>The format follows <a class="text-link" href="https://gobyexample.com/">Go by Example</a>'s example-per-page teaching and <a class="text-link" href="https://doc.rust-lang.org/rust-by-example/">Rust By Example</a>'s expectation that examples run. Literate programming supplied the premise that prose and source should explain each other; <a class="text-link" href="https://marimo.io/">marimo</a>'s source/output adjacency shaped the cells. The site runs on Cloudflare Python Workers with FastAPI; Shiki highlights read-only code and CodeMirror powers the editor. The source is public under the MIT license at <a class="text-link" href="https://github.com/adewale/pythonbyexample">github.com/adewale/pythonbyexample</a>.</p>
+  </section>
+</article>

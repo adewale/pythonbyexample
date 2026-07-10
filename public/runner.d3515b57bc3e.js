@@ -4,8 +4,16 @@ function initializeRunner() {
   if (!textarea || !form) return;
 
   const originalCode = textarea.dataset.originalCode ?? textarea.defaultValue;
+  const resizeFallbackEditor = () => {
+    // When the CDN-backed editor is unavailable, keep a shared multi-line
+    // payload visible in the native textarea instead of leaving it at the
+    // authored example's height.
+    textarea.style.height = 'auto';
+    textarea.style.height = `${Math.max(textarea.scrollHeight, 18 * 16)}px`;
+  };
   const setCode = (value) => {
     textarea.value = value;
+    resizeFallbackEditor();
     window.pythonByExampleEditor?.setValue(value);
   };
 
@@ -17,17 +25,70 @@ function initializeRunner() {
     });
   }
 
+  let sharedCodeLoaded = false;
   const hash = new URL(window.location.href).hash;
   if (hash.startsWith('#code=')) {
     try {
       setCode(decodeURIComponent(escape(atob(hash.slice(6)))));
+      sharedCodeLoaded = textarea.value !== originalCode;
     } catch (_) {
       // Ignore malformed share fragments and leave the authored example intact.
     }
   }
 
+  // Share the current editor code as the #code= fragment the loader
+  // above has accepted since day one; unedited code shares the clean
+  // page URL. The encoder mirrors the decoder exactly.
+  async function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const holder = document.createElement('textarea');
+    holder.value = text;
+    holder.setAttribute('readonly', '');
+    holder.style.position = 'fixed';
+    holder.style.left = '-9999px';
+    document.body.appendChild(holder);
+    holder.select();
+    const copied = document.execCommand('copy');
+    holder.remove();
+    if (!copied) throw new Error('execCommand copy failed');
+  }
+
+  const toolbar = form.querySelector('.playground-toolbar');
+  if (toolbar) {
+    const shareButton = document.createElement('button');
+    shareButton.type = 'button';
+    shareButton.className = 'tool-button share-button';
+    shareButton.textContent = 'Copy link';
+    shareButton.setAttribute('aria-live', 'polite');
+    shareButton.setAttribute('aria-label', 'Copy a link to this example with the current code');
+    let shareRestore = null;
+    shareButton.addEventListener('click', async () => {
+      window.pythonByExampleEditor?.syncTextarea();
+      const code = textarea.value;
+      const pageUrl = window.location.origin + window.location.pathname;
+      const url = code === originalCode ? pageUrl : pageUrl + '#code=' + btoa(unescape(encodeURIComponent(code)));
+      clearTimeout(shareRestore);
+      let feedback = 'Link copied';
+      if (url.length > 8000) {
+        feedback = 'Code too long to link';
+      } else {
+        try { await copyTextToClipboard(url); } catch (_) { feedback = 'Copy failed'; }
+      }
+      shareButton.textContent = feedback;
+      shareRestore = setTimeout(() => { shareButton.textContent = 'Copy link'; }, 1600);
+    });
+    toolbar.append(shareButton);
+  }
+
   const outputPanel = document.querySelector('.output-panel');
   if (!outputPanel) return;
+  if (sharedCodeLoaded) {
+    outputPanel.querySelector('h3').textContent = 'Output';
+    outputPanel.querySelector('code').textContent = 'This link included edited code. Press Run to execute it.';
+  }
   const challengeBox = document.querySelector('[data-turnstile-sitekey]');
   let turnstileWidgetId = null;
   let loadingTurnstile = null;
@@ -136,8 +197,21 @@ function initializeRunner() {
   });
 }
 
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initializeRunner, { once: true });
-} else {
-  initializeRunner();
-}
+// layout.html emits this async module after the page content, so its targets
+// are already parsed. Do not wait for DOMContentLoaded: the head's CDN-backed
+// editor module can otherwise hold that event while Run/Reset/share remain dead.
+initializeRunner();
+
+// Left/right arrows page through the catalog via the existing
+// rel=prev/next links. Modifier keys and any editable surface are
+// ignored so the shortcut never interferes with editing.
+document.addEventListener('keydown', (event) => {
+  if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+  if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+  const target = event.target;
+  if (target instanceof Element && target.closest('input, textarea, select, button, .cm-editor, [contenteditable="true"]')) return;
+  const codeField = document.getElementById('code-editor');
+  if (codeField && codeField.value !== (codeField.dataset.originalCode ?? codeField.defaultValue)) return;
+  const link = document.querySelector(event.key === 'ArrowLeft' ? '.example-nav a[rel="prev"]' : '.example-nav a[rel="next"]');
+  if (link) window.location.href = link.href;
+});

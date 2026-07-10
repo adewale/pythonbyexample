@@ -21,6 +21,10 @@ Production: <https://www.pythonbyexample.dev> (`workers.dev` is disabled so the 
 - Per-example social-card images composed from the marginalia figure set
 - Learner-behavior reporting from Worker wide events (`docs/learner-analytics.md`)
 - A quality-gate suite for registries, rubric scores, coverage, and teaching structure that fails builds when content regresses
+- `/about` page describing the verification pipeline, runner sandbox, figure grammar, and live design tokens
+- Copy buttons on read-only source cells
+- Keyboard prev/next navigation (`←`/`→`) on example pages
+- "Copy link" sharing of the runner's current code via `#code=` URLs
 
 ## Attribution
 
@@ -37,6 +41,7 @@ The project uses:
 - [FastAPI](https://fastapi.tiangolo.com/) for application routing.
 - [Shiki](https://github.com/shikijs/shiki) for read-only syntax highlighting.
 - [CodeMirror](https://codemirror.net/) for the editable example editor.
+- [Lucide](https://lucide.dev/) for the copy/check/x glyphs on the code-cell copy button.
 
 Python documentation links point to the official [Python documentation](https://docs.python.org/3.13/).
 

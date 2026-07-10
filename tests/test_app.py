@@ -288,7 +288,7 @@ class AppTests(unittest.TestCase):
         self.assertIn("Executed in 12.3 ms", render_example_page(get_example("hello-world"), output="hello world\n", execution_time_ms=12.3))
         self.assertIn("Execution time appears here after you run the example.", render_example_page(get_example("hello-world")))
         self.assertIn("Expected output", render_example_page(get_example("hello-world")))
-        self.assertIn('rel="next" href="/examples/values"', html)
+        self.assertIn('rel="next" title="Next example (right arrow key)" href="/examples/values"', html)
         self.assertIn('method="post"', html)
         self.assertIn('<textarea name="code"', html)
         self.assertNotIn('class="lesson-grid"', html)
@@ -416,6 +416,12 @@ class AppTests(unittest.TestCase):
         self.assertIn("response.status === 413", runner)
         self.assertIn("Submitted code is too large", runner)
         self.assertIn("catch (error)", runner)
+        # The 2026-07 share-link work reversed the early no-clipboard
+        # lesson for client scripts: runner.js may use the clipboard,
+        # but server markup still renders only the Run and Reset
+        # buttons, with share/copy affordances JS-injected.
+        self.assertEqual(html.count("<button"), 2)
+        self.assertIn("copyTextToClipboard", runner)
 
     def test_generated_drift_is_blocked_before_commit_and_merge(self):
         hook = (ROOT / ".githooks" / "pre-commit").read_text()
@@ -583,6 +589,49 @@ class DarkModeAndAccessibilityTests(unittest.TestCase):
         self.assertIn(".skip-link:focus", css)
 
 
+class DesignFoundationsTests(unittest.TestCase):
+    def test_body_type_respects_user_text_size(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn("font: 100%/1.6", css)
+        self.assertNotIn("font: 16px/1.6", css)
+
+    def test_home_header_never_hides_the_nav_on_landing(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertNotIn("header { opacity: 0", css)
+        self.assertIn("body:has(.hero) header::before", css)
+        self.assertIn("header-veil-emerge", css)
+        self.assertNotIn("@keyframes header-emerge", css)
+
+    def test_non_motion_accessibility_signals_have_fallbacks(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn("@media (prefers-reduced-transparency: reduce)", css)
+        self.assertIn("@media (prefers-contrast: more)", css)
+        self.assertIn("backdrop-filter: none", css)
+
+    def test_cards_press_down_and_nav_links_have_touch_targets(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn(".card:active { transform: translateY(0) scale(0.99); }", css)
+        self.assertIn(".nav-links a { padding: .55rem .9rem; margin-block: -.55rem;", css)
+
+    def test_terminal_colors_are_design_tokens(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn("--terminal-bg: #0b1020", css)
+        self.assertIn("--terminal-ink: #f9fafb", css)
+        self.assertIn("background: var(--terminal-bg); color: var(--terminal-ink);", css)
+        about = (ROOT / "src" / "templates" / "about.html").read_text()
+        self.assertIn("var(--terminal-bg)", about)
+        self.assertIn("var(--terminal-ink)", about)
+
+    def test_search_exposes_combobox_semantics(self):
+        home = render_home()
+        self.assertIn('role="combobox"', home)
+        self.assertIn('aria-expanded="false"', home)
+        self.assertIn('role="listbox"', home)
+        js = (ROOT / "public" / "search.js").read_text()
+        self.assertIn("aria-expanded", js)
+        self.assertIn("'option'", js)
+
+
 class BannerTests(unittest.TestCase):
     def test_mutability_renders_a_two_figure_small_multiple_banner(self):
         page = render_example_page(get_example("mutability"))
@@ -746,6 +795,14 @@ class SocialCardTests(unittest.TestCase):
         self.assertIn("Python learning journeys", cards["journeys"])
         self.assertIn("Python By Example · Journeys", cards["journeys"])
 
+    def test_card_html_includes_about_page(self):
+        from scripts.build_social_cards import card_html
+
+        cards = card_html()
+        self.assertIn("about", cards)
+        self.assertIn("How this site is made", cards["about"])
+        self.assertIn("Python By Example · About", cards["about"])
+
     def test_runtime_journeys_and_edge_labels_load_from_editorial_registry(self):
         from src import app as app_module
         from src.editorial_registry import journeys, see_also_edge_labels
@@ -761,6 +818,7 @@ class DiscoverabilityTests(unittest.TestCase):
         self.assertEqual(response.headers["Content-Type"], "application/xml; charset=utf-8")
         self.assertIn('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', response.body)
         self.assertIn("<loc>https://www.pythonbyexample.dev/</loc>", response.body)
+        self.assertIn("<loc>https://www.pythonbyexample.dev/about</loc>", response.body)
         self.assertIn("<loc>https://www.pythonbyexample.dev/journeys</loc>", response.body)
         from src.app import JOURNEYS
 
@@ -770,7 +828,7 @@ class DiscoverabilityTests(unittest.TestCase):
             self.assertIn(f"<loc>https://www.pythonbyexample.dev/examples/{example['slug']}</loc>", response.body)
         self.assertEqual(
             response.body.count("<loc>"),
-            2 + len(JOURNEYS) + len(list_examples()),
+            3 + len(JOURNEYS) + len(list_examples()),
         )
 
     def test_example_pages_carry_learning_resource_json_ld(self):
@@ -805,6 +863,174 @@ class DiscoverabilityTests(unittest.TestCase):
         robots = (ROOT / "public" / "robots.txt").read_text()
         self.assertIn("Sitemap: https://www.pythonbyexample.dev/sitemap.xml", robots)
         self.assertIn("User-agent: *", robots)
+
+
+class AboutPageTests(unittest.TestCase):
+    def test_about_page_is_routable_with_canonical_metadata(self):
+        response = route("https://example.test/about")
+        self.assertEqual(response.status, 200)
+        page = response.body
+        self.assertIn("<title>About · Python By Example</title>", page)
+        self.assertIn('<link rel="canonical" href="https://www.pythonbyexample.dev/about">', page)
+        self.assertIn('<meta property="og:url" content="https://www.pythonbyexample.dev/about">', page)
+        self.assertIn('<meta property="og:image" content="https://www.pythonbyexample.dev/og/about.jpg">', page)
+        self.assertIn('<meta name="twitter:image" content="https://www.pythonbyexample.dev/og/about.jpg">', page)
+        self.assertTrue((ROOT / "public" / "og" / "about.jpg").exists())
+        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S)
+        self.assertIsNotNone(match)
+        data = json.loads(match.group(1))
+        self.assertEqual(data["@type"], "AboutPage")
+        self.assertEqual(data["url"], "https://www.pythonbyexample.dev/about")
+
+    def test_about_page_derives_counts_instead_of_hardcoding_them(self):
+        from src.app import JOURNEYS, render_about
+
+        page = render_about()
+        self.assertNotIn("__EXAMPLE_COUNT__", page)
+        self.assertNotIn("__JOURNEY_COUNT__", page)
+        self.assertIn(f"{len(list_examples())} examples and {len(JOURNEYS)} journeys", page)
+
+    def test_about_page_renders_the_design_language_from_live_tokens(self):
+        from src.app import render_about
+
+        page = render_about()
+        self.assertIn('class="token-grid"', page)
+        self.assertIn("--swatch: var(--accent)", page)
+        self.assertIn("width: var(--space-6)", page)
+        self.assertIn('class="cell-code-stack"', page)
+
+    def test_about_page_tokens_all_exist_in_the_stylesheet(self):
+        css_root = (ROOT / "public" / "site.css").read_text().split("\n", 1)[0]
+        template = (ROOT / "src" / "templates" / "about.html").read_text()
+        tokens = set(re.findall(r"var\((--[a-z0-9-]+)\)", template))
+        self.assertGreaterEqual(len(tokens), 21)
+        for token in sorted(tokens):
+            with self.subTest(token=token):
+                self.assertIn(f"{token}:", css_root)
+
+    def test_every_page_links_about_in_the_nav(self):
+        for page in [render_home(), render_example_page(get_example("hello-world"))]:
+            self.assertIn('<a href="/about">About</a>', page)
+
+    def test_about_page_loads_no_editor_or_search_assets(self):
+        page = route("https://example.test/about").body
+        self.assertNotIn("/editor.", page)
+        self.assertNotIn("search-index", page)
+
+    def test_about_page_meets_the_seo_linter_bar(self):
+        page = route("https://example.test/about").body
+        self.assertIsNone(re.search(r"__[A-Z][A-Z0-9_]+__", page))
+        description = re.search(r'<meta name="description" content="([^"]*)">', page)
+        self.assertIsNotNone(description)
+        self.assertTrue(80 <= len(description.group(1)) <= 180, len(description.group(1)))
+        self.assertRegex(page, r'href="/site\.[0-9a-f]{12}\.css"')
+        self.assertRegex(page, r'src="/syntax-highlight\.[0-9a-f]{12}\.js"')
+
+
+class CopyButtonTests(unittest.TestCase):
+    def test_syntax_script_injects_copy_buttons_on_source_cells(self):
+        js = (ROOT / "public" / "syntax-highlight.js").read_text()
+        self.assertIn("'.cell-source'", js)
+        self.assertIn("copy-button", js)
+        self.assertIn("navigator.clipboard", js)
+        self.assertIn("execCommand('copy')", js)
+        self.assertIn("aria-label", js)
+
+    def test_copy_button_styles_use_design_tokens(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn(".cell-source { position: relative; }", css)
+        self.assertIn(".copy-button", css)
+        self.assertIn(".copy-button.copied", css)
+        self.assertIn(".copy-button:active { transform: scale(0.96); }", css)
+
+    def test_copy_button_renders_lucide_glyphs_as_current_color_masks(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn(".copy-icon", css)
+        self.assertIn("background: currentColor", css)
+        self.assertIn("rect x='9' y='9' width='13' height='13' rx='2'", css)
+        self.assertIn("polyline points='20 6 9 17 4 12'", css)
+        self.assertIn("M18 6 6 18M6 6l12 12", css)
+        self.assertIn("-webkit-mask", css)
+        self.assertIn("mask-image", css)
+        self.assertIn(".copy-button::before", css)
+        self.assertIn("copy-pop", css)
+        self.assertIn(
+            "@media (prefers-reduced-motion: no-preference) { .copy-button.copied .copy-icon",
+            css,
+        )
+
+    def test_copy_button_announces_status_through_hidden_live_text(self):
+        js = (ROOT / "public" / "syntax-highlight.js").read_text()
+        self.assertIn("copy-status", js)
+        self.assertIn("aria-live", js)
+        self.assertIn("'copied', 'failed'", js)
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn(".copy-status { position: absolute; left: -9999px; }", css)
+
+
+class KeyboardNavTests(unittest.TestCase):
+    def test_runner_script_navigates_with_arrow_keys(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("ArrowLeft", js)
+        self.assertIn("ArrowRight", js)
+        self.assertIn('.example-nav a[rel="prev"]', js)
+        self.assertIn('.example-nav a[rel="next"]', js)
+
+    def test_arrow_navigation_skips_editable_and_modified_keys(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("'input, textarea, select, button, .cm-editor, [contenteditable=\"true\"]'", js)
+        self.assertIn("event.metaKey", js)
+        self.assertIn("event.defaultPrevented", js)
+
+    def test_arrow_navigation_never_discards_edited_code(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("codeField.value !== (codeField.dataset.originalCode ?? codeField.defaultValue)", js)
+
+    def test_nav_links_advertise_the_keyboard_shortcut(self):
+        page = render_example_page(get_example("values"))
+        self.assertIn('title="Previous example (left arrow key)"', page)
+        self.assertIn('title="Next example (right arrow key)"', page)
+
+    def test_share_button_copies_a_code_fragment_link(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("Copy link", js)
+        self.assertIn("btoa(unescape(encodeURIComponent(code)))", js)
+        self.assertIn("code === originalCode ? pageUrl : pageUrl + '#code='", js)
+        self.assertIn(".playground-toolbar", js)
+        self.assertIn("aria-live", js)
+
+    def test_share_encoder_mirrors_the_day_one_decoder(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("decodeURIComponent(escape(atob(hash.slice(6))))", js)
+        self.assertIn("btoa(unescape(encodeURIComponent(code)))", js)
+
+    def test_hash_decode_syncs_the_enhanced_editor(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("setCode(decodeURIComponent(escape(atob(hash.slice(6)))))", js)
+
+    def test_shared_link_recipients_see_a_status_notice(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("This link included edited code. Press Run to execute it.", js)
+
+    def test_runner_module_loads_async_ahead_of_cdn_modules(self):
+        page = render_example_page(get_example("values"))
+        self.assertRegex(page, r'<script type="module" async src="/runner\.[0-9a-f]{12}\.js"></script>')
+
+    def test_share_button_sits_apart_from_the_run_reset_pair(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("'tool-button share-button'", js)
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn(".share-button { margin-left: auto; }", css)
+
+    def test_arrow_navigation_guards_missing_neighbors_at_catalog_edges(self):
+        examples = list_examples()
+        first_page = render_example_page(get_example(examples[0]["slug"]))
+        last_page = render_example_page(get_example(examples[-1]["slug"]))
+        self.assertNotIn('<a class="text-link" rel="prev"', first_page)
+        self.assertIn('<a class="text-link" rel="next"', first_page)
+        self.assertIn('<a class="text-link" rel="prev"', last_page)
+        self.assertNotIn('<a class="text-link" rel="next"', last_page)
+        self.assertIn("if (link) window.location.href = link.href;", (ROOT / "public" / "runner.js").read_text())
 
 
 if __name__ == "__main__":

@@ -51,13 +51,16 @@ function wireSearch() {
   function hideResults() {
     results.hidden = true;
     results.replaceChildren();
+    input.setAttribute('aria-expanded', 'false');
   }
 
   // Result nodes are built with textContent so catalog fields can never
   // be parsed as markup.
   function resultNode(entry) {
     const item = document.createElement('li');
+    item.setAttribute('role', 'presentation');
     const link = document.createElement('a');
+    link.setAttribute('role', 'option');
     link.href = `/examples/${encodeURIComponent(entry.slug)}`;
     const title = document.createElement('strong');
     title.textContent = entry.title;
@@ -79,6 +82,7 @@ function wireSearch() {
         empty.textContent = 'No matching examples.';
         results.replaceChildren(empty);
         results.hidden = false;
+        input.setAttribute('aria-expanded', 'true');
       } else {
         hideResults();
       }
@@ -86,6 +90,7 @@ function wireSearch() {
     }
     results.replaceChildren(...matches.map(resultNode));
     results.hidden = false;
+    input.setAttribute('aria-expanded', 'true');
   }
 
   input.addEventListener('focus', loadIndex, { once: true });

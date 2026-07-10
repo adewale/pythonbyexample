@@ -6,7 +6,16 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ## Unreleased
 
+### Fixed
+
+- Example-page runner wiring (Run interception, Reset, the share button, and keyboard navigation) no longer waits for the CDN-backed highlighter and editor modules: `runner.js` loads `async`, so a slow or unreachable esm.sh cannot stall it — ordered module scripts otherwise execute strictly after every preceding module settles, including their top-level awaits.
+
 ### Added
+
+- `/about` page describing how the site is made — the verified-output pipeline, the runner sandbox, the figure grammar, and the quality gates — with a design-language section that renders the live CSS tokens (color swatches, spacing scale, type specimens, and a real walkthrough cell as a specimen). Linked from the nav on every page and listed in the sitemap.
+- Copy buttons on read-only source cells: injected client-side onto `.cell-source` wrappers (so no-JS pages render no dead buttons), clipboard API with a hidden-textarea fallback, and a quiet icon-in-pill treatment — the Lucide copy glyph drawn as a `currentColor` CSS mask (checkmark on success, x on failure), a visually hidden live region announcing the result, and a ~44px tap target around the small pill. These are the site's first and only UI icons; every other action stays text.
+- Keyboard navigation on example pages: `←`/`→` follow the existing `rel="prev"`/`rel="next"` links, ignoring keystrokes with modifiers or focus inside the editor, inputs, or any editable surface. Arrows only fire while the editor is unedited (so a slip never discards work), and the prev/next links carry title hints naming the shortcut.
+- "Copy link" button in the runner toolbar: copies a URL embedding the editor's current code as the `#code=` fragment the page has decoded since the first commit (the clean page URL when the code is unedited). The decoder now resizes the editor after loading a shared payload. The button sits apart from the Run/Reset pair at the toolbar's far edge — it exports the code rather than acting on it — and a link recipient sees a notice that the editor holds shared code instead of the example's expected output.
 
 - Banner position grammar from `docs/visual-explainer-spec.md` is now production: `render_banner(slug, position)` supports `before`, `after-cell-N` (legacy anchor `cell-N`), and `after-walkthrough`, with multiple figures per position rendering as one small-multiple banner. The mutability page ships the canonical two-figure pair (aliased mutation vs. frozen tuple).
 - Curated pair banners on contrast cells: `positional-only-parameters` shows the `/` and `*` separator twins side by side, `metaclasses` pairs the metaclass triangle with the familiar class triangle, and `tuples` pairs the frozen tuple with the growing list on the intent-contrast cell. `iterator-vs-iterable` gains the one-pass caret figure on the exhaustion cell.
@@ -23,6 +32,11 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ### Changed
 
+- The home header stays visible on landing: the scroll-driven entrance now animates the brand and a compositor-friendly veil layer instead of hiding the whole header (which left the page with no visible nav at first paint).
+- Body type is `100%/1.6` instead of a fixed 16px, so browser text-size settings are respected. The never-rendering brand faces (FT Kunst Grotesk, Apercu Mono Pro — installed nowhere, shipped never) are removed from the stacks, which now declare the real design: `system-ui` prose and `ui-monospace`-first code. The `/about` type specimen says so.
+- `prefers-reduced-transparency` and `prefers-contrast: more` get solid-chrome and defined-border fallbacks; cards press down on tap; header links carry full-height (~43px) tap targets via padding with cancelling negative margins.
+- The home search exposes combobox/listbox semantics (`aria-expanded`, `role="option"`) to match its existing keyboard behavior.
+- The runner output chip's navy is now tokenized (`--terminal-bg`/`--terminal-ink`) and appears in the `/about` design language.
 - Journeys now reference every example: `iterator-vs-iterable`, `classmethods-and-staticmethods`, `bound-and-unbound-methods`, `abstract-base-classes`, and `structured-data-shapes` joined their natural sections, with journey-outcome support lists updated.
 - Journey meta descriptions no longer claim gap placeholders; all previously declared gaps are filled.
 - Python tooling is pinned to 3.13 through `uv`; CI and preview workflows are hardened, generated-file recovery retries from a clean worktree, and quality gates enforce live registry/score invariants.

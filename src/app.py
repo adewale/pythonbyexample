@@ -201,14 +201,12 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
     description = _meta_description(description or "Learn Python with concise, editable examples that run in isolated Cloudflare Dynamic Python Workers.")
     canonical_url = f"{SITE_URL}{path}"
     page_title = title if title == "Python By Example" else f"{title} · Python By Example"
-    editor_scripts = (
-        "".join(
-            f'<script type="module" src="{html.escape(ASSET_PATHS[name])}"></script>'
-            for name in ("EDITOR_JS", "RUNNER_JS")
-        )
-        if include_editor
-        else ""
-    )
+    # The CDN-backed editor stays in the head, but the dependency-free runner
+    # is emitted after page content. Its async module can then attach Run,
+    # Reset, share, and navigation without waiting for the editor's esm.sh
+    # graph or for DOMContentLoaded (which that graph delays).
+    editor_scripts = f'<script type="module" src="{html.escape(ASSET_PATHS["EDITOR_JS"])}"></script>' if include_editor else ""
+    runner_script = f'<script type="module" async src="{html.escape(ASSET_PATHS["RUNNER_JS"])}"></script>' if include_editor else ""
     if include_search:
         editor_scripts += f'<script type="module" src="{html.escape(ASSET_PATHS["SEARCH_JS"])}"></script>'
     return _replace(
@@ -226,6 +224,7 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
             "SITE_CSS": html.escape(ASSET_PATHS["SITE_CSS"]),
             "SYNTAX_JS": html.escape(ASSET_PATHS["SYNTAX_JS"]),
             "EDITOR_SCRIPTS": editor_scripts,
+            "RUNNER_SCRIPT": runner_script,
             "CONTENT": content,
         },
     )
@@ -378,8 +377,34 @@ def render_journey_page(journey):
     )
 
 
+def render_about() -> str:
+    content = _replace(
+        _template("about.html"),
+        {
+            "EXAMPLE_COUNT": str(len(list_examples())),
+            "JOURNEY_COUNT": str(len(JOURNEYS)),
+            "PYTHON_VERSION": html.escape(PYTHON_VERSION),
+        },
+    )
+    return _layout(
+        "About",
+        content,
+        description=f"How Python By Example is made: verified output for every example, an isolated Python {PYTHON_VERSION} runner, a locked figure grammar, and the design tokens behind every page.",
+        path="/about",
+        og_image=f"{SITE_URL}/og/about.jpg",
+        structured_data={
+            "@context": "https://schema.org",
+            "@type": "AboutPage",
+            "name": "About Python By Example",
+            "url": f"{SITE_URL}/about",
+            "description": f"How Python By Example teaches Python {PYTHON_VERSION}: verified example output, sandboxed execution, a locked figure grammar, and explicit quality gates.",
+            "inLanguage": "en",
+        },
+    )
+
+
 def render_sitemap() -> str:
-    paths = ["/", "/journeys"]
+    paths = ["/", "/about", "/journeys"]
     paths.extend(f'/journeys/{journey["slug"]}' for journey in JOURNEYS)
     paths.extend(f'/examples/{example["slug"]}' for example in list_examples())
     entries = "".join(f"<url><loc>{html.escape(SITE_URL + path)}</loc></url>" for path in paths)
@@ -593,12 +618,12 @@ def render_example_page(
     editable_code = example["code"] if code is None else code
     previous_example, next_example = _example_neighbors(example["slug"])
     previous_link = (
-        f'<a class="text-link" rel="prev" href="/examples/{html.escape(previous_example["slug"])}">← {html.escape(previous_example["title"])}</a>'
+        f'<a class="text-link" rel="prev" title="Previous example (left arrow key)" href="/examples/{html.escape(previous_example["slug"])}">← {html.escape(previous_example["title"])}</a>'
         if previous_example
         else "<span></span>"
     )
     next_link = (
-        f'<a class="text-link" rel="next" href="/examples/{html.escape(next_example["slug"])}">{html.escape(next_example["title"])} →</a>'
+        f'<a class="text-link" rel="next" title="Next example (right arrow key)" href="/examples/{html.escape(next_example["slug"])}">{html.escape(next_example["title"])} →</a>'
         if next_example
         else "<span></span>"
     )
@@ -686,6 +711,8 @@ def route(url: str, method: str = "GET", turnstile_site_key: str | None = None) 
             render_cell_output_flow_option(get_example("values")),
             headers={"Content-Type": "text/html; charset=utf-8"},
         )
+    if method == "GET" and path == "/about":
+        return AppResponse(render_about(), headers={"Content-Type": "text/html; charset=utf-8"})
     if method == "GET" and path == "/journeys":
         return AppResponse(render_journeys_index(), headers={"Content-Type": "text/html; charset=utf-8"})
     if method == "GET" and path.startswith("/journeys/"):
