@@ -761,6 +761,7 @@ class DiscoverabilityTests(unittest.TestCase):
         self.assertEqual(response.headers["Content-Type"], "application/xml; charset=utf-8")
         self.assertIn('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', response.body)
         self.assertIn("<loc>https://www.pythonbyexample.dev/</loc>", response.body)
+        self.assertIn("<loc>https://www.pythonbyexample.dev/about</loc>", response.body)
         self.assertIn("<loc>https://www.pythonbyexample.dev/journeys</loc>", response.body)
         from src.app import JOURNEYS
 
@@ -770,7 +771,7 @@ class DiscoverabilityTests(unittest.TestCase):
             self.assertIn(f"<loc>https://www.pythonbyexample.dev/examples/{example['slug']}</loc>", response.body)
         self.assertEqual(
             response.body.count("<loc>"),
-            2 + len(JOURNEYS) + len(list_examples()),
+            3 + len(JOURNEYS) + len(list_examples()),
         )
 
     def test_example_pages_carry_learning_resource_json_ld(self):
@@ -805,6 +806,106 @@ class DiscoverabilityTests(unittest.TestCase):
         robots = (ROOT / "public" / "robots.txt").read_text()
         self.assertIn("Sitemap: https://www.pythonbyexample.dev/sitemap.xml", robots)
         self.assertIn("User-agent: *", robots)
+
+
+class AboutPageTests(unittest.TestCase):
+    def test_about_page_is_routable_with_canonical_metadata(self):
+        response = route("https://example.test/about")
+        self.assertEqual(response.status, 200)
+        page = response.body
+        self.assertIn("<title>About · Python By Example</title>", page)
+        self.assertIn('<link rel="canonical" href="https://www.pythonbyexample.dev/about">', page)
+        self.assertIn('<meta property="og:url" content="https://www.pythonbyexample.dev/about">', page)
+        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S)
+        self.assertIsNotNone(match)
+        data = json.loads(match.group(1))
+        self.assertEqual(data["@type"], "AboutPage")
+        self.assertEqual(data["url"], "https://www.pythonbyexample.dev/about")
+
+    def test_about_page_derives_counts_instead_of_hardcoding_them(self):
+        from src.app import JOURNEYS, render_about
+
+        page = render_about()
+        self.assertNotIn("__EXAMPLE_COUNT__", page)
+        self.assertNotIn("__JOURNEY_COUNT__", page)
+        self.assertIn(f"{len(list_examples())} examples and {len(JOURNEYS)} journeys", page)
+
+    def test_about_page_renders_the_design_language_from_live_tokens(self):
+        from src.app import render_about
+
+        page = render_about()
+        self.assertIn('class="token-grid"', page)
+        self.assertIn("--swatch: var(--accent)", page)
+        self.assertIn("width: var(--space-6)", page)
+        self.assertIn('class="cell-code-stack"', page)
+
+    def test_about_page_tokens_all_exist_in_the_stylesheet(self):
+        css_root = (ROOT / "public" / "site.css").read_text().split("\n", 1)[0]
+        template = (ROOT / "src" / "templates" / "about.html").read_text()
+        tokens = set(re.findall(r"var\((--[a-z0-9-]+)\)", template))
+        self.assertGreaterEqual(len(tokens), 21)
+        for token in sorted(tokens):
+            with self.subTest(token=token):
+                self.assertIn(f"{token}:", css_root)
+
+    def test_every_page_links_about_in_the_nav(self):
+        for page in [render_home(), render_example_page(get_example("hello-world"))]:
+            self.assertIn('<a href="/about">About</a>', page)
+
+    def test_about_page_loads_no_editor_or_search_assets(self):
+        page = route("https://example.test/about").body
+        self.assertNotIn("/editor.", page)
+        self.assertNotIn("search-index", page)
+
+    def test_about_page_meets_the_seo_linter_bar(self):
+        page = route("https://example.test/about").body
+        self.assertIsNone(re.search(r"__[A-Z][A-Z0-9_]+__", page))
+        description = re.search(r'<meta name="description" content="([^"]*)">', page)
+        self.assertIsNotNone(description)
+        self.assertTrue(80 <= len(description.group(1)) <= 180, len(description.group(1)))
+        self.assertRegex(page, r'href="/site\.[0-9a-f]{12}\.css"')
+        self.assertRegex(page, r'src="/syntax-highlight\.[0-9a-f]{12}\.js"')
+
+
+class CopyButtonTests(unittest.TestCase):
+    def test_syntax_script_injects_copy_buttons_on_source_cells(self):
+        js = (ROOT / "public" / "syntax-highlight.js").read_text()
+        self.assertIn("'.cell-source'", js)
+        self.assertIn("copy-button", js)
+        self.assertIn("navigator.clipboard", js)
+        self.assertIn("execCommand('copy')", js)
+        self.assertIn("aria-label", js)
+
+    def test_copy_button_styles_use_design_tokens(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn(".cell-source { position: relative; }", css)
+        self.assertIn(".copy-button", css)
+        self.assertIn(".copy-button.copied", css)
+
+
+class KeyboardNavTests(unittest.TestCase):
+    def test_runner_script_navigates_with_arrow_keys(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("ArrowLeft", js)
+        self.assertIn("ArrowRight", js)
+        self.assertIn('.example-nav a[rel="prev"]', js)
+        self.assertIn('.example-nav a[rel="next"]', js)
+
+    def test_arrow_navigation_skips_editable_and_modified_keys(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("'input, textarea, select, button, .cm-editor, [contenteditable=\"true\"]'", js)
+        self.assertIn("event.metaKey", js)
+        self.assertIn("event.defaultPrevented", js)
+
+    def test_arrow_navigation_guards_missing_neighbors_at_catalog_edges(self):
+        examples = list_examples()
+        first_page = render_example_page(get_example(examples[0]["slug"]))
+        last_page = render_example_page(get_example(examples[-1]["slug"]))
+        self.assertNotIn('<a class="text-link" rel="prev"', first_page)
+        self.assertIn('<a class="text-link" rel="next"', first_page)
+        self.assertIn('<a class="text-link" rel="prev"', last_page)
+        self.assertNotIn('<a class="text-link" rel="next"', last_page)
+        self.assertIn("if (link) window.location.href = link.href;", (ROOT / "public" / "runner.js").read_text())
 
 
 if __name__ == "__main__":

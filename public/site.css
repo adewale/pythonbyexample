@@ -109,6 +109,10 @@
     .cell-code-stack code { white-space: pre-wrap; }
     .cell-source pre, .cell-source .shiki-block, .cell-output pre { margin: 0; padding: 0; border-left: 0; border-radius: 0; background: transparent !important; color: var(--text); box-shadow: none; white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: visible; }
     .cell-source .shiki-block .line { display: inline; }
+    .cell-source { position: relative; }
+    .copy-button { position: absolute; top: -0.2rem; right: 0; padding: .12rem .6rem; border: 1px solid var(--hairline); border-radius: 9999px; background: var(--surface-2); color: var(--muted); font-size: .74rem; cursor: pointer; transition-property: color, border-color; transition-duration: 150ms; }
+    .copy-button:hover, .copy-button:focus-visible { color: var(--text); border-color: var(--accent); }
+    .copy-button.copied { color: var(--accent); border-color: var(--accent); }
     .cell-output { margin-top: var(--space-3); padding: var(--space-3) 0 0; border-top: 1px solid var(--hairline-soft); background: transparent; }
     .unsupported-cell .cell-code-stack { border-left-style: dashed; }
     .notebook-notes { margin-top: var(--space-5); }
@@ -159,6 +163,22 @@
     .example-nav { margin-top: var(--space-5); padding-top: var(--space-3); border-top: 1px solid var(--hairline); }
     footer { margin-block: 2rem; color: var(--muted); }
     .site-footer-note { font-size: .82rem; text-align: center; }
+    /* About page: prose sections plus a design-language section that
+       renders the live tokens. Swatches composite each token over
+       --surface so translucent tokens (veils, softs) display honestly;
+       set the token per swatch with style="--swatch: var(--accent)". */
+    .about-page { max-width: 820px; margin-inline: auto; }
+    .about-section { margin-block: var(--space-5); padding-top: var(--space-4); border-top: 1px solid var(--hairline); }
+    .about-section h2 { margin-bottom: var(--space-2); }
+    .about-section p:not(.cell-label) { max-width: 68ch; color: var(--muted); }
+    .about-section > .cell-label { margin-top: var(--space-4); }
+    .token-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(11.5rem, 1fr)); gap: var(--space-2) var(--space-3); margin: 0; padding: 0; list-style: none; }
+    .token { display: flex; align-items: center; gap: .6rem; }
+    .token code { font-size: .8rem; color: var(--muted); }
+    .token-swatch { flex: none; width: 2.1rem; height: 1.4rem; border: 1px solid var(--hairline); border-radius: .35rem; background: linear-gradient(var(--swatch, transparent), var(--swatch, transparent)), var(--surface); }
+    .token-bar { flex: none; height: .5rem; border: 1px solid var(--hairline); border-radius: 9999px; background: var(--accent-soft); }
+    .type-specimen p { margin: 0 0 var(--space-2); }
+    .type-specimen .meta { font-size: .88rem; }
     @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 1ms !important; } }
     /* Cell banner: a figure attached to a cell renders in a banner row
        AFTER that cell, spanning the full content width. Cells always

@@ -378,8 +378,33 @@ def render_journey_page(journey):
     )
 
 
+def render_about() -> str:
+    content = _replace(
+        _template("about.html"),
+        {
+            "EXAMPLE_COUNT": str(len(list_examples())),
+            "JOURNEY_COUNT": str(len(JOURNEYS)),
+            "PYTHON_VERSION": html.escape(PYTHON_VERSION),
+        },
+    )
+    return _layout(
+        "About",
+        content,
+        description=f"How Python By Example is made: verified output for every example, an isolated Python {PYTHON_VERSION} runner, a locked figure grammar, and the design tokens behind every page.",
+        path="/about",
+        structured_data={
+            "@context": "https://schema.org",
+            "@type": "AboutPage",
+            "name": "About Python By Example",
+            "url": f"{SITE_URL}/about",
+            "description": f"How Python By Example teaches Python {PYTHON_VERSION}: verified example output, sandboxed execution, a locked figure grammar, and explicit quality gates.",
+            "inLanguage": "en",
+        },
+    )
+
+
 def render_sitemap() -> str:
-    paths = ["/", "/journeys"]
+    paths = ["/", "/about", "/journeys"]
     paths.extend(f'/journeys/{journey["slug"]}' for journey in JOURNEYS)
     paths.extend(f'/examples/{example["slug"]}' for example in list_examples())
     entries = "".join(f"<url><loc>{html.escape(SITE_URL + path)}</loc></url>" for path in paths)
@@ -686,6 +711,8 @@ def route(url: str, method: str = "GET", turnstile_site_key: str | None = None) 
             render_cell_output_flow_option(get_example("values")),
             headers={"Content-Type": "text/html; charset=utf-8"},
         )
+    if method == "GET" and path == "/about":
+        return AppResponse(render_about(), headers={"Content-Type": "text/html; charset=utf-8"})
     if method == "GET" and path == "/journeys":
         return AppResponse(render_journeys_index(), headers={"Content-Type": "text/html; charset=utf-8"})
     if method == "GET" and path.startswith("/journeys/"):

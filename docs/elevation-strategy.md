@@ -115,13 +115,17 @@ The scope boundary should be stated once and kept: **language plus
 standard library**. Third-party frameworks (pandas, Django, FastAPI)
 are off-essence.
 
-Separately, surface work we already have: the confusable-pair registry
-(`is` vs `==`, list vs tuple, shallow vs deep copy, `@staticmethod` vs
-`@classmethod`, iterator vs iterable) matches extremely high-intent
-searches. A small "X vs Y" contrasts index page — built from the
-existing registry, linking to the existing pages — makes that value
-visible to search engines and to learners scanning for a specific
-confusion.
+Separately, sharpen how the existing contrast work meets search
+intent. The confusable-pair contrasts already reach visitors: every
+owner page is a public example, all of them appear in journey
+sections, roughly half the pairs are stated in visitor-facing journey
+text (e.g. "distinguish value equality from object identity"), and
+iterator vs iterable has a dedicated page. What does not exist is a
+surface shaped like the search query: no page enumerates the pairs,
+and the registry itself is read only at build time. A small "X vs Y"
+contrasts index — generated from the registry, linking to the owning
+pages — would target those high-intent queries directly instead of
+leaving each contrast mid-page where only an on-page reader finds it.
 
 ## Thrust 3 — Deepen the on-page loop
 

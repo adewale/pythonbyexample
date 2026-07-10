@@ -141,3 +141,15 @@ if (document.readyState === 'loading') {
 } else {
   initializeRunner();
 }
+
+// Left/right arrows page through the catalog via the existing
+// rel=prev/next links. Modifier keys and any editable surface are
+// ignored so the shortcut never interferes with editing.
+document.addEventListener('keydown', (event) => {
+  if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+  if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+  const target = event.target;
+  if (target instanceof Element && target.closest('input, textarea, select, button, .cm-editor, [contenteditable="true"]')) return;
+  const link = document.querySelector(event.key === 'ArrowLeft' ? '.example-nav a[rel="prev"]' : '.example-nav a[rel="next"]');
+  if (link) window.location.href = link.href;
+});
