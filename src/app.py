@@ -4,7 +4,6 @@ import contextlib
 import difflib
 import html
 import io
-import json
 import re
 from pathlib import Path
 
@@ -472,9 +471,16 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
     description = _meta_description(description or "Learn Python with concise, editable examples that run in isolated Cloudflare Dynamic Python Workers.")
     canonical_url = f"{SITE_URL}{path}"
     page_title = title if title == "Python By Example" else f"{title} · Python By Example"
-    editor_script = f'<script type="module" src="{html.escape(ASSET_PATHS["EDITOR_JS"])}"></script>' if include_editor else ""
+    editor_scripts = (
+        "".join(
+            f'<script type="module" src="{html.escape(ASSET_PATHS[name])}"></script>'
+            for name in ("EDITOR_JS", "RUNNER_JS")
+        )
+        if include_editor
+        else ""
+    )
     if include_search:
-        editor_script += f'<script type="module" src="{html.escape(ASSET_PATHS["SEARCH_JS"])}"></script>'
+        editor_scripts += f'<script type="module" src="{html.escape(ASSET_PATHS["SEARCH_JS"])}"></script>'
     return _replace(
         _template("layout.html"),
         {
@@ -489,8 +495,7 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
             "OG_TYPE": html.escape(og_type),
             "SITE_CSS": html.escape(ASSET_PATHS["SITE_CSS"]),
             "SYNTAX_JS": html.escape(ASSET_PATHS["SYNTAX_JS"]),
-            "EDITOR_JS": html.escape(ASSET_PATHS["EDITOR_JS"]),
-            "EDITOR_SCRIPT": editor_script,
+            "EDITOR_SCRIPTS": editor_scripts,
             "CONTENT": content,
         },
     )
@@ -745,22 +750,14 @@ def render_cell_output_flow_option(example):
       <summary>Show complete editable source</summary>
       <form class="runner-panel runner-editor" method="post" action="/examples/{html.escape(example["slug"])}">
         <h2>Complete woven source</h2>
-        <textarea name="code" id="code-editor" spellcheck="false" rows="{max(14, woven_source.count(chr(10)) + 2)}">{html.escape(woven_source)}</textarea>
-        <div class="playground-toolbar"><button class="button" type="submit">Run all</button><button class="tool-button" type="button" data-reset onclick="resetCode()">Reset</button></div>
+        <textarea name="code" id="code-editor" data-original-code="{html.escape(woven_source)}" aria-label="Editable Python example code" spellcheck="false" rows="{max(14, woven_source.count(chr(10)) + 2)}">{html.escape(woven_source)}</textarea>
+        <div class="playground-toolbar"><button class="button" type="submit">Run all</button><button class="tool-button" type="button" data-reset>Reset</button></div>
       </form>
     </details>
   </section>
   <section class="lp-cells" aria-label="Literate cells with output">{"".join(cells)}</section>
   <section class="notebook-notes"><h2>Notes</h2><ul>{notes}</ul></section>
 </article>
-<script>
-const originalCode = {json.dumps(woven_source).replace("<", "\\u003c")};
-function editor() {{ return document.getElementById('code-editor'); }}
-function resizeEditor() {{ const field = editor(); if (!field) return; field.style.height = 'auto'; field.style.height = field.scrollHeight + 'px'; }}
-function resetCode() {{ editor().value = originalCode; resizeEditor(); editor().focus(); }}
-resizeEditor();
-const field = editor(); if (field) field.addEventListener('input', resizeEditor);
-</script>
 '''
     return _layout(f'{example["title"]} literate cells option', content, description=f'Prototype layout for the {example["title"]} Python example.', path='/layout-options/cell-output-flow', include_editor=True)
 
@@ -862,9 +859,9 @@ def render_example_page(
             "OUTPUT_HEADING": html.escape(output_heading),
             "SHOWN_OUTPUT": html.escape(shown_output),
             "EXECUTION_TIME": html.escape(execution_time),
-            # <-escaping keeps a literal </script> in example code
-            # from terminating the inline script block.
-            "ORIGINAL_CODE_JSON": json.dumps(example["code"]).replace("<", "\\u003c"),
+            # This value feeds the external runner's Reset action, not an
+            # executable script. Attribute escaping keeps authored code inert.
+            "ORIGINAL_CODE": html.escape(example["code"]),
         },
     )
     return _layout(

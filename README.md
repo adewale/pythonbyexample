@@ -126,6 +126,7 @@ Source assets live at stable paths such as:
 public/site.css
 public/syntax-highlight.js
 public/editor.js
+public/runner.js
 ```
 
 Before tests/deploy, regenerate embedded example data, fingerprinted asset copies, and Python manifests:
@@ -140,6 +141,7 @@ This writes files such as:
 public/site.<hash>.css
 public/syntax-highlight.<hash>.js
 public/editor.<hash>.js
+public/runner.<hash>.js
 src/asset_manifest.py
 ```
 

@@ -17,7 +17,7 @@ from src.asset_manifest import ASSET_PATHS, HTML_CACHE_VERSION  # noqa: E402
 META_DESCRIPTION_RE = re.compile(r'<meta name="description" content="([^"]+)">')
 CANONICAL_RE = re.compile(r'<link rel="canonical" href="([^"]+)">')
 OG_URL_RE = re.compile(r'<meta property="og:url" content="([^"]+)">')
-HASHED_ASSET_RE = re.compile(r'/(site|syntax-highlight|editor)\.[0-9a-f]{12}\.(css|js)')
+HASHED_ASSET_RE = re.compile(r'/(site|syntax-highlight|editor|runner|search)\.[0-9a-f]{12}\.(css|js)')
 JSON_LD_RE = re.compile(r'<script type="application/ld\+json">(.+?)</script>', re.S)
 OG_IMAGE_RE = re.compile(r'<meta property="og:image" content="([^"]+)">')
 
@@ -43,7 +43,7 @@ def assert_page_metadata(name: str, html: str, path: str, failures: list[str]) -
     og_url = OG_URL_RE.search(html)
     if not og_url or og_url.group(1) != expected_url:
         fail(f"{name}: og:url is {og_url.group(1) if og_url else None}, expected {expected_url}", failures)
-    if '/site.css' in html or '/syntax-highlight.js' in html or '/editor.js' in html:
+    if '/site.css' in html or '/syntax-highlight.js' in html or '/editor.js' in html or '/runner.js' in html:
         fail(f"{name}: references unfingerprinted CSS/JS asset", failures)
     if len(HASHED_ASSET_RE.findall(html)) < 2:
         fail(f"{name}: missing fingerprinted CSS/JS assets", failures)

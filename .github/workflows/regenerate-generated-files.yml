@@ -54,8 +54,9 @@ jobs:
               exit 0
             fi
             echo "Push raced with another commit; retrying (attempt $attempt)."
-            git reset --soft HEAD~1
-            git restore --staged .
+            # Drop the unpushed generated commit and its worktree changes;
+            # the next iteration rebases a clean checkout, then rebuilds.
+            git reset --hard HEAD~1
           done
           echo "Failed to push regenerated files after 3 attempts." >&2
           exit 1

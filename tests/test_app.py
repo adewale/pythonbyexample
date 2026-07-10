@@ -1,5 +1,6 @@
 import ast
 import contextlib
+import html as html_lib
 import importlib
 import io
 import json
@@ -10,8 +11,9 @@ from pathlib import Path
 
 from src.app import build_dynamic_worker_code, get_example, list_examples, render_example_page, render_home, route
 from src.example_loader import EXAMPLES_DIR, load_manifest, verify_example_output
+from src.asset_manifest import ASSET_PATHS
 from src.example_sources_data import EXAMPLE_SOURCE_FILES
-from src.security import CONTENT_SECURITY_POLICY, CSP_SCRIPT_NONCE
+from src.security import CONTENT_SECURITY_POLICY
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -325,19 +327,20 @@ class AppTests(unittest.TestCase):
         self.assertIn('class="example-shell"', html)
 
     def test_turnstile_widget_is_conditional_and_temporary(self):
-        html = render_example_page(get_example("hello-world"))
-        self.assertNotIn('class="turnstile-challenge"', html)
-        self.assertNotIn('<script src="https://challenges.cloudflare.com/turnstile', html)
+        page = render_example_page(get_example("hello-world"))
+        self.assertNotIn('class="turnstile-challenge"', page)
+        self.assertNotIn('<script src="https://challenges.cloudflare.com/turnstile', page)
 
         protected = render_example_page(get_example("hello-world"), turnstile_site_key="site-key-123")
+        runner = (ROOT / "public" / "runner.js").read_text()
         self.assertIn('data-turnstile-sitekey="site-key-123"', protected)
-        self.assertIn("https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit", protected)
-        self.assertIn(f'nonce="{CSP_SCRIPT_NONCE}"', protected)
+        self.assertIn(ASSET_PATHS["RUNNER_JS"], protected)
+        self.assertNotIn("<script nonce=", protected)
         self.assertNotIn("onclick=", protected)
-        self.assertIn("turnstile.render", protected)
-        self.assertIn("execution: 'execute'", protected)
-        self.assertNotIn("size: 'invisible'", protected)
-        self.assertIn("turnstile.remove", protected)
+        self.assertIn("turnstile.render", runner)
+        self.assertIn("execution: 'execute'", runner)
+        self.assertNotIn("size: 'invisible'", runner)
+        self.assertIn("turnstile.remove", runner)
         self.assertNotIn('class="cf-turnstile"', protected)
 
         challenged = render_example_page(
@@ -359,10 +362,11 @@ class AppTests(unittest.TestCase):
         self.assertIn("Content-Security-Policy", main_source)
         self.assertIn("Strict-Transport-Security", main_source)
         self.assertIn("script-src-attr 'none'", CONTENT_SECURITY_POLICY)
+        self.assertNotIn("nonce-", CONTENT_SECURITY_POLICY)
         self.assertNotIn("script-src 'unsafe-inline'", CONTENT_SECURITY_POLICY)
 
     def test_cf_workers_design_system_and_playground_lessons(self):
-        html = render_example_page(get_example("hello-world"), output="hello world\n")
+        html = render_example_page(get_example("hello-world"))
         css = (ROOT / "public" / "site.css").read_text()
         self.assertIn("#FF4801", css)
         self.assertIn("#F5F1EB", css)
@@ -388,14 +392,35 @@ class AppTests(unittest.TestCase):
         self.assertIn('.execution-time', css)
         self.assertIn('min-height: 1.5rem', css)
         self.assertIn('.cm-editor', css)
-        self.assertIn("function resetCode", html)
+        self.assertIn('data-original-code="', html)
+        self.assertIn(html_lib.escape(get_example("hello-world")["code"]), html)
+        hostile_example = {**get_example("hello-world"), "code": 'print("</script><script>alert(1)</script>")\n'}
+        hostile_html = render_example_page(hostile_example)
+        self.assertIn('data-original-code="print(&quot;&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt;&quot;)', hostile_html)
+        self.assertNotIn("<script nonce=", hostile_html)
+        self.assertIn(ASSET_PATHS["EDITOR_JS"], html)
+        self.assertIn(ASSET_PATHS["RUNNER_JS"], html)
+        self.assertNotIn("<script nonce=", html)
         self.assertIn('class="syntax-inline">print()</code>', html)
         self.assertNotIn("navigator.clipboard", html)
-        self.assertIn("fetch(form.action", html)
-        self.assertIn("new URLSearchParams(formData)", html)
-        self.assertIn("application/x-www-form-urlencoded", html)
-        self.assertIn("Running in a Dynamic Python Worker", html)
-        self.assertIn("catch (error)", html)
+
+        editor = (ROOT / "public" / "editor.js").read_text()
+        runner = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("EditorView.contentAttributes.of", editor)
+        self.assertIn("'aria-label': textarea.getAttribute('aria-label')", editor)
+        self.assertIn("textarea.dataset.originalCode", runner)
+        self.assertIn("window.pythonByExampleEditor?.setValue(value)", runner)
+        self.assertIn("fetch(form.action", runner)
+        self.assertIn("new URLSearchParams(formData)", runner)
+        self.assertIn("application/x-www-form-urlencoded", runner)
+        self.assertIn("response.status === 413", runner)
+        self.assertIn("Submitted code is too large", runner)
+        self.assertIn("catch (error)", runner)
+
+    def test_regeneration_workflow_discards_stale_generated_output_before_retry(self):
+        workflow = (ROOT / ".github" / "workflows" / "regenerate-generated-files.yml").read_text()
+        self.assertIn("git reset --hard HEAD~1", workflow)
+        self.assertNotIn("git reset --soft HEAD~1", workflow)
 
     def test_conditionals_are_substantive_not_bare_minimum(self):
         example = get_example("conditionals")

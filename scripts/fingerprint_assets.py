@@ -14,6 +14,7 @@ ASSETS = {
     "SITE_CSS": "site.css",
     "SYNTAX_JS": "syntax-highlight.js",
     "EDITOR_JS": "editor.js",
+    "RUNNER_JS": "runner.js",
     "SEARCH_JS": "search.js",
     "SEARCH_INDEX": "search-index.json",
 }
@@ -81,6 +82,8 @@ def main() -> None:
         "/syntax-highlight.*.js\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/editor.*.js\n"
+        "  Cache-Control: public, max-age=31536000, immutable\n\n"
+        "/runner.*.js\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/search.*.js\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
