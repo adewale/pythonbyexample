@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts.fingerprint_assets import ASSETS, PUBLIC, html_version  # noqa: E402
-from src.app import JOURNEYS, SITE_URL, list_examples, render_example_page, render_home, render_journey_page, render_sitemap  # noqa: E402
+from src.app import JOURNEYS, SITE_URL, list_examples, render_example_page, render_home, render_journeys_index, render_journey_page, render_sitemap  # noqa: E402
 from src.asset_manifest import ASSET_PATHS, HTML_CACHE_VERSION  # noqa: E402
 
 META_DESCRIPTION_RE = re.compile(r'<meta name="description" content="([^"]+)">')
@@ -77,6 +77,8 @@ def assert_sitemap(failures: list[str]) -> None:
         url = f"{SITE_URL}/examples/{example['slug']}"
         if f"<loc>{url}</loc>" not in sitemap:
             fail(f"sitemap: missing {url}", failures)
+    if f"<loc>{SITE_URL}/journeys</loc>" not in sitemap:
+        fail("sitemap: missing journeys index URL", failures)
     for journey in JOURNEYS:
         url = f"{SITE_URL}/journeys/{journey['slug']}"
         if f"<loc>{url}</loc>" not in sitemap:
@@ -125,6 +127,7 @@ def main() -> int:
     assert_worker_cache_policy(failures)
     assert_sitemap(failures)
     assert_page_metadata("home", render_home(), "/", failures)
+    assert_page_metadata("journeys-index", render_journeys_index(), "/journeys", failures)
     for example in list_examples():
         assert_page_metadata(
             f"example:{example['slug']}",
@@ -143,7 +146,7 @@ def main() -> int:
         for failure in failures:
             print(f"FAIL: {failure}", file=sys.stderr)
         return 1
-    print(f"SEO/cache lint passed for 1 home page, {len(JOURNEYS)} journeys, and {len(list_examples())} example pages.")
+    print(f"SEO/cache lint passed for 1 home page, 1 journey index, {len(JOURNEYS)} journeys, and {len(list_examples())} example pages.")
     return 0
 
 

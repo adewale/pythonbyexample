@@ -289,6 +289,7 @@ def render_home() -> str:
 
 
 def render_journeys_index():
+    description = "Curated Python By Example journeys that compose individual examples into larger mental maps with per-section learner outcomes."
     cards = []
     for journey in JOURNEYS:
         section_titles = "".join(f'<li>{html.escape(section["title"])}</li>' for section in journey["sections"])
@@ -312,8 +313,18 @@ def render_journeys_index():
     return _layout(
         "Python learning journeys",
         content,
-        description="Curated Python By Example journeys that compose individual examples into larger mental maps with per-section learner outcomes.",
+        description=description,
         path="/journeys",
+        og_image=f"{SITE_URL}/og/journeys.jpg",
+        structured_data={
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": "Python learning journeys",
+            "description": description,
+            "url": f"{SITE_URL}/journeys",
+            "inLanguage": "en",
+            "isPartOf": {"@type": "WebSite", "name": "Python By Example", "url": f"{SITE_URL}/"},
+        },
     )
 
 

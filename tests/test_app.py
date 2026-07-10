@@ -696,6 +696,17 @@ class SocialCardTests(unittest.TestCase):
         self.assertIn('<meta property="og:image" content="https://www.pythonbyexample.dev/og/home.jpg">', home)
         self.assertIn('<meta name="twitter:card" content="summary_large_image">', home)
 
+    def test_journeys_index_references_social_card_and_collection_json_ld(self):
+        from src.app import render_journeys_index
+
+        page = render_journeys_index()
+        self.assertIn('<meta property="og:image" content="https://www.pythonbyexample.dev/og/journeys.jpg">', page)
+        self.assertIn('<meta name="twitter:card" content="summary_large_image">', page)
+        data = json.loads(re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S).group(1))
+        self.assertEqual(data["@type"], "CollectionPage")
+        self.assertEqual(data["name"], "Python learning journeys")
+        self.assertEqual(data["url"], "https://www.pythonbyexample.dev/journeys")
+
     def test_journey_pages_reference_social_cards_and_collection_json_ld(self):
         from src.app import JOURNEYS, render_journey_page
 
@@ -716,6 +727,7 @@ class SocialCardTests(unittest.TestCase):
             with self.subTest(slug=journey["slug"]):
                 self.assertTrue((ROOT / "public" / "og" / f"journey-{journey['slug']}.jpg").exists())
         self.assertTrue((ROOT / "public" / "og" / "home.jpg").exists())
+        self.assertTrue((ROOT / "public" / "og" / "journeys.jpg").exists())
 
     def test_card_html_composes_title_section_and_figure(self):
         from scripts.build_social_cards import render_social_card_html
@@ -725,6 +737,14 @@ class SocialCardTests(unittest.TestCase):
         self.assertIn("Closures", card)
         self.assertIn("Functions", card)
         self.assertIn("pythonbyexample.dev", card)
+
+    def test_card_html_includes_journeys_index(self):
+        from scripts.build_social_cards import card_html
+
+        cards = card_html()
+        self.assertIn("journeys", cards)
+        self.assertIn("Python learning journeys", cards["journeys"])
+        self.assertIn("Python By Example · Journeys", cards["journeys"])
 
     def test_runtime_journeys_and_edge_labels_load_from_editorial_registry(self):
         from src import app as app_module

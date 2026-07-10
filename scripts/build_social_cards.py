@@ -71,12 +71,22 @@ def render_journey_social_card_html(journey: dict) -> str:
     return _card_shell(_card_body(eyebrow="Python By Example · Journey", title=journey["title"], summary=journey["summary"]))
 
 
+def render_journeys_index_social_card_html() -> str:
+    return _card_shell(
+        _card_body(
+            eyebrow="Python By Example · Journeys",
+            title="Python learning journeys",
+            summary="Curated paths that compose individual examples into larger mental maps.",
+        )
+    )
+
+
 def render_home_card_html() -> str:
     return _card_shell(_card_body(eyebrow="Learn Python by running it", title="Python By Example", summary=f"{len(list_examples())} concise, editable Python {PYTHON_VERSION} examples with verified output."))
 
 
 def card_html() -> dict[str, str]:
-    cards = {"home": render_home_card_html()}
+    cards = {"home": render_home_card_html(), "journeys": render_journeys_index_social_card_html()}
     cards.update({example["slug"]: render_social_card_html(example) for example in list_examples()})
     cards.update({f"journey-{journey['slug']}": render_journey_social_card_html(journey) for journey in JOURNEYS})
     return cards

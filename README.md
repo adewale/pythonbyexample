@@ -164,7 +164,7 @@ scripts/format_examples.py --check
 make deploy
 ```
 
-`make deploy` runs `make build` first, so embedded example data and cache fingerprints are regenerated before Wrangler deploys.
+`make deploy` first runs `make check-generated`, which rebuilds and rejects any generated output not committed to the branch. It then syncs the ignored Python Workers dependency bundle before Wrangler deploys.
 
 ## Contributing
 

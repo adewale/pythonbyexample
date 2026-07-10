@@ -109,5 +109,6 @@ dev:
 smoke-deployment:
 	$(PY) scripts/smoke_deployment.py $(URL)
 
-deploy: build
+deploy: check-generated
+	uv run --group workers pywrangler sync
 	uv run --group workers pywrangler deploy
