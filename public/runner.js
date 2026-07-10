@@ -26,6 +26,53 @@ function initializeRunner() {
     }
   }
 
+  // Share the current editor code as the #code= fragment the loader
+  // above has accepted since day one; unedited code shares the clean
+  // page URL. The encoder mirrors the decoder exactly.
+  async function copyTextToClipboard(text) {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    const holder = document.createElement('textarea');
+    holder.value = text;
+    holder.setAttribute('readonly', '');
+    holder.style.position = 'fixed';
+    holder.style.left = '-9999px';
+    document.body.appendChild(holder);
+    holder.select();
+    const copied = document.execCommand('copy');
+    holder.remove();
+    if (!copied) throw new Error('execCommand copy failed');
+  }
+
+  const toolbar = form.querySelector('.playground-toolbar');
+  if (toolbar) {
+    const shareButton = document.createElement('button');
+    shareButton.type = 'button';
+    shareButton.className = 'tool-button';
+    shareButton.textContent = 'Copy link';
+    shareButton.setAttribute('aria-live', 'polite');
+    shareButton.setAttribute('aria-label', 'Copy a link to this example with the current code');
+    let shareRestore = null;
+    shareButton.addEventListener('click', async () => {
+      window.pythonByExampleEditor?.syncTextarea();
+      const code = textarea.value;
+      const pageUrl = window.location.origin + window.location.pathname;
+      const url = code === originalCode ? pageUrl : pageUrl + '#code=' + btoa(unescape(encodeURIComponent(code)));
+      clearTimeout(shareRestore);
+      let feedback = 'Link copied';
+      if (url.length > 8000) {
+        feedback = 'Code too long to link';
+      } else {
+        try { await copyTextToClipboard(url); } catch (_) { feedback = 'Copy failed'; }
+      }
+      shareButton.textContent = feedback;
+      shareRestore = setTimeout(() => { shareButton.textContent = 'Copy link'; }, 1600);
+    });
+    toolbar.append(shareButton);
+  }
+
   const outputPanel = document.querySelector('.output-panel');
   if (!outputPanel) return;
   const challengeBox = document.querySelector('[data-turnstile-sitekey]');

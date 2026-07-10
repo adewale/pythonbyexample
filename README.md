@@ -24,6 +24,7 @@ Production: <https://www.pythonbyexample.dev> (`workers.dev` is disabled so the 
 - `/about` page describing the verification pipeline, runner sandbox, figure grammar, and live design tokens
 - Copy buttons on read-only source cells
 - Keyboard prev/next navigation (`←`/`→`) on example pages
+- "Copy link" sharing of the runner's current code via `#code=` URLs
 
 ## Attribution
 

@@ -207,7 +207,7 @@ all aimed at the scorecard's engagement and return lines:
 **Now (days; mostly small, single-surface changes)**
 
 1. Share-this-code link + copy buttons on code blocks.
-   *(Copy buttons shipped 2026-07-10; the share link is still open.)*
+   *(Both shipped 2026-07-10.)*
 2. `/about` page + edit-on-GitHub links.
    *(`/about` shipped 2026-07-10; edit-on-GitHub links are still open.)*
 3. `/llms.txt`, per-example Markdown endpoints, Atom feed.

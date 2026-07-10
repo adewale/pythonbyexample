@@ -416,6 +416,12 @@ class AppTests(unittest.TestCase):
         self.assertIn("response.status === 413", runner)
         self.assertIn("Submitted code is too large", runner)
         self.assertIn("catch (error)", runner)
+        # The 2026-07 share-link work reversed the early no-clipboard
+        # lesson for client scripts: runner.js may use the clipboard,
+        # but server markup still renders only the Run and Reset
+        # buttons, with share/copy affordances JS-injected.
+        self.assertEqual(html.count("<button"), 2)
+        self.assertIn("copyTextToClipboard", runner)
 
     def test_generated_drift_is_blocked_before_commit_and_merge(self):
         hook = (ROOT / ".githooks" / "pre-commit").read_text()
@@ -896,6 +902,23 @@ class KeyboardNavTests(unittest.TestCase):
         self.assertIn("'input, textarea, select, button, .cm-editor, [contenteditable=\"true\"]'", js)
         self.assertIn("event.metaKey", js)
         self.assertIn("event.defaultPrevented", js)
+
+    def test_share_button_copies_a_code_fragment_link(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("Copy link", js)
+        self.assertIn("btoa(unescape(encodeURIComponent(code)))", js)
+        self.assertIn("code === originalCode ? pageUrl : pageUrl + '#code='", js)
+        self.assertIn(".playground-toolbar", js)
+        self.assertIn("aria-live", js)
+
+    def test_share_encoder_mirrors_the_day_one_decoder(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("decodeURIComponent(escape(atob(hash.slice(6))))", js)
+        self.assertIn("btoa(unescape(encodeURIComponent(code)))", js)
+
+    def test_hash_decode_syncs_the_enhanced_editor(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("setCode(decodeURIComponent(escape(atob(hash.slice(6)))))", js)
 
     def test_arrow_navigation_guards_missing_neighbors_at_catalog_edges(self):
         examples = list_examples()
