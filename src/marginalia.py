@@ -1,7 +1,8 @@
 """Marginalia attachments and figure registry.
 
-Authors of example markdown never touch this file. The project owner curates
-named figures here and attaches them to cells via slug + anchor.
+Example prose and code live in Markdown; illustration definitions and their
+slug/anchor attachments are curated here. Figure quality metadata lives in the
+``[figures]`` table of ``docs/quality-registries.toml``.
 
 Anchors today:
     "cell-0", "cell-1", … each literate-program cell, zero-indexed.

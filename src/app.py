@@ -109,7 +109,22 @@ class BoundedStdout(io.TextIOBase):
         return len(value)
 
     def getvalue(self):
-        return "".join(self.parts)
+        # Submitted code receives sys.stdout and can mutate its attributes
+        # directly. Revalidate the sink after exec before joining anything,
+        # so appending around write() cannot bypass the byte cap.
+        if type(self.parts) is not list:
+            raise OutputLimitExceeded
+        checked = []
+        total = 0
+        for value in self.parts:
+            if type(value) is not str or len(value) > MAX_OUTPUT_BYTES - total:
+                raise OutputLimitExceeded
+            encoded = value.encode("utf-8")
+            total += len(encoded)
+            if total > MAX_OUTPUT_BYTES:
+                raise OutputLimitExceeded
+            checked.append(value)
+        return "".join(checked)
 
 
 class Default(WorkerEntrypoint):
@@ -119,7 +134,7 @@ class Default(WorkerEntrypoint):
         try:
             with contextlib.redirect_stdout(stdout):
                 exec(EXAMPLE_CODE, namespace)
-            return Response(stdout.getvalue(), headers={{"Content-Type": "text/plain; charset=utf-8"}})
+            return Response(BoundedStdout.getvalue(stdout), headers={{"Content-Type": "text/plain; charset=utf-8"}})
         except OutputLimitExceeded:
             return Response(OUTPUT_LIMIT_MESSAGE, status=413, headers={{"Content-Type": "text/plain; charset=utf-8"}})
         except Exception:
@@ -197,9 +212,12 @@ def _structured_data_script(data: dict) -> str:
     return f'<script type="application/ld+json">{payload}</script>'
 
 
-def _layout(title: str, content: str, description: str | None = None, path: str = "/", og_type: str = "website", include_editor: bool = False, include_search: bool = False, structured_data: dict | None = None, og_image: str | None = None) -> str:
+def _layout(title: str, content: str, description: str | None = None, path: str | None = "/", og_type: str = "website", include_editor: bool = False, include_search: bool = False, structured_data: dict | None = None, og_image: str | None = None) -> str:
     description = _meta_description(description or "Learn Python with concise, editable examples that run in isolated Cloudflare Dynamic Python Workers.")
-    canonical_url = f"{SITE_URL}{path}"
+    canonical_url = f"{SITE_URL}{path}" if path is not None else ""
+    canonical_tag = f'<link rel="canonical" href="{html.escape(canonical_url)}">' if canonical_url else ""
+    og_url_tag = f'<meta property="og:url" content="{html.escape(canonical_url)}">' if canonical_url else ""
+    robots_meta = "" if canonical_url else '<meta name="robots" content="noindex">'
     page_title = title if title == "Python By Example" else f"{title} · Python By Example"
     # The CDN-backed editor stays in the head, but the dependency-free runner
     # is emitted after page content. Its async module can then attach Run,
@@ -219,7 +237,9 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
             "REFERENCE_URL": html.escape(REFERENCE_URL),
             "PYTHON_VERSION": html.escape(PYTHON_VERSION),
             "META_DESCRIPTION": html.escape(description),
-            "CANONICAL_URL": html.escape(canonical_url),
+            "CANONICAL_TAG": canonical_tag,
+            "OG_URL_TAG": og_url_tag,
+            "ROBOTS_META": robots_meta,
             "OG_TYPE": html.escape(og_type),
             "SITE_CSS": html.escape(ASSET_PATHS["SITE_CSS"]),
             "SYNTAX_JS": html.escape(ASSET_PATHS["SYNTAX_JS"]),
@@ -426,15 +446,15 @@ def render_example_not_found(slug: str) -> str:
         '<p class="meta">Try one of these nearby examples.</p>'
         f"<h2>Recommended examples</h2><ul>{recommendations}</ul>"
     )
-    return _layout("Not Found", content)
+    return _layout("Not Found", content, path=None)
 
 
 def render_journey_not_found() -> str:
-    return _layout("Not Found", "<h1>Journey not found</h1>")
+    return _layout("Not Found", "<h1>Journey not found</h1>", path=None)
 
 
 def render_not_found() -> str:
-    return _layout("Not Found", "<h1>Not found</h1>")
+    return _layout("Not Found", "<h1>Not found</h1>", path=None)
 
 
 def _example_neighbors(slug):
@@ -692,6 +712,12 @@ def render_example_page(
 
 
 def route(url: str, method: str = "GET", turnstile_site_key: str | None = None) -> AppResponse:
+    """Legacy pure-rendering adapter retained for focused renderer tests.
+
+    Production HTTP routing, middleware, caching, POST handling, and security
+    headers live in ``src.main``. New transport behavior must be tested through
+    that ASGI application rather than added here.
+    """
     without_scheme = url.split("://", 1)[-1]
     path_part = without_scheme.split("/", 1)[1] if "/" in without_scheme else ""
     path = ("/" + path_part.split("?", 1)[0]).rstrip("/") or "/"
@@ -719,7 +745,7 @@ def route(url: str, method: str = "GET", turnstile_site_key: str | None = None) 
         slug = path.split("/", 2)[2]
         journey = JOURNEYS_BY_SLUG.get(slug)
         if journey is None:
-            return AppResponse(_layout("Not Found", "<h1>Journey not found</h1>"), status=404)
+            return AppResponse(_layout("Not Found", "<h1>Journey not found</h1>", path=None), status=404)
         return AppResponse(render_journey_page(journey), headers={"Content-Type": "text/html; charset=utf-8"})
     if path.startswith("/examples/"):
         slug = path.split("/", 2)[2]
@@ -730,9 +756,9 @@ def route(url: str, method: str = "GET", turnstile_site_key: str | None = None) 
                 for item in _recommended_examples(slug)
             )
             body = f'<h1>Example not found</h1><p class="meta">Try one of these nearby examples.</p><h2>Recommended examples</h2><ul>{recommendations}</ul>'
-            return AppResponse(_layout("Not Found", body), status=404)
+            return AppResponse(_layout("Not Found", body, path=None), status=404)
         return AppResponse(
             render_example_page(example, turnstile_site_key=turnstile_site_key),
             headers={"Content-Type": "text/html; charset=utf-8"},
         )
-    return AppResponse(_layout("Not Found", "<h1>Not found</h1>"), status=404)
+    return AppResponse(_layout("Not Found", "<h1>Not found</h1>", path=None), status=404)

@@ -139,6 +139,75 @@ class MainModuleHarness(unittest.TestCase):
         return importlib.import_module("main")
 
 
+class _Headers(dict):
+    def set(self, name, value):
+        self[name] = value
+
+
+class MainDefaultFetchTests(MainModuleHarness):
+    def test_post_and_bridge_rejections_get_security_no_store_and_status_observability(self):
+        main = self.import_main()
+        emitted = []
+        event = {"cache": "bypass"}
+        response = SimpleNamespace(status=413, headers=_Headers())
+
+        async def asgi_fetch(*args, **kwargs):
+            return response
+
+        main.caches = None
+        main.asgi.fetch = asgi_fetch
+        main.observability.event_from_worker_request = lambda *args, **kwargs: event
+        main.observability.emit = lambda value, env=None: emitted.append(value.copy())
+        worker = main.Default()
+        worker.env = SimpleNamespace()
+        request = SimpleNamespace(
+            method="POST",
+            url="https://www.pythonbyexample.dev/examples/values",
+            js_object=SimpleNamespace(),
+        )
+
+        returned = asyncio.run(worker.fetch(request))
+
+        self.assertIs(returned, response)
+        self.assertEqual(response.headers["Cache-Control"], "no-store")
+        for name, value in main.SECURITY_HEADERS.items():
+            self.assertEqual(response.headers[name], value)
+        self.assertEqual(emitted[-1]["status_code"], 413)
+        self.assertEqual(emitted[-1]["outcome"], "client_error")
+
+    def test_dynamic_response_reader_cancels_stream_above_output_cap(self):
+        main = self.import_main()
+        cancelled = []
+
+        class Chunk:
+            def __init__(self, value):
+                self.value = value
+
+            def to_bytes(self):
+                return self.value
+
+        class Reader:
+            def __init__(self):
+                self.results = [
+                    SimpleNamespace(done=False, value=Chunk(b"x" * 40_000)),
+                    SimpleNamespace(done=False, value=Chunk(b"y" * 40_000)),
+                ]
+
+            async def read(self):
+                return self.results.pop(0)
+
+            async def cancel(self, reason):
+                cancelled.append(reason)
+
+        reader = Reader()
+        response = SimpleNamespace(body=SimpleNamespace(getReader=lambda: reader))
+        text, exceeded = asyncio.run(main._read_dynamic_response_text(response))
+
+        self.assertTrue(exceeded)
+        self.assertEqual(text, main.DYNAMIC_OUTPUT_LIMIT_MESSAGE)
+        self.assertEqual(len(cancelled), 1)
+
+
 class MainObservabilityTests(MainModuleHarness):
     def test_run_example_marks_dynamic_worker_http_500_as_worker_error(self):
         main = self.import_main()

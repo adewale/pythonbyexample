@@ -67,6 +67,8 @@ def make_request(*, cookie: str = "", headers: dict[str, str] | None = None, env
             "path": "/examples/values",
             "query_string": b"",
             "headers": raw_headers,
+            "scheme": "https",
+            "server": ("www.pythonbyexample.dev", 443),
             "env": env,
         }
     )
@@ -274,6 +276,18 @@ class RunExampleFlowTests(unittest.TestCase):
         self.assertEqual(self._ran_code, "print(42)")
         self.assertIn("ran-output", response.body.decode())
 
+    def test_dynamic_worker_output_rejection_propagates_413(self):
+        async def rejected(request, slug, code):
+            request.state.dynamic_worker_status = 413
+            return main.DYNAMIC_OUTPUT_LIMIT_MESSAGE
+
+        main._run_example = rejected
+        response = self._run(
+            post_request(b"code=print(42)", env=session_env(TURNSTILE_CHALLENGE_MODE="off"))
+        )
+        self.assertEqual(response.status_code, 413)
+        self.assertIn("output exceeded", response.body.decode())
+
     def test_invalid_raw_or_percent_encoded_utf8_is_rejected_before_execution(self):
         for body in (b"code=\xff", b"code=%FF"):
             with self.subTest(body=body):
@@ -340,17 +354,37 @@ class TurnstileSiteverifyTests(unittest.TestCase):
                 self.assertIn("verification failed", message)
                 self.assertEqual(outcome, "fail")
 
-    def test_successful_siteverify_requires_true_success_flag(self):
+    def test_successful_siteverify_requires_matching_hostname_and_action(self):
         class Response:
             status = 200
             async def text(self):
-                return '{"success": true}'
+                return '{"success": true, "hostname": "www.pythonbyexample.dev", "action": "run-example"}'
 
         main.js_fetch = lambda _request: _awaitable(Response())
         ok, message, outcome = asyncio.run(main._verify_turnstile(make_request(env=session_env()), "token"))
         self.assertTrue(ok)
         self.assertEqual(message, "")
         self.assertEqual(outcome, "pass")
+
+    def test_siteverify_rejects_wrong_or_missing_hostname_and_action(self):
+        payloads = [
+            '{"success": true}',
+            '{"success": true, "hostname": "other.example", "action": "run-example"}',
+            '{"success": true, "hostname": "www.pythonbyexample.dev", "action": "other-action"}',
+        ]
+        for payload in payloads:
+            with self.subTest(payload=payload):
+                class Response:
+                    status = 200
+
+                    async def text(self):
+                        return payload
+
+                main.js_fetch = lambda _request: _awaitable(Response())
+                ok, message, outcome = asyncio.run(main._verify_turnstile(make_request(env=session_env()), "token"))
+                self.assertFalse(ok)
+                self.assertIn("verification failed", message)
+                self.assertEqual(outcome, "fail")
 
 
 async def _awaitable(value):
@@ -403,6 +437,16 @@ class DynamicWorkerCodeTests(unittest.TestCase):
             self.assertEqual(huge_error.status, 413)
             self.assertEqual(huge_error.body, DYNAMIC_OUTPUT_LIMIT_MESSAGE)
             self.assertLessEqual(len(huge_error.body.encode()), MAX_DYNAMIC_OUTPUT_BYTES)
+            namespace = {}
+            exec(
+                build_dynamic_worker_code(
+                    f"import sys; sys.stdout.parts.append('x' * {MAX_DYNAMIC_OUTPUT_BYTES + 1})"
+                ),
+                namespace,
+            )
+            mutated_sink = asyncio.run(namespace["Default"]().fetch(None))
+            self.assertEqual(mutated_sink.status, 413)
+            self.assertEqual(mutated_sink.body, DYNAMIC_OUTPUT_LIMIT_MESSAGE)
         finally:
             if saved_workers is None:
                 sys.modules.pop("workers", None)

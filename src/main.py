@@ -12,8 +12,10 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from workers import WorkerEntrypoint, python_from_rpc
 
 from app import (
+    DYNAMIC_OUTPUT_LIMIT_MESSAGE,
     FAVICON_SVG,
     JOURNEYS_BY_SLUG,
+    MAX_DYNAMIC_OUTPUT_BYTES,
     build_dynamic_worker_code,
     get_example,
     render_about,
@@ -36,6 +38,7 @@ import observability
 import worker_asgi_bridge as asgi
 
 TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+TURNSTILE_ACTION = "run-example"
 SMOKE_BYPASS_HEADER = "x-pythonbyexample-smoke-secret"
 TURNSTILE_CLEARANCE_COOKIE = "pbe_turnstile_clearance"
 DEFAULT_TURNSTILE_CLEARANCE_SECONDS = 60 * 60 * 8
@@ -344,6 +347,7 @@ async def run_example(slug: str, request: Request):
     elif event := _wide_event(request):
         event["turnstile"] = {"outcome": _turnstile_not_required_outcome(request)}
 
+    request.state.dynamic_worker_status = 200
     started = time.perf_counter()
     try:
         output = await _run_example(request, example["slug"], submitted)
@@ -358,7 +362,8 @@ async def run_example(slug: str, request: Request):
             code=submitted,
             execution_time_ms=elapsed_ms,
             turnstile_site_key=_turnstile_site_key(request),
-        )
+        ),
+        status=413 if request.state.dynamic_worker_status == 413 else 200,
     )
     if turnstile_verified:
         _set_turnstile_clearance(response, request)
@@ -411,9 +416,48 @@ async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str, st
             raise ValueError("Turnstile Siteverify returned a non-object payload")
     except Exception:
         return False, "Turnstile verification failed. Please refresh the challenge and try again.", "fail"
-    if result.get("success") is True:
+    expected_hostname = urlparse(str(request.url)).hostname or ""
+    if (
+        result.get("success") is True
+        and result.get("hostname", "").lower().rstrip(".") == expected_hostname.lower().rstrip(".")
+        and result.get("action") == TURNSTILE_ACTION
+    ):
         return True, "", "pass"
     return False, "Turnstile verification failed. Please refresh the challenge and try again.", "fail"
+
+
+async def _read_dynamic_response_text(response) -> tuple[str, bool]:
+    """Read a Dynamic Worker response without trusting its declared status.
+
+    Submitted code controls the child runtime and may tamper with Python-level
+    stdout internals. The parent therefore enforces the same byte limit while
+    consuming the Fetch response stream and cancels as soon as it is exceeded.
+    """
+    body = getattr(response, "body", None)
+    if body is not None and hasattr(body, "getReader"):
+        reader = body.getReader()
+        chunks: list[bytes] = []
+        total = 0
+        while True:
+            result = await reader.read()
+            if bool(getattr(result, "done", False)):
+                break
+            value = getattr(result, "value", None)
+            chunk = value.to_bytes() if hasattr(value, "to_bytes") else bytes(value)
+            total += len(chunk)
+            if total > MAX_DYNAMIC_OUTPUT_BYTES:
+                try:
+                    await reader.cancel("Dynamic Worker output exceeded limit")
+                except Exception:
+                    pass
+                return DYNAMIC_OUTPUT_LIMIT_MESSAGE, True
+            chunks.append(chunk)
+        return b"".join(chunks).decode("utf-8", errors="replace"), False
+
+    output = await response.text()
+    if len(output.encode("utf-8")) > MAX_DYNAMIC_OUTPUT_BYTES:
+        return DYNAMIC_OUTPUT_LIMIT_MESSAGE, True
+    return output, False
 
 
 async def _run_example(request: Request, slug, code):
@@ -466,8 +510,11 @@ async def _run_example(request: Request, slug, code):
         )
         response = python_from_rpc(await entrypoint.fetch(dynamic_request))
         status_code = int(getattr(response, "status", 200) or 200)
+        output, output_limit_exceeded = await _read_dynamic_response_text(response)
+        if output_limit_exceeded:
+            status_code = 413
         worker_event["status_code"] = status_code
-        output = await response.text()
+        request.state.dynamic_worker_status = status_code
         if status_code == 413:
             worker_event["outcome"] = "rejected"
             worker_event["rejected"] = "output_too_large"
@@ -553,6 +600,7 @@ class Default(WorkerEntrypoint):
                         max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
                     )
                     _apply_security_headers(response)
+                    observability.record_status(event, getattr(response, "status", 200))
                     if getattr(response, "status", 200) == 200:
                         response.headers.set(
                             "Cache-Control",
@@ -572,6 +620,7 @@ class Default(WorkerEntrypoint):
                     max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
                 )
                 _apply_security_headers(response)
+                observability.record_status(event, getattr(response, "status", 200))
                 response.headers.set("Cache-Control", "no-store")
                 return response
 
@@ -584,6 +633,8 @@ class Default(WorkerEntrypoint):
                 max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
             )
             _apply_security_headers(response)
+            observability.record_status(event, getattr(response, "status", 200))
+            response.headers.set("Cache-Control", "no-store")
             return response
         except Exception as exc:
             event["status_code"] = 500

@@ -39,10 +39,12 @@ make build
 
 ## Before opening a pull request
 
-Start the local Worker for browser-backed checks:
+Install the committed dependency locks and start the local Worker with the repository-pinned Wrangler:
 
 ```bash
-uv run --group workers pywrangler dev --port 9696
+uv sync --locked --all-groups
+npm ci --ignore-scripts
+make dev
 ```
 
 Then run:

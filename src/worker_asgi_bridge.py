@@ -212,13 +212,13 @@ async def process_request(
                 with acquire_js_buffer(body) as jsbytes:
                     await writer.write(jsbytes.slice())
             else:
-                # Complete body in a single chunk
-                px = create_proxy(body)
-                buf = px.getBuffer()
-                px.destroy()
-                resp = Response.new(
-                    buf.data, headers=Object.fromEntries(headers), status=status
-                )
+                # Complete body in a single chunk. Response construction may
+                # retain the source view, so copy it before releasing the
+                # Pyodide buffer handle just as the streaming path does.
+                with acquire_js_buffer(body) as jsbytes:
+                    resp = Response.new(
+                        jsbytes.slice(), headers=Object.fromEntries(headers), status=status
+                    )
                 result.set_result(resp)
                 finished_response.set()
 
@@ -270,7 +270,7 @@ async def process_websocket(app: Any, req: "Request | js.Request") -> js.Respons
     onopen(1)
 
     def onclose(evt):
-        msg = {"type": "websocket.close", "code": evt.code, "reason": evt.reason}
+        msg = {"type": "websocket.disconnect", "code": evt.code, "reason": evt.reason}
         queue.put_nowait(msg)
 
     def onmessage(evt):
@@ -287,12 +287,13 @@ async def process_websocket(app: Any, req: "Request | js.Request") -> js.Respons
             s = got.get("text", None)
             if b:
                 with acquire_js_buffer(b) as jsbytes:
-                    # Unlike the `Response` constructor,  server.send seems to
-                    # eagerly copy the source buffer
+                    # Unlike the `Response` constructor, server.send eagerly
+                    # copies the source buffer.
                     server.send(jsbytes)
             if s:
                 server.send(s)
-
+        elif got["type"] == "websocket.close":
+            server.close(got.get("code", 1000), got.get("reason", ""))
         else:
             logger.warning(" == Not implemented %s", got["type"])
 

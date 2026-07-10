@@ -34,16 +34,28 @@ function wireSearch() {
   const container = document.querySelector('.site-search');
   const input = document.getElementById('site-search-input');
   const results = document.getElementById('site-search-results');
-  if (!container || !input || !results) return;
+  const status = document.getElementById('site-search-status');
+  if (!container || !input || !results || !status) return;
 
   let entries = null;
   let loading = null;
   function loadIndex() {
     if (!loading) {
       loading = fetch(container.dataset.searchIndex)
-        .then((response) => response.json())
-        .then((data) => { entries = data; })
-        .catch(() => { loading = null; });
+        .then((response) => {
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          return response.json();
+        })
+        .then((data) => {
+          if (!Array.isArray(data)) throw new Error('Search index is not an array');
+          entries = data;
+          status.textContent = '';
+        })
+        .catch(() => {
+          loading = null;
+          entries = null;
+          status.textContent = 'Search is temporarily unavailable. Please browse the example sections below.';
+        });
     }
     return loading;
   }
@@ -83,11 +95,14 @@ function wireSearch() {
         results.replaceChildren(empty);
         results.hidden = false;
         input.setAttribute('aria-expanded', 'true');
+        status.textContent = 'No examples match your search.';
       } else {
         hideResults();
+        status.textContent = '';
       }
       return;
     }
+    status.textContent = `${matches.length} matching example${matches.length === 1 ? '' : 's'}.`;
     results.replaceChildren(...matches.map(resultNode));
     results.hidden = false;
     input.setAttribute('aria-expanded', 'true');
@@ -100,6 +115,7 @@ function wireSearch() {
     if (event.key === 'Escape') {
       input.value = '';
       hideResults();
+      status.textContent = '';
     } else if (event.key === 'ArrowDown' && links.length) {
       event.preventDefault();
       links[0].focus();

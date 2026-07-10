@@ -1,0 +1,12 @@
+{
+  "name": "pythonbyexample-tooling",
+  "private": true,
+  "type": "module",
+  "packageManager": "npm@11.4.2",
+  "scripts": {
+    "wrangler": "wrangler"
+  },
+  "devDependencies": {
+    "wrangler": "4.110.0"
+  }
+}

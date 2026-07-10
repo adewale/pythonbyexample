@@ -1,11 +1,12 @@
-import { EditorState } from 'https://esm.sh/@codemirror/state@6.5.2';
+import { Compartment, EditorState } from 'https://esm.sh/@codemirror/state@6.5.2';
 import { EditorView, lineNumbers } from 'https://esm.sh/@codemirror/view@6.41.1?deps=@codemirror/state@6.5.2';
 import { defaultHighlightStyle, syntaxHighlighting } from 'https://esm.sh/@codemirror/language@6.12.3?deps=@codemirror/state@6.5.2,@codemirror/view@6.41.1';
 import { python } from 'https://esm.sh/@codemirror/lang-python@6.2.1?deps=@codemirror/state@6.5.2,@codemirror/view@6.41.1,@codemirror/language@6.12.3';
 import { oneDarkHighlightStyle } from 'https://esm.sh/@codemirror/theme-one-dark@6.1.3?deps=@codemirror/state@6.5.2,@codemirror/view@6.41.1,@codemirror/language@6.12.3';
 
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-const highlightStyle = prefersDark ? oneDarkHighlightStyle : defaultHighlightStyle;
+const themePreference = window.matchMedia('(prefers-color-scheme: dark)');
+const highlightStyle = () => themePreference.matches ? oneDarkHighlightStyle : defaultHighlightStyle;
+const highlightCompartment = new Compartment();
 
 const textarea = document.getElementById('code-editor');
 const form = document.querySelector('form.runner-editor');
@@ -18,7 +19,7 @@ if (textarea && form) {
       doc: textarea.value,
       extensions: [
         python(),
-        syntaxHighlighting(highlightStyle),
+        highlightCompartment.of(syntaxHighlighting(highlightStyle())),
         lineNumbers(),
         EditorView.lineWrapping,
         EditorView.contentAttributes.of({
@@ -33,6 +34,9 @@ if (textarea && form) {
 
   textarea.insertAdjacentElement('afterend', view.dom);
   textarea.hidden = true;
+  themePreference.addEventListener?.('change', () => {
+    view.dispatch({ effects: highlightCompartment.reconfigure(syntaxHighlighting(highlightStyle())) });
+  });
 
   function resize() {
     view.dom.style.minHeight = '';
