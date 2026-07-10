@@ -33,7 +33,7 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 ### Changed
 
 - The home header stays visible on landing: the scroll-driven entrance now animates the brand and a compositor-friendly veil layer instead of hiding the whole header (which left the page with no visible nav at first paint).
-- Body type is `100%/1.6` instead of a fixed 16px, so browser text-size settings are respected; the `/about` type specimen now describes the stack as it actually renders (system face; FT Kunst Grotesk only where installed).
+- Body type is `100%/1.6` instead of a fixed 16px, so browser text-size settings are respected. The never-rendering brand faces (FT Kunst Grotesk, Apercu Mono Pro — installed nowhere, shipped never) are removed from the stacks, which now declare the real design: `system-ui` prose and `ui-monospace`-first code. The `/about` type specimen says so.
 - `prefers-reduced-transparency` and `prefers-contrast: more` get solid-chrome and defined-border fallbacks; cards press down on tap; header links carry full-height (~43px) tap targets via padding with cancelling negative margins.
 - The home search exposes combobox/listbox semantics (`aria-expanded`, `role="option"`) to match its existing keyboard behavior.
 - The runner output chip's navy is now tokenized (`--terminal-bg`/`--terminal-ink`) and appears in the `/about` design language.
