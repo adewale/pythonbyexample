@@ -8,21 +8,16 @@ explain, and ties those outcomes back to examples in that section.
 from __future__ import annotations
 
 import sys
-import tomllib
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-REGISTRY_PATH = ROOT / "docs" / "quality-registries.toml"
-sys.path.insert(0, str(ROOT))
-
-from src.app import JOURNEYS  # noqa: E402
-from src.examples import EXAMPLES  # noqa: E402
+from _common import load_catalog, load_registry
+from src.app import JOURNEYS
 
 
 def main() -> int:
-    registry = tomllib.loads(REGISTRY_PATH.read_text())
+    registry = load_registry()
     outcomes = registry.get("journey_outcomes", {})
-    example_slugs = {example["slug"] for example in EXAMPLES}
+    _catalog, examples = load_catalog()
+    example_slugs = {example["slug"] for example in examples}
     expected: dict[str, tuple[str, str, set[str]]] = {}
     errors: list[str] = []
 

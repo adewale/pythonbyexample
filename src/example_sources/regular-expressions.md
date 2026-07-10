@@ -104,7 +104,7 @@ None
 :::
 
 :::cell
-`re.compile` produces a reusable pattern object whose methods skip the parser on each call. Reach for it when the same pattern runs in a loop.
+`re.compile` produces a reusable pattern object and gives the pattern a name. The `re` module also caches recently compiled patterns internally, so the practical wins are readability and a place to attach flags more than raw speed.
 
 ```python
 scoreline = re.compile(pattern)

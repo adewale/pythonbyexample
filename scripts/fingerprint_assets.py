@@ -3,9 +3,10 @@ from __future__ import annotations
 
 import hashlib
 import re
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
+from _common import ROOT
+from src.security import CONTENT_SECURITY_POLICY, STRICT_TRANSPORT_SECURITY
+
 PUBLIC = ROOT / "public"
 MANIFEST = ROOT / "src" / "asset_manifest.py"
 
@@ -13,6 +14,7 @@ ASSETS = {
     "SITE_CSS": "site.css",
     "SYNTAX_JS": "syntax-highlight.js",
     "EDITOR_JS": "editor.js",
+    "RUNNER_JS": "runner.js",
     "SEARCH_JS": "search.js",
     "SEARCH_INDEX": "search-index.json",
 }
@@ -39,12 +41,17 @@ def html_version(paths: dict[str, str]) -> str:
     for value in sorted(paths.values()):
         digest.update(value.encode("utf-8"))
     content_paths = [
+        ROOT / "docs" / "quality-registries.toml",
         ROOT / "src" / "app.py",
+        ROOT / "src" / "editorial_registry.py",
+        ROOT / "src" / "editorial_registry_data.py",
         ROOT / "src" / "examples.py",
         ROOT / "src" / "example_loader.py",
         ROOT / "src" / "example_sources_data.py",
+        ROOT / "src" / "main.py",
         ROOT / "src" / "marginalia.py",
         ROOT / "src" / "marginalia_grammar.py",
+        ROOT / "src" / "security.py",
         ROOT / "src" / "example_sources" / "manifest.toml",
         *sorted((ROOT / "src" / "example_sources").glob("*.md")),
         *sorted((ROOT / "src" / "templates").glob("*.html")),
@@ -64,11 +71,19 @@ def main() -> None:
         f"HTML_CACHE_VERSION = {version!r}\n"
     )
     (PUBLIC / "_headers").write_text(
+        "/*\n"
+        "  X-Content-Type-Options: nosniff\n"
+        "  Referrer-Policy: strict-origin-when-cross-origin\n"
+        "  X-Frame-Options: DENY\n"
+        f"  Strict-Transport-Security: {STRICT_TRANSPORT_SECURITY}\n"
+        f"  Content-Security-Policy: {CONTENT_SECURITY_POLICY}\n\n"
         "/site.*.css\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/syntax-highlight.*.js\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/editor.*.js\n"
+        "  Cache-Control: public, max-age=31536000, immutable\n\n"
+        "/runner.*.js\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/search.*.js\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"

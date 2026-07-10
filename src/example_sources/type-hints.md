@@ -20,8 +20,6 @@ The alternative to an annotation is prose, tests, or runtime validation. Good Py
 
 :::program
 ```python
-from typing import TypeAlias
-
 def total(numbers: list[int]) -> int:
     return sum(numbers)
 
@@ -52,7 +50,7 @@ print(lookup("Ada"))
 print(lookup("Guido"))
 
 
-Score: TypeAlias = int
+type Score = int
 
 def grade(score: Score) -> str:
     return "pass" if score >= 50 else "fail"
@@ -133,12 +131,10 @@ None
 :::
 
 :::cell
-`TypeAlias` names a type so it can be reused with intent. `Score: TypeAlias = int` keeps the underlying type at runtime but lets the API talk about a domain concept rather than a primitive.
+The `type` statement names a type so it can be reused with intent. `type Score = int` keeps the underlying type at runtime but lets the API talk about a domain concept rather than a primitive. Older code spells this `Score: TypeAlias = int`; `typing.TypeAlias` is deprecated since Python 3.12, and the type-aliases page covers the modern statement in depth.
 
 ```python
-from typing import TypeAlias
-
-Score: TypeAlias = int
+type Score = int
 
 def grade(score: Score) -> str:
     return "pass" if score >= 50 else "fail"
@@ -155,6 +151,6 @@ pass
 - Python does not enforce most type hints at runtime.
 - Tools like type checkers and editors use annotations to catch mistakes earlier.
 - Use `X | Y` for unions and `Optional[X]` for "X or None"; both spellings mean the same thing.
-- Reach for `TypeAlias` when a domain name reads better than a raw primitive type.
+- Reach for a `type` alias when a domain name reads better than a raw primitive type.
 - Use runtime validation when untrusted input must be rejected while the program runs.
 :::

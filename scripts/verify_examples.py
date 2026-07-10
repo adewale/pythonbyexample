@@ -5,13 +5,10 @@ from __future__ import annotations
 import argparse
 import re
 import sys
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
-
-from src.example_loader import EXAMPLES_DIR, load_examples, verify_example_output  # noqa: E402
-from src.example_sources_data import EXAMPLE_SOURCE_FILES  # noqa: E402
+from _common import EXAMPLES_DIR, load_catalog
+from src.example_loader import verify_example_output
+from src.example_sources_data import EXAMPLE_SOURCE_FILES
 
 
 def version_tuple(version: str) -> tuple[int, ...]:
@@ -25,7 +22,7 @@ def main() -> int:
     args = parser.parse_args()
     selected = set(args.slugs)
     errors: list[str] = []
-    catalog, examples = load_examples()
+    catalog, examples = load_catalog()
 
     if args.python_version and catalog.python_version != args.python_version:
         errors.append(f"src/example_sources/manifest.toml:1: python_version is {catalog.python_version!r}, expected {args.python_version!r}")
@@ -47,8 +44,14 @@ def main() -> int:
     titles: set[str] = set()
     version_sensitive: list[str] = []
     count = 0
-    for example in examples:
+    for order_slug, example in zip(catalog.order, examples):
         slug = example["slug"]
+        if slug != order_slug:
+            errors.append(
+                f"{EXAMPLES_DIR / f'{order_slug}.md'}:1: frontmatter slug {slug!r} "
+                f"does not match the filename"
+            )
+            continue
         if selected and slug not in selected:
             continue
         count += 1

@@ -18,11 +18,16 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 - Skip-to-content link on every page.
 - Per-example social-card images composed from each example's marginalia figure (`make social-cards`), referenced by `og:image`/`twitter:card` on home and example pages and checked by the SEO linter.
 - Learner-behavior report (`scripts/learner_report.py` + `docs/learner-analytics.md`) aggregating exported Worker wide events into most-read pages, most-run examples with edited/error shares and execution percentiles, journey traffic, and missing-example 404s.
+- Content gates for program/cell parity, prose duplication, and internal inline links, wired into `make quality-checks`.
+- Shared inline-prose rendering, figure XML/caption contracts, regenerated figure-review prototypes, and behavioral tests for the Turnstile and ASGI paths.
 
 ### Changed
 
 - Journeys now reference every example: `iterator-vs-iterable`, `classmethods-and-staticmethods`, `bound-and-unbound-methods`, `abstract-base-classes`, and `structured-data-shapes` joined their natural sections, with journey-outcome support lists updated.
 - Journey meta descriptions no longer claim gap placeholders; all previously declared gaps are filled.
+- Python tooling is pinned to 3.13 through `uv`; CI and preview workflows are hardened, generated-file recovery retries from a clean worktree, and quality gates enforce live registry/score invariants.
+- Worker runtime hardening adds body limits, cache-key normalization, constant-time smoke-bypass comparison, fail-closed Turnstile modes, latin-1 ASGI headers, and once-per-isolate lifespan startup.
+- Content corrections across 29 example pages improve Python accuracy, executable demonstrations, sandbox-boundary framing, and link/prose quality.
 
 ## 2026-05-16
 

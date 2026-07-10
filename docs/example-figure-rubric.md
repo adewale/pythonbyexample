@@ -119,6 +119,13 @@ the figure can merge.
   lesson must frame the figure in its own voice. Verbatim caption
   reuse copies the lesson voice the same way verbatim code reuse
   copies the example. *Contract 5b — FigureCaptionContract.*
+- **Captions are complete sentences within length.** Every caption
+  (attachments and journey section figures) is non-empty, ends with
+  a period, and stays under 220 characters. Semantic figure/caption
+  agreement stays a curator judgement — the marginalia gestalt
+  renders the production caption under every figure so review can
+  catch a caption asserting something the figure does not draw.
+  *Contract 5c.*
 - **No clipping.** Every `<rect>`, `<text>`, `<line>`, `<circle>`,
   `<path>` lives inside the padded viewBox. Text width counts: a
   long mono string in a too-narrow box clips even if the geometry
@@ -132,11 +139,15 @@ the figure can merge.
   "1 · 2" collision in a too-narrow box). *Contract 3.*
 - **Palette discipline.** Only `INK`, `INK_SOFT`, `EMPHASIS`,
   `SOFT_FILL`, or `"none"` may appear as fill or stroke. *Contract
-  5a — FigureGrammarContract.*
+  5 — FigureGrammarContract.*
 - **Font discipline.** Only `FONT_SERIF`, `FONT_MONO`, `FONT_SANS`
-  may appear as `font-family`. *Contract 5b.*
+  may appear as `font-family`. *Contract 5.*
 - **Stroke-weight discipline.** Only `W_HAIRLINE`, `W_STROKE`,
-  `W_EMPHASIS`, `W_GHOST`. *Contract 5c.*
+  `W_EMPHASIS`, `W_GHOST`. *Contract 5.*
+- **Well-formed XML, escaping enforced.** Every rendered figure must
+  parse with a real XML parser; the grammar escapes `<`, `>`, and `&`
+  in drawn text so a label cannot silently produce a browser-dropped
+  SVG. *Contract 11 — FigureWellFormedXMLContract.*
 - **Emphasis scarcity, enforced.** At most ONE accent mark
   (`EMPHASIS`-coloured arrowhead, caret, dot, traced path, or rect
   stroke) per figure. Was a soft v1 criterion; now hard. The census
@@ -147,9 +158,16 @@ the figure can merge.
   punctuation — every pause point on a ribbon — reads as one system),
   and a `lanes` traced path plus its terminal dot count as one mark.
   A gate set plus any focal accent still fails. *Contract 9.*
-- **Banner-fit, enforced.** Every figure's intrinsic width
-  (Canvas.w + 2 · PAD_X) must fit `.cell-banner--1`'s 440px max
-  ceiling. *Contract 8.*
+- **Banner-fit, enforced.** Every figure's RENDERED width —
+  INTRINSIC_SCALE · (Canvas.w + 2 · PAD_X) — must fit the 640px
+  ceiling of `.cell-banner--1` / `.journey-section-figure`
+  (`clamp(280px, 65-70vw, 640px)` in site.css). The figure must also not
+  display taller than 440px at that banner width, or it reads as a
+  portrait column rather than a margin banner. *Contract 8.*
+- **No solid line strikes a label.** A solid `<line>` may not cross a
+  text label's interior (reads as an accidental strike-through);
+  deliberate *dashed* strikes through a label are allowed. *Contract 12
+  — FigureLineTextCollisionContract.*
 - **Twin consistency.** When two figures depict parallel concepts
   (`kw-only-separator` ↔ `positional-only-separator`,
   `class-triangle` ↔ `metaclass-triangle`), their metrics must
@@ -173,8 +191,8 @@ the figure can merge.
 
 ## Page-level coherence (per slug, multi-figure)
 
-A separate 0-1.0 score applied to slugs whose `ATTACHMENTS[slug]`
-list contains more than one figure. Multi-figure pages must form a
+A separate 0-1.0 score applied to slugs whose `[[figure_attachments]]`
+entries (loaded as `ATTACHMENTS[slug]`) contain more than one figure. Multi-figure pages must form a
 coherent set, not three angles on the same point.
 
 - **1.0** — figures show distinct aspects of the lesson in a

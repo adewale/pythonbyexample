@@ -29,7 +29,7 @@ high_scores = {name: score for name, score in scores.items() if score >= 10}
 print(high_scores)
 
 unique_scores = {score for score in scores.values()}
-print(unique_scores)
+print(sorted(unique_scores))
 ```
 :::
 
@@ -62,15 +62,15 @@ print(high_scores)
 :::
 
 :::cell
-A set comprehension keeps only unique results. Here two people have the same score, so the resulting set has two values.
+A set comprehension keeps only unique results. Here two people have the same score, so the resulting set has two values — printed through `sorted()` because sets have no display order to rely on.
 
 ```python
 unique_scores = {score for score in scores.values()}
-print(unique_scores)
+print(sorted(unique_scores))
 ```
 
 ```output
-{8, 10}
+[8, 10]
 ```
 :::
 

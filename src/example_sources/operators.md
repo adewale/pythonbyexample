@@ -49,6 +49,14 @@ print(Scale(2) @ Scale(3))
 items = ["a", "b"]
 if (size := len(items)) > 0:
     print(size)
+
+def loud():
+    print("ran")
+    return True
+
+print(False and loud())
+print(True or loud())
+print(True and loud())
 ```
 :::
 

@@ -30,6 +30,16 @@ class SmokeDeploymentTests(unittest.TestCase):
 
         self.assertEqual(smoke.output_panel_text(body), "<ok>\n")
 
+    def test_smoke_bypass_secret_requires_https_origin(self):
+        smoke = load_smoke_module()
+
+        self.assertIsNone(smoke.validate_smoke_bypass_origin("http://localhost:9696", ""))
+        self.assertIsNone(smoke.validate_smoke_bypass_origin("https://example.dev", "secret"))
+        self.assertIn(
+            "https://",
+            smoke.validate_smoke_bypass_origin("http://example.dev", "secret"),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

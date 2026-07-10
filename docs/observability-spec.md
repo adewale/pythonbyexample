@@ -503,7 +503,10 @@ Do not emit a second per-request log. Attach the cleanup failure to the same wid
 
 ```python
 finally:
-    if code_callback is not None and hasattr(code_callback, "destroy"):
+    # create_once_callable destroys itself after the Dynamic Loader invokes it,
+    # so destroy ONLY callbacks that went unused (e.g. cache-hit paths) to avoid
+    # false "OnceProxy has already been destroyed" cleanup errors.
+    if code_callback is not None and not code_callback_used and hasattr(code_callback, "destroy"):
         try:
             code_callback.destroy()
         except Exception as exc:

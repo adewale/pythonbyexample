@@ -1,12 +1,14 @@
 # Rubric audit snapshot — 2026-05-12
 
+> **Superseded.** This is a point-in-time snapshot. The catalog has since dropped the Workers journey (journey sections went from 24 to 21) and the figure registry grew past a one-per-slug count. The journey-section counts below have been corrected to the current 21; regenerate a fresh snapshot with `make rubric-audit` rather than trusting the rest of these frozen numbers.
+
 This snapshot audits the shipped catalog against the example, example-figure, and journey-visualisation rubrics. It records the green baseline and the accepted exception so future passes can hunt for semantic drift instead of rediscovering the same ledgers.
 
 ## Scoreboard
 
 - Examples: count=109, min=7.1, avg=8.98, median=9, below9=1, distribution=7.1 × 1, 9 × 108
 - Example diagrams: count=109, min=9, avg=9.01, median=9, below9=0, distribution=9 × 106, 9.5 × 3
-- Journey diagrams: count=24, min=9, avg=9.02, median=9, below9=0, distribution=9 × 23, 9.5 × 1
+- Journey diagrams: count=21, min=9, avg=9.02, median=9, below9=0, distribution=9 × 20, 9.5 × 1
 - Accepted waiver: `hello-world` remains intentionally tiny at 7.1.
 - Graph health: 109 linked sources, 361 edges, 0 orphaned examples.
 
@@ -54,7 +56,7 @@ This snapshot audits the shipped catalog against the example, example-figure, an
 | Grammar conformance | Shared geometry contracts | PASS |
 | Independence from lesson figures | Section figures compared with example attachments | PASS |
 | Layout fit | Journey figure dimensions within production column | PASS |
-| Outcome support | `check_journey_outcomes.py` over all 24 sections | PASS |
+| Outcome support | `check_journey_outcomes.py` over all 21 sections | PASS |
 | Prerequisite order | Journey order reviewed against lesson dependencies | PASS |
 
 ## Example and diagram inventory

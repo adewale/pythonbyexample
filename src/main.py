@@ -11,9 +11,25 @@ from fastapi.responses import HTMLResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from workers import WorkerEntrypoint, python_from_rpc
 
-from app import FAVICON_SVG, build_dynamic_worker_code, get_example, render_example_page, route
+from app import (
+    FAVICON_SVG,
+    JOURNEYS_BY_SLUG,
+    build_dynamic_worker_code,
+    get_example,
+    render_cell_output_flow_option,
+    render_example_not_found,
+    render_example_page,
+    render_home,
+    render_journey_not_found,
+    render_journey_page,
+    render_journeys_index,
+    render_mobile_run_first_option,
+    render_not_found,
+    render_sitemap,
+)
 from asset_manifest import HTML_CACHE_VERSION
 from examples import PYTHON_VERSION
+from security import CONTENT_SECURITY_POLICY, STRICT_TRANSPORT_SECURITY
 
 import observability
 import worker_asgi_bridge as asgi
@@ -22,6 +38,10 @@ TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverif
 SMOKE_BYPASS_HEADER = "x-pythonbyexample-smoke-secret"
 TURNSTILE_CLEARANCE_COOKIE = "pbe_turnstile_clearance"
 DEFAULT_TURNSTILE_CLEARANCE_SECONDS = 60 * 60 * 8
+# Generous ceiling for an edited example program (the largest curated
+# program is well under 4 KB). Bounds the bytes we hash, embed in a
+# Dynamic Worker module, and echo back into the page.
+MAX_SUBMITTED_BODY_BYTES = 100_000
 
 try:
     from js import Object, Request as JsRequest, caches, fetch as js_fetch
@@ -46,7 +66,7 @@ def _to_js_object(value):
 
 
 def _html(body, status=200):
-    return HTMLResponse(body, status_code=status)
+    return HTMLResponse(body, status_code=status, headers={"Content-Type": "text/html; charset=utf-8"})
 
 
 def _wide_event(request: Request) -> dict | None:
@@ -79,13 +99,37 @@ def should_cache_get_url(url: str) -> bool:
     return not path.startswith("/layout-options/")
 
 
+# Static assets get the same set from public/_headers; Worker-rendered
+# HTML needs them applied here. frame-ancestors 'none' (plus the legacy
+# X-Frame-Options) keeps the Run button out of clickjacking frames.
+SECURITY_HEADERS = {
+    "X-Content-Type-Options": "nosniff",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "X-Frame-Options": "DENY",
+    "Strict-Transport-Security": STRICT_TRANSPORT_SECURITY,
+    "Content-Security-Policy": CONTENT_SECURITY_POLICY,
+}
+
+
+def _apply_security_headers(response) -> None:
+    headers = getattr(response, "headers", None)
+    if headers is None:
+        return
+    for name, value in SECURITY_HEADERS.items():
+        headers.set(name, value)
+
+
 def html_cache_key_url(url: str, turnstile_site_key: str = "") -> str:
-    separator = "&" if "?" in url else "?"
+    parsed = urlparse(url)
+    # Routes ignore ordinary query strings, so the Worker cache key must ignore
+    # them too. This prevents tracking or cache-busting parameters from creating
+    # unbounded copies of identical HTML.
+    base_url = parsed._replace(path=parsed.path or "/", params="", query="", fragment="").geturl()
     turnstile_fragment = ""
     if turnstile_site_key:
         digest = hashlib.sha256(turnstile_site_key.encode("utf-8")).hexdigest()[:8]
         turnstile_fragment = f"&__turnstile={digest}"
-    return f"{url}{separator}__html_v={HTML_CACHE_VERSION}{turnstile_fragment}"
+    return f"{base_url}?__html_v={HTML_CACHE_VERSION}{turnstile_fragment}"
 
 
 @app.get("/favicon.svg")
@@ -94,9 +138,8 @@ async def favicon():
 
 
 @app.get("/", response_class=HTMLResponse)
-async def home(request: Request):
-    response = route(str(request.url), method="GET")
-    return _html(response.body, response.status)
+async def home():
+    return _html(render_home())
 
 
 def _env_text(request: Request, name: str) -> str:
@@ -131,7 +174,8 @@ def _turnstile_clearance_seconds(request: Request) -> int:
 
 def _smoke_bypass_ok(request: Request) -> bool:
     bypass_secret = _env_text(request, "PBE_SMOKE_BYPASS_SECRET")
-    return bool(bypass_secret and request.headers.get(SMOKE_BYPASS_HEADER) == bypass_secret)
+    supplied = request.headers.get(SMOKE_BYPASS_HEADER, "")
+    return bool(bypass_secret) and hmac.compare_digest(supplied, bypass_secret)
 
 
 def _sign_clearance(secret: str, expires: int) -> str:
@@ -160,9 +204,11 @@ def _requires_turnstile(request: Request) -> bool:
     if not _turnstile_secret(request) or _smoke_bypass_ok(request):
         return False
     mode = _turnstile_challenge_mode(request)
-    if mode in {"session", "once", "once-per-session"}:
-        return not _clearance_valid(request)
-    return False
+    if mode == "off":
+        return False
+    # Any other value — including a typo of "session" — fails closed and
+    # requires the challenge rather than silently disabling protection.
+    return not _clearance_valid(request)
 
 
 def _set_turnstile_clearance(response: HTMLResponse, request: Request) -> None:
@@ -182,10 +228,35 @@ def _set_turnstile_clearance(response: HTMLResponse, request: Request) -> None:
     )
 
 
+@app.get("/layout-options/mobile-run-first", response_class=HTMLResponse)
+async def mobile_run_first_option():
+    return _html(render_mobile_run_first_option(get_example("values")))
+
+
+@app.get("/layout-options/cell-output-flow", response_class=HTMLResponse)
+async def cell_output_flow_option():
+    return _html(render_cell_output_flow_option(get_example("values")))
+
+
+@app.get("/journeys", response_class=HTMLResponse)
+async def journeys_index():
+    return _html(render_journeys_index())
+
+
+@app.get("/journeys/{slug}", response_class=HTMLResponse)
+async def journey_page(slug: str):
+    journey = JOURNEYS_BY_SLUG.get(slug)
+    if journey is None:
+        return _html(render_journey_not_found(), 404)
+    return _html(render_journey_page(journey))
+
+
 @app.get("/examples/{slug}", response_class=HTMLResponse)
 async def example_page(slug: str, request: Request):
-    response = route(str(request.url), method="GET", turnstile_site_key=_turnstile_site_key(request))
-    return _html(response.body, response.status)
+    example = get_example(slug)
+    if example is None:
+        return _html(render_example_not_found(slug), 404)
+    return _html(render_example_page(example, turnstile_site_key=_turnstile_site_key(request)))
 
 
 @app.post("/examples/{slug}", response_class=HTMLResponse)
@@ -193,8 +264,32 @@ async def run_example(slug: str, request: Request):
     example = get_example(slug)
     if example is None:
         return _html("<h1>Example not found</h1>", 404)
-    body = (await request.body()).decode("utf-8")
-    form = parse_qs(body)
+    raw_body = await request.body()
+    if len(raw_body) > MAX_SUBMITTED_BODY_BYTES:
+        if event := _wide_event(request):
+            event["example"] = {"slug": example["slug"], "code_bytes": len(raw_body), "rejected": "too_large"}
+        return _html(
+            render_example_page(
+                example,
+                output=f"Submitted code is too large (over {MAX_SUBMITTED_BODY_BYTES // 1000} kB). Trim it and run again.",
+                turnstile_site_key=_turnstile_site_key(request),
+            ),
+            413,
+        )
+    try:
+        body = raw_body.decode("utf-8")
+        form = parse_qs(body, encoding="utf-8", errors="strict")
+    except UnicodeDecodeError:
+        if event := _wide_event(request):
+            event["example"] = {"slug": example["slug"], "code_bytes": len(raw_body), "rejected": "invalid_utf8"}
+        return _html(
+            render_example_page(
+                example,
+                output="Submitted code must be valid UTF-8. Fix the encoding and try again.",
+                turnstile_site_key=_turnstile_site_key(request),
+            ),
+            400,
+        )
     submitted = form.get("code", [example["code"]])[0]
     submitted_bytes = submitted.encode("utf-8")
     if event := _wide_event(request):
@@ -301,8 +396,15 @@ async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str, st
             }
         ),
     )
-    response = await js_fetch(verify_request)
-    result = json.loads(await response.text())
+    try:
+        response = await js_fetch(verify_request)
+        if int(getattr(response, "status", 0) or 0) < 200 or int(getattr(response, "status", 0) or 0) >= 300:
+            raise ValueError("Turnstile Siteverify returned a non-success status")
+        result = json.loads(await response.text())
+        if not isinstance(result, dict):
+            raise ValueError("Turnstile Siteverify returned a non-object payload")
+    except Exception:
+        return False, "Turnstile verification failed. Please refresh the challenge and try again.", "fail"
     if result.get("success") is True:
         return True, "", "pass"
     return False, "Turnstile verification failed. Please refresh the challenge and try again.", "fail"
@@ -360,7 +462,10 @@ async def _run_example(request: Request, slug, code):
         status_code = int(getattr(response, "status", 200) or 200)
         worker_event["status_code"] = status_code
         output = await response.text()
-        if status_code >= 500:
+        if status_code == 413:
+            worker_event["outcome"] = "rejected"
+            worker_event["rejected"] = "output_too_large"
+        elif status_code >= 500:
             worker_event["outcome"] = "error"
             worker_event["error"] = {
                 "type": "DynamicWorkerHTTPError",
@@ -389,12 +494,21 @@ async def _run_example(request: Request, slug, code):
 
 @app.get("/{path:path}")
 async def not_found(path: str, request: Request):
-    response = route(str(request.url), method="GET")
-    # Non-HTML routes (such as /sitemap.xml) set their own Content-Type;
-    # wrapping them in HTMLResponse would discard it.
-    if response.headers:
-        return Response(response.body, status_code=response.status, headers=response.headers)
-    return _html(response.body, response.status)
+    # FastAPI dispatches the explicit routes above in production. Keep these
+    # fallbacks for direct Worker calls to the catch-all as well.
+    if path == "sitemap.xml":
+        return Response(
+            render_sitemap(),
+            headers={"Content-Type": "application/xml; charset=utf-8"},
+        )
+    if path == "journeys":
+        return _html(render_journeys_index())
+    if path.startswith("journeys/"):
+        journey = JOURNEYS_BY_SLUG.get(path.removeprefix("journeys/"))
+        if journey is not None:
+            return _html(render_journey_page(journey))
+        return _html(render_journey_not_found(), 404)
+    return _html(render_not_found(), 404)
 
 
 class Default(WorkerEntrypoint):
@@ -428,13 +542,18 @@ class Default(WorkerEntrypoint):
                         asgi_request,
                         self.env,
                         state={"wide_event": event},
+                        max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
                     )
+                    _apply_security_headers(response)
                     if getattr(response, "status", 200) == 200:
                         response.headers.set(
                             "Cache-Control",
                             "public, max-age=300, stale-while-revalidate=86400",
                         )
                         await caches.default.put(cache_key, response.clone())
+                    else:
+                        # Error pages must not linger in browser heuristic caches.
+                        response.headers.set("Cache-Control", "no-store")
                     return response
                 event["cache"] = "bypass"
                 response = await asgi.fetch(
@@ -442,17 +561,22 @@ class Default(WorkerEntrypoint):
                     asgi_request,
                     self.env,
                     state={"wide_event": event},
+                    max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
                 )
+                _apply_security_headers(response)
                 response.headers.set("Cache-Control", "no-store")
                 return response
 
             event["cache"] = "bypass"
-            return await asgi.fetch(
+            response = await asgi.fetch(
                 app,
                 asgi_request,
                 self.env,
                 state={"wide_event": event},
+                max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
             )
+            _apply_security_headers(response)
+            return response
         except Exception as exc:
             event["status_code"] = 500
             event["outcome"] = "error"

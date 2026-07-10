@@ -15,6 +15,14 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, field
 from typing import Callable
+from xml.sax.saxutils import escape as xml_escape
+
+# Padding emitted around every figure's registered canvas by
+# Canvas.to_svg(); the geometry contracts import these so paint code and
+# tests share one source of truth.
+PAD_TOP = 14
+PAD_X = 14
+PAD_BOTTOM = 14
 
 # ─── Palette ───────────────────────────────────────────────────────────
 # Aligned with public/site.css design tokens. These are the only
@@ -45,7 +53,6 @@ GAP_L = 16
 DOT_R = 2.5
 TICK_LEN = 6
 NODE_R = 14
-ARROW_OPEN = 5
 ARROW_CLOSED = 7
 
 NAME_W = 60
@@ -166,19 +173,6 @@ class Canvas:
     def tick(self, x, y, *, length=TICK_LEN):
         self.hairline(x, y - length / 2, x, y + length / 2)
 
-    def open_arrow(self, x1, y1, x2, y2):
-        """Axis-style arrow: hairline ending in tiny open V."""
-        self.hairline(x1, y1, x2, y2)
-        dx, dy = x2 - x1, y2 - y1
-        L = math.hypot(dx, dy) or 1
-        ux, uy = dx / L, dy / L
-        bx, by = x2 - ARROW_OPEN * ux, y2 - ARROW_OPEN * uy
-        px, py = -uy * (ARROW_OPEN / 2), ux * (ARROW_OPEN / 2)
-        self._add(
-            f'<path d="M{x2},{y2} L{bx + px},{by + py} M{x2},{y2} L{bx - px},{by - py}" '
-            f'stroke="{INK}" stroke-width="{W_HAIRLINE}" fill="none"/>'
-        )
-
     def closed_arrow(self, x1, y1, x2, y2, *, emphasis=False):
         """Becomes-this / dispatches-to: line + filled wedge.
 
@@ -207,7 +201,7 @@ class Canvas:
             attrs.append('font-style="italic"')
         if tracking:
             attrs.append(f'letter-spacing="{tracking}"')
-        self._add(f"<text {' '.join(attrs)}>{s}</text>")
+        self._add(f"<text {' '.join(attrs)}>{xml_escape(s)}</text>")
 
     def mono(self, x, y, s, *, anchor="middle", size=SIZE_MONO, color=INK):
         self._text(x, y, s, family=FONT_MONO, size=size, anchor=anchor, color=color)
@@ -297,7 +291,7 @@ class Canvas:
         self.dashed(x, y_top, x, y_bot)
         return x
 
-    def register(self, x, y, w, *, divisions=None, between=False):
+    def register(self, x, y, w, *, divisions=None):
         """Hairline with regular ticks."""
         self.hairline(x, y, x + w, y)
         if divisions is None:
@@ -305,10 +299,6 @@ class Canvas:
         step = w / divisions
         for i in range(divisions + 1):
             self.tick(x + i * step, y)
-        if between:
-            for i in range(divisions):
-                self.hairline(x + i * step + step / 2, y - TICK_LEN / 3,
-                              x + i * step + step / 2, y + TICK_LEN / 3)
 
     def node(self, x, y, label, *, r=NODE_R, ghost=False):
         weight = W_GHOST if ghost else W_STROKE
@@ -393,12 +383,6 @@ class Canvas:
         self.frame(210, 10, third_w, 36, label=third_label)
         self.mono(210 + third_w / 2, 32, third_value)
 
-    def dispatch(self, x, y, src, dst, *, src_w=70, dst_w=120):
-        """Source form → method form."""
-        self.object_box(x, y, "", src, w=src_w, soft=False)
-        self.closed_arrow(x + src_w + 4, y + OBJECT_H / 2, x + src_w + 36, y + OBJECT_H / 2)
-        self.object_box(x + src_w + 40, y, "", dst, w=dst_w, soft=True)
-
     def connect(self, ax, ay, ar, bx, by, br, *, kind="stroke", offset=0):
         """Edge between two circles, terminating tangentially at each boundary.
 
@@ -462,7 +446,7 @@ class Canvas:
     INTRINSIC_SCALE = 1.6
 
     def to_svg(self) -> str:
-        pad_top, pad_x, pad_bottom = 14, 14, 14
+        pad_top, pad_x, pad_bottom = PAD_TOP, PAD_X, PAD_BOTTOM
         vb_w = self.w + 2 * pad_x
         vb_h = self.h + pad_top + pad_bottom
         out_w = round(vb_w * self.INTRINSIC_SCALE)
@@ -489,6 +473,7 @@ class Card:
     order: int | str
     figure: Callable[[Canvas], None]
     note: str = ""
+    caption: str = ""
     width: int = 320
     height: int = 110
     is_journey: bool = False
@@ -503,6 +488,12 @@ class Card:
             eyebrow = f"{self.section} · {self.order:02d}"
         else:
             eyebrow = f"Journey · {self.order}"
+        # The production caption is part of what reviewers must judge:
+        # a caption that asserts something the figure does not draw is a
+        # shipped defect, so the gestalt shows the exact figcaption text.
+        caption_html = (
+            f'  <p class="caption">{xml_escape(self.caption)}</p>\n' if self.caption else ""
+        )
         note_html = f'  <p class="note">{self.note}</p>\n' if self.note else ""
         score_html = ""
         if self.score is not None:
@@ -518,6 +509,7 @@ class Card:
             f'  <p class="eyebrow">{eyebrow}</p>\n'
             f'  <h3>{self.title}</h3>\n'
             f"  {c.to_svg()}\n"
+            f"{caption_html}"
             f"{score_html}"
             f"{note_html}"
             f"</div>"

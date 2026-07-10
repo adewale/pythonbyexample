@@ -21,6 +21,9 @@ if (textarea && form) {
         syntaxHighlighting(highlightStyle),
         lineNumbers(),
         EditorView.lineWrapping,
+        EditorView.contentAttributes.of({
+          'aria-label': textarea.getAttribute('aria-label') || 'Editable Python example code',
+        }),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) textarea.value = update.state.doc.toString();
         }),
@@ -41,5 +44,5 @@ if (textarea && form) {
   }
 
   form.addEventListener('submit', syncTextarea);
-  window.pythonByExampleEditor = { setValue, syncTextarea };
+  window.pythonByExampleEditor = { setValue, syncTextarea, focus: () => view.focus() };
 }

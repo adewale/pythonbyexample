@@ -5,31 +5,40 @@ The score dictionaries are curated editorial data. This check does not
 pretend to grade prose automatically; it makes the gate explicit:
 examples below the hard minimum must either have a narrow waiver or be
 tracked in the improvement backlog with a concrete next action.
+
+Waivers are time-boxed: `expires` must be an ISO date in the future,
+and a waiver whose example has recovered to target is flagged as stale
+so the registry only ever describes live editorial debt.
 """
 from __future__ import annotations
 
+import datetime
 import sys
-import tomllib
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-REGISTRY_PATH = ROOT / "docs" / "quality-registries.toml"
-sys.path.insert(0, str(ROOT))
-
-from src.examples import EXAMPLES  # noqa: E402
-from src.marginalia import EXAMPLE_QUALITY_SCORES, SECTION_FIGURE_SCORES  # noqa: E402
-
-
-def _load_registry() -> dict:
-    return tomllib.loads(REGISTRY_PATH.read_text())
+from _common import load_catalog, load_registry
+from src.marginalia import EXAMPLE_QUALITY_SCORES, SECTION_FIGURE_SCORES
 
 
 def _entry_has_text(entry: dict, *keys: str) -> bool:
     return all(isinstance(entry.get(key), str) and bool(entry[key].strip()) for key in keys)
 
 
+def check_expiry_date(value, *, today: datetime.date | None = None) -> str | None:
+    """Return an error string when `value` is not a future ISO date."""
+    today = today or datetime.date.today()
+    if not isinstance(value, str):
+        return f"expires must be an ISO date string, got {value!r}"
+    try:
+        expires = datetime.date.fromisoformat(value)
+    except ValueError:
+        return f"expires must be an ISO date (YYYY-MM-DD), got {value!r}"
+    if expires <= today:
+        return f"expired on {value}; re-review and extend or fix the example"
+    return None
+
+
 def main() -> int:
-    registry = _load_registry()
+    registry = load_registry()
     gates = registry.get("quality_gates", {})
     target = float(gates.get("example_target", 9.0))
     hard_min = float(gates.get("example_hard_min", 8.5))
@@ -43,7 +52,8 @@ def main() -> int:
             print(error, file=sys.stderr)
         return 1
 
-    slugs = {example["slug"] for example in EXAMPLES}
+    _catalog, examples = load_catalog()
+    slugs = {example["slug"] for example in examples}
     waivers = registry.get("quality_waivers", {})
     backlog = registry.get("quality_improvement_backlog", {})
     section_backlog = registry.get("journey_section_improvement_backlog", {})
@@ -56,13 +66,33 @@ def main() -> int:
     if ghost_scores:
         errors.append(f"quality scores for unknown examples: {sorted(ghost_scores)}")
 
+    for label, registry_scores in (
+        ("example", EXAMPLE_QUALITY_SCORES),
+        ("journey section", SECTION_FIGURE_SCORES),
+    ):
+        for key, entry in registry_scores.items():
+            if not isinstance(entry, tuple) or len(entry) != 2:
+                errors.append(f"{label} score {key}: not a (score, commentary) tuple")
+                continue
+            score, commentary = entry
+            if not isinstance(score, (int, float)) or not 0 <= score <= 10:
+                errors.append(f"{label} score {key}: {score!r} outside the rubric's [0, 10]")
+            if not isinstance(commentary, str) or not commentary.strip():
+                errors.append(f"{label} score {key}: empty commentary")
+
     for slug in sorted(waivers):
         if slug not in slugs:
             errors.append(f"quality waiver for unknown example: {slug}")
             continue
         entry = waivers[slug]
-        if not _entry_has_text(entry, "reason", "expires") or not isinstance(entry.get("accepted_min"), (int, float)):
+        if not _entry_has_text(entry, "reason") or not isinstance(entry.get("accepted_min"), (int, float)):
             errors.append(f"quality waiver {slug} must include accepted_min, reason, and expires")
+        expiry_error = check_expiry_date(entry.get("expires"))
+        if expiry_error:
+            errors.append(f"quality waiver {slug}: {expiry_error}")
+        waived_score = EXAMPLE_QUALITY_SCORES.get(slug, (0.0, ""))[0]
+        if waived_score >= target:
+            errors.append(f"quality waiver {slug} is stale because score is now {waived_score:.1f}")
 
     for slug in sorted(backlog):
         if slug not in slugs:
@@ -108,6 +138,15 @@ def main() -> int:
         for title in weak_sections:
             if title not in section_backlog:
                 errors.append(f"journey section figure below {section_min:.1f}: {title}")
+
+    journey_average_min = gates.get("journey_average_min")
+    if journey_average_min is not None and SECTION_FIGURE_SCORES:
+        average = sum(score for score, _ in SECTION_FIGURE_SCORES.values()) / len(SECTION_FIGURE_SCORES)
+        if average < float(journey_average_min):
+            errors.append(
+                f"journey section figure average {average:.2f} below "
+                f"journey_average_min {float(journey_average_min):.1f}"
+            )
 
     if errors:
         for error in errors:

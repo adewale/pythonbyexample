@@ -15,10 +15,8 @@ from __future__ import annotations
 
 import re
 import sys
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-EXAMPLES_DIR = ROOT / "src" / "example_sources"
+from _common import EXAMPLES_DIR
 
 
 NOTE_RE = re.compile(r":::note\n(.*?)\n:::", re.DOTALL)
@@ -45,23 +43,27 @@ def main() -> int:
     errors: list[str] = []
     for path in sorted(EXAMPLES_DIR.glob("*.md")):
         text = path.read_text()
-        notes_match = NOTE_RE.search(text)
-        if not notes_match:
+        note_blocks = list(NOTE_RE.finditer(text))
+        if not note_blocks:
             continue
-        body_outside_notes = text[: notes_match.start()] + text[notes_match.end():]
+        # Every note block is checked, and the grounding body excludes
+        # ALL note blocks — a bullet may not be "supported" by another
+        # note asserting the same undemonstrated thing.
+        body_outside_notes = NOTE_RE.sub("", text)
         body_tokens = tokens(body_outside_notes)
-        for raw_line in notes_match.group(1).splitlines():
-            line = raw_line.strip()
-            if not line.startswith("- "):
-                continue
-            bullet = line[2:]
-            bullet_tokens = tokens(bullet)
-            if not bullet_tokens:
-                continue
-            if not bullet_tokens & body_tokens:
-                errors.append(
-                    f"{path}: note bullet has no keyword overlap with the rest of the page: {bullet!r}"
-                )
+        for notes_match in note_blocks:
+            for raw_line in notes_match.group(1).splitlines():
+                line = raw_line.strip()
+                if not line.startswith("- "):
+                    continue
+                bullet = line[2:]
+                bullet_tokens = tokens(bullet)
+                if not bullet_tokens:
+                    continue
+                if not bullet_tokens & body_tokens:
+                    errors.append(
+                        f"{path}: note bullet has no keyword overlap with the rest of the page: {bullet!r}"
+                    )
     if errors:
         for error in errors:
             print(error, file=sys.stderr)

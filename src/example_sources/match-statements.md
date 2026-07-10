@@ -93,5 +93,6 @@ unknown action: jump
 :::note
 - `match` compares structure, not just equality.
 - Patterns can bind names such as `x` and `y` while matching.
+- Mapping patterns match when the named keys are present; extra keys in the subject are ignored rather than failing the case.
 - Put the catch-all `_` case last, because cases are tried from top to bottom.
 :::

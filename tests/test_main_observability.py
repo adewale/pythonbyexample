@@ -198,6 +198,42 @@ class MainObservabilityTests(MainModuleHarness):
         )
         self.assertEqual(destroyed, [True])
 
+    def test_run_example_marks_dynamic_worker_output_limit_as_rejected(self):
+        main = self.import_main()
+
+        class FakeJsRequest:
+            @staticmethod
+            def new(url, options):
+                return SimpleNamespace(url=url, options=options)
+
+        class Response:
+            status = 413
+            async def text(self):
+                return "Program output exceeded the 64 kB limit. Reduce output and try again."
+
+        class Worker:
+            def getEntrypoint(self):
+                return SimpleNamespace(fetch=lambda request: _response(Response()))
+
+        main.JsRequest = FakeJsRequest
+        main.create_once_callable = lambda callback: SimpleNamespace(destroy=lambda: None)
+        main.python_from_rpc = lambda response: response
+        event = {"request_id": "req-413"}
+        request = SimpleNamespace(
+            state=SimpleNamespace(wide_event=event),
+            scope={"env": SimpleNamespace(LOADER=SimpleNamespace(get=lambda *_: Worker()))},
+            url="https://www.pythonbyexample.dev/examples/values",
+        )
+        output = asyncio.run(main._run_example(request, "values", "print('x')"))
+        self.assertIn("output exceeded", output)
+        self.assertEqual(event["worker"]["status_code"], 413)
+        self.assertEqual(event["worker"]["outcome"], "rejected")
+        self.assertEqual(event["worker"]["rejected"], "output_too_large")
+
+
+async def _response(value):
+    return value
+
 
 if __name__ == "__main__":
     unittest.main()

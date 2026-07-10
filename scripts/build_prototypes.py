@@ -10,20 +10,11 @@ keep the marginalia-gestalt and operators-comparison review pages.
 from __future__ import annotations
 
 import html
-import sys
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT / "src"))
-
-from app import (  # noqa: E402  (sys.path set above)
-    JOURNEYS_BY_SLUG,
-    _walkthrough_cells,
-    get_example,
-    render_inline,
-)
-from marginalia import SECTION_FIGURES as JOURNEY_SECTION_FIGURES  # noqa: E402
-from marginalia import _render_svg  # noqa: E402
+from _common import ROOT
+from src.app import JOURNEYS_BY_SLUG, _walkthrough_cells, get_example, render_inline
+from src.marginalia import SECTION_FIGURES as JOURNEY_SECTION_FIGURES
+from src.marginalia import _render_svg
 
 OUT_DIR = ROOT / "public" / "prototyping"
 
@@ -320,7 +311,7 @@ def build_production_figures_gestalt() -> None:
     ship-vs-design gap visible: any figure shown here is wired through to
     production attachments OR available for attachment.
     """
-    from marginalia import ATTACHMENTS, FIGURES, SCORES  # noqa: PLC0415
+    from src.marginalia import ATTACHMENTS, FIGURES, SCORES
 
     # Build a slug→figure_names index of attached figures so we can mark
     # figures that already render somewhere on a real page.

@@ -89,7 +89,7 @@ try {
   let pageReady = false;
   for (let i = 0; i < 300; i++) {
     const ready = await client.send('Runtime.evaluate', {
-      expression: `location.href === ${JSON.stringify(url)} && document.readyState === 'complete' && !!document.querySelector('.lesson-step code')`,
+      expression: `location.href === ${JSON.stringify(url)} && document.readyState === 'complete' && !!document.querySelector('.lesson-step code') && !!window.pythonByExampleEditor && !!document.querySelector('.cm-content')`,
       returnByValue: true,
     });
     if (ready.result.value) {
@@ -129,12 +129,49 @@ try {
   const metrics = result.result.value;
   console.log(JSON.stringify(metrics, null, 2));
 
+  const interaction = await client.send('Runtime.evaluate', {
+    expression: `(() => new Promise((resolve) => {
+      const editor = document.querySelector('.cm-content');
+      const output = document.querySelector('.output-panel code');
+      const form = document.querySelector('form.runner-editor');
+      if (!editor || !output || !form || !window.pythonByExampleEditor) {
+        resolve({ error: 'runner controls did not initialize' });
+        return;
+      }
+      window.pythonByExampleEditor.setValue('x'.repeat(100001));
+      form.requestSubmit();
+      let attempts = 0;
+      const waitFor413 = () => {
+        const text = output.textContent;
+        if (text.includes('Submitted code is too large')) {
+          resolve({ ariaLabel: editor.getAttribute('aria-label'), text });
+          return;
+        }
+        if (++attempts === 100) {
+          resolve({ ariaLabel: editor.getAttribute('aria-label'), text, error: '413 message did not render' });
+          return;
+        }
+        setTimeout(waitFor413, 100);
+      };
+      waitFor413();
+    }))()`,
+    awaitPromise: true,
+    returnByValue: true,
+  });
+
   const failures = [];
+  if (interaction.result.value?.ariaLabel !== 'Editable Python example code') {
+    failures.push('CodeMirror editor is missing its accessible name');
+  }
+  if (interaction.result.value?.error) {
+    failures.push(interaction.result.value.error);
+  }
   for (const block of metrics.blocks) {
     if (block.ratio > 1.25) failures.push(`block ${block.index} visual line height ratio ${block.ratio.toFixed(2)} > 1.25`);
   }
   if (!metrics.loadedShiki) failures.push('Shiki did not load');
 
+  console.log(JSON.stringify({ runnerInteraction: interaction.result.value }, null, 2));
   client.close();
   if (failures.length) {
     console.error(`Browser layout check failed: ${failures.join('; ')}`);

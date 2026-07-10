@@ -11,13 +11,13 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts.fingerprint_assets import ASSETS, PUBLIC, html_version  # noqa: E402
-from src.app import SITE_URL, list_examples, render_example_page, render_home, render_sitemap  # noqa: E402
+from src.app import JOURNEYS, SITE_URL, list_examples, render_example_page, render_home, render_journeys_index, render_journey_page, render_sitemap  # noqa: E402
 from src.asset_manifest import ASSET_PATHS, HTML_CACHE_VERSION  # noqa: E402
 
 META_DESCRIPTION_RE = re.compile(r'<meta name="description" content="([^"]+)">')
 CANONICAL_RE = re.compile(r'<link rel="canonical" href="([^"]+)">')
 OG_URL_RE = re.compile(r'<meta property="og:url" content="([^"]+)">')
-HASHED_ASSET_RE = re.compile(r'/(site|syntax-highlight)\.[0-9a-f]{12}\.(css|js)')
+HASHED_ASSET_RE = re.compile(r'/(site|syntax-highlight|editor|runner|search)\.[0-9a-f]{12}\.(css|js)')
 JSON_LD_RE = re.compile(r'<script type="application/ld\+json">(.+?)</script>', re.S)
 OG_IMAGE_RE = re.compile(r'<meta property="og:image" content="([^"]+)">')
 
@@ -43,7 +43,7 @@ def assert_page_metadata(name: str, html: str, path: str, failures: list[str]) -
     og_url = OG_URL_RE.search(html)
     if not og_url or og_url.group(1) != expected_url:
         fail(f"{name}: og:url is {og_url.group(1) if og_url else None}, expected {expected_url}", failures)
-    if '/site.css' in html or '/syntax-highlight.js' in html:
+    if '/site.css' in html or '/syntax-highlight.js' in html or '/editor.js' in html or '/runner.js' in html:
         fail(f"{name}: references unfingerprinted CSS/JS asset", failures)
     if len(HASHED_ASSET_RE.findall(html)) < 2:
         fail(f"{name}: missing fingerprinted CSS/JS assets", failures)
@@ -75,6 +75,12 @@ def assert_sitemap(failures: list[str]) -> None:
     sitemap = render_sitemap()
     for example in list_examples():
         url = f"{SITE_URL}/examples/{example['slug']}"
+        if f"<loc>{url}</loc>" not in sitemap:
+            fail(f"sitemap: missing {url}", failures)
+    if f"<loc>{SITE_URL}/journeys</loc>" not in sitemap:
+        fail("sitemap: missing journeys index URL", failures)
+    for journey in JOURNEYS:
+        url = f"{SITE_URL}/journeys/{journey['slug']}"
         if f"<loc>{url}</loc>" not in sitemap:
             fail(f"sitemap: missing {url}", failures)
     if f"<loc>{SITE_URL}/</loc>" not in sitemap:
@@ -121,6 +127,7 @@ def main() -> int:
     assert_worker_cache_policy(failures)
     assert_sitemap(failures)
     assert_page_metadata("home", render_home(), "/", failures)
+    assert_page_metadata("journeys-index", render_journeys_index(), "/journeys", failures)
     for example in list_examples():
         assert_page_metadata(
             f"example:{example['slug']}",
@@ -128,11 +135,18 @@ def main() -> int:
             f"/examples/{example['slug']}",
             failures,
         )
+    for journey in JOURNEYS:
+        assert_page_metadata(
+            f"journey:{journey['slug']}",
+            render_journey_page(journey),
+            f"/journeys/{journey['slug']}",
+            failures,
+        )
     if failures:
         for failure in failures:
             print(f"FAIL: {failure}", file=sys.stderr)
         return 1
-    print(f"SEO/cache lint passed for 1 home page and {len(list_examples())} example pages.")
+    print(f"SEO/cache lint passed for 1 home page, 1 journey index, {len(JOURNEYS)} journeys, and {len(list_examples())} example pages.")
     return 0
 
 

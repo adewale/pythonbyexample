@@ -1,5 +1,6 @@
 import ast
 import contextlib
+import html as html_lib
 import importlib
 import io
 import json
@@ -10,7 +11,9 @@ from pathlib import Path
 
 from src.app import build_dynamic_worker_code, get_example, list_examples, render_example_page, render_home, route
 from src.example_loader import EXAMPLES_DIR, load_manifest, verify_example_output
+from src.asset_manifest import ASSET_PATHS
 from src.example_sources_data import EXAMPLE_SOURCE_FILES
+from src.security import CONTENT_SECURITY_POLICY
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -59,13 +62,25 @@ class AppTests(unittest.TestCase):
         self.assertIn("dict.items()", pairs[3][0])
         self.assertIn("scores.items()", pairs[3][1])
 
-    def test_every_example_executes_without_error(self):
+    # Environment-shaped examples carry hand-written expected_output
+    # (their real output depends on subprocess/socket/thread timing), so
+    # for them executing without error is the contract.
+    ENVIRONMENT_SHAPED_SLUGS = {
+        "networking",
+        "subprocesses",
+        "threads-and-processes",
+        "virtual-environments",
+    }
+
+    def test_every_example_executes_and_matches_expected_output(self):
         for example in list_examples():
             with self.subTest(slug=example["slug"]):
                 stdout = io.StringIO()
                 with contextlib.redirect_stdout(stdout):
                     exec(example["code"], {"__name__": "__main__"})
-                self.assertIsInstance(stdout.getvalue(), str)
+                if example["slug"] in self.ENVIRONMENT_SHAPED_SLUGS:
+                    continue
+                self.assertEqual(stdout.getvalue(), example["expected_output"])
 
     def test_language_surface_has_good_initial_coverage(self):
         sections = {example["section"] for example in list_examples()}
@@ -298,6 +313,8 @@ class AppTests(unittest.TestCase):
         self.assertNotIn("nav a { min-height: 40px; display: inline-flex; align-items: center; border-radius", css)
         self.assertNotIn("transition: all", css)
         self.assertIn("min-height: 40px", css)
+        self.assertIn("--accent-action: #C83800", css)
+        self.assertIn("background: var(--accent-action)", css)
         self.assertIn("box-shadow:", css)
         self.assertIn("background: transparent", css)
         self.assertIn("border-left: 2px solid var(--accent)", css)
@@ -310,17 +327,20 @@ class AppTests(unittest.TestCase):
         self.assertIn('class="example-shell"', html)
 
     def test_turnstile_widget_is_conditional_and_temporary(self):
-        html = render_example_page(get_example("hello-world"))
-        self.assertNotIn('class="turnstile-challenge"', html)
-        self.assertNotIn('<script src="https://challenges.cloudflare.com/turnstile', html)
+        page = render_example_page(get_example("hello-world"))
+        self.assertNotIn('class="turnstile-challenge"', page)
+        self.assertNotIn('<script src="https://challenges.cloudflare.com/turnstile', page)
 
         protected = render_example_page(get_example("hello-world"), turnstile_site_key="site-key-123")
+        runner = (ROOT / "public" / "runner.js").read_text()
         self.assertIn('data-turnstile-sitekey="site-key-123"', protected)
-        self.assertIn("https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit", protected)
-        self.assertIn("turnstile.render", protected)
-        self.assertIn("execution: 'execute'", protected)
-        self.assertNotIn("size: 'invisible'", protected)
-        self.assertIn("turnstile.remove", protected)
+        self.assertIn(ASSET_PATHS["RUNNER_JS"], protected)
+        self.assertNotIn("<script nonce=", protected)
+        self.assertNotIn("onclick=", protected)
+        self.assertIn("turnstile.render", runner)
+        self.assertIn("execution: 'execute'", runner)
+        self.assertNotIn("size: 'invisible'", runner)
+        self.assertIn("turnstile.remove", runner)
         self.assertNotIn('class="cf-turnstile"', protected)
 
         challenged = render_example_page(
@@ -339,9 +359,14 @@ class AppTests(unittest.TestCase):
         self.assertIn("/turnstile/v0/siteverify", main_source)
         self.assertIn("PBE_SMOKE_BYPASS_SECRET", main_source)
         self.assertIn("x-pythonbyexample-smoke-secret", main_source)
+        self.assertIn("Content-Security-Policy", main_source)
+        self.assertIn("Strict-Transport-Security", main_source)
+        self.assertIn("script-src-attr 'none'", CONTENT_SECURITY_POLICY)
+        self.assertNotIn("nonce-", CONTENT_SECURITY_POLICY)
+        self.assertNotIn("script-src 'unsafe-inline'", CONTENT_SECURITY_POLICY)
 
     def test_cf_workers_design_system_and_playground_lessons(self):
-        html = render_example_page(get_example("hello-world"), output="hello world\n")
+        html = render_example_page(get_example("hello-world"))
         css = (ROOT / "public" / "site.css").read_text()
         self.assertIn("#FF4801", css)
         self.assertIn("#F5F1EB", css)
@@ -367,14 +392,39 @@ class AppTests(unittest.TestCase):
         self.assertIn('.execution-time', css)
         self.assertIn('min-height: 1.5rem', css)
         self.assertIn('.cm-editor', css)
-        self.assertIn("function resetCode", html)
+        self.assertIn('data-original-code="', html)
+        self.assertIn(html_lib.escape(get_example("hello-world")["code"]), html)
+        hostile_example = {**get_example("hello-world"), "code": 'print("</script><script>alert(1)</script>")\n'}
+        hostile_html = render_example_page(hostile_example)
+        self.assertIn('data-original-code="print(&quot;&lt;/script&gt;&lt;script&gt;alert(1)&lt;/script&gt;&quot;)', hostile_html)
+        self.assertNotIn("<script nonce=", hostile_html)
+        self.assertIn(ASSET_PATHS["EDITOR_JS"], html)
+        self.assertIn(ASSET_PATHS["RUNNER_JS"], html)
+        self.assertNotIn("<script nonce=", html)
         self.assertIn('class="syntax-inline">print()</code>', html)
         self.assertNotIn("navigator.clipboard", html)
-        self.assertIn("fetch(form.action", html)
-        self.assertIn("new URLSearchParams(formData)", html)
-        self.assertIn("application/x-www-form-urlencoded", html)
-        self.assertIn("Running in a Dynamic Python Worker", html)
-        self.assertIn("catch (error)", html)
+
+        editor = (ROOT / "public" / "editor.js").read_text()
+        runner = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("EditorView.contentAttributes.of", editor)
+        self.assertIn("'aria-label': textarea.getAttribute('aria-label')", editor)
+        self.assertIn("textarea.dataset.originalCode", runner)
+        self.assertIn("window.pythonByExampleEditor?.setValue(value)", runner)
+        self.assertIn("fetch(form.action", runner)
+        self.assertIn("new URLSearchParams(formData)", runner)
+        self.assertIn("application/x-www-form-urlencoded", runner)
+        self.assertIn("response.status === 413", runner)
+        self.assertIn("Submitted code is too large", runner)
+        self.assertIn("catch (error)", runner)
+
+    def test_generated_drift_is_blocked_before_commit_and_merge(self):
+        hook = (ROOT / ".githooks" / "pre-commit").read_text()
+        installer = (ROOT / "scripts" / "install-git-hooks.sh").read_text()
+        verify_workflow = (ROOT / ".github" / "workflows" / "verify.yml").read_text()
+        self.assertIn("make check-generated", hook)
+        self.assertIn(".githooks/pre-commit", installer)
+        self.assertIn("make verify", verify_workflow)
+        self.assertFalse((ROOT / ".github" / "workflows" / "regenerate-generated-files.yml").exists())
 
     def test_conditionals_are_substantive_not_bare_minimum(self):
         example = get_example("conditionals")
@@ -444,6 +494,7 @@ class AppTests(unittest.TestCase):
         self.assertIn('def should_cache_get_url(url: str) -> bool:', main_source)
         self.assertIn('return not path.startswith("/layout-options/")', main_source)
         self.assertIn('response.headers.set("Cache-Control", "no-store")', main_source)
+        self.assertNotIn("route(", main_source)
 
     def test_dynamic_worker_execution_uses_hash_keyed_get_cache(self):
         main_source = (ROOT / "src" / "main.py").read_text()
@@ -645,18 +696,38 @@ class SocialCardTests(unittest.TestCase):
         self.assertIn('<meta property="og:image" content="https://www.pythonbyexample.dev/og/home.jpg">', home)
         self.assertIn('<meta name="twitter:card" content="summary_large_image">', home)
 
-    def test_pages_without_cards_fall_back_to_summary_twitter_card(self):
+    def test_journeys_index_references_social_card_and_collection_json_ld(self):
+        from src.app import render_journeys_index
+
+        page = render_journeys_index()
+        self.assertIn('<meta property="og:image" content="https://www.pythonbyexample.dev/og/journeys.jpg">', page)
+        self.assertIn('<meta name="twitter:card" content="summary_large_image">', page)
+        data = json.loads(re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S).group(1))
+        self.assertEqual(data["@type"], "CollectionPage")
+        self.assertEqual(data["name"], "Python learning journeys")
+        self.assertEqual(data["url"], "https://www.pythonbyexample.dev/journeys")
+
+    def test_journey_pages_reference_social_cards_and_collection_json_ld(self):
         from src.app import JOURNEYS, render_journey_page
 
-        page = render_journey_page(JOURNEYS[0])
-        self.assertIn('<meta name="twitter:card" content="summary">', page)
-        self.assertNotIn("og:image", page)
+        journey = JOURNEYS[0]
+        page = render_journey_page(journey)
+        self.assertIn(f'https://www.pythonbyexample.dev/og/journey-{journey["slug"]}.jpg', page)
+        self.assertIn('<meta name="twitter:card" content="summary_large_image">', page)
+        data = json.loads(re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S).group(1))
+        self.assertEqual(data["@type"], "CollectionPage")
+        self.assertEqual(data["url"], f'https://www.pythonbyexample.dev/journeys/{journey["slug"]}')
 
-    def test_social_card_image_exists_for_every_example(self):
+    def test_social_card_image_exists_for_every_published_page(self):
         for example in list_examples():
             with self.subTest(slug=example["slug"]):
                 self.assertTrue((ROOT / "public" / "og" / f"{example['slug']}.jpg").exists())
+        from src.app import JOURNEYS
+        for journey in JOURNEYS:
+            with self.subTest(slug=journey["slug"]):
+                self.assertTrue((ROOT / "public" / "og" / f"journey-{journey['slug']}.jpg").exists())
         self.assertTrue((ROOT / "public" / "og" / "home.jpg").exists())
+        self.assertTrue((ROOT / "public" / "og" / "journeys.jpg").exists())
 
     def test_card_html_composes_title_section_and_figure(self):
         from scripts.build_social_cards import render_social_card_html
@@ -666,6 +737,21 @@ class SocialCardTests(unittest.TestCase):
         self.assertIn("Closures", card)
         self.assertIn("Functions", card)
         self.assertIn("pythonbyexample.dev", card)
+
+    def test_card_html_includes_journeys_index(self):
+        from scripts.build_social_cards import card_html
+
+        cards = card_html()
+        self.assertIn("journeys", cards)
+        self.assertIn("Python learning journeys", cards["journeys"])
+        self.assertIn("Python By Example · Journeys", cards["journeys"])
+
+    def test_runtime_journeys_and_edge_labels_load_from_editorial_registry(self):
+        from src import app as app_module
+        from src.editorial_registry import journeys, see_also_edge_labels
+
+        self.assertEqual(app_module.JOURNEYS, journeys())
+        self.assertEqual(app_module.SEE_ALSO_EDGE_LABELS, see_also_edge_labels())
 
 
 class DiscoverabilityTests(unittest.TestCase):

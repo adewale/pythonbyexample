@@ -12,8 +12,8 @@ These tests fix two classes of bug the visual audit caught:
      /examples/values, the "STR"/"LIST"/"DICT" tags sat on top of the
      box above them, making the type names unreadable.
 
-Both contracts are asserted across all 109 figures. New figures are
-covered automatically because the tests iterate FIGURES.
+Both contracts are asserted across every figure in FIGURES. New
+figures are covered automatically because the tests iterate FIGURES.
 """
 from __future__ import annotations
 
@@ -31,9 +31,9 @@ ALL_FIGURES: dict[str, tuple] = FIGURES
 
 ATTR = re.compile(r'([\w-]+)="([^"]+)"')
 
-# Padding emitted by Canvas.to_svg(). Must agree with the constants in
-# src/marginalia_grammar.py.
-PAD_TOP, PAD_X, PAD_BOTTOM = 14, 14, 14
+# Padding emitted by Canvas.to_svg(), imported so the contracts and the
+# paint code share one source of truth.
+from src.marginalia_grammar import PAD_BOTTOM, PAD_TOP, PAD_X  # noqa: E402,F401
 
 # Character advance and text-width estimation live in
 # src/marginalia_grammar.py (BBOX_ADVANCE / text_width) so the paint
@@ -255,22 +255,18 @@ class FigureRegistrationContract(unittest.TestCase):
         orphan_refs = names - set(FIGURES)
         self.assertEqual(orphan_refs, set(), f"attachments reference unknown figures: {sorted(orphan_refs)}")
 
-    def test_no_unused_figure_paint_functions(self):
-        # A figure name counts as "used" if it ships on an example page
-        # (ATTACHMENTS), a journey section (SECTION_FIGURES), or appears
-        # anywhere in scripts/build_prototypes.py (banner layouts and
-        # gestalt galleries that aren't covered by the structured
-        # registries).
-        from pathlib import Path
+    # Figures that ship on no production page but are deliberately kept
+    # for the /prototyping layout pages. Grepping build_prototypes.py
+    # source would count a name in a comment as "used"; an explicit
+    # allowlist keeps the exception visible and reviewed.
+    PROTOTYPE_ONLY_FIGURES = {"tuple-no-mutation"}
 
+    def test_no_unused_figure_paint_functions(self):
         from src.marginalia import SECTION_FIGURES
 
-        prototype_src = (
-            Path(__file__).resolve().parents[1] / "scripts" / "build_prototypes.py"
-        ).read_text()
         used = {name for items in ATTACHMENTS.values() for _, name, _ in items}
         used |= {name for name, _ in SECTION_FIGURES.values()}
-        used |= {name for name in FIGURES if f'"{name}"' in prototype_src or f"'{name}'" in prototype_src}
+        used |= self.PROTOTYPE_ONLY_FIGURES
         unused = set(FIGURES) - used
         self.assertEqual(
             unused, set(),
@@ -344,6 +340,21 @@ class SectionFigureContract(unittest.TestCase):
         self.assertEqual(
             missing, set(),
             f"journey sections without a figure: {sorted(missing)}",
+        )
+
+    def test_every_section_figure_belongs_to_a_live_journey_section(self):
+        """The reverse direction: deleting a journey section must not
+        leave a dead SECTION_FIGURES entry whose paint function then
+        counts as "used" while rendering nowhere.
+        """
+        from src.app import JOURNEYS
+        from src.marginalia import SECTION_FIGURES
+
+        section_titles = {s["title"] for j in JOURNEYS for s in j["sections"]}
+        dead = set(SECTION_FIGURES) - section_titles
+        self.assertEqual(
+            dead, set(),
+            f"SECTION_FIGURES entries with no journey section: {sorted(dead)}",
         )
 
     def test_every_section_figure_points_to_a_real_paint_function(self):
@@ -442,6 +453,37 @@ class FigureCaptionContract(unittest.TestCase):
         ]
         self.assertEqual(duplicates, {}, "\n  " + "\n  ".join(message_lines))
 
+    def test_captions_are_complete_sentences_within_length(self):
+        """Contract 5c: every caption (example attachments and journey
+        section figures) is non-empty, ends with a period, and stays
+        under 220 characters so it reads as one figcaption line block.
+        Semantic figure/caption agreement stays a curator judgement —
+        the marginalia gestalt renders the production caption under
+        every figure precisely so review can catch a caption asserting
+        something the figure does not draw.
+        """
+        from src.marginalia import SECTION_FIGURES
+
+        failures: list[str] = []
+        captions = [
+            (f"{slug}/{name}", caption)
+            for slug, items in ATTACHMENTS.items()
+            for _, name, caption in items
+        ]
+        captions += [
+            (f"section {title!r}/{name}", caption)
+            for title, (name, caption) in SECTION_FIGURES.items()
+        ]
+        for where, caption in captions:
+            if not caption or not caption.strip():
+                failures.append(f"{where}: empty caption")
+                continue
+            if not caption.rstrip().endswith("."):
+                failures.append(f"{where}: caption does not end with a period")
+            if len(caption) > 220:
+                failures.append(f"{where}: caption is {len(caption)} chars (max 220)")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
 
 class FigureAnchorContract(unittest.TestCase):
     """Contract 6: every cell-N attachment anchor points to a real cell.
@@ -467,7 +509,12 @@ class FigureAnchorContract(unittest.TestCase):
             if ex is None:
                 failures.append(f"{slug}: ATTACHMENT exists but no markdown example matches")
                 continue
-            cells = ex.get("walkthrough", [])
+            # app.py renders ex["cells"] (one rendered cell per parsed
+            # :::cell/:::unsupported block), NOT ex["walkthrough"]
+            # (one entry per prose paragraph, unsupported cells
+            # dropped). Anchors must be validated against the rendered
+            # list or a figure can pass here yet never ship.
+            cells = ex.get("cells", [])
             for anchor, name, _ in items:
                 if anchor in ("before", "after-walkthrough"):
                     continue
@@ -481,8 +528,39 @@ class FigureAnchorContract(unittest.TestCase):
                 if int(match.group(1)) >= len(cells):
                     failures.append(
                         f"{slug}: anchor {anchor!r} → figure {name!r}, "
-                        f"but example has only {len(cells)} cell(s)"
+                        f"but example renders only {len(cells)} cell(s)"
                     )
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+    def test_every_attached_figure_appears_in_the_rendered_page(self):
+        """The end-to-end guarantee the per-piece contracts can't give:
+        if the anchor scheme in app.py drifted (say to "cell_0"), every
+        figure would silently vanish while the geometry suite stayed
+        green. Render each attached example's real page and assert its
+        banner markup is present, and likewise for journey pages.
+        """
+        from src.app import JOURNEYS, render_example_page, render_journey_page
+        from src.example_loader import load_examples
+
+        _, examples = load_examples()
+        by_slug = {ex["slug"]: ex for ex in examples}
+        failures: list[str] = []
+        for slug in ATTACHMENTS:
+            example = by_slug.get(slug)
+            if example is None:
+                continue
+            page = render_example_page(example)
+            expected = page.count('<div class="cell-banner')
+            if expected < 1:
+                failures.append(f"{slug}: rendered page contains no cell-banner")
+        for journey in JOURNEYS:
+            page = render_journey_page(journey)
+            figures = page.count('journey-section-figure')
+            if figures < len(journey["sections"]):
+                failures.append(
+                    f"journey {journey['slug']}: {figures} section figures rendered, "
+                    f"expected {len(journey['sections'])}"
+                )
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
 
@@ -524,6 +602,11 @@ class FigureSizeContract(unittest.TestCase):
     """
 
     BANNER_MAX_WIDTH = 640  # cell-banner--1 / journey-section-figure max-width
+    # When scaled to the banner width the SVG keeps its aspect ratio, so its
+    # displayed height is BANNER_MAX_WIDTH * vb_h/vb_w. A figure taller than
+    # this at full width reads as a portrait column dominating the page; the
+    # tallest shipped figure displays at ~341px, so 440 leaves real headroom.
+    BANNER_MAX_DISPLAY_HEIGHT = 440
 
     def test_every_figure_fits_the_banner(self):
         from src.marginalia_grammar import Canvas as _C
@@ -535,6 +618,20 @@ class FigureSizeContract(unittest.TestCase):
                 failures.append(
                     f"{name}: rendered width {rendered}px exceeds "
                     f"{self.BANNER_MAX_WIDTH}px banner ceiling"
+                )
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+    def test_no_figure_is_too_tall_at_banner_width(self):
+        failures: list[str] = []
+        for name, (_, w, h) in ALL_FIGURES.items():
+            vb_w = w + 2 * PAD_X
+            vb_h = h + PAD_TOP + PAD_BOTTOM
+            display_width = min(self.BANNER_MAX_WIDTH, round(vb_w * Canvas.INTRINSIC_SCALE))
+            display_height = display_width * vb_h / vb_w
+            if display_height > self.BANNER_MAX_DISPLAY_HEIGHT:
+                failures.append(
+                    f"{name}: displays {display_height:.0f}px tall at banner width, "
+                    f"exceeds {self.BANNER_MAX_DISPLAY_HEIGHT}px"
                 )
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
@@ -614,6 +711,76 @@ class FigureEmphasisScarcityContract(unittest.TestCase):
                     accents += 1
             if accents > 1:
                 failures.append(f"{name}: {accents} accent marks (rubric allows at most 1)")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
+class FigureWellFormedXMLContract(unittest.TestCase):
+    """Contract 11: every rendered figure is well-formed XML.
+
+    The other contracts inspect markup with regexes, which cannot
+    notice an unescaped `<` or `&` inside a label silently producing a
+    malformed (browser-dropped) SVG. Parse every figure with a real XML
+    parser, and prove the grammar escapes text by painting probe
+    strings containing XML metacharacters.
+    """
+
+    def test_every_figure_parses_as_xml(self):
+        import xml.etree.ElementTree as ET
+
+        failures: list[str] = []
+        for name, (paint, w, h) in ALL_FIGURES.items():
+            canvas = Canvas(w=w, h=h)
+            paint(canvas)
+            try:
+                ET.fromstring(canvas.to_svg())
+            except ET.ParseError as error:
+                failures.append(f"{name}: {error}")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+    def test_text_with_xml_metacharacters_is_escaped(self):
+        import xml.etree.ElementTree as ET
+
+        canvas = Canvas(w=200, h=60)
+        canvas.mono(0, 20, "a < b & c", anchor="start")
+        canvas.label(0, 40, 'x <= "y"')
+        tree = ET.fromstring(canvas.to_svg())
+        texts = [el.text for el in tree.iter() if el.tag.endswith("text")]
+        self.assertIn("a < b & c", texts)
+        self.assertIn('x <= "y"', texts)
+
+
+class FigureLineTextCollisionContract(unittest.TestCase):
+    """Contract 12: no SOLID line passes through a text label's interior.
+
+    A solid stroke crossing a label reads as an accidental strike-through.
+    DASHED lines are excluded: the grammar uses dashed strikes through
+    labels deliberately (e.g. crossing out `.append` to show a rejected
+    mutation), so only solid `<line>` elements are policed. Empty text
+    elements render nothing and are skipped.
+    """
+
+    INTERIOR_SLACK = 2.0
+
+    def test_no_solid_line_crosses_a_label(self):
+        failures: list[str] = []
+        for name, (paint, w, h) in ALL_FIGURES.items():
+            canvas = Canvas(w=w, h=h)
+            paint(canvas)
+            parts = parse_parts(canvas.parts)
+            texts = [
+                (text_bbox(attrs, content), content)
+                for kind, attrs, content in parts
+                if kind == "text" and content.strip()
+            ]
+            for kind, attrs, _content in parts:
+                if kind != "line" or "stroke-dasharray" in attrs:
+                    continue
+                lx, ly, lw, lh = line_bbox(attrs)
+                for (tx, ty, tw, th), content in texts:
+                    overlap_w = min(lx + lw, tx + tw) - max(lx, tx)
+                    overlap_h = min(ly + lh, ty + th) - max(ly, ty)
+                    if overlap_w > self.INTERIOR_SLACK and overlap_h > self.INTERIOR_SLACK:
+                        failures.append(f"{name}: solid line crosses label {content!r}")
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
 

@@ -35,18 +35,8 @@ finally:
 ```
 :::
 
-:::unsupported
-`socketpair()` returns two connected endpoints. `sendall` writes encoded bytes into one end, and `recv` reads up to 16 bytes off the other. The byte boundary is the whole point: `"ping".encode("utf-8")` produces `b'ping'`, which is what the socket actually moves. (This fragment runs in standard Python only — the Python By Example runner does not expose arbitrary sockets and disables outbound access for edited examples.)
-
-```python
-left, right = socket.socketpair()
-left.sendall("ping".encode("utf-8"))
-data = right.recv(16)
-```
-:::
-
 :::cell
-The complete version adds two things: a `try`/`finally` so both endpoints close even if `recv` or the surrounding work raises, and a second `print` that `decode`s the received bytes back into a Python `str` for display. The first `print` shows the raw bytes `b'ping'`; the second shows the decoded text `ping`.
+`socketpair()` returns two connected endpoints. `sendall` writes encoded bytes into one end and `recv` reads up to 16 bytes off the other — the byte boundary is the whole point: `"ping".encode("utf-8")` produces `b'ping'`, which is what the socket actually moves. The `try`/`finally` closes both endpoints even if `recv` raises, and the second `print` `decode`s the bytes back into a Python `str`. The in-browser sandbox cannot open sockets, so pressing Run here fails; this output came from a real socket pair under standard CPython at build time.
 
 ```python
 import socket
@@ -73,5 +63,5 @@ ping
 - Network protocols move bytes, not Python `str` objects.
 - Close real sockets when finished, usually with a context manager or `finally` block.
 - Use high-level HTTP libraries for application HTTP unless socket-level control is the lesson.
-- Cloudflare Workers support HTTP-style networking through platform APIs; this example avoids outbound calls so the editable lesson stays deterministic and safe.
+- The verified output came from a real `socketpair()` under standard CPython at build time; the in-browser sandbox cannot open sockets, so live runs of this page fail there.
 :::

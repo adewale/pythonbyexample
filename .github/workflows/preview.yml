@@ -38,21 +38,29 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: npx --yes wrangler whoami
+        run: npx --yes wrangler@4.90.0 whoami
       - name: Sync Python Workers vendor
         run: uv run pywrangler sync
+      # Workflow inputs are passed through env vars rather than interpolated
+      # into the script, so a crafted input cannot inject shell commands into
+      # steps that hold the Cloudflare API token.
       - name: Upload Cloudflare Preview
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PREVIEW_NAME: ${{ inputs.name || 'preview' }}
+          PREVIEW_MESSAGE: ${{ github.sha }}
         run: |
           set -x
           uv run pywrangler preview \
-            --name "${{ inputs.name || 'preview' }}" \
-            --message "${{ github.sha }}" \
+            --name "$PREVIEW_NAME" \
+            --message "$PREVIEW_MESSAGE" \
             --json
       - name: Smoke test deployed Preview
-        run: scripts/smoke_deployment.py "https://${{ inputs.name || 'preview' }}-pythonbyexample.adewale-883.workers.dev"
+        env:
+          PREVIEW_NAME: ${{ inputs.name || 'preview' }}
+          PBE_SMOKE_BYPASS_SECRET: ${{ secrets.PBE_SMOKE_BYPASS_SECRET }}
+        run: scripts/smoke_deployment.py "https://${PREVIEW_NAME}-pythonbyexample.adewale-883.workers.dev"
       - name: Dump wrangler logs on failure
         if: failure()
         run: |

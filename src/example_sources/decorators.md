@@ -43,6 +43,7 @@ def welcome(name):
 
 print(welcome("workers"))
 print(welcome.__name__)
+print(welcome.__doc__)
 ```
 :::
 

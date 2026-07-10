@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Generated artifacts are committed. Rebuild and refuse the commit when the
+# index would leave embedded data, fingerprints, prototypes, or card provenance
+# stale. CI enforces the same contract for contributors without this local hook.
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+make check-generated

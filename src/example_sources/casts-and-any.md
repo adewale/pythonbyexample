@@ -28,6 +28,10 @@ score = int(score_text)
 print(score + 2)
 print(cast(list[int], raw) is raw)
 print(type(raw).__name__)
+
+value: object = {"score": "98"}
+if isinstance(value, dict):
+    print(value["score"])
 ```
 :::
 

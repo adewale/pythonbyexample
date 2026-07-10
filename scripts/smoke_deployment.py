@@ -69,6 +69,12 @@ def has_exception_marker(body: str) -> str | None:
     return None
 
 
+def validate_smoke_bypass_origin(base_url: str, smoke_bypass_secret: str) -> str | None:
+    if smoke_bypass_secret and urllib.parse.urlparse(base_url).scheme != "https":
+        return "PBE_SMOKE_BYPASS_SECRET may only be sent to an https:// deployment origin"
+    return None
+
+
 def output_panel_text(body: str) -> str:
     match = re.search(
         r'<section[^>]*class="[^"]*output-panel[^"]*"[^>]*>.*?<pre><code>(.*?)</code></pre>',
@@ -86,6 +92,10 @@ def main() -> int:
     args = parser.parse_args()
 
     base = args.base_url.rstrip("/") + "/"
+    smoke_bypass_value = os.environ.get("PBE_SMOKE_BYPASS_SECRET", "")
+    if origin_error := validate_smoke_bypass_origin(base, smoke_bypass_value):
+        print(origin_error, file=sys.stderr)
+        return 1
     paths = SMOKE_PATHS + (args.paths or [])
     failures: list[str] = []
 
@@ -106,13 +116,11 @@ def main() -> int:
             failures.append(f"{url}: rendered exception marker {marker!r}")
         print(f"GET {status} {url}")
 
-    smoke_bypass_secret = os.environ.get("PBE_SMOKE_BYPASS_SECRET", "")
-
     if not args.skip_post:
         for slug, code, expected in POST_SMOKES:
             url = urljoin(base, f"examples/{slug}")
             try:
-                status, body = post_code(url, code, smoke_bypass_secret)
+                status, body = post_code(url, code, smoke_bypass_value)
             except urllib.error.HTTPError as exc:
                 failures.append(f"POST {url}: HTTP {exc.code}")
                 continue

@@ -7,22 +7,18 @@ while preventing silent holes or stale entries.
 """
 from __future__ import annotations
 
+import datetime
 import sys
-import tomllib
-from pathlib import Path
 
-ROOT = Path(__file__).resolve().parents[1]
-REGISTRY_PATH = ROOT / "docs" / "quality-registries.toml"
-sys.path.insert(0, str(ROOT))
-
-from src.examples import EXAMPLES  # noqa: E402
-from src.marginalia import ATTACHMENTS  # noqa: E402
+from _common import load_catalog, load_registry
+from src.marginalia import ATTACHMENTS
 
 
 def main() -> int:
-    registry = tomllib.loads(REGISTRY_PATH.read_text())
+    registry = load_registry()
     rationales = registry.get("no_figure_rationales", {})
-    slugs = {example["slug"] for example in EXAMPLES}
+    _catalog, examples = load_catalog()
+    slugs = {example["slug"] for example in examples}
     errors: list[str] = []
 
     for slug, entry in sorted(rationales.items()):
@@ -40,6 +36,17 @@ def main() -> int:
             errors.append(f"{slug}: missing no-figure reason")
         if not isinstance(review_after, str) or not review_after.strip():
             errors.append(f"{slug}: missing review_after")
+        else:
+            try:
+                due = datetime.date.fromisoformat(review_after)
+            except ValueError:
+                errors.append(f"{slug}: review_after must be an ISO date, got {review_after!r}")
+            else:
+                if due <= datetime.date.today():
+                    errors.append(
+                        f"{slug}: review_after {review_after} has passed; "
+                        f"re-review the no-figure decision and move the date or draw the figure"
+                    )
 
     if errors:
         for error in errors:

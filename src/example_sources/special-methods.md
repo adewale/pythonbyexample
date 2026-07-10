@@ -43,7 +43,7 @@ class Bag:
         return hash(tuple(self.items))
 
     def __lt__(self, other):
-        return len(self.items) < len(other.items)
+        return self.items < other.items
 
     def __contains__(self, item):
         return item in self.items
@@ -209,7 +209,7 @@ Bag(['a', 'b'])
 :::
 
 :::cell
-`__eq__` decides what equality means for the type. Defining `__eq__` removes the default `__hash__`, so add `__hash__` back when instances should work in sets or as dict keys. `__lt__` enables `<` and, with the rest of the order family, `sorted()`.
+`__eq__` decides what equality means for the type, comparing contents. `__lt__` orders by those same contents, so ordering stays consistent with equality (define one comparison and `functools.total_ordering` can fill in the rest; `__lt__` alone is enough for `<` and `sorted()`). Defining `__eq__` removes the default `__hash__`, so add it back only for types you treat as immutable: this `Bag` hashes its current items, so the last two lines show the hazard — a `Bag` found in a set becomes unfindable once its items change, because its hash no longer points at the bucket it was stored in.
 
 ```python
 class Bag:
@@ -223,22 +223,28 @@ class Bag:
         return hash(tuple(self.items))
 
     def __lt__(self, other):
-        return len(self.items) < len(other.items)
+        return self.items < other.items
 
 print(Bag(["a", "b"]) == Bag(["a", "b"]))
 print(Bag(["a"]) < Bag(["a", "b"]))
-print(hash(Bag(["a"])) == hash(Bag(["a"])))
+
+bag = Bag(["a"])
+seen = {bag}
+print(bag in seen)
+bag.items.append("b")
+print(bag in seen)
 ```
 
 ```output
 True
 True
 True
+False
 ```
 :::
 
 :::cell
-The container protocols make instances behave like built-in containers. `__contains__` powers `in`, `__getitem__`/`__setitem__` power subscription, and `__bool__` decides truthiness for `if` and `while`. See [container-protocols](/data-model/container-protocols) for the full surface.
+The container protocols make instances behave like built-in containers. `__contains__` powers `in`, `__getitem__`/`__setitem__` power subscription, and `__bool__` decides truthiness for `if` and `while`. See [container-protocols](/examples/container-protocols) for the full surface.
 
 ```python
 class Bag:
@@ -274,7 +280,7 @@ False
 :::
 
 :::cell
-`__call__` makes an instance callable like a function — useful for stateful operations whose configuration deserves a name. `__enter__` and `__exit__` make a class a context manager so it can be used with `with`. The focused [callable-objects](/data-model/callable-objects) and [context-managers](/data-model/context-managers) pages go deeper.
+`__call__` makes an instance callable like a function — useful for stateful operations whose configuration deserves a name. `__enter__` and `__exit__` make a class a context manager so it can be used with `with`. The focused [callable-objects](/examples/callable-objects) and [context-managers](/examples/context-managers) pages go deeper.
 
 ```python
 class Multiplier:

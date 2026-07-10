@@ -1,9 +1,14 @@
-# Rubric saturation analysis
+# Historical rubric saturation analysis (superseded)
 
-After six iteration passes, the figure system has 109 examples
-attached (one per slug on `main`) and 109 figures in
-`src/marginalia.py FIGURES`. Coverage is 100%. Distribution against
-`docs/example-figure-rubric.md`:
+> **Historical record, not release evidence.** This snapshot predates the
+> current figure rubric and its ≥8.5 production gate. It is retained to explain
+> the rubric changes below; use `docs/quality-registries.toml`,
+> `docs/example-figure-rubric.md`, and the quality checks for current scores
+> and release decisions.
+
+At the time of this analysis, the figure system attached one banner per slug
+from 124 paint functions in `src/marginalia.py FIGURES`. Its then-current
+scoring distribution was:
 
 | band | count | composition |
 |---|---:|---|
@@ -12,25 +17,22 @@ attached (one per slug on `main`) and 109 figures in
 | 8.5 | ~55 | strong but honest reuse, or generic placeholders |
 | 8.0 | ~16 | binding pictures, abstract pictures, weak reuses |
 
-Mean ≈ 8.7. **No figure scores below 8.0.** No figure exceeds 9.5.
-Pushing further requires changes to the rubric itself, because the
-remaining drag comes from criteria that are structurally over-strict
-for a library this size.
+The historical mean was approximately 8.7, with no score below 8.0. Those
+scores do **not** satisfy or describe today's production gate.
 
-## Why every figure cannot reach 9.0 under the current rubric
+## Why every figure could not reach 9.0 under the v1 rubric
 
-Two criteria in `docs/example-figure-rubric.md` cap most figures
-at 8.5 by design:
+Two v1 criteria capped most figures at 8.5 by design:
 
-### Criterion 2 — "Match the running variables (0–1.0)"
+### v1 Criterion 2 — "Match the running variables (0–1.0)"
 
 A figure loses up to 1.0 when its placeholders (`a`, `b`, `xs`) do
 not match the cell's specific names (`first`, `second`, `factor`,
 `numbers`). For a library of 109 figures across 109 cells, matching
-running variables one-for-one would require 109 bespoke paint
-functions; reuse becomes impossible. Today 12 figures are reused
-across multiple slugs precisely because they capture a *general*
-mechanism (`iter-protocol` covers `iterators`,
+running variables one-for-one would require a bespoke paint
+function per cell; reuse becomes impossible. Today 7 figures are
+reused across multiple slugs precisely because they capture a
+*general* mechanism (`iter-protocol` covers `iterators`,
 `iterator-vs-iterable`, `iterating-over-iterables`,
 `container-protocols`). Every reuse pays a tax against this
 criterion.
@@ -57,7 +59,7 @@ journey-section figure already sits at `/journeys/<slug>`, and the
 lesson appears alone at `/examples/<slug>`; readers don't see both
 beside each other. The "independence" penalty fires regardless.
 
-## What the rubric needs
+## Historical recommendations for the rubric
 
 Four upgrades would let further iteration produce visible quality
 gains rather than just shuffling the same band.
@@ -81,7 +83,7 @@ For canonical figures: criteria 2 and 9 stay as written. Cap at
 Result: ~70 library figures (today reuse-shaped) all reach 9.0;
 ~30 canonical figures reach 9.0–9.5 by being slug-specific.
 
-### 2. Replace criterion 2 with **"the figure earns its place"**
+### 2. Replace criterion 2 with **"the figure earns its place"** (implemented)
 
 Strict variable-matching loses information value at scale. The
 better question is "does swapping in this figure improve the cell
@@ -124,7 +126,7 @@ page-level rubric (0–1.0) would score:
 Today this is a manual judgement; codifying it would prevent the
 inevitable "too many figures" failure mode as coverage grows.
 
-## What this turn changed
+## Changes recorded by this historical analysis
 
 - Fixed the layout regression: cells stay 2-col always; figures live
   in banner rows BETWEEN cells. `hello-world` now matches production.

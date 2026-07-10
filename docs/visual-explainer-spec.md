@@ -9,8 +9,8 @@ between prose and code, which works at every viewport.
 ## Goals
 
 - **One column model per page type, fixed.** Example pages keep cells in
-  the prose|code 2-col grid; journey pages keep section heading + figure
-  in a 2-col grid. Figures never reflow the surrounding columns.
+  the prose|code 2-col grid; journey pages keep headings, figures, and lists
+  in one centered flow. Figures never reflow the surrounding columns.
 - **Universal, not viewport-conditional.** A reader at any width sees the
   same figure in the same place. No `@media` breakpoints for figure
   positioning; no overlay layer.
@@ -99,40 +99,34 @@ Captions are per-figure.
   font-style: italic;
   max-width: 44ch;
 }
-.cell-banner--1 figure { max-width: 440px; }
+.cell-banner--1 figure { max-width: clamp(280px, 65vw, 640px); }
 ```
 
 The cell never reflows: cells without banners around them and cells
 between banners look identical to today's layout.
 
-### Journey pages — figure beside section heading
+### Journey pages — figure between section heading and list
 
 Journey pages are not literate code; they are linear lists of items
-grouped under section headings. Here the figure lives **beside** the
-section heading in a 2-column row (heading-and-list on the left, figure
-on the right). The column model is fixed for the whole journey page:
-each section is a 2-col grid, every section the same shape.
+grouped under section headings. The figure renders as a centered block
+**between** the section heading and the example list — the same
+single-column flow on every viewport:
 
 ```css
-.journey-section {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: var(--space-4);
-}
-@media (min-width: 900px) {
-  .journey-section {
-    grid-template-columns: minmax(0, 1.4fr) minmax(220px, 320px);
-    align-items: start;
-  }
+.journey-section-figure {
+  margin: var(--space-4) auto;
+  width: 100%;
+  max-width: clamp(280px, 70vw, 640px);
 }
 ```
 
 One figure per section, faithful to the section's conceptual shift,
-scored against `docs/journey-visualisation-rubric.md`. The same template
-is reused for every journey; figures are mapped via
-`JOURNEY_SECTION_FIGURES` in `scripts/build_prototypes.py`. Sections
-without a figure render as a heading + list with no figure column,
-but production journeys are currently expected to have section figures.
+scored against `docs/journey-visualisation-rubric.md`. Journey-section
+metadata lives in `docs/quality-registries.toml` and is loaded through
+`src/editorial_registry.py`; `src/marginalia.py` renders the resulting
+registry entry. `render_for_section` returns empty for an unmapped title,
+but the SectionFigureContract requires every production journey section
+to have one.
 
 ### Why these two, not five
 
@@ -145,28 +139,16 @@ vary instead. Adding a second or third figure changes the banner's
 internal grid (auto-fit handles 1/2/3+), but the cells around it
 remain unchanged — no reflow, no cognitive context-switch.
 
-## Anchors and attachments
+## Anchors, attachments, and journey figures
 
-`src/marginalia.py` declares which figures attach where. `ATTACHMENTS`
-remains the single registry; its anchor vocabulary is the position
-grammar. Multiple tuples on the same position share one banner as a
-small multiple:
+`docs/quality-registries.toml` is the source of truth for attachment and
+caption metadata. Each `[[figure_attachments]]` row names an example slug,
+position, paint-function name, and caption; each
+`[[journey_section_figures]]` row names a journey-section title, figure, and
+caption. `src/editorial_registry.py` loads those rows, while
+`src/marginalia.py` owns executable paint functions plus the renderers.
 
-```python
-# implemented shape — the mutability pair renders as one two-figure banner
-ATTACHMENTS = {
-    "mutability": [
-        ("cell-0", "aliasing-mutation",
-         "Two names share one mutable list — appending through one "
-         "name changes the object visible through both."),
-        ("cell-0", "tuple-no-mutation",
-         "By contrast, a tuple is frozen — its contents cannot change "
-         "in place, so aliasing carries no mutation hazard."),
-    ],
-}
-```
-
-Banner positions (anchor spellings in parentheses):
+Banner positions (legacy `cell-N` spellings remain valid):
 
 | position                            | renders                           |
 |-------------------------------------|-----------------------------------|
@@ -174,10 +156,12 @@ Banner positions (anchor spellings in parentheses):
 | `after-cell-N` (or legacy `cell-N`) | once, after cell N (zero-indexed) |
 | `after-walkthrough`                 | once, after the last cell         |
 
-`render_banner(slug, position)` resolves both anchor spellings and
-returns one `.cell-banner` row holding every figure attached to that
-position. Adding a banner figure is a one-line edit in
-`src/marginalia.py`.
+`render_banner(slug, position)` normalizes both cell-anchor spellings and
+returns one `.cell-banner` row holding every figure at that position;
+`render_for_anchor` remains its compatibility wrapper. Journey pages call
+`render_for_section(section_title)` between a section heading and its list.
+Add or move metadata in the registry; add a `FIGURES` paint function only when
+the diagram itself is new.
 
 ## Authoring model
 
@@ -203,9 +187,10 @@ independently.
 
 ### What the project owner does
 
-Edit `ATTACHMENTS` in `src/marginalia.py`. Add a paint function (composed
-from grammar primitives) and register it in `FIGURES`. Append a tuple of
-`(anchor, figure_name, caption)` to `ATTACHMENTS[slug]`. Done.
+Edit `docs/quality-registries.toml`. Add `[[figure_attachments]]` and
+`[[example_figure_scores]]` entries. If the figure is new, add a paint
+function (composed from grammar primitives) and register it in `FIGURES` in
+`src/marginalia.py`. Done.
 
 ## Pipeline invariants (root-cause rules)
 
@@ -242,12 +227,16 @@ explicitly. Re-introducing either is a defect.
 - `src/marginalia_grammar.py` — palette, tokens, words, phrases, metrics.
   Aligned with `public/site.css` design tokens; figures use the four
   palette constants and never pick colours directly.
-- `src/marginalia.py` — figure registry (`FIGURES`) and attachment map.
-  Exports `render_banner(slug, position)` for the position grammar
-  (`render_for_anchor` remains as an anchor-spelling wrapper).
-- `src/app.py` — `_render_walkthrough` is the walkthrough-level
-  renderer: it interleaves cells with `before`, `after-cell-N`, and
-  `after-walkthrough` banners.
+- `docs/quality-registries.toml` — source of truth for attachments,
+  captions, journeys, and curated editorial scores.
+- `src/editorial_registry.py` — loader for the registry (or its generated
+  Worker fallback).
+- `src/marginalia.py` — executable figure registry (`FIGURES`) plus
+  `render_banner`, the `render_for_anchor` compatibility wrapper, and
+  `render_for_section`.
+- `src/app.py` — `_render_walkthrough` interleaves teaching cells with
+  `before`, `after-cell-N`, and `after-walkthrough` banners; journey pages
+  place section figures.
 - `public/site.css` — `.cell-banner` rules. Production uses the
   banner-between grammar; cells always render with the prose|code
   2-column grid and never receive a `has-figure` class.

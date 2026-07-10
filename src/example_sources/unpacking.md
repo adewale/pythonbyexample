@@ -36,7 +36,7 @@ describe(**data)
 :::
 
 :::cell
-Unpacking binds multiple names from one iterable or mapping. It makes the structure of data visible at the point where values are introduced.
+Tuple unpacking assigns each position to a name in one statement: `x` receives the first element of `point` and `y` the second. The assignment fails loudly if the number of names and elements disagree, which catches shape mistakes early.
 
 ```python
 point = (3, 4)
@@ -50,7 +50,7 @@ print(x, y)
 :::
 
 :::cell
-Starred unpacking handles variable-length sequences by collecting the middle or remaining values. This keeps common head-tail patterns readable.
+The starred name collects however many elements the head and tail don't claim — here `first` and `last` take the ends and `*middle` gathers the rest into a list. The same list works whether it has four elements or forty.
 
 ```python
 first, *middle, last = [1, 2, 3, 4]
@@ -63,9 +63,7 @@ print(first, middle, last)
 :::
 
 :::cell
-Dictionary unpacking with ** connects structured data to function calls. It is widely used in configuration, adapters, and code that bridges APIs.
-
-Dictionary unpacking with ** connects structured data to function calls. It is widely used in configuration, adapters, and code that bridges APIs.
+`describe(**data)` spreads the dictionary's keys as keyword arguments, so the call site never repeats `name=` and `language=` by hand. This is the bridge between dict-shaped data (configuration, parsed JSON) and function signatures.
 
 ```python
 def describe(name, language):

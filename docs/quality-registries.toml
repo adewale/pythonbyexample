@@ -1,8 +1,8 @@
-# Quality registries.
+# Quality and editorial registries.
 #
-# Source of truth for the rubric checks in `scripts/check_*.py`.
-# Each entry pins a contrast or footgun to a single owning page, so the
-# catalog has exactly one home for the lesson and verifiers can prove it.
+# Source of truth for rubric checks, journey structure, edge labels,
+# figure attachments/captions, and curated scores. Executable paint
+# functions stay in `src/marginalia.py`; mutable editorial data lives here.
 
 [[confusable_pairs]]
 name = "__str__ vs __repr__"
@@ -179,6 +179,12 @@ pairs = [
   ["comprehensions", "comprehension-patterns"],
 ]
 
+[paired_pages.cell_tokens]
+"iterators|iterating-over-iterables" = ["iterable", "iterator"]
+"iterators|iterator-vs-iterable" = ["iterable", "iterator", "iter("]
+"generators|generator-expressions" = ["generator", "expression"]
+"comprehensions|comprehension-patterns" = ["nested loops", "explicit loop"]
+
 [quality_gates]
 example_target = 9.0
 example_hard_min = 8.5
@@ -188,7 +194,7 @@ journey_average_min = 8.8
 [quality_waivers.hello-world]
 accepted_min = 7.0
 reason = "Traditional first example is intentionally tiny: program -> output is the goal, not a full concept tour."
-expires = "never"
+expires = "2026-12-01"
 
 [no_figure_rationales]
 # Slugs may be added here only when the page is constraint-shaped,
@@ -576,3 +582,2767 @@ progressive_walkthrough = 0.75
 representative_coverage = 0.75
 practical_usefulness = 0.75
 editorial_progression = 1.0
+
+# Editorial registries loaded by the site at runtime.
+# Keep prose, captions, scores, journey ordering, and edge labels here;
+# keep executable paint functions in src/marginalia.py.
+
+[[journeys]]
+slug = "runtime"
+title = "Runtime"
+summary = "This journey builds the smallest coherent model of Python at runtime: programs run statements, names refer to objects, objects have types, and operations ask those objects to do work."
+
+[[journeys.sections]]
+title = "Start with executable evidence."
+summary = "Learners first need to see that every page is a runnable program with visible output."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "hello-world"
+description = "start with a complete program and its output"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "values"
+description = "see that Python programs manipulate runtime objects"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "literals"
+description = "write small values directly in source code"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "variables"
+description = "understand that names bind to objects rather than storing values themselves"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "constants"
+description = "learn the convention Python uses for values that should not change"
+
+[[journeys.sections]]
+title = "Separate value, identity, and absence."
+summary = "This section prevents early confusion about equality, object identity, missing values, and truth tests."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "none"
+description = "represent expected absence with a singleton object"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "booleans"
+description = "combine facts with boolean operators"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "truthiness"
+description = "predict how objects behave in boolean contexts"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "equality-and-identity"
+description = "distinguish value equality from object identity"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "mutability"
+description = "predict when operations change an object in place"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "object-lifecycle"
+description = "explain references, garbage collection, and why identity can outlive a single name"
+
+[[journeys.sections]]
+title = "Read expressions as object operations."
+summary = "This section connects operators, text, and formatting to Python's data model."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "numbers"
+description = "use numeric objects and arithmetic operators"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "operators"
+description = "combine, compare, and test values with expression syntax"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "strings"
+description = "treat text as Unicode rather than raw bytes"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "string-formatting"
+description = "turn objects into readable text at output boundaries"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "bytes-and-bytearray"
+description = "contrast text with binary data and explicit decoding"
+
+[[journeys]]
+slug = "control-flow"
+title = "Control Flow"
+summary = "This journey follows how a Python program chooses which path runs, names facts at decision points, and exits early when the remaining work no longer applies."
+
+[[journeys.sections]]
+title = "Choose between paths."
+summary = "Start with ordinary branching and boolean predicates before reaching for more compact forms."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "booleans"
+description = "combine facts into readable conditions"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "truthiness"
+description = "use object truth values without hiding intent"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "operators"
+description = "build comparisons and boolean expressions for conditions"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "conditionals"
+description = "choose between branches with clear predicates"
+
+[[journeys.sections]]
+title = "Name and shape decisions."
+summary = "Some branches become clearer when the code names an intermediate value or dispatches on data shape."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "assignment-expressions"
+description = "name an intermediate value inside a condition when it improves clarity"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "match-statements"
+description = "dispatch on the shape of data rather than only on boolean tests"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "advanced-match-patterns"
+description = "combine destructuring, alternatives, and guards in pattern matching"
+
+[[journeys.sections]]
+title = "Stop as soon as the answer is known."
+summary = "Early exits make the successful path easier to read by moving exceptional or completed cases out of the way."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "guard-clauses"
+description = "show how early returns reduce nested conditional code"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "assertions"
+description = "state assumptions that should fail loudly while developing"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "exceptions"
+description = "leave the current path when ordinary return values are not enough"
+
+[[journeys]]
+slug = "iteration"
+title = "Iteration"
+summary = "This journey follows repeated work from ordinary loops to the iterator protocol: consume values, stop deliberately, and produce lazy streams only when they help."
+
+[[journeys.sections]]
+title = "Choose the right loop shape."
+summary = "Loops differ by what they consume, when they stop, and whether completion itself carries meaning."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "for-loops"
+description = "consume values from an iterable"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "while-loops"
+description = "repeat while a condition must be rechecked"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "break-and-continue"
+description = "interrupt or skip loop work intentionally"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "loop-else"
+description = "attach completion logic to loops that did not break"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "sentinel-iteration"
+description = "show `iter(callable, sentinel)` for repeated reads until a marker appears"
+
+[[journeys.sections]]
+title = "See the protocol behind `for`."
+summary = "The important mental shift is that loops consume producers through a protocol rather than special-casing lists."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "iterating-over-iterables"
+description = "separate value producers from value consumers"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "iterator-vs-iterable"
+description = "distinguish re-iterable collections from one-pass iterators"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "iterators"
+description = "use `iter()` and `next()` to expose the protocol behind `for`"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "generators"
+description = "write functions that produce values lazily"
+
+[[journeys.sections]]
+title = "Compose lazy value streams."
+summary = "Iterator pipelines are useful when code can transform values one at a time instead of materializing every intermediate result."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "generator-expressions"
+description = "create lazy one-pass streams with expression syntax"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "itertools"
+description = "compose iterator streams without materializing every value"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "yield-from"
+description = "delegate part of a generator to another iterable"
+
+[[journeys]]
+slug = "shapes"
+title = "Shapes"
+summary = "This journey teaches the core Python habit of choosing a data shape, transforming it directly, and making the result visible."
+
+[[journeys.sections]]
+title = "Pick the container that matches the question."
+summary = "Lists, tuples, dictionaries, and sets answer different questions about order, position, lookup, and uniqueness."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "lists"
+description = "store ordered mutable data"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "tuples"
+description = "group fixed-position values"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "dicts"
+description = "look up values by key"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "sets"
+description = "model uniqueness and membership"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "collections-module"
+description = "show `deque`, `Counter`, `defaultdict`, and `namedtuple` as specialized shapes"
+
+[[journeys.sections]]
+title = "Move between shapes deliberately."
+summary = "Most everyday Python code is data reshaping, so learners need the idioms for selecting, unpacking, and rebuilding values."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "unpacking"
+description = "bind names from structured values"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "slices"
+description = "select ranges from sequences"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "comprehensions"
+description = "build concrete collections from compact loops"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "comprehension-patterns"
+description = "compose filters and nested transformations"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "sorting"
+description = "order records with key functions"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "copying-collections"
+description = "contrast shallow copies, deep copies, and shared nested data"
+
+[[journeys.sections]]
+title = "Cross text and data boundaries."
+summary = "Programs often receive text and produce structured data, so parsing and serialization belong in the data journey."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "number-parsing"
+description = "turn text into numbers safely"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "json"
+description = "move structured data across a text boundary"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "regular-expressions"
+description = "extract structure from text patterns"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "datetime"
+description = "represent dates, times, and durations as typed values"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "csv-data"
+description = "show row-shaped text data and dictionary records"
+
+[[journeys]]
+slug = "interfaces"
+title = "Interfaces"
+summary = "This journey shows how Python grows from simple functions to callable APIs, object interfaces, protocols, and metaclasses."
+
+[[journeys.sections]]
+title = "Start with functions as named behavior."
+summary = "Functions are the first abstraction boundary because they name behavior and control how callers provide information."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "functions"
+description = "package behavior behind a name"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "keyword-only-arguments"
+description = "make important call-site choices explicit"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "positional-only-parameters"
+description = "hide parameter names that should remain implementation details"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "args-and-kwargs"
+description = "accept flexible call shapes when forwarding or adapting APIs"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "multiple-return-values"
+description = "return multiple related values as a tuple"
+
+[[journeys.sections]]
+title = "Use functions as values."
+summary = "Python functions can capture state, be passed around, and wrap other functions."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "scope-global-nonlocal"
+description = "control where assignment happens"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "closures"
+description = "capture state in nested functions"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "recursion"
+description = "solve self-similar problems with a base case"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "lambdas"
+description = "write small unnamed functions for expression positions"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "decorators"
+description = "wrap behavior without changing call sites"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "partial-functions"
+description = "show how to pre-fill arguments with `functools.partial`"
+
+[[journeys.sections]]
+title = "Bundle behavior with state."
+summary = "Classes become useful when data and behavior need to move together behind a stable interface."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "classes"
+description = "bundle state and behavior into a new object type"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "inheritance-and-super"
+description = "reuse and extend behavior through parent classes"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "dataclasses"
+description = "generate common methods for data containers"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "properties"
+description = "keep attribute syntax while adding computation or validation"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "classmethods-and-staticmethods"
+description = "choose between instance, class, and static behavior on a class"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "special-methods"
+description = "connect objects to Python syntax and built-ins"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "truth-and-size"
+description = "make objects work with truth tests and `len()`"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "container-protocols"
+description = "support membership, lookup, and assignment syntax"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "callable-objects"
+description = "make stateful instances callable like functions"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "operator-overloading"
+description = "define operators only when the operation is unsurprising"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "attribute-access"
+description = "customize fallback lookup and assignment carefully"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "bound-and-unbound-methods"
+description = "explain how attribute access turns a function into a bound method"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "descriptors"
+description = "explain the protocol behind methods, properties, and managed attributes"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "metaclasses"
+description = "customize class creation when ordinary class tools are not enough"
+
+[[journeys]]
+slug = "types"
+title = "Types"
+summary = "This journey maps Python's runtime object model to optional static annotations so learners know what types can and cannot promise."
+
+[[journeys.sections]]
+title = "Keep runtime and static analysis separate."
+summary = "The first lesson is that annotations describe expectations for tools while ordinary Python objects still run the program."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "type-hints"
+description = "document expected types and feed type checkers"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "protocols"
+description = "describe required behavior by structural shape"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "abstract-base-classes"
+description = "contrast runtime-enforced nominal interfaces with structural protocols"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "enums"
+description = "name a fixed set of symbolic values"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "runtime-type-checks"
+description = "show `type()`, `isinstance()`, and `issubclass()` without turning Python into Java"
+
+[[journeys.sections]]
+title = "Describe realistic data shapes."
+summary = "Typed Python becomes useful when annotations explain optional values, unions, callables, and JSON-like records."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "union-and-optional-types"
+description = "show `X | Y` and `None`-aware APIs"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "type-aliases"
+description = "name complex types with `type` statements or aliases"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "typed-dicts"
+description = "type dictionary records that come from JSON"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "structured-data-shapes"
+description = "choose between dataclass, NamedTuple, and TypedDict for records"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "literal-and-final"
+description = "express constrained values and names that should not be rebound"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "callable-types"
+description = "type functions that are passed as arguments"
+
+[[journeys.sections]]
+title = "Scale annotations for reusable libraries."
+summary = "Advanced typing exists to preserve information across reusable functions, containers, and decorators."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "generics-and-typevar"
+description = "write reusable typed containers and functions"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "paramspec"
+description = "preserve callable signatures through decorators"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "overloads"
+description = "describe APIs whose return type depends on the input shape"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "casts-and-any"
+description = "show escape hatches and their tradeoffs"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "newtype"
+description = "create distinct static identities for runtime-compatible values"
+
+[[journeys]]
+slug = "reliability"
+title = "Reliability"
+summary = "This journey follows the boundaries where programs fail, clean up, split into modules, communicate with the outside world, and run concurrent work."
+
+[[journeys.sections]]
+title = "Make failure explicit."
+summary = "Robust Python code distinguishes expected absence, broken assumptions, recoverable errors, and domain-specific failures."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "exceptions"
+description = "signal and recover from errors"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "assertions"
+description = "state internal assumptions"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "exception-chaining"
+description = "preserve the cause while translating an error"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "exception-groups"
+description = "handle multiple failures together"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "custom-exceptions"
+description = "name failures in the language of the problem domain"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "warnings"
+description = "signal soft problems and deprecations"
+
+[[journeys.sections]]
+title = "Control resource and module boundaries."
+summary = "Cleanup, deletion, imports, and modules define where responsibilities begin and end."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "context-managers"
+description = "pair setup with reliable cleanup"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "delete-statements"
+description = "remove names, attributes, and items intentionally"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "modules"
+description = "split code into importable files"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "import-aliases"
+description = "make imported names clear at use sites"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "packages"
+description = "show package directories, `__init__.py`, and public module boundaries"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "virtual-environments"
+description = "isolate dependencies for a project"
+
+[[journeys.sections]]
+title = "Handle operations that outlive one expression."
+summary = "I/O, testing, logging, subprocesses, and concurrency require different control boundaries from ordinary expressions."
+
+[[journeys.sections.items]]
+kind = "example"
+value = "async-await"
+description = "await concurrent I/O-shaped work"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "async-iteration-and-context"
+description = "consume async streams and cleanup protocols"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "logging"
+description = "record operational events without using `print()`"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "testing"
+description = "write deterministic tests with `unittest` or `pytest`"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "subprocesses"
+description = "run external commands safely"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "threads-and-processes"
+description = "contrast concurrency choices beyond `asyncio`"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "networking"
+description = "make HTTP or socket boundaries explicit"
+
+# Explicit see_also edge labels; default labels are inferred in src/app.py.
+[[see_also_edge_labels]]
+source = "break-and-continue"
+target = "loop-else"
+label = "contrast"
+
+[[see_also_edge_labels]]
+source = "assignment-expressions"
+target = "conditionals"
+label = "contrast"
+
+[[see_also_edge_labels]]
+source = "yield-from"
+target = "generators"
+label = "prerequisite"
+
+[[see_also_edge_labels]]
+source = "async-iteration-and-context"
+target = "async-await"
+label = "prerequisite"
+
+[[see_also_edge_labels]]
+source = "delete-statements"
+target = "mutability"
+label = "shared mechanism"
+
+[[see_also_edge_labels]]
+source = "positional-only-parameters"
+target = "keyword-only-arguments"
+label = "contrast"
+
+[[see_also_edge_labels]]
+source = "assertions"
+target = "exceptions"
+label = "alternative"
+
+[[see_also_edge_labels]]
+source = "exception-chaining"
+target = "exceptions"
+label = "builds on"
+
+[[see_also_edge_labels]]
+source = "exception-groups"
+target = "exceptions"
+label = "alternative"
+
+[[see_also_edge_labels]]
+source = "operators"
+target = "numbers"
+label = "related syntax"
+
+[[see_also_edge_labels]]
+source = "operators"
+target = "booleans"
+label = "condition building"
+
+[[see_also_edge_labels]]
+source = "operators"
+target = "assignment-expressions"
+label = "specialized expression"
+
+[[see_also_edge_labels]]
+source = "literals"
+target = "values"
+label = "value surface"
+
+[[see_also_edge_labels]]
+source = "literals"
+target = "strings"
+label = "text literal"
+
+[[see_also_edge_labels]]
+source = "literals"
+target = "sets"
+label = "container literal"
+
+# Example-cell figure attachments. figure names refer to FIGURES paint functions.
+[[figure_attachments]]
+slug = "mutability"
+anchor = "cell-0"
+figure = "aliasing-mutation"
+caption = "Two names share one mutable list — appending through one name changes the object visible through both."
+
+[[figure_attachments]]
+slug = "mutability"
+anchor = "cell-0"
+figure = "tuple-no-mutation"
+caption = "By contrast, a tuple is frozen — its contents cannot change in place, so aliasing carries no mutation hazard."
+
+[[figure_attachments]]
+slug = "variables"
+anchor = "cell-0"
+figure = "variables-bind"
+caption = "A name is a label that points at an object. Assignment binds the label; the object exists independently."
+
+[[figure_attachments]]
+slug = "lists"
+anchor = "cell-0"
+figure = "list-append"
+caption = "Lists are mutable sequences. `.append` extends the same list object — no new list is created."
+
+[[figure_attachments]]
+slug = "dicts"
+anchor = "cell-0"
+figure = "dict-buckets"
+caption = "Each key is hashed to a bucket; collisions chain into the next slot. Lookup is constant-time on average."
+
+[[figure_attachments]]
+slug = "unpacking"
+anchor = "cell-0"
+figure = "unpacking-bind"
+caption = "Left-side names bind to right-side positions; `*rest` gathers the middle into a list."
+
+[[figure_attachments]]
+slug = "comprehensions"
+anchor = "cell-0"
+figure = "comprehension-equivalence"
+caption = "A comprehension is a compact spelling of the equivalent for-loop with append, made into one expression."
+
+[[figure_attachments]]
+slug = "classes"
+anchor = "cell-0"
+figure = "class-triangle"
+caption = "Every Python value sits on the instance → class → type triangle; the metaclass is the type of the class."
+
+[[figure_attachments]]
+slug = "inheritance-and-super"
+anchor = "cell-0"
+figure = "mro-chain"
+caption = "Multiple inheritance forms a graph; C3 linearisation flattens it into the MRO Python uses for attribute lookup."
+
+[[figure_attachments]]
+slug = "dataclasses"
+anchor = "cell-0"
+figure = "dataclass-fields"
+caption = "Field declarations become the generated __init__ signature: declaration is the constructor."
+
+[[figure_attachments]]
+slug = "special-methods"
+anchor = "cell-0"
+figure = "operator-dispatch"
+caption = "Operators are method calls. `a + b` dispatches to `a.__add__(b)`; the data model exposes the syntax."
+
+[[figure_attachments]]
+slug = "decorators"
+anchor = "cell-0"
+figure = "decorator-rebind"
+caption = "@dec rebinds the name to wrapper(f₀); the original function survives only in the wrapper's closure cell."
+
+[[figure_attachments]]
+slug = "recursion"
+anchor = "cell-1"
+figure = "call-stack"
+caption = "Each call pushes a new frame with the same name and a smaller argument; the base case unwinds back up the stack."
+
+[[figure_attachments]]
+slug = "exception-chaining"
+anchor = "cell-0"
+figure = "exception-cause-context"
+caption = "`raise X from Y` sets `__cause__` (explicit); raising during except sets `__context__` (implicit)."
+
+[[figure_attachments]]
+slug = "hello-world"
+anchor = "cell-0"
+figure = "program-output"
+caption = "Every Python program starts as source and produces text on standard output. The smallest mental model."
+
+[[figure_attachments]]
+slug = "numbers"
+anchor = "cell-0"
+figure = "number-lines"
+caption = "Ints have unbounded precision; floats use IEEE doubles whose representable values thin out near the extremes."
+
+[[figure_attachments]]
+slug = "operators"
+anchor = "cell-0"
+figure = "expression-tree"
+caption = "An expression like `(2 + 3) * 4` parses as a tree; operator precedence and parentheses determine its shape."
+
+[[figure_attachments]]
+slug = "none"
+anchor = "cell-0"
+figure = "none-singleton"
+caption = "`None` is a single object: every name that points at None points at the same object."
+
+[[figure_attachments]]
+slug = "equality-and-identity"
+anchor = "cell-0"
+figure = "identity-and-equality"
+caption = "Two names can share one object (`is` and `==` both true) or hold two equal-but-distinct objects (only `==` true)."
+
+[[figure_attachments]]
+slug = "strings"
+anchor = "cell-0"
+figure = "codepoints-bytes"
+caption = "Strings are sequences of Unicode codepoints. UTF-8 encoding turns them into bytes; `é` takes two bytes, `c` takes one."
+
+[[figure_attachments]]
+slug = "for-loops"
+anchor = "cell-1"
+figure = "iterator-unroll"
+caption = "Each call to next() advances the caret one cell along the iterable — the same shape behind range(), strings, and any sequence."
+
+[[figure_attachments]]
+slug = "sorting"
+anchor = "cell-1"
+figure = "sort-stability"
+caption = "Python's sort is stable: items with equal keys keep their original order, so chained sorts compose predictably."
+
+[[figure_attachments]]
+slug = "keyword-only-arguments"
+anchor = "cell-0"
+figure = "kw-only-separator"
+caption = "A bare `*` divides positional or keyword arguments from keyword-only ones; callers must pass `c` and `d` by name."
+
+[[figure_attachments]]
+slug = "positional-only-parameters"
+anchor = "cell-0"
+figure = "positional-only-separator"
+caption = "A bare `/` divides positional-only arguments from positional-or-keyword ones; callers cannot name `a` or `b`."
+
+[[figure_attachments]]
+slug = "positional-only-parameters"
+anchor = "cell-0"
+figure = "kw-only-separator"
+caption = "In the same signature, the bare `*` works the other way: parameters after it, such as `clamp`, must be named at the call site."
+
+[[figure_attachments]]
+slug = "closures"
+anchor = "cell-0"
+figure = "closure-cell"
+caption = "The inner function keeps a reference into the outer scope's cell, so the captured factor survives the outer return."
+
+[[figure_attachments]]
+slug = "scope-global-nonlocal"
+anchor = "cell-0"
+figure = "scope-rings"
+caption = "Name lookup walks LEGB — local, enclosing, global, built-in — outward, returning the first binding it finds."
+
+[[figure_attachments]]
+slug = "generators"
+anchor = "cell-0"
+figure = "generator-ribbon"
+caption = "A generator's body is a timeline cut by yield gates: each next() advances to the next gate; locals survive the pause."
+
+[[figure_attachments]]
+slug = "type-hints"
+anchor = "cell-0"
+figure = "annotation-ghost"
+caption = "Annotations describe expected types for tools; the runtime accepts any object regardless."
+
+[[figure_attachments]]
+slug = "exceptions"
+anchor = "cell-0"
+figure = "exception-lanes"
+caption = "try, except, else, and finally as parallel lanes; a single coral path traces what actually runs."
+
+[[figure_attachments]]
+slug = "context-managers"
+anchor = "cell-0"
+figure = "context-bowtie"
+caption = "A context manager pairs setup with reliable cleanup; the raise path still routes through __exit__."
+
+[[figure_attachments]]
+slug = "async-await"
+anchor = "cell-1"
+figure = "async-swimlane"
+caption = "On await, the coroutine yields to the loop; the loop runs other work and resumes when the awaitable is ready."
+
+[[figure_attachments]]
+slug = "iterators"
+anchor = "cell-0"
+figure = "iter-protocol"
+caption = "iter() exposes the iterator behind for; next() pulls one value at a time until exhausted."
+
+[[figure_attachments]]
+slug = "slices"
+anchor = "cell-0"
+figure = "slice-ruler"
+caption = "Slice indices sit between cells; [:3] and [3:] partition the sequence at index 3, never overlapping or losing an item."
+
+[[figure_attachments]]
+slug = "operator-overloading"
+anchor = "cell-0"
+figure = "operator-dispatch"
+caption = "Defining `__add__` on a class lets `+` dispatch into the class's own behavior."
+
+[[figure_attachments]]
+slug = "iterator-vs-iterable"
+anchor = "cell-0"
+figure = "iter-protocol"
+caption = "An iterable knows how to produce an iterator (via iter()); the iterator knows how to produce values (via next())."
+
+[[figure_attachments]]
+slug = "iterator-vs-iterable"
+anchor = "cell-1"
+figure = "iterator-unroll"
+caption = "The iterator's caret only moves forward — after the first `list(stream)` drains it, nothing is left for the second."
+
+[[figure_attachments]]
+slug = "type-aliases"
+anchor = "cell-0"
+figure = "type-alias-name"
+caption = "A type alias names a complex annotation once so call sites read as the domain meaning, not the type composition."
+
+[[figure_attachments]]
+slug = "typed-dicts"
+anchor = "cell-0"
+figure = "typed-dict-shape"
+caption = "TypedDict gives each key a typed value, so `obj['x']` is checked against the declared shape."
+
+[[figure_attachments]]
+slug = "union-and-optional-types"
+anchor = "cell-0"
+figure = "union-types"
+caption = "`int | str | None` says one slot may hold any of three shapes — including expected absence."
+
+[[figure_attachments]]
+slug = "generics-and-typevar"
+anchor = "cell-0"
+figure = "generic-preservation"
+caption = "A generic preserves the input type through the call: the same T flows in and out of fn[T]."
+
+[[figure_attachments]]
+slug = "abstract-base-classes"
+anchor = "cell-0"
+figure = "class-triangle"
+caption = "An ABC sits on the same triangle as concrete classes; subclasses inherit the abstract methods they must implement."
+
+[[figure_attachments]]
+slug = "copying-collections"
+anchor = "cell-0"
+figure = "aliasing-mutation"
+caption = "Without copy() two names share the same object; mutating through one is visible through the other."
+
+[[figure_attachments]]
+slug = "truth-and-size"
+anchor = "cell-0"
+figure = "truth-and-size"
+caption = "bool(x) calls __bool__ first; if absent, __len__() != 0; if neither, defaults to True."
+
+[[figure_attachments]]
+slug = "descriptors"
+anchor = "cell-0"
+figure = "descriptor-protocol"
+caption = "Attribute access on an instance routes through the descriptor's __get__/__set__/__delete__ when the attribute is a descriptor."
+
+[[figure_attachments]]
+slug = "bound-and-unbound-methods"
+anchor = "cell-0"
+figure = "bound-unbound"
+caption = "Accessing a method via an instance binds self; accessing it via the class returns the underlying function."
+
+[[figure_attachments]]
+slug = "classmethods-and-staticmethods"
+anchor = "cell-0"
+figure = "method-kinds"
+caption = "Three method kinds, three first-argument conventions: classmethod gets the class, staticmethod gets nothing, instance gets self."
+
+[[figure_attachments]]
+slug = "callable-objects"
+anchor = "cell-0"
+figure = "callable-objects"
+caption = "Defining __call__ makes any object callable; functions are just one shape that satisfies this protocol."
+
+[[figure_attachments]]
+slug = "attribute-access"
+anchor = "cell-0"
+figure = "attribute-lookup"
+caption = "obj.x checks instance __dict__, then class __dict__, then __getattr__; the first hit wins."
+
+[[figure_attachments]]
+slug = "guard-clauses"
+anchor = "cell-0"
+figure = "guard-clauses"
+caption = "Early returns handle the exceptional cases first so the main work is the body of the function, not its tail."
+
+[[figure_attachments]]
+slug = "bytes-and-bytearray"
+anchor = "cell-0"
+figure = "bytes-vs-bytearray"
+caption = "bytes is a frozen sequence of integers; bytearray is the mutable counterpart with append/extend/etc."
+
+[[figure_attachments]]
+slug = "sentinel-iteration"
+anchor = "cell-0"
+figure = "sentinel-iteration"
+caption = "`iter(callable, sentinel)` calls the callable repeatedly, stopping when it returns the sentinel."
+
+[[figure_attachments]]
+slug = "partial-functions"
+anchor = "cell-0"
+figure = "partial-functions"
+caption = "`functools.partial(f, 1)` pre-fills `a=1`, returning a thinner callable `g(b, c)` that only needs the rest."
+
+[[figure_attachments]]
+slug = "args-and-kwargs"
+anchor = "cell-0"
+figure = "args-kwargs"
+caption = "*args captures the extra positionals as a tuple; **kwargs captures the extra keywords as a dict."
+
+[[figure_attachments]]
+slug = "multiple-return-values"
+anchor = "cell-0"
+figure = "multiple-return"
+caption = "A function returning multiple values really returns one tuple; the caller unpacks it into named bindings."
+
+[[figure_attachments]]
+slug = "lambdas"
+anchor = "cell-0"
+figure = "lambda-expression"
+caption = "A lambda is a function literal: parameters before the colon, a single expression after, no statement body."
+
+[[figure_attachments]]
+slug = "properties"
+anchor = "cell-0"
+figure = "property-fork"
+caption = "When x is a property, attribute access routes through fget/fset instead of touching __dict__."
+
+[[figure_attachments]]
+slug = "metaclasses"
+anchor = "cell-0"
+figure = "metaclass-triangle"
+caption = "A metaclass is the type of a class, just as a class is the type of its instances; type is the default metaclass."
+
+[[figure_attachments]]
+slug = "metaclasses"
+anchor = "cell-0"
+figure = "class-triangle"
+caption = "The class makes instances — the same triangle one level down, with type as the default apex."
+
+[[figure_attachments]]
+slug = "modules"
+anchor = "cell-0"
+figure = "sys-path-resolution"
+caption = "An import walks sys.path entry by entry; the first directory containing the module wins."
+
+[[figure_attachments]]
+slug = "import-aliases"
+anchor = "cell-0"
+figure = "import-alias"
+caption = "`import x as y` binds the name y to the same module object x would have."
+
+[[figure_attachments]]
+slug = "protocols"
+anchor = "cell-0"
+figure = "protocol-check"
+caption = "An object satisfies a protocol structurally — by having the required methods — not by inheriting it."
+
+[[figure_attachments]]
+slug = "enums"
+anchor = "cell-0"
+figure = "enum-members"
+caption = "An enum names a fixed set of symbolic values; no new members appear at runtime."
+
+[[figure_attachments]]
+slug = "datetime"
+anchor = "cell-0"
+figure = "datetime-instant"
+caption = "An aware datetime carries a UTC offset; one instant in time reads differently on two clocks."
+
+[[figure_attachments]]
+slug = "json"
+anchor = "cell-0"
+figure = "json-python-mapping"
+caption = "Six type pairs bridge the JSON text boundary; each json value maps to one Python type."
+
+[[figure_attachments]]
+slug = "regular-expressions"
+anchor = "cell-0"
+figure = "regex-anchors"
+caption = "^ and $ anchor the pattern; quantifiers like {2} bound how many times a token repeats."
+
+[[figure_attachments]]
+slug = "number-parsing"
+anchor = "cell-0"
+figure = "number-parse"
+caption = "int() turns text into a typed number; malformed input raises ValueError instead of guessing."
+
+[[figure_attachments]]
+slug = "string-formatting"
+anchor = "cell-1"
+figure = "format-spec"
+caption = "The format spec is a railroad of named optional fields: alignment, sign, width, precision, type."
+
+[[figure_attachments]]
+slug = "truthiness"
+anchor = "cell-0"
+figure = "truthy-check"
+caption = "bool(x) is True except for a small fixed set: 0, 0.0, \"\", [], {}, None, False."
+
+[[figure_attachments]]
+slug = "booleans"
+anchor = "cell-0"
+figure = "boolean-truth-table"
+caption = "`a and b` returns True only when both are True; otherwise it returns the first falsy value."
+
+[[figure_attachments]]
+slug = "sets"
+anchor = "cell-0"
+figure = "set-buckets"
+caption = "Sets are hash buckets without values; `x in s` averages O(1) regardless of size."
+
+[[figure_attachments]]
+slug = "tuples"
+anchor = "cell-3"
+figure = "tuple-frozen"
+caption = "Tuples are ordered, immutable sequences; positions matter, contents do not change once constructed."
+
+[[figure_attachments]]
+slug = "tuples"
+anchor = "cell-3"
+figure = "list-append"
+caption = "A list is the other intent: a variable number of similar items, growing in place with `.append`."
+
+[[figure_attachments]]
+slug = "values"
+anchor = "cell-0"
+figure = "value-types"
+caption = "Every literal is an object with a type; the type carries the behaviour, not the variable name."
+
+[[figure_attachments]]
+slug = "yield-from"
+anchor = "cell-0"
+figure = "yield-delegation"
+caption = "`yield from inner` delegates iteration to an inner generator; its yields surface here unchanged."
+
+[[figure_attachments]]
+slug = "itertools"
+anchor = "cell-0"
+figure = "itertools-chain"
+caption = "chain stitches two iterables into one stream without materialising either: values arrive lazily."
+
+[[figure_attachments]]
+slug = "assertions"
+anchor = "cell-0"
+figure = "assertion-check"
+caption = "assert tests a condition; True passes silently, False raises AssertionError with the optional message."
+
+[[figure_attachments]]
+slug = "custom-exceptions"
+anchor = "cell-0"
+figure = "custom-exception-chain"
+caption = "Subclassing an existing exception gains a domain name without changing semantics."
+
+[[figure_attachments]]
+slug = "exception-groups"
+anchor = "cell-0"
+figure = "exception-group-peel"
+caption = "except* peels matched leaves out of an ExceptionGroup; survivors regroup and propagate."
+
+[[figure_attachments]]
+slug = "delete-statements"
+anchor = "cell-0"
+figure = "delete-name-erased"
+caption = "`del x` removes the name; the object survives if any other reference holds it, otherwise gets collected."
+
+[[figure_attachments]]
+slug = "conditionals"
+anchor = "cell-0"
+figure = "branch-fork"
+caption = "A predicate sorts a value into one of several branches; if/elif/else is the explicit spelling."
+
+[[figure_attachments]]
+slug = "match-statements"
+anchor = "cell-0"
+figure = "match-dispatch-ladder"
+caption = "match dispatches by pattern shape; the value flows down the patterns and the first match wins."
+
+[[figure_attachments]]
+slug = "assignment-expressions"
+anchor = "cell-0"
+figure = "naming-decisions"
+caption = "The walrus binds a name during the surrounding expression; one expression, two outputs."
+
+[[figure_attachments]]
+slug = "iterating-over-iterables"
+anchor = "cell-0"
+figure = "iter-protocol"
+caption = "`for` desugars to iter()+next(): one iter() call, then next() until StopIteration ends the loop."
+
+[[figure_attachments]]
+slug = "generator-expressions"
+anchor = "cell-1"
+figure = "lazy-stream"
+caption = "A generator expression composes filter and map lazily; values flow only when next() pulls them."
+
+[[figure_attachments]]
+slug = "async-iteration-and-context"
+anchor = "cell-0"
+figure = "async-swimlane"
+caption = "async iteration and async with both rest on the same loop-vs-coroutine handoff as await."
+
+[[figure_attachments]]
+slug = "loop-else"
+anchor = "cell-0"
+figure = "loop-else-gate"
+caption = "The loop's else branch runs only when the loop falls through naturally; break skips it."
+
+[[figure_attachments]]
+slug = "break-and-continue"
+anchor = "cell-0"
+figure = "early-exit"
+caption = "break exits the loop; continue skips to the next iteration. Both interrupt the natural fall-through."
+
+[[figure_attachments]]
+slug = "comprehension-patterns"
+anchor = "cell-0"
+figure = "comprehension-equivalence"
+caption = "Nested clauses compose left to right; the comprehension is still equivalent to a for-loop with append."
+
+[[figure_attachments]]
+slug = "container-protocols"
+anchor = "cell-0"
+figure = "container-methods"
+caption = "Container syntax routes to narrow protocol methods: assignment to __setitem__, membership to __contains__, lookup to __getitem__."
+
+[[figure_attachments]]
+slug = "functions"
+anchor = "cell-0"
+figure = "function-with-body"
+caption = "A function takes inputs, evaluates a body, and returns a value: `greet('Ada')` produces `'Hello, Ada'`."
+
+[[figure_attachments]]
+slug = "constants"
+anchor = "cell-0"
+figure = "variables-bind"
+caption = "UPPER_CASE is a naming convention, not a language constraint; the binding behaves like any other variable."
+
+[[figure_attachments]]
+slug = "while-loops"
+anchor = "cell-0"
+figure = "while-backedge"
+caption = "`while` repeats the body while the test stays true; the back-edge returns control to the test before each pass."
+
+[[figure_attachments]]
+slug = "while-loops"
+anchor = "cell-0"
+figure = "loop-repetition"
+caption = "Each loop shape has its own stopping rule: `for` ends when the iterable is exhausted, `while` when the condition turns false, sentinel iteration when the marker value appears."
+
+[[figure_attachments]]
+slug = "advanced-match-patterns"
+anchor = "cell-0"
+figure = "match-pattern-variants"
+caption = "Capture, alternative, guard, and class patterns each name a different way a value can match a case."
+
+[[figure_attachments]]
+slug = "literals"
+anchor = "cell-0"
+figure = "literal-forms"
+caption = "Each Python type has its own literal spellings; ints accept decimal, hex, and binary; strings accept either quote."
+
+[[figure_attachments]]
+slug = "packages"
+anchor = "cell-0"
+figure = "package-tree"
+caption = "A directory with __init__.py becomes an importable package; submodules and subpackages nest beneath it."
+
+[[figure_attachments]]
+slug = "virtual-environments"
+anchor = "cell-0"
+figure = "venv-boundary"
+caption = "A venv carries its own interpreter and site-packages, isolating a project's dependencies from the system."
+
+[[figure_attachments]]
+slug = "subprocesses"
+anchor = "cell-0"
+figure = "subprocess-spawn"
+caption = "subprocess.run spawns a child process and captures its stdout, stderr, and exit code as portable evidence."
+
+[[figure_attachments]]
+slug = "logging"
+anchor = "cell-0"
+figure = "logging-levels"
+caption = "Five severity levels; the logger's configured threshold drops everything below it."
+
+[[figure_attachments]]
+slug = "testing"
+anchor = "cell-0"
+figure = "aaa-pattern"
+caption = "arrange-act-assert: set up the state, perform the behavior under test, compare the result to expectations."
+
+[[figure_attachments]]
+slug = "networking"
+anchor = "cell-0"
+figure = "socket-byte-boundary"
+caption = "Text crosses the socket as bytes — `encode` marks the python → wire boundary, `decode` brings the bytes back to a Python `str`."
+
+[[figure_attachments]]
+slug = "threads-and-processes"
+anchor = "cell-0"
+figure = "gil-lanes"
+caption = "Threads share memory but the GIL serialises Python bytecode; processes run in parallel with isolated memory."
+
+[[figure_attachments]]
+slug = "casts-and-any"
+anchor = "cell-0"
+figure = "cast-escape"
+caption = "cast(T, x) tells the type checker to treat x as T; the runtime is unaffected."
+
+[[figure_attachments]]
+slug = "newtype"
+anchor = "cell-0"
+figure = "newtype-phantom"
+caption = "NewType creates a distinct static identity backed by the same runtime type — UserId is int with a name."
+
+[[figure_attachments]]
+slug = "overloads"
+anchor = "cell-0"
+figure = "overload-signatures"
+caption = "@overload declares static call signatures for double(int) and double(str); one runtime implementation handles both."
+
+[[figure_attachments]]
+slug = "paramspec"
+anchor = "cell-0"
+figure = "paramspec-preserve"
+caption = "ParamSpec preserves the wrapped function's signature through a decorator, parameter for parameter."
+
+[[figure_attachments]]
+slug = "literal-and-final"
+anchor = "cell-0"
+figure = "literal-constrained"
+caption = "Literal narrows a slot to a fixed set of constant values; Final says the binding will not change."
+
+[[figure_attachments]]
+slug = "callable-types"
+anchor = "cell-0"
+figure = "callable-type"
+caption = "A Callable annotation describes the callback slot: this argument list must produce this return type."
+
+[[figure_attachments]]
+slug = "runtime-type-checks"
+anchor = "cell-0"
+figure = "isinstance-check"
+caption = "isinstance and issubclass ask the runtime; the answer is a bool, not a static type refinement."
+
+[[figure_attachments]]
+slug = "collections-module"
+anchor = "cell-0"
+figure = "collections-containers"
+caption = "Four specialised containers for shapes the built-in types don't cover well: deque, Counter, defaultdict, namedtuple."
+
+[[figure_attachments]]
+slug = "structured-data-shapes"
+anchor = "cell-0"
+figure = "structured-shapes"
+caption = "The same record can be a mutable dataclass, an immutable NamedTuple, or a runtime dict described by TypedDict."
+
+[[figure_attachments]]
+slug = "csv-data"
+anchor = "cell-0"
+figure = "csv-records"
+caption = "CSV files are rows of records; each line has the same columns in the same order."
+
+[[figure_attachments]]
+slug = "warnings"
+anchor = "cell-0"
+figure = "warning-signal"
+caption = "A warning is a soft signal: the message is reported, but execution continues unless filters elevate it."
+
+[[figure_attachments]]
+slug = "object-lifecycle"
+anchor = "cell-0"
+figure = "object-lifecycle"
+caption = "Names keep the same object reachable; deleting one name matters only when it removes the last reference."
+
+# Journey-section figures keyed by the visible section title.
+[[journey_section_figures]]
+section = "Start with executable evidence."
+figure = "runtime-evidence-loop"
+caption = "Examples are evidence loops: source, a run step, and visible output stay together."
+
+[[journey_section_figures]]
+section = "Separate value, identity, and absence."
+figure = "runtime-object-axes"
+caption = "Runtime objects answer separate questions: equal value, same identity, or the singleton that marks absence."
+
+[[journey_section_figures]]
+section = "Read expressions as object operations."
+figure = "runtime-expression-model"
+caption = "Expression syntax enters the data model; object methods produce the result."
+
+[[journey_section_figures]]
+section = "Choose between paths."
+figure = "control-decision-map"
+caption = "Facts flow into one decision point; exactly one branch owns the next step."
+
+[[journey_section_figures]]
+section = "Name and shape decisions."
+figure = "control-fact-shape"
+caption = "Name a fact when a condition needs it; match shape when the data structure is the decision."
+
+[[journey_section_figures]]
+section = "Stop as soon as the answer is known."
+figure = "control-stop-boundary"
+caption = "Early exits draw a boundary: once the answer is found, the tail stays unread."
+
+[[journey_section_figures]]
+section = "Choose the right loop shape."
+figure = "iteration-loop-selector"
+caption = "Choose the loop from its stopping rule: exhaustion, condition, or sentinel marker."
+
+[[journey_section_figures]]
+section = "See the protocol behind `for`."
+figure = "iteration-protocol-map"
+caption = "for is surface syntax; iter() creates an iterator and next() pulls values until StopIteration."
+
+[[journey_section_figures]]
+section = "Compose lazy value streams."
+figure = "iteration-lazy-pull"
+caption = "Lazy pipelines run from the consumer's pull: next() requests one value through each stage."
+
+[[journey_section_figures]]
+section = "Pick the container that matches the question."
+figure = "container-questions"
+caption = "Each container answers a different question: ordered, fixed, lookup, unique."
+
+[[journey_section_figures]]
+section = "Move between shapes deliberately."
+figure = "reshape-pipeline"
+caption = "Most everyday code reshapes data: one input, one transform, one new value."
+
+[[journey_section_figures]]
+section = "Cross text and data boundaries."
+figure = "text-data-boundary"
+caption = "Programs receive text and produce structured data; parsing makes the boundary explicit."
+
+[[journey_section_figures]]
+section = "Start with functions as named behavior."
+figure = "function-signature"
+caption = "A function is the first abstraction boundary: arguments in, body, return value out."
+
+[[journey_section_figures]]
+section = "Use functions as values."
+figure = "function-as-value"
+caption = "Functions are first-class values. A second name binds to the same function object."
+
+[[journey_section_figures]]
+section = "Bundle behavior with state."
+figure = "class-with-state"
+caption = "Classes group fields and methods so data and behavior move together behind one interface."
+
+[[journey_section_figures]]
+section = "Keep runtime and static analysis separate."
+figure = "type-runtime-static-split"
+caption = "Runtime values run the program; static tools inspect separate annotations and report before execution."
+
+[[journey_section_figures]]
+section = "Describe realistic data shapes."
+figure = "type-shape-catalog"
+caption = "Real data contracts combine fields, variants, and expected absence instead of one scalar type."
+
+[[journey_section_figures]]
+section = "Scale annotations for reusable libraries."
+figure = "type-library-contract"
+caption = "Reusable APIs carry caller contracts through the library boundary with generics, parameters, and overloads."
+
+[[journey_section_figures]]
+section = "Make failure explicit."
+figure = "reliability-signal-map"
+caption = "Different failure shapes need explicit signals: assertions, recovery, chained causes, or warnings."
+
+[[journey_section_figures]]
+section = "Control resource and module boundaries."
+figure = "reliability-boundary-map"
+caption = "Reliable programs name their boundaries: resources clean up, modules import, environments constrain runtime."
+
+[[journey_section_figures]]
+section = "Handle operations that outlive one expression."
+figure = "reliability-operation-boundary"
+caption = "Async, threaded, test, and logging work cross an operation boundary before evidence comes back."
+
+# Curated scores for example-cell figures.
+[[example_figure_scores]]
+slug = "variables"
+score = 9.5
+comment = "the canonical name → object picture"
+
+[[example_figure_scores]]
+slug = "mutability"
+score = 9.5
+comment = "three-state small multiple of aliased mutation"
+
+[[example_figure_scores]]
+slug = "copying-collections"
+score = 9.5
+comment = "same picture as mutability, perfect match"
+
+[[example_figure_scores]]
+slug = "hello-world"
+score = 9.0
+comment = "program → output, smallest mechanism"
+
+[[example_figure_scores]]
+slug = "numbers"
+score = 9.0
+comment = "int unbounded vs float thinning, both registers"
+
+[[example_figure_scores]]
+slug = "operators"
+score = 9.0
+comment = "expression tree mechanism"
+
+[[example_figure_scores]]
+slug = "none"
+score = 9.0
+comment = "three names converging on one None"
+
+[[example_figure_scores]]
+slug = "equality-and-identity"
+score = 9.0
+comment = "shared vs separate object, side-by-side"
+
+[[example_figure_scores]]
+slug = "strings"
+score = 9.0
+comment = "codepoints + bytes registers"
+
+[[example_figure_scores]]
+slug = "for-loops"
+score = 9.0
+comment = "4-row caret advance"
+
+[[example_figure_scores]]
+slug = "sorting"
+score = 9.0
+comment = "stability ribbons preserved across keys"
+
+[[example_figure_scores]]
+slug = "keyword-only-arguments"
+score = 9.0
+comment = "signature with explicit `*` separator"
+
+[[example_figure_scores]]
+slug = "positional-only-parameters"
+score = 9.0
+comment = "signature with explicit `/` separator"
+
+[[example_figure_scores]]
+slug = "closures"
+score = 9.0
+comment = "captured cell reference"
+
+[[example_figure_scores]]
+slug = "scope-global-nonlocal"
+score = 9.0
+comment = "LEGB nested rings"
+
+[[example_figure_scores]]
+slug = "recursion"
+score = 9.0
+comment = "stacked frames with same name, different argument"
+
+[[example_figure_scores]]
+slug = "lists"
+score = 9.0
+comment = "cells with append mechanism"
+
+[[example_figure_scores]]
+slug = "dicts"
+score = 9.0
+comment = "hash buckets with collision chain"
+
+[[example_figure_scores]]
+slug = "slices"
+score = 9.0
+comment = "ruler with bracket overlay"
+
+[[example_figure_scores]]
+slug = "comprehensions"
+score = 9.0
+comment = "comprehension over equivalent for-loop"
+
+[[example_figure_scores]]
+slug = "type-hints"
+score = 9.0
+comment = "ghost annotations over runtime values"
+
+[[example_figure_scores]]
+slug = "generators"
+score = 9.0
+comment = "ribbon cut by yield gates"
+
+[[example_figure_scores]]
+slug = "exceptions"
+score = 9.0
+comment = "try/except/else/finally lanes with traced path"
+
+[[example_figure_scores]]
+slug = "context-managers"
+score = 9.0
+comment = "enter / body / exit bowtie"
+
+[[example_figure_scores]]
+slug = "async-await"
+score = 9.0
+comment = "loop/coro swimlane with await handoffs"
+
+[[example_figure_scores]]
+slug = "classes"
+score = 9.0
+comment = "instance/class/type triangle"
+
+[[example_figure_scores]]
+slug = "inheritance-and-super"
+score = 9.0
+comment = "MRO chain with diamond ghost"
+
+[[example_figure_scores]]
+slug = "dataclasses"
+score = 9.0
+comment = "fields → generated __init__ signature"
+
+[[example_figure_scores]]
+slug = "decorators"
+score = 9.0
+comment = "before/after rebinding through cell"
+
+[[example_figure_scores]]
+slug = "special-methods"
+score = 9.0
+comment = "syntax → method dispatch"
+
+[[example_figure_scores]]
+slug = "unpacking"
+score = 9.0
+comment = "binding-line mechanism with *rest"
+
+[[example_figure_scores]]
+slug = "exception-chaining"
+score = 9.0
+comment = "__cause__ vs __context__ distinguished"
+
+[[example_figure_scores]]
+slug = "iterating-over-iterables"
+score = 9.0
+comment = "iter() exposes the iterator"
+
+[[example_figure_scores]]
+slug = "iterators"
+score = 9.0
+comment = "three-state machine"
+
+[[example_figure_scores]]
+slug = "iterator-vs-iterable"
+score = 9.0
+comment = "the protocol exposed"
+
+[[example_figure_scores]]
+slug = "container-protocols"
+score = 9.0
+comment = "syntax routes to __setitem__, __contains__, __getitem__"
+
+[[example_figure_scores]]
+slug = "operator-overloading"
+score = 9.0
+comment = "dispatch arrow"
+
+[[example_figure_scores]]
+slug = "union-and-optional-types"
+score = 9.0
+comment = "type fork to several shapes"
+
+[[example_figure_scores]]
+slug = "abstract-base-classes"
+score = 9.0
+comment = "same triangle as concrete classes"
+
+[[example_figure_scores]]
+slug = "conditionals"
+score = 9.0
+comment = "predicate forks value to branch"
+
+[[example_figure_scores]]
+slug = "match-statements"
+score = 9.0
+comment = "dispatch ladder; first match wins"
+
+[[example_figure_scores]]
+slug = "advanced-match-patterns"
+score = 9.0
+comment = "four pattern variants"
+
+[[example_figure_scores]]
+slug = "loop-else"
+score = 9.0
+comment = "fell-through vs broke, two outcomes"
+
+[[example_figure_scores]]
+slug = "while-loops"
+score = 9.0
+comment = "back-edge mechanism plus the three stopping rules"
+
+[[example_figure_scores]]
+slug = "type-aliases"
+score = 9.0
+comment = "complex annotation collapses to a name"
+
+[[example_figure_scores]]
+slug = "typed-dicts"
+score = 9.0
+comment = "keys with declared value types"
+
+[[example_figure_scores]]
+slug = "comprehension-patterns"
+score = 9.0
+comment = "nested clauses compose"
+
+[[example_figure_scores]]
+slug = "lambdas"
+score = 9.0
+comment = "function literal: params / expression"
+
+[[example_figure_scores]]
+slug = "string-formatting"
+score = 9.0
+comment = "format-spec railroad"
+
+[[example_figure_scores]]
+slug = "regular-expressions"
+score = 9.0
+comment = "pattern ruler with anchors"
+
+[[example_figure_scores]]
+slug = "json"
+score = 9.0
+comment = "two-column type mapping"
+
+[[example_figure_scores]]
+slug = "metaclasses"
+score = 9.0
+comment = "extended triangle to metaclass"
+
+[[example_figure_scores]]
+slug = "datetime"
+score = 9.0
+comment = "one instant, two clock offsets"
+
+[[example_figure_scores]]
+slug = "values"
+score = 9.0
+comment = "every literal is a typed object"
+
+[[example_figure_scores]]
+slug = "literals"
+score = 9.0
+comment = "literal spellings per type"
+
+[[example_figure_scores]]
+slug = "booleans"
+score = 9.0
+comment = "2×2 truth table"
+
+[[example_figure_scores]]
+slug = "sets"
+score = 9.0
+comment = "hash buckets without values"
+
+[[example_figure_scores]]
+slug = "yield-from"
+score = 9.0
+comment = "stitched ribbons; delegation"
+
+[[example_figure_scores]]
+slug = "generator-expressions"
+score = 9.0
+comment = "lazy filter→map pipeline"
+
+[[example_figure_scores]]
+slug = "async-iteration-and-context"
+score = 9.0
+comment = "loop/coro lanes with await yields"
+
+[[example_figure_scores]]
+slug = "assignment-expressions"
+score = 9.0
+comment = "walrus binds while comparing"
+
+[[example_figure_scores]]
+slug = "break-and-continue"
+score = 9.0
+comment = "early exit at first match"
+
+[[example_figure_scores]]
+slug = "delete-statements"
+score = 9.0
+comment = "name erased; object survives if referenced"
+
+[[example_figure_scores]]
+slug = "exception-groups"
+score = 9.0
+comment = "except* peels matching leaves"
+
+[[example_figure_scores]]
+slug = "custom-exceptions"
+score = 9.0
+comment = "subclass chain to a domain name"
+
+[[example_figure_scores]]
+slug = "modules"
+score = 9.0
+comment = "sys.path resolution; first hit wins"
+
+[[example_figure_scores]]
+slug = "protocols"
+score = 9.0
+comment = "structural duck check"
+
+[[example_figure_scores]]
+slug = "enums"
+score = 9.0
+comment = "closed set of symbolic values"
+
+[[example_figure_scores]]
+slug = "functions"
+score = 9.0
+comment = "specific call: greet('Ada') → 'Hello, Ada'"
+
+[[example_figure_scores]]
+slug = "constants"
+score = 9.0
+comment = "name binding; UPPER_CASE is convention"
+
+[[example_figure_scores]]
+slug = "import-aliases"
+score = 9.0
+comment = "two names bind to the same module"
+
+[[example_figure_scores]]
+slug = "number-parsing"
+score = 9.0
+comment = "int() success path vs ValueError"
+
+[[example_figure_scores]]
+slug = "tuples"
+score = 9.0
+comment = "frozen sequence with struck-through .append"
+
+[[example_figure_scores]]
+slug = "truthiness"
+score = 9.0
+comment = "bool(x) with the falsy set as a strip"
+
+[[example_figure_scores]]
+slug = "itertools"
+score = 9.0
+comment = "chain joins two iterables into one stream"
+
+[[example_figure_scores]]
+slug = "assertions"
+score = 9.0
+comment = "True passes, False raises"
+
+[[example_figure_scores]]
+slug = "descriptors"
+score = 9.0
+comment = "get/set/delete protocol routed through descriptor"
+
+[[example_figure_scores]]
+slug = "attribute-access"
+score = 9.0
+comment = "instance __dict__ → class __dict__ → __getattr__"
+
+[[example_figure_scores]]
+slug = "bound-and-unbound-methods"
+score = 9.0
+comment = "instance.method bound vs Class.method unbound"
+
+[[example_figure_scores]]
+slug = "classmethods-and-staticmethods"
+score = 9.0
+comment = "three method kinds, three first-arg conventions"
+
+[[example_figure_scores]]
+slug = "callable-objects"
+score = 9.0
+comment = "__call__ makes any object callable"
+
+[[example_figure_scores]]
+slug = "generics-and-typevar"
+score = 9.0
+comment = "the same T flows in and out"
+
+[[example_figure_scores]]
+slug = "truth-and-size"
+score = 9.0
+comment = "__bool__ → __len__ → True fallback chain"
+
+[[example_figure_scores]]
+slug = "bytes-and-bytearray"
+score = 9.0
+comment = "frozen vs mutable contrast"
+
+[[example_figure_scores]]
+slug = "sentinel-iteration"
+score = 9.0
+comment = "iter(callable, sentinel) stop condition"
+
+[[example_figure_scores]]
+slug = "partial-functions"
+score = 9.0
+comment = "f → partial(f, 1) → g"
+
+[[example_figure_scores]]
+slug = "guard-clauses"
+score = 9.0
+comment = "early returns, main body at the tail"
+
+[[example_figure_scores]]
+slug = "packages"
+score = 9.0
+comment = "__init__.py + nested submodules"
+
+[[example_figure_scores]]
+slug = "virtual-environments"
+score = 9.0
+comment = "project / venv boundary"
+
+[[example_figure_scores]]
+slug = "subprocesses"
+score = 9.0
+comment = "spawn → child → captured output"
+
+[[example_figure_scores]]
+slug = "logging"
+score = 9.0
+comment = "five thresholded levels"
+
+[[example_figure_scores]]
+slug = "testing"
+score = 9.0
+comment = "arrange-act-assert three-row pattern"
+
+[[example_figure_scores]]
+slug = "networking"
+score = 9.0
+comment = "text ↔ bytes across the socket boundary"
+
+[[example_figure_scores]]
+slug = "casts-and-any"
+score = 9.0
+comment = "Any → cast(T, x) → T, runtime unchanged"
+
+[[example_figure_scores]]
+slug = "newtype"
+score = 9.0
+comment = "same runtime, distinct static identity"
+
+[[example_figure_scores]]
+slug = "paramspec"
+score = 9.0
+comment = "P preserved through decorator"
+
+[[example_figure_scores]]
+slug = "literal-and-final"
+score = 9.0
+comment = "slot narrows to a fixed set"
+
+[[example_figure_scores]]
+slug = "runtime-type-checks"
+score = 9.0
+comment = "isinstance returns bool"
+
+[[example_figure_scores]]
+slug = "collections-module"
+score = 9.0
+comment = "deque / Counter / defaultdict / namedtuple"
+
+[[example_figure_scores]]
+slug = "structured-data-shapes"
+score = 9.0
+comment = "dataclass vs NamedTuple vs TypedDict runtime trade-offs"
+
+[[example_figure_scores]]
+slug = "csv-data"
+score = 9.0
+comment = "rows × columns; same shape per line"
+
+[[example_figure_scores]]
+slug = "warnings"
+score = 9.0
+comment = "soft signal; execution continues"
+
+[[example_figure_scores]]
+slug = "object-lifecycle"
+score = 9.0
+comment = "names keep object reachable until last reference disappears"
+
+[[example_figure_scores]]
+slug = "args-and-kwargs"
+score = 9.0
+comment = "*args tuple, **kwargs dict regions"
+
+[[example_figure_scores]]
+slug = "multiple-return-values"
+score = 9.0
+comment = "function returns tuple; caller unpacks"
+
+[[example_figure_scores]]
+slug = "properties"
+score = 9.0
+comment = "obj.x routes through fget instead of __dict__"
+
+[[example_figure_scores]]
+slug = "overloads"
+score = 9.0
+comment = "static overload signatures contrasted with one runtime body"
+
+[[example_figure_scores]]
+slug = "callable-types"
+score = 9.0
+comment = "callback slot shows argument list and return type"
+
+[[example_figure_scores]]
+slug = "threads-and-processes"
+score = 9.0
+comment = "thread GIL sharing contrasted with process isolation"
+
+# Curated scores for journey-section figures.
+[[journey_section_figure_scores]]
+section = "Start with executable evidence."
+score = 9.0
+comment = "journey-native source/run/output evidence loop"
+
+[[journey_section_figure_scores]]
+section = "Separate value, identity, and absence."
+score = 9.0
+comment = "three runtime questions separated"
+
+[[journey_section_figure_scores]]
+section = "Read expressions as object operations."
+score = 9.0
+comment = "syntax enters the data-model method surface"
+
+[[journey_section_figure_scores]]
+section = "Choose between paths."
+score = 9.0
+comment = "branch map independent of one if-statement example"
+
+[[journey_section_figure_scores]]
+section = "Name and shape decisions."
+score = 9.0
+comment = "name-vs-shape decision map"
+
+[[journey_section_figure_scores]]
+section = "Stop as soon as the answer is known."
+score = 9.0
+comment = "early boundary leaves tail unread"
+
+[[journey_section_figure_scores]]
+section = "Choose the right loop shape."
+score = 9.0
+comment = "loop choice by stopping rule"
+
+[[journey_section_figure_scores]]
+section = "See the protocol behind `for`."
+score = 9.5
+comment = "for surface mapped to iter()/next()/StopIteration"
+
+[[journey_section_figure_scores]]
+section = "Compose lazy value streams."
+score = 9.0
+comment = "consumer pull drives the lazy pipeline"
+
+[[journey_section_figure_scores]]
+section = "Pick the container that matches the question."
+score = 9.0
+comment = "list/tuple/dict/set per question"
+
+[[journey_section_figure_scores]]
+section = "Move between shapes deliberately."
+score = 9.0
+comment = "input → transform → result"
+
+[[journey_section_figure_scores]]
+section = "Cross text and data boundaries."
+score = 9.0
+comment = "text in, structured value out"
+
+[[journey_section_figure_scores]]
+section = "Start with functions as named behavior."
+score = 9.0
+comment = "concrete call, named body, and return boundary"
+
+[[journey_section_figure_scores]]
+section = "Use functions as values."
+score = 9.0
+comment = "second name binds same function"
+
+[[journey_section_figure_scores]]
+section = "Bundle behavior with state."
+score = 9.0
+comment = "class groups state + methods"
+
+[[journey_section_figure_scores]]
+section = "Keep runtime and static analysis separate."
+score = 9.0
+comment = "runtime track separated from static-tool track"
+
+[[journey_section_figure_scores]]
+section = "Describe realistic data shapes."
+score = 9.0
+comment = "field, variant, and absence contracts in one map"
+
+[[journey_section_figure_scores]]
+section = "Scale annotations for reusable libraries."
+score = 9.0
+comment = "caller contracts survive library API boundary"
+
+[[journey_section_figure_scores]]
+section = "Make failure explicit."
+score = 9.0
+comment = "failure shapes mapped to explicit signals"
+
+[[journey_section_figure_scores]]
+section = "Control resource and module boundaries."
+score = 9.0
+comment = "resource/module/env boundaries shown together"
+
+[[journey_section_figure_scores]]
+section = "Handle operations that outlive one expression."
+score = 9.0
+comment = "operation boundary returns evidence later"
+
+# Curated example quality scores.
+[[example_quality_scores]]
+slug = "hello-world"
+score = 7.1
+comment = "waived: traditional smallest complete program"
+
+[[example_quality_scores]]
+slug = "values"
+score = 9.0
+comment = "object/type/operation map with prerequisite graph edges"
+
+[[example_quality_scores]]
+slug = "literals"
+score = 9.0
+comment = "criterion-level pass: graph-rich, note-heavy, multi-cell"
+
+[[example_quality_scores]]
+slug = "numbers"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "booleans"
+score = 9.0
+comment = "truth operations, short-circuiting, bool-as-int footgun"
+
+[[example_quality_scores]]
+slug = "operators"
+score = 9.0
+comment = "criterion-level pass: graph-rich, note-heavy, multi-cell"
+
+[[example_quality_scores]]
+slug = "none"
+score = 9.0
+comment = "None, mapping default, and exception absence boundaries"
+
+[[example_quality_scores]]
+slug = "variables"
+score = 9.0
+comment = "binding, rebinding, augmented-assignment, lifecycle graph"
+
+[[example_quality_scores]]
+slug = "constants"
+score = 9.0
+comment = "constant convention, Final boundary, runtime rebinding evidence"
+
+[[example_quality_scores]]
+slug = "truthiness"
+score = 9.0
+comment = "truth-value categories, explicit-comparison boundary, graph-linked"
+
+[[example_quality_scores]]
+slug = "equality-and-identity"
+score = 9.0
+comment = "== versus is, singleton check, identity-cache warning"
+
+[[example_quality_scores]]
+slug = "mutability"
+score = 9.0
+comment = "in-place mutation, rebinding, alias visibility"
+
+[[example_quality_scores]]
+slug = "object-lifecycle"
+score = 9.0
+comment = "references, rebinding, and last-reference boundary"
+
+[[example_quality_scores]]
+slug = "strings"
+score = 9.0
+comment = "Unicode text, immutability, encoding boundary"
+
+[[example_quality_scores]]
+slug = "bytes-and-bytearray"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "string-formatting"
+score = 9.0
+comment = "f-string expression, format spec, debug/repr boundary"
+
+[[example_quality_scores]]
+slug = "conditionals"
+score = 9.0
+comment = "branch ordering, truthiness, and ternary boundary"
+
+[[example_quality_scores]]
+slug = "guard-clauses"
+score = 9.0
+comment = "nested contrast plus flattened guard path"
+
+[[example_quality_scores]]
+slug = "assignment-expressions"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "for-loops"
+score = 9.0
+comment = "direct iteration, range, and enumerate progression"
+
+[[example_quality_scores]]
+slug = "break-and-continue"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "loop-else"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "iterating-over-iterables"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "iterators"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "iterator-vs-iterable"
+score = 9.0
+comment = "graph-rich"
+
+[[example_quality_scores]]
+slug = "sentinel-iteration"
+score = 9.0
+comment = "call-until-marker shape contrasted with manual while"
+
+[[example_quality_scores]]
+slug = "match-statements"
+score = 9.0
+comment = "shape dispatch and guarded pattern payoff"
+
+[[example_quality_scores]]
+slug = "advanced-match-patterns"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "while-loops"
+score = 9.0
+comment = "state-driven repetition contrasted with for loops"
+
+[[example_quality_scores]]
+slug = "lists"
+score = 9.0
+comment = "ordered mutable sequence operations plus tuple/set/copy boundaries"
+
+[[example_quality_scores]]
+slug = "tuples"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "unpacking"
+score = 9.0
+comment = "sequence, starred, and mapping unpacking shapes"
+
+[[example_quality_scores]]
+slug = "dicts"
+score = 9.0
+comment = "lookup/default/update/delete dictionary boundaries"
+
+[[example_quality_scores]]
+slug = "sets"
+score = 9.0
+comment = "uniqueness, membership, set algebra, ordering boundary"
+
+[[example_quality_scores]]
+slug = "slices"
+score = 9.0
+comment = "range bounds, step, reverse, and unchanged-source evidence"
+
+[[example_quality_scores]]
+slug = "comprehensions"
+score = 9.0
+comment = "loop-equivalent collection building with filter/projection boundaries"
+
+[[example_quality_scores]]
+slug = "comprehension-patterns"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "sorting"
+score = 9.0
+comment = "key functions, reverse order, sorted/list.sort boundary"
+
+[[example_quality_scores]]
+slug = "collections-module"
+score = 9.0
+comment = "Counter, defaultdict, deque, namedtuple mapped to data shapes"
+
+[[example_quality_scores]]
+slug = "copying-collections"
+score = 9.0
+comment = "alias, shallow copy, and deepcopy boundaries"
+
+[[example_quality_scores]]
+slug = "functions"
+score = 9.0
+comment = "definition/call/return/default-boundary walkthrough"
+
+[[example_quality_scores]]
+slug = "keyword-only-arguments"
+score = 9.0
+comment = "call-site readability and boolean flag boundary"
+
+[[example_quality_scores]]
+slug = "positional-only-parameters"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "args-and-kwargs"
+score = 9.0
+comment = "flexible argument collection plus forwarding/API-boundary graph"
+
+[[example_quality_scores]]
+slug = "multiple-return-values"
+score = 9.0
+comment = "tuple return plus unpacking boundary"
+
+[[example_quality_scores]]
+slug = "closures"
+score = 9.0
+comment = "closed-over state, factory payoff, late-binding boundary"
+
+[[example_quality_scores]]
+slug = "partial-functions"
+score = 9.0
+comment = "before/after callable adaptation and introspection"
+
+[[example_quality_scores]]
+slug = "scope-global-nonlocal"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "recursion"
+score = 9.0
+comment = "base case and recursive tree-shape payoff"
+
+[[example_quality_scores]]
+slug = "lambdas"
+score = 9.0
+comment = "expression callable use contrasted with named def reuse"
+
+[[example_quality_scores]]
+slug = "generators"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "yield-from"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "generator-expressions"
+score = 9.0
+comment = "eager list contrast, lazy one-pass consumption, reducer use"
+
+[[example_quality_scores]]
+slug = "itertools"
+score = 9.0
+comment = "lazy standard-library pipeline and iterator-composition payoff"
+
+[[example_quality_scores]]
+slug = "decorators"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "classes"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "inheritance-and-super"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "classmethods-and-staticmethods"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "dataclasses"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "properties"
+score = 9.0
+comment = "managed attribute API without caller syntax change"
+
+[[example_quality_scores]]
+slug = "special-methods"
+score = 9.0
+comment = "criterion-level pass: graph-rich, note-heavy, multi-cell"
+
+[[example_quality_scores]]
+slug = "truth-and-size"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "container-protocols"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "callable-objects"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "operator-overloading"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "attribute-access"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "bound-and-unbound-methods"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "descriptors"
+score = 9.0
+comment = "descriptor lookup, __set_name__, and validation mechanics"
+
+[[example_quality_scores]]
+slug = "metaclasses"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "context-managers"
+score = 9.0
+comment = "criterion-level pass: graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "delete-statements"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "exceptions"
+score = 9.0
+comment = "specific handling, else/finally cleanup, broad-catch boundary"
+
+[[example_quality_scores]]
+slug = "assertions"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "exception-chaining"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "exception-groups"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "warnings"
+score = 9.0
+comment = "capture and escalate soft failures with filters"
+
+[[example_quality_scores]]
+slug = "modules"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "import-aliases"
+score = 9.0
+comment = "criterion-level pass: graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "packages"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "virtual-environments"
+score = 9.0
+comment = "standard venv workflow plus explicit Worker deployment boundary"
+
+[[example_quality_scores]]
+slug = "type-hints"
+score = 9.0
+comment = "criterion-level pass: graph-rich, note-heavy, multi-cell"
+
+[[example_quality_scores]]
+slug = "runtime-type-checks"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "union-and-optional-types"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "type-aliases"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "typed-dicts"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "structured-data-shapes"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "literal-and-final"
+score = 9.0
+comment = "Literal value set, Final rebinding promise, runtime caveat"
+
+[[example_quality_scores]]
+slug = "callable-types"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "generics-and-typevar"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "paramspec"
+score = 9.0
+comment = "Callable erasure contrasted with ParamSpec-preserving decorator"
+
+[[example_quality_scores]]
+slug = "overloads"
+score = 9.0
+comment = "static overload stubs contrasted with one runtime implementation"
+
+[[example_quality_scores]]
+slug = "casts-and-any"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "newtype"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "protocols"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "abstract-base-classes"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "enums"
+score = 9.0
+comment = "closed symbolic choice set contrasted with raw strings"
+
+[[example_quality_scores]]
+slug = "regular-expressions"
+score = 9.0
+comment = "criterion-level pass: graph-rich, note-heavy, multi-cell"
+
+[[example_quality_scores]]
+slug = "number-parsing"
+score = 9.0
+comment = "decimal, explicit base, and recoverable ValueError boundary"
+
+[[example_quality_scores]]
+slug = "custom-exceptions"
+score = 9.0
+comment = "domain error naming, raise point, recovery boundary"
+
+[[example_quality_scores]]
+slug = "json"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "logging"
+score = 9.0
+comment = "logger, handler, formatter, and threshold boundaries"
+
+[[example_quality_scores]]
+slug = "testing"
+score = 9.0
+comment = "criterion-level pass: graph-rich"
+
+[[example_quality_scores]]
+slug = "subprocesses"
+score = 9.0
+comment = "standard subprocess contract plus explicit Worker boundary"
+
+[[example_quality_scores]]
+slug = "threads-and-processes"
+score = 9.0
+comment = "thread/process executor contrast plus explicit Worker boundary"
+
+[[example_quality_scores]]
+slug = "networking"
+score = 9.0
+comment = "protocol byte boundary plus explicit socket runtime caveat"
+
+[[example_quality_scores]]
+slug = "datetime"
+score = 9.0
+comment = "date/time/delta parsing with timezone scope made explicit"
+
+[[example_quality_scores]]
+slug = "csv-data"
+score = 9.0
+comment = "DictReader, conversion, and DictWriter row boundary"
+
+[[example_quality_scores]]
+slug = "async-await"
+score = 9.0
+comment = "graph-rich, note-heavy"
+
+[[example_quality_scores]]
+slug = "async-iteration-and-context"
+score = 9.0
+comment = "criterion-level pass: graph-rich"

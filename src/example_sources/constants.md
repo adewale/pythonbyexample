@@ -3,7 +3,7 @@ slug = "constants"
 title = "Constants"
 section = "Basics"
 summary = "Python uses naming conventions and optional types for values that should not change."
-doc_path = "/tutorial/classes.html#python-scopes-and-namespaces"
+doc_path = "/library/typing.html#typing.Final"
 see_also = [
   "variables",
   "literal-and-final",
