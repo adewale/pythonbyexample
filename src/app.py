@@ -201,11 +201,15 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
     description = _meta_description(description or "Learn Python with concise, editable examples that run in isolated Cloudflare Dynamic Python Workers.")
     canonical_url = f"{SITE_URL}{path}"
     page_title = title if title == "Python By Example" else f"{title} · Python By Example"
+    # runner.js loads async: ordered module scripts each wait for the
+    # previous one to settle, and the CDN-backed highlighter and editor
+    # modules sit ahead of it in the head. Without async, Run/Reset and
+    # the share wiring stall behind two esm.sh round-trips (and never
+    # attach if the CDN is unreachable). runner.js imports nothing and
+    # guards its own DOM readiness, so early execution is safe.
     editor_scripts = (
-        "".join(
-            f'<script type="module" src="{html.escape(ASSET_PATHS[name])}"></script>'
-            for name in ("EDITOR_JS", "RUNNER_JS")
-        )
+        f'<script type="module" src="{html.escape(ASSET_PATHS["EDITOR_JS"])}"></script>'
+        f'<script type="module" async src="{html.escape(ASSET_PATHS["RUNNER_JS"])}"></script>'
         if include_editor
         else ""
     )

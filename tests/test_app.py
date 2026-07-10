@@ -1001,6 +1001,10 @@ class KeyboardNavTests(unittest.TestCase):
         js = (ROOT / "public" / "runner.js").read_text()
         self.assertIn("This link included edited code. Press Run to execute it.", js)
 
+    def test_runner_module_loads_async_ahead_of_cdn_modules(self):
+        page = render_example_page(get_example("values"))
+        self.assertRegex(page, r'<script type="module" async src="/runner\.[0-9a-f]{12}\.js"></script>')
+
     def test_share_button_sits_apart_from_the_run_reset_pair(self):
         js = (ROOT / "public" / "runner.js").read_text()
         self.assertIn("'tool-button share-button'", js)

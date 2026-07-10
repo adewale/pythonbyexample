@@ -6,6 +6,10 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ## Unreleased
 
+### Fixed
+
+- Example-page runner wiring (Run interception, Reset, the share button, and keyboard navigation) no longer waits for the CDN-backed highlighter and editor modules: `runner.js` loads `async`, so a slow or unreachable esm.sh cannot stall it — ordered module scripts otherwise execute strictly after every preceding module settles, including their top-level awaits.
+
 ### Added
 
 - `/about` page describing how the site is made — the verified-output pipeline, the runner sandbox, the figure grammar, and the quality gates — with a design-language section that renders the live CSS tokens (color swatches, spacing scale, type specimens, and a real walkthrough cell as a specimen). Linked from the nav on every page and listed in the sitemap.
