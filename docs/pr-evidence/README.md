@@ -20,3 +20,7 @@ OUTPUT=<output>.png node scripts/capture_browser_screenshot.mjs
 ```
 
 The captures use the repository's headless-Chrome script; it waits for the selected element and writes the selector's rendered bounding box.
+
+## TODO
+
+- [ ] Add an executable base/head capture wrapper that creates pinned worktrees, installs dependencies, starts each local Worker on a fixed port, waits for readiness, captures the documented URL/viewport/selector, and records SHA-256 hashes. Keep it reviewer tooling rather than a pixel-comparison CI gate so platform font/rasterization differences do not make Verify flaky.
