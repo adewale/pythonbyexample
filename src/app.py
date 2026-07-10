@@ -618,12 +618,12 @@ def render_example_page(
     editable_code = example["code"] if code is None else code
     previous_example, next_example = _example_neighbors(example["slug"])
     previous_link = (
-        f'<a class="text-link" rel="prev" href="/examples/{html.escape(previous_example["slug"])}">← {html.escape(previous_example["title"])}</a>'
+        f'<a class="text-link" rel="prev" title="Previous example (left arrow key)" href="/examples/{html.escape(previous_example["slug"])}">← {html.escape(previous_example["title"])}</a>'
         if previous_example
         else "<span></span>"
     )
     next_link = (
-        f'<a class="text-link" rel="next" href="/examples/{html.escape(next_example["slug"])}">{html.escape(next_example["title"])} →</a>'
+        f'<a class="text-link" rel="next" title="Next example (right arrow key)" href="/examples/{html.escape(next_example["slug"])}">{html.escape(next_example["title"])} →</a>'
         if next_example
         else "<span></span>"
     )

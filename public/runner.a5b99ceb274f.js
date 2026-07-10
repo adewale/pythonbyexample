@@ -21,6 +21,13 @@ function initializeRunner() {
   if (hash.startsWith('#code=')) {
     try {
       setCode(decodeURIComponent(escape(atob(hash.slice(6)))));
+      if (textarea.value !== originalCode) {
+        const panel = document.querySelector('.output-panel');
+        const heading = panel && panel.querySelector('h3');
+        const code = panel && panel.querySelector('code');
+        if (heading) heading.textContent = 'Output';
+        if (code) code.textContent = 'This link included edited code. Press Run to execute it.';
+      }
     } catch (_) {
       // Ignore malformed share fragments and leave the authored example intact.
     }
@@ -50,7 +57,7 @@ function initializeRunner() {
   if (toolbar) {
     const shareButton = document.createElement('button');
     shareButton.type = 'button';
-    shareButton.className = 'tool-button';
+    shareButton.className = 'tool-button share-button';
     shareButton.textContent = 'Copy link';
     shareButton.setAttribute('aria-live', 'polite');
     shareButton.setAttribute('aria-label', 'Copy a link to this example with the current code');
@@ -197,6 +204,8 @@ document.addEventListener('keydown', (event) => {
   if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
   const target = event.target;
   if (target instanceof Element && target.closest('input, textarea, select, button, .cm-editor, [contenteditable="true"]')) return;
+  const codeField = document.getElementById('code-editor');
+  if (codeField && codeField.value !== (codeField.dataset.originalCode ?? codeField.defaultValue)) return;
   const link = document.querySelector(event.key === 'ArrowLeft' ? '.example-nav a[rel="prev"]' : '.example-nav a[rel="next"]');
   if (link) window.location.href = link.href;
 });

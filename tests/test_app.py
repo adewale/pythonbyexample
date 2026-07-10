@@ -288,7 +288,7 @@ class AppTests(unittest.TestCase):
         self.assertIn("Executed in 12.3 ms", render_example_page(get_example("hello-world"), output="hello world\n", execution_time_ms=12.3))
         self.assertIn("Execution time appears here after you run the example.", render_example_page(get_example("hello-world")))
         self.assertIn("Expected output", render_example_page(get_example("hello-world")))
-        self.assertIn('rel="next" href="/examples/values"', html)
+        self.assertIn('rel="next" title="Next example (right arrow key)" href="/examples/values"', html)
         self.assertIn('method="post"', html)
         self.assertIn('<textarea name="code"', html)
         self.assertNotIn('class="lesson-grid"', html)
@@ -887,6 +887,7 @@ class CopyButtonTests(unittest.TestCase):
         self.assertIn(".cell-source { position: relative; }", css)
         self.assertIn(".copy-button", css)
         self.assertIn(".copy-button.copied", css)
+        self.assertIn(".copy-button:active { transform: scale(0.96); }", css)
 
     def test_copy_button_renders_lucide_glyphs_as_current_color_masks(self):
         css = (ROOT / "public" / "site.css").read_text()
@@ -927,6 +928,15 @@ class KeyboardNavTests(unittest.TestCase):
         self.assertIn("event.metaKey", js)
         self.assertIn("event.defaultPrevented", js)
 
+    def test_arrow_navigation_never_discards_edited_code(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("codeField.value !== (codeField.dataset.originalCode ?? codeField.defaultValue)", js)
+
+    def test_nav_links_advertise_the_keyboard_shortcut(self):
+        page = render_example_page(get_example("values"))
+        self.assertIn('title="Previous example (left arrow key)"', page)
+        self.assertIn('title="Next example (right arrow key)"', page)
+
     def test_share_button_copies_a_code_fragment_link(self):
         js = (ROOT / "public" / "runner.js").read_text()
         self.assertIn("Copy link", js)
@@ -943,6 +953,16 @@ class KeyboardNavTests(unittest.TestCase):
     def test_hash_decode_syncs_the_enhanced_editor(self):
         js = (ROOT / "public" / "runner.js").read_text()
         self.assertIn("setCode(decodeURIComponent(escape(atob(hash.slice(6)))))", js)
+
+    def test_shared_link_recipients_see_a_status_notice(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("This link included edited code. Press Run to execute it.", js)
+
+    def test_share_button_sits_apart_from_the_run_reset_pair(self):
+        js = (ROOT / "public" / "runner.js").read_text()
+        self.assertIn("'tool-button share-button'", js)
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn(".share-button { margin-left: auto; }", css)
 
     def test_arrow_navigation_guards_missing_neighbors_at_catalog_edges(self):
         examples = list_examples()
