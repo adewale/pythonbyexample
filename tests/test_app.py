@@ -589,6 +589,49 @@ class DarkModeAndAccessibilityTests(unittest.TestCase):
         self.assertIn(".skip-link:focus", css)
 
 
+class DesignFoundationsTests(unittest.TestCase):
+    def test_body_type_respects_user_text_size(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn("font: 100%/1.6", css)
+        self.assertNotIn("font: 16px/1.6", css)
+
+    def test_home_header_never_hides_the_nav_on_landing(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertNotIn("header { opacity: 0", css)
+        self.assertIn("body:has(.hero) header::before", css)
+        self.assertIn("header-veil-emerge", css)
+        self.assertNotIn("@keyframes header-emerge", css)
+
+    def test_non_motion_accessibility_signals_have_fallbacks(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn("@media (prefers-reduced-transparency: reduce)", css)
+        self.assertIn("@media (prefers-contrast: more)", css)
+        self.assertIn("backdrop-filter: none", css)
+
+    def test_cards_press_down_and_nav_links_have_touch_targets(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn(".card:active { transform: translateY(0) scale(0.99); }", css)
+        self.assertIn(".nav-links a { padding: .55rem .9rem; margin-block: -.55rem;", css)
+
+    def test_terminal_colors_are_design_tokens(self):
+        css = (ROOT / "public" / "site.css").read_text()
+        self.assertIn("--terminal-bg: #0b1020", css)
+        self.assertIn("--terminal-ink: #f9fafb", css)
+        self.assertIn("background: var(--terminal-bg); color: var(--terminal-ink);", css)
+        about = (ROOT / "src" / "templates" / "about.html").read_text()
+        self.assertIn("var(--terminal-bg)", about)
+        self.assertIn("var(--terminal-ink)", about)
+
+    def test_search_exposes_combobox_semantics(self):
+        home = render_home()
+        self.assertIn('role="combobox"', home)
+        self.assertIn('aria-expanded="false"', home)
+        self.assertIn('role="listbox"', home)
+        js = (ROOT / "public" / "search.js").read_text()
+        self.assertIn("aria-expanded", js)
+        self.assertIn("'option'", js)
+
+
 class BannerTests(unittest.TestCase):
     def test_mutability_renders_a_two_figure_small_multiple_banner(self):
         page = render_example_page(get_example("mutability"))

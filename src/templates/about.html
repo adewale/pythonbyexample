@@ -27,10 +27,12 @@
   </section>
   <section class="about-section">
     <h2>The design language</h2>
-    <p>Every page draws from the tokens below, and this section reads them from the same stylesheet it documents. In dark mode the warm palette inverts; <code class="syntax-inline">--figure-paper</code> stays light, so figures sit on a paper chip instead of being recoloured.</p>
+    <p>Every page draws from the tokens below, and this section reads them from the same stylesheet it documents. In dark mode the warm palette inverts; <code class="syntax-inline">--figure-paper</code> stays light, so figures sit on a paper chip instead of being recoloured, and the terminal tokens keep the runner's output chip dark in both schemes.</p>
     <p class="cell-label">Color</p>
     <ul class="token-grid">
       <li class="token"><span class="token-swatch" style="--swatch: var(--accent)"></span><code>--accent</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--accent-text)"></span><code>--accent-text</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--accent-action)"></span><code>--accent-action</code></li>
       <li class="token"><span class="token-swatch" style="--swatch: var(--accent-hover)"></span><code>--accent-hover</code></li>
       <li class="token"><span class="token-swatch" style="--swatch: var(--accent-soft)"></span><code>--accent-soft</code></li>
       <li class="token"><span class="token-swatch" style="--swatch: var(--text)"></span><code>--text</code></li>
@@ -45,6 +47,8 @@
       <li class="token"><span class="token-swatch" style="--swatch: var(--header-veil-0)"></span><code>--header-veil-0</code></li>
       <li class="token"><span class="token-swatch" style="--swatch: var(--header-veil-solid)"></span><code>--header-veil-solid</code></li>
       <li class="token"><span class="token-swatch" style="--swatch: var(--figure-paper)"></span><code>--figure-paper</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--terminal-bg)"></span><code>--terminal-bg</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--terminal-ink)"></span><code>--terminal-ink</code></li>
     </ul>
     <p class="cell-label">Spacing</p>
     <ul class="token-grid">
@@ -57,7 +61,7 @@
     </ul>
     <p class="cell-label">Type</p>
     <div class="type-specimen">
-      <p>Names bind to objects; objects carry the type. <span class="meta">FT Kunst Grotesk with system fallbacks, 16px/1.6, for prose.</span></p>
+      <p>Names bind to objects; objects carry the type. <span class="meta">Prose sets 100%/1.6 in the system face, respecting your browser's text-size setting; FT Kunst Grotesk leads the stack for readers who have it installed.</span></p>
     </div>
     <p class="cell-label">The rail</p>
     <div class="cell-code-stack"><div class="cell-source"><p class="cell-label">Source</p><pre><code class="language-python">value = 21 * 2

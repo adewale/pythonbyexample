@@ -28,6 +28,11 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ### Changed
 
+- The home header stays visible on landing: the scroll-driven entrance now animates the brand and a compositor-friendly veil layer instead of hiding the whole header (which left the page with no visible nav at first paint).
+- Body type is `100%/1.6` instead of a fixed 16px, so browser text-size settings are respected; the `/about` type specimen now describes the stack as it actually renders (system face; FT Kunst Grotesk only where installed).
+- `prefers-reduced-transparency` and `prefers-contrast: more` get solid-chrome and defined-border fallbacks; cards press down on tap; header links carry full-height (~43px) tap targets via padding with cancelling negative margins.
+- The home search exposes combobox/listbox semantics (`aria-expanded`, `role="option"`) to match its existing keyboard behavior.
+- The runner output chip's navy is now tokenized (`--terminal-bg`/`--terminal-ink`) and appears in the `/about` design language.
 - Journeys now reference every example: `iterator-vs-iterable`, `classmethods-and-staticmethods`, `bound-and-unbound-methods`, `abstract-base-classes`, and `structured-data-shapes` joined their natural sections, with journey-outcome support lists updated.
 - Journey meta descriptions no longer claim gap placeholders; all previously declared gaps are filled.
 - Python tooling is pinned to 3.13 through `uv`; CI and preview workflows are hardened, generated-file recovery retries from a clean worktree, and quality gates enforce live registry/score invariants.
