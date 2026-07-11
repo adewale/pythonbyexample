@@ -404,8 +404,8 @@ this rule, record its zone, rule ID, plan, expression, characteristics,
 threshold/period, mitigation/action, deployment date, and a controlled 429
 Security Events result in the release record. `wrangler.jsonc` deploys the
 Worker only; it cannot declare or verify zone WAF rate-limiting rules. The
-production configuration disables `workers.dev` so the custom-domain WAF rule
-is not bypassed by a public fallback hostname.
+production configuration disables `workers.dev` and version preview URLs so the
+custom-domain WAF rule is not bypassed by a public fallback hostname.
 
 Cloudflare Dashboard:
 
