@@ -228,7 +228,7 @@ Use the active Cloudflare-supported Python version.
 
 ## Cloudflare notes
 
-- `wrangler.jsonc` enables `python_workers` and `python_dedicated_snapshot`.
+- `wrangler.jsonc` enables `python_workers` and `python_dedicated_snapshot` while disabling both public `workers.dev` and version preview URLs.
 - The parent Worker uses a `LOADER` Worker Loader binding.
 - Dynamic Worker IDs include Python version, example slug, and submitted code hash.
 - Dynamic Workers run with `globalOutbound: null` and tight CPU/subrequest limits.

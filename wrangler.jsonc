@@ -8,7 +8,7 @@
     "python_dedicated_snapshot"
   ],
   "workers_dev": false,
-  "preview_urls": true,
+  "preview_urls": false,
   "routes": [
     {
       "pattern": "www.pythonbyexample.dev",
