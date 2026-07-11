@@ -97,10 +97,21 @@ def render_about_social_card_html() -> str:
     )
 
 
+def render_privacy_social_card_html() -> str:
+    return _card_shell(
+        _card_body(
+            eyebrow="Python By Example · Privacy",
+            title="Privacy and data use",
+            summary="How the runner, operational logs, Turnstile, cookies, and optional browser dependencies handle data.",
+        )
+    )
+
+
 def card_html() -> dict[str, str]:
     cards = {
         "about": render_about_social_card_html(),
         "home": render_home_card_html(),
+        "privacy": render_privacy_social_card_html(),
         "journeys": render_journeys_index_social_card_html(),
     }
     cards.update({example["slug"]: render_social_card_html(example) for example in list_examples()})

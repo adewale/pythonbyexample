@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from scripts.fingerprint_assets import ASSETS, PUBLIC, html_version  # noqa: E402
-from src.app import JOURNEYS, SITE_URL, list_examples, render_about, render_example_page, render_home, render_journeys_index, render_journey_page, render_sitemap  # noqa: E402
+from src.app import JOURNEYS, SITE_URL, list_examples, render_about, render_example_page, render_home, render_journeys_index, render_journey_page, render_privacy, render_sitemap  # noqa: E402
 from src.asset_manifest import ASSET_PATHS, HTML_CACHE_VERSION  # noqa: E402
 
 META_DESCRIPTION_RE = re.compile(r'<meta name="description" content="([^"]+)">')
@@ -79,6 +79,8 @@ def assert_sitemap(failures: list[str]) -> None:
             fail(f"sitemap: missing {url}", failures)
     if f"<loc>{SITE_URL}/about</loc>" not in sitemap:
         fail("sitemap: missing about URL", failures)
+    if f"<loc>{SITE_URL}/privacy</loc>" not in sitemap:
+        fail("sitemap: missing privacy URL", failures)
     if f"<loc>{SITE_URL}/journeys</loc>" not in sitemap:
         fail("sitemap: missing journeys index URL", failures)
     for journey in JOURNEYS:
@@ -130,6 +132,7 @@ def main() -> int:
     assert_sitemap(failures)
     assert_page_metadata("home", render_home(), "/", failures)
     assert_page_metadata("about", render_about(), "/about", failures)
+    assert_page_metadata("privacy", render_privacy(), "/privacy", failures)
     assert_page_metadata("journeys-index", render_journeys_index(), "/journeys", failures)
     for example in list_examples():
         assert_page_metadata(
@@ -149,7 +152,7 @@ def main() -> int:
         for failure in failures:
             print(f"FAIL: {failure}", file=sys.stderr)
         return 1
-    print(f"SEO/cache lint passed for 1 home page, 1 about page, 1 journey index, {len(JOURNEYS)} journeys, and {len(list_examples())} example pages.")
+    print(f"SEO/cache lint passed for 1 home page, 1 about page, 1 privacy page, 1 journey index, {len(JOURNEYS)} journeys, and {len(list_examples())} example pages.")
     return 0
 
 

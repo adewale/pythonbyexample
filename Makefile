@@ -3,12 +3,19 @@
 PY := uv run --python 3.13
 NODE_DEPS_STAMP := node_modules/.package-lock.json
 
-.PHONY: node-deps test embed-examples embed-editorial-registry build-search-index build check-generated fingerprint prototypes browser-layout-test search-ranking-test social-cards check-social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported check-program-covers-cells check-prose-duplication check-inline-links score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes audit-example-graph quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy lint
+.PHONY: check-node-version node-deps test embed-examples embed-editorial-registry build-search-index build check-generated fingerprint prototypes browser-layout-test search-ranking-test social-cards check-social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported check-program-covers-cells check-prose-duplication check-inline-links score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes audit-example-graph quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy lint
 
-$(NODE_DEPS_STAMP): package.json package-lock.json
+check-node-version:
+	@major="$$(node -p 'process.versions.node.split(".")[0]')"; \
+	if test "$$major" != "22"; then \
+		echo "Node 22 is required for Pywrangler/Pyodide (found $$(node --version))." >&2; \
+		exit 1; \
+	fi
+
+$(NODE_DEPS_STAMP): package.json package-lock.json | check-node-version
 	npm ci --ignore-scripts
 
-node-deps: $(NODE_DEPS_STAMP)
+node-deps: check-node-version $(NODE_DEPS_STAMP)
 
 test:
 	$(PY) python -m unittest discover -s tests -v
@@ -117,5 +124,5 @@ smoke-deployment:
 	$(PY) scripts/smoke_deployment.py $(URL)
 
 deploy: node-deps check-generated
-	uv run --group workers pywrangler sync
+	uv run --group workers pywrangler sync --force
 	uv run --group workers pywrangler deploy

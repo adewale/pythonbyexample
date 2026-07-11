@@ -40,6 +40,18 @@ class CatchAllResponseHeaderTests(MainModuleHarness):
             self.assertEqual(response.status_code, 200)
             self.assertIn('rel="canonical" href="https://www.pythonbyexample.dev/about"', response.content)
 
+    def test_privacy_page_stays_html_through_explicit_and_catch_all_routes(self):
+        main = self.import_main()
+        explicit = asyncio.run(main.privacy_page())
+        fallback = asyncio.run(main.not_found("privacy", self.request("https://example.test/privacy")))
+        for response in (explicit, fallback):
+            self.assertTrue(response.headers["Content-Type"].startswith("text/html"))
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(
+                'rel="canonical" href="https://www.pythonbyexample.dev/privacy"',
+                response.content,
+            )
+
     def test_unknown_paths_fall_back_to_html(self):
         main = self.import_main()
         response = asyncio.run(

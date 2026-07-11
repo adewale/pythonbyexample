@@ -6,6 +6,9 @@
   "scripts": {
     "wrangler": "wrangler"
   },
+  "engines": {
+    "node": "22.x"
+  },
   "devDependencies": {
     "wrangler": "4.110.0"
   }

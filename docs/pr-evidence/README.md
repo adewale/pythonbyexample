@@ -30,7 +30,7 @@ These artifacts provide reviewable evidence for the runner, journey-page, and so
 | [Runtime journey page](pr-6-journey-runtime.png) | `/journeys/runtime` renders its overview, first learning outcome, figure, and linked examples at a 1200×1260 desktop viewport. | `a85bbf7` | `eb1db35d5ff7fc7974ad3a3891b694aaa5f8f277ba291b94a24c62767340e04d` |
 | [`/journeys` social card](../../public/og/journeys.jpg) | The exact 1200×630 JPEG referenced by the `/journeys` `og:image` tag. | `a85bbf7` | `3042997bb2b3acd9e2ab74106f5b4d3d4c58dafcfe23f1ddc548ed39e4548a3c` |
 
-`public/og/journeys.jpg` is a tracked PR artifact and its deterministic HTML input is recorded in `public/og/manifest.json`. `make check-social-cards` verifies its provenance, the exact 119-card JPEG set, and each card's JPEG decodability and 1200×630 dimensions.
+`public/og/journeys.jpg` is a tracked PR artifact and its deterministic HTML input is recorded in `public/og/manifest.json`. `make check-social-cards` verifies its provenance, the exact 120-card JPEG set, and each card's JPEG decodability and 1200×630 dimensions.
 
 Regenerate each page with its commit checked out, serve the rendered `/examples/values` HTML plus `public/` on a local HTTP server, then run:
 

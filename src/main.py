@@ -28,6 +28,7 @@ from app import (
     render_journeys_index,
     render_mobile_run_first_option,
     render_not_found,
+    render_privacy,
     render_sitemap,
 )
 from asset_manifest import HTML_CACHE_VERSION
@@ -245,6 +246,11 @@ async def cell_output_flow_option():
 @app.get("/about", response_class=HTMLResponse)
 async def about_page():
     return _html(render_about())
+
+
+@app.get("/privacy", response_class=HTMLResponse)
+async def privacy_page():
+    return _html(render_privacy())
 
 
 @app.get("/journeys", response_class=HTMLResponse)
@@ -556,6 +562,8 @@ async def not_found(path: str, request: Request):
         )
     if path == "about":
         return _html(render_about())
+    if path == "privacy":
+        return _html(render_privacy())
     if path == "journeys":
         return _html(render_journeys_index())
     if path.startswith("journeys/"):

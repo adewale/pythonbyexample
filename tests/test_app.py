@@ -9,7 +9,7 @@ import sys
 import unittest
 from pathlib import Path
 
-from src.app import build_dynamic_worker_code, get_example, list_examples, render_example_page, render_home, route
+from src.app import build_dynamic_worker_code, get_example, list_examples, render_example_page, render_home, render_privacy, route
 from src.example_loader import EXAMPLES_DIR, load_manifest, verify_example_output
 from src.asset_manifest import ASSET_PATHS
 from src.example_sources_data import EXAMPLE_SOURCE_FILES
@@ -438,7 +438,11 @@ class AppTests(unittest.TestCase):
         package = json.loads((ROOT / "package.json").read_text())
         lock = json.loads((ROOT / "package-lock.json").read_text())
         self.assertEqual(package["devDependencies"]["wrangler"], "4.110.0")
+        self.assertEqual(package["engines"]["node"], "22.x")
         self.assertEqual(lock["packages"][""]["devDependencies"]["wrangler"], "4.110.0")
+        makefile = (ROOT / "Makefile").read_text()
+        self.assertIn("check-node-version", makefile)
+        self.assertIn("pywrangler sync --force", makefile)
         self.assertFalse((ROOT / ".github" / "workflows" / "regenerate-generated-files.yml").exists())
 
     def test_conditionals_are_substantive_not_bare_minimum(self):
@@ -798,13 +802,16 @@ class SocialCardTests(unittest.TestCase):
         self.assertIn("Python learning journeys", cards["journeys"])
         self.assertIn("Python By Example · Journeys", cards["journeys"])
 
-    def test_card_html_includes_about_page(self):
+    def test_card_html_includes_about_and_privacy_pages(self):
         from scripts.build_social_cards import card_html
 
         cards = card_html()
         self.assertIn("about", cards)
         self.assertIn("How this site is made", cards["about"])
         self.assertIn("Python By Example · About", cards["about"])
+        self.assertIn("privacy", cards)
+        self.assertIn("Privacy and data use", cards["privacy"])
+        self.assertIn("Python By Example · Privacy", cards["privacy"])
 
     def test_runtime_journeys_and_edge_labels_load_from_editorial_registry(self):
         from src import app as app_module
@@ -822,6 +829,7 @@ class DiscoverabilityTests(unittest.TestCase):
         self.assertIn('<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', response.body)
         self.assertIn("<loc>https://www.pythonbyexample.dev/</loc>", response.body)
         self.assertIn("<loc>https://www.pythonbyexample.dev/about</loc>", response.body)
+        self.assertIn("<loc>https://www.pythonbyexample.dev/privacy</loc>", response.body)
         self.assertIn("<loc>https://www.pythonbyexample.dev/journeys</loc>", response.body)
         from src.app import JOURNEYS
 
@@ -831,7 +839,7 @@ class DiscoverabilityTests(unittest.TestCase):
             self.assertIn(f"<loc>https://www.pythonbyexample.dev/examples/{example['slug']}</loc>", response.body)
         self.assertEqual(
             response.body.count("<loc>"),
-            3 + len(JOURNEYS) + len(list_examples()),
+            4 + len(JOURNEYS) + len(list_examples()),
         )
 
     def test_example_pages_carry_learning_resource_json_ld(self):
@@ -940,6 +948,45 @@ class AboutPageTests(unittest.TestCase):
         self.assertTrue(80 <= len(description.group(1)) <= 180, len(description.group(1)))
         self.assertRegex(page, r'href="/site\.[0-9a-f]{12}\.css"')
         self.assertRegex(page, r'src="/syntax-highlight\.[0-9a-f]{12}\.js"')
+
+
+class PrivacyPageTests(unittest.TestCase):
+    def test_privacy_page_is_routable_and_globally_linked(self):
+        response = route("https://example.test/privacy")
+        self.assertEqual(response.status, 200)
+        page = response.body
+        self.assertIn("<title>Privacy · Python By Example</title>", page)
+        self.assertIn('<link rel="canonical" href="https://www.pythonbyexample.dev/privacy">', page)
+        self.assertIn('<meta property="og:image" content="https://www.pythonbyexample.dev/og/privacy.jpg">', page)
+        self.assertTrue((ROOT / "public" / "og" / "privacy.jpg").exists())
+        for rendered in (render_home(), render_example_page(get_example("hello-world")), page):
+            self.assertIn('<a class="text-link" href="/privacy">Privacy</a>', rendered)
+
+    def test_privacy_notice_discloses_runner_turnstile_logs_cdn_and_cookie(self):
+        page = render_privacy()
+        for required in (
+            "Cloudflare Turnstile Privacy Addendum",
+            "https://www.cloudflare.com/privacypolicy/",
+            "pbe_turnstile_clearance",
+            "eight hours",
+            "submitted Python source",
+            "esm.sh",
+            "IP address",
+            "raw submitted code",
+        ):
+            with self.subTest(required=required):
+                self.assertIn(required, page)
+        self.assertIn("do not sell", page)
+
+    def test_privacy_page_has_webpage_structured_data_without_editor_assets(self):
+        page = render_privacy()
+        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S)
+        self.assertIsNotNone(match)
+        data = json.loads(match.group(1))
+        self.assertEqual(data["@type"], "WebPage")
+        self.assertEqual(data["url"], "https://www.pythonbyexample.dev/privacy")
+        self.assertNotIn("/editor.", page)
+        self.assertNotIn("search-index", page)
 
 
 class CopyButtonTests(unittest.TestCase):

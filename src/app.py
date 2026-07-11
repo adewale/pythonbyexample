@@ -423,8 +423,26 @@ def render_about() -> str:
     )
 
 
+def render_privacy() -> str:
+    return _layout(
+        "Privacy",
+        _template("privacy.html"),
+        description="How Python By Example handles runner submissions, operational logs, Cloudflare Turnstile verification, cookies, and optional code-editor CDN requests.",
+        path="/privacy",
+        og_image=f"{SITE_URL}/og/privacy.jpg",
+        structured_data={
+            "@context": "https://schema.org",
+            "@type": "WebPage",
+            "name": "Python By Example privacy notice",
+            "url": f"{SITE_URL}/privacy",
+            "description": "Privacy information for Python By Example, including its editable runner, Cloudflare Turnstile, operational logs, cookies, and optional browser dependencies.",
+            "inLanguage": "en",
+        },
+    )
+
+
 def render_sitemap() -> str:
-    paths = ["/", "/about", "/journeys"]
+    paths = ["/", "/about", "/privacy", "/journeys"]
     paths.extend(f'/journeys/{journey["slug"]}' for journey in JOURNEYS)
     paths.extend(f'/examples/{example["slug"]}' for example in list_examples())
     entries = "".join(f"<url><loc>{html.escape(SITE_URL + path)}</loc></url>" for path in paths)
@@ -739,6 +757,8 @@ def route(url: str, method: str = "GET", turnstile_site_key: str | None = None) 
         )
     if method == "GET" and path == "/about":
         return AppResponse(render_about(), headers={"Content-Type": "text/html; charset=utf-8"})
+    if method == "GET" and path == "/privacy":
+        return AppResponse(render_privacy(), headers={"Content-Type": "text/html; charset=utf-8"})
     if method == "GET" and path == "/journeys":
         return AppResponse(render_journeys_index(), headers={"Content-Type": "text/html; charset=utf-8"})
     if method == "GET" and path.startswith("/journeys/"):
