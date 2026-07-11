@@ -382,7 +382,7 @@ The following non-secret Worker vars are checked into `wrangler.jsonc`:
 
 Do **not** put secret keys in `wrangler.jsonc`.
 
-Manual browser verification and production smoke with `PBE_SMOKE_BYPASS_SECRET` both passed after deploying session-scoped Invisible-mode Turnstile.
+Manual browser verification and production smoke with `PBE_SMOKE_BYPASS_SECRET` both passed after deploying session-scoped Invisible-mode Turnstile. A privacy notice is published at `/privacy` and linked from every page footer.
 
 Docs:
 
@@ -393,7 +393,7 @@ Docs:
 
 Invisible mode note: Cloudflare documents that invisible widgets have no visual footprint, and that widget `size` values are `normal`, `flexible`, or `compact`; invisibility is selected by widget mode, not by `size="invisible"`.
 
-Privacy note: Cloudflare documents that using Invisible mode requires referencing the Cloudflare Turnstile Privacy Addendum in your own privacy policy.
+Privacy note: Cloudflare documents that using Invisible mode requires referencing the Cloudflare Turnstile Privacy Addendum in your own privacy policy. The globally linked `/privacy` notice now includes that addendum, Cloudflare links, cookie details, runner processing, operational-log fields, and optional CDN disclosures.
 
 ## Remaining TODO
 

@@ -22,6 +22,7 @@ Production: <https://www.pythonbyexample.dev> (`workers.dev` is disabled so the 
 - Learner-behavior reporting from Worker wide events (`docs/learner-analytics.md`)
 - A quality-gate suite for registries, rubric scores, coverage, and teaching structure that fails builds when content regresses
 - `/about` page describing the verification pipeline, runner sandbox, figure grammar, and live design tokens
+- `/privacy` notice covering runner submissions, operational logs, Invisible Turnstile, cookies, and optional browser CDNs
 - Copy buttons on read-only source cells
 - Keyboard prev/next navigation (`←`/`→`) on example pages
 - "Copy link" sharing of the runner's current code via `#code=` URLs
@@ -67,9 +68,10 @@ This project is developed with red-green-refactor TDD:
 2. Implement the smallest change that makes it pass.
 3. Refactor while keeping tests green.
 
-Install the exact committed Python and Node dependency sets, then run:
+Use Node 22 (Pywrangler's Pyodide runtime is not compatible with Node 26), then install the exact committed Python and Node dependency sets:
 
 ```bash
+node --version  # v22.x
 uv sync --locked --all-groups
 npm ci --ignore-scripts
 make test
@@ -231,5 +233,6 @@ Use the active Cloudflare-supported Python version.
 - Dynamic Worker IDs include Python version, example slug, and submitted code hash.
 - Dynamic Workers run with `globalOutbound: null` and tight CPU/subrequest limits.
 - POST example runs carry `Cache-Control: no-store` and are never cached.
-- Wrangler is an exact dev dependency in `package-lock.json`; `make dev` and `make deploy` install/use that local version through Pywrangler.
+- Wrangler is an exact dev dependency in `package-lock.json`; `make dev` and `make deploy` require Node 22 and install/use that local version through Pywrangler.
+- `make deploy` forces a fresh Pywrangler vendor sync so an empty or stale `python_modules/` directory cannot produce a dependency-free upload.
 - Production still requires the account-level WAF/rate-limit rule documented in `docs/turnstile-runner-protection-spec.md`; repository settings alone do not prove that external control is active.

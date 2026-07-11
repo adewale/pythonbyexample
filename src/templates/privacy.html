@@ -1,0 +1,35 @@
+<article class="example-shell about-page">
+  <div class="example-top"><a class="text-link" href="/">↑ All examples</a><a class="text-link" href="/about">About</a></div>
+  <section class="example-intro" aria-labelledby="privacy-heading">
+    <p class="eyebrow">Privacy</p>
+    <h1 id="privacy-heading">Privacy and data use</h1>
+    <p class="meta">Effective 11 July 2026. Python By Example has no accounts or advertising, and we do not sell personal information.</p>
+  </section>
+  <section class="about-section">
+    <h2>Requests and operational logs</h2>
+    <p>The site runs on Cloudflare Workers. Cloudflare processes ordinary request information needed to deliver and protect the service, which can include your IP address, request headers, browser information, requested path, and timing data. Cloudflare's platform log envelope may retain this request metadata according to the account's Workers Logs settings.</p>
+    <p>Our structured application events record operational fields such as the requested path, example slug, whether submitted code differed from the example, a short code hash, byte count, execution outcome, and duration. They do not include raw submitted code, request bodies, Turnstile tokens, cookies, authorization headers, or the full IP address in application-defined fields.</p>
+  </section>
+  <section class="about-section">
+    <h2>Editable Python runner</h2>
+    <p>When you press Run, the submitted Python source is sent to a Cloudflare Dynamic Worker for isolated execution. Outbound network access is disabled. The source is used to execute that request and to derive a hash used for safe Worker reuse; it is not included in our structured analytics event.</p>
+  </section>
+  <section class="about-section" id="turnstile-privacy-addendum">
+    <h2>Cloudflare Turnstile Privacy Addendum</h2>
+    <p>To protect the runner from abuse, an Invisible-mode Cloudflare Turnstile check may run when a browser session first submits edited code. Turnstile may process browser, device, network, and IP signals to distinguish people from automated abuse. See Cloudflare's <a class="text-link" href="https://www.cloudflare.com/privacypolicy/">Privacy Policy</a> and <a class="text-link" href="https://developers.cloudflare.com/turnstile/">Turnstile documentation</a>.</p>
+    <p>After successful verification, the site sets <code class="syntax-inline">pbe_turnstile_clearance</code>, an HttpOnly, Secure, SameSite=Lax cookie scoped to <code class="syntax-inline">/examples</code>. It normally expires after eight hours and prevents repeated verification during the same learning session.</p>
+  </section>
+  <section class="about-section">
+    <h2>Code editor and syntax highlighting</h2>
+    <p>Example pages can load the CodeMirror editor and Shiki syntax highlighter from <code class="syntax-inline">esm.sh</code>. When those optional modules load, the CDN receives ordinary network request information such as your IP address and browser headers. If the CDN is unavailable, the page retains a plain-text editor and readable server-rendered code.</p>
+  </section>
+  <section class="about-section">
+    <h2>Retention and choices</h2>
+    <p>Operational logs are retained according to the configured Cloudflare Workers Logs retention settings and are used for reliability, abuse prevention, and aggregate interaction reporting. You can read all examples without an account. Disabling cookies may cause Turnstile verification to repeat when you run edited code.</p>
+    <p>Questions or requests about this notice can be opened in the project's <a class="text-link" href="https://github.com/adewale/pythonbyexample/issues">public issue tracker</a>. Do not include private or sensitive information in a public issue.</p>
+  </section>
+  <section class="about-section">
+    <h2>Changes to this notice</h2>
+    <p>Material changes will update the effective date above and ship through the public source repository.</p>
+  </section>
+</article>

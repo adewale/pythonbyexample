@@ -39,9 +39,10 @@ make build
 
 ## Before opening a pull request
 
-Install the committed dependency locks and start the local Worker with the repository-pinned Wrangler:
+Use Node 22, install the committed dependency locks, and start the local Worker with the repository-pinned Wrangler:
 
 ```bash
+node --version  # v22.x
 uv sync --locked --all-groups
 npm ci --ignore-scripts
 make dev
