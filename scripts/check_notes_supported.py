@@ -18,7 +18,6 @@ import sys
 
 from _common import EXAMPLES_DIR
 
-
 NOTE_RE = re.compile(r":::note\n(.*?)\n:::", re.DOTALL)
 WORD_RE = re.compile(r"[A-Za-z_][A-Za-z0-9_]{2,}")
 STOPWORDS = {

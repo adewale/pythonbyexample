@@ -13,8 +13,8 @@ Hierarchy:
 from __future__ import annotations
 
 import math
+from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Callable
 from xml.sax.saxutils import escape as xml_escape
 
 # Padding emitted around every figure's registered canvas by

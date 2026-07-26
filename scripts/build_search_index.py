@@ -16,7 +16,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src.app import list_examples  # noqa: E402
+from src.app import list_examples
 
 TARGET = ROOT / "public" / "search-index.json"
 

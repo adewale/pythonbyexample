@@ -18,7 +18,8 @@ import re
 import sys
 
 from _common import EXAMPLES_DIR, REGISTRY_PATH, load_registry
-CELL_BLOCK_RE = re.compile(r":::(?:cell|unsupported)\n(.*?)\n:::", re.S)
+
+CELL_BLOCK_RE = re.compile(r":::(?:cell|unsupported)\n(.*?)\n:::", re.DOTALL)
 
 
 def cell_text(markdown_text: str) -> str:

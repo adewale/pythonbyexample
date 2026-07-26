@@ -74,14 +74,14 @@ def _paragraphs(markdown_text: str) -> list[str]:
 
 
 def _single_fence(block_text: str, language: str, filename: str, line: int) -> str:
-    matches = re.findall(rf"```{re.escape(language)}\n(.*?)\n```", block_text, flags=re.S)
+    matches = re.findall(rf"```{re.escape(language)}\n(.*?)\n```", block_text, flags=re.DOTALL)
     if len(matches) != 1:
         raise ValueError(f"{filename}:{line}: expected exactly one {language} fence")
     return matches[0].rstrip("\n")
 
 
 def _extract_program(body: str, filename: str, body_line: int) -> tuple[str, str]:
-    pattern = re.compile(r":::program\n(.*?)\n:::", re.S)
+    pattern = re.compile(r":::program\n(.*?)\n:::", re.DOTALL)
     matches = list(pattern.finditer(body))
     if len(matches) != 1:
         raise ValueError(f"{filename}:{body_line}: expected exactly one :::program block")
@@ -94,7 +94,7 @@ def _extract_program(body: str, filename: str, body_line: int) -> tuple[str, str
 
 def _parse_cells_and_notes(body: str, filename: str, body_line: int) -> tuple[list[str], list[Cell], list[str]]:
     notes: list[str] = []
-    note_pattern = re.compile(r":::note\n(.*?)\n:::", re.S)
+    note_pattern = re.compile(r":::note\n(.*?)\n:::", re.DOTALL)
 
     def note_repl(match: re.Match[str]) -> str:
         for line in match.group(1).splitlines():
@@ -106,7 +106,7 @@ def _parse_cells_and_notes(body: str, filename: str, body_line: int) -> tuple[li
         return "\n"
 
     body_no_notes = note_pattern.sub(note_repl, body)
-    block_pattern = re.compile(r":::(cell|unsupported)\n(.*?)\n:::", re.S)
+    block_pattern = re.compile(r":::(cell|unsupported)\n(.*?)\n:::", re.DOTALL)
     matches = list(block_pattern.finditer(body_no_notes))
     if not matches:
         raise ValueError(f"{filename}:{body_line}: expected at least one :::cell block")
@@ -120,8 +120,8 @@ def _parse_cells_and_notes(body: str, filename: str, body_line: int) -> tuple[li
         output = ""
         if kind == "cell":
             output = _single_fence(text, "output", filename, line)
-        prose_text = re.sub(r"```python\n.*?\n```", "", text, flags=re.S)
-        prose_text = re.sub(r"```output\n.*?\n```", "", prose_text, flags=re.S)
+        prose_text = re.sub(r"```python\n.*?\n```", "", text, flags=re.DOTALL)
+        prose_text = re.sub(r"```output\n.*?\n```", "", prose_text, flags=re.DOTALL)
         prose = _paragraphs(prose_text)
         if not prose:
             raise ValueError(f"{filename}:{line}: cell prose is required")
@@ -134,7 +134,9 @@ def _run(code: str, namespace: dict[str, Any] | None = None) -> str:
     if namespace is None:
         namespace = {"__name__": "__main__"}
     with contextlib.redirect_stdout(stdout):
-        exec(compile(code, "<example>", "exec", dont_inherit=True), namespace)
+        exec(  # noqa: S102 - executing the selected teaching example is the feature
+            compile(code, "<example>", "exec", dont_inherit=True), namespace
+        )
     return stdout.getvalue()
 
 

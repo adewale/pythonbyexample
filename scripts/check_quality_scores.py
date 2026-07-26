@@ -25,7 +25,7 @@ def _entry_has_text(entry: dict, *keys: str) -> bool:
 
 def check_expiry_date(value, *, today: datetime.date | None = None) -> str | None:
     """Return an error string when `value` is not a future ISO date."""
-    today = today or datetime.date.today()
+    today = today or datetime.datetime.now(datetime.UTC).date()
     if not isinstance(value, str):
         return f"expires must be an ISO date string, got {value!r}"
     try:

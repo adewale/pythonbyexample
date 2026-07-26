@@ -20,8 +20,8 @@ from PIL import Image, UnidentifiedImageError
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from src.app import JOURNEYS, PYTHON_VERSION, list_examples  # noqa: E402
-from src.marginalia import render_first_figure  # noqa: E402
+from src.app import JOURNEYS, PYTHON_VERSION, list_examples
+from src.marginalia import render_first_figure
 
 CARD_DIR = ROOT / "build" / "social-cards"
 OUTPUT_DIR = ROOT / "public" / "og"

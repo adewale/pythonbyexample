@@ -15,9 +15,15 @@ workers = [
 ]
 dev = [
     "pillow>=11.3,<12",
-    "ruff>=0.8",
+    "ruff==0.16.0",
 ]
 
 [tool.ruff]
+required-version = "==0.16.0"
 line-length = 100
 src = ["src"]
+
+[tool.ruff.lint.per-file-ignores]
+# Observability helpers deliberately catch host-runtime failures so telemetry
+# can never change an application's result.
+"src/observability.py" = ["BLE001", "S110", "S112"]

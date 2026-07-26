@@ -5,8 +5,8 @@ import sys
 import types
 import unittest
 from types import SimpleNamespace
+from typing import ClassVar
 from urllib.parse import urlparse
-
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
@@ -247,7 +247,7 @@ class WorkerAsgiBridgeScopeTests(unittest.TestCase):
         class FakeRequest(self.Request):
             method = "POST"
             url = "https://www.pythonbyexample.dev/examples/hello-world?run=1"
-            headers = {"Content-Type": "text/plain", "X-Request-ID": "trace-1"}
+            headers: ClassVar = {"Content-Type": "text/plain", "X-Request-ID": "trace-1"}
 
         request = FakeRequest()
         env = SimpleNamespace(NAME="env")

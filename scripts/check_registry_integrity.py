@@ -13,7 +13,7 @@ from pathlib import Path
 
 from _common import EXAMPLES_DIR, frontmatter, load_catalog, load_registry
 
-CELL_BLOCK_RE = re.compile(r":::(?:cell|unsupported)\n(.*?)\n:::", re.S)
+CELL_BLOCK_RE = re.compile(r":::(?:cell|unsupported)\n(.*?)\n:::", re.DOTALL)
 
 
 def _frontmatter_see_also(path: Path) -> set[str]:

@@ -121,7 +121,7 @@ async def start_application(app):
 
 async def process_request(
     app: Any,
-    req: "Request | js.Request",
+    req: Request | js.Request,
     env: Any,
     # added for waitUntil, but not used anymore
     # TODO(later): remove this parameter after unvendoring Python SDK from workerd
@@ -229,7 +229,7 @@ async def process_request(
 
             # If we get here and no response has been set yet, the app didn't generate a response
             if not result.done():
-                raise RuntimeError("The application did not generate a response")  # noqa: TRY301
+                raise RuntimeError("The application did not generate a response")
         except Exception as e:
             if not result.done():
                 result.set_exception(e)
@@ -254,7 +254,7 @@ async def process_request(
         app_task.destroy()
 
 
-async def process_websocket(app: Any, req: "Request | js.Request") -> js.Response:
+async def process_websocket(app: Any, req: Request | js.Request) -> js.Response:
     from js import Response, WebSocketPair
 
     client, server = WebSocketPair.new().object_values()
@@ -326,7 +326,7 @@ def _ensure_application_started(app: Any) -> Future:
 
 async def fetch(
     app: Any,
-    req: "Request | js.Request",
+    req: Request | js.Request,
     env: Any,
     ctx: Context | None = None,
     *,
@@ -342,7 +342,7 @@ async def fetch(
         raise
 
 
-async def websocket(app: Any, req: "Request | js.Request") -> js.Response:
+async def websocket(app: Any, req: Request | js.Request) -> js.Response:
     return await process_websocket(app, req)
 
 

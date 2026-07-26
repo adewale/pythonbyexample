@@ -16,7 +16,6 @@ import unittest
 
 from src.example_loader import load_examples
 
-
 _, EXAMPLES = load_examples()
 
 

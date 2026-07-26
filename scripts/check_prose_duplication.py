@@ -14,6 +14,8 @@ editorial judgement this gate deliberately stays out of.
 """
 from __future__ import annotations
 
+import itertools
+
 from _common import EXAMPLES_DIR, fail, load_catalog
 
 
@@ -24,14 +26,14 @@ def main() -> int:
         slug = example["slug"]
         path = EXAMPLES_DIR / f"{slug}.md"
         intro = example.get("explanation", [])
-        for first, second in zip(intro, intro[1:]):
+        for first, second in itertools.pairwise(intro):
             if first == second:
                 errors.append(f"{path}:1: intro repeats a paragraph verbatim: {first[:70]!r}")
         intro_set = set(intro)
         for index, cell in enumerate(example["cells"], 1):
             prose = cell.get("prose", [])
             line = cell.get("line", 1)
-            for first, second in zip(prose, prose[1:]):
+            for first, second in itertools.pairwise(prose):
                 if first == second:
                     errors.append(
                         f"{path}:{line}: cell {index} repeats a paragraph verbatim: {first[:70]!r}"

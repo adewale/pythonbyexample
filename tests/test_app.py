@@ -8,10 +8,19 @@ import re
 import sys
 import unittest
 from pathlib import Path
+from typing import ClassVar
 
-from src.app import build_dynamic_worker_code, get_example, list_examples, render_example_page, render_home, render_privacy, route
-from src.example_loader import EXAMPLES_DIR, load_manifest, verify_example_output
+from src.app import (
+    build_dynamic_worker_code,
+    get_example,
+    list_examples,
+    render_example_page,
+    render_home,
+    render_privacy,
+    route,
+)
 from src.asset_manifest import ASSET_PATHS
+from src.example_loader import EXAMPLES_DIR, load_manifest, verify_example_output
 from src.example_sources_data import EXAMPLE_SOURCE_FILES
 from src.security import CONTENT_SECURITY_POLICY
 
@@ -65,7 +74,7 @@ class AppTests(unittest.TestCase):
     # Environment-shaped examples carry hand-written expected_output
     # (their real output depends on subprocess/socket/thread timing), so
     # for them executing without error is the contract.
-    ENVIRONMENT_SHAPED_SLUGS = {
+    ENVIRONMENT_SHAPED_SLUGS: ClassVar = {
         "networking",
         "subprocesses",
         "threads-and-processes",
@@ -77,7 +86,7 @@ class AppTests(unittest.TestCase):
             with self.subTest(slug=example["slug"]):
                 stdout = io.StringIO()
                 with contextlib.redirect_stdout(stdout):
-                    exec(example["code"], {"__name__": "__main__"})
+                    exec(example["code"], {"__name__": "__main__"})  # noqa: S102
                 if example["slug"] in self.ENVIRONMENT_SHAPED_SLUGS:
                     continue
                 self.assertEqual(stdout.getvalue(), example["expected_output"])
@@ -759,7 +768,7 @@ class SocialCardTests(unittest.TestCase):
         page = render_journeys_index()
         self.assertIn('<meta property="og:image" content="https://www.pythonbyexample.dev/og/journeys.jpg">', page)
         self.assertIn('<meta name="twitter:card" content="summary_large_image">', page)
-        data = json.loads(re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S).group(1))
+        data = json.loads(re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.DOTALL).group(1))
         self.assertEqual(data["@type"], "CollectionPage")
         self.assertEqual(data["name"], "Python learning journeys")
         self.assertEqual(data["url"], "https://www.pythonbyexample.dev/journeys")
@@ -771,7 +780,7 @@ class SocialCardTests(unittest.TestCase):
         page = render_journey_page(journey)
         self.assertIn(f'https://www.pythonbyexample.dev/og/journey-{journey["slug"]}.jpg', page)
         self.assertIn('<meta name="twitter:card" content="summary_large_image">', page)
-        data = json.loads(re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S).group(1))
+        data = json.loads(re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.DOTALL).group(1))
         self.assertEqual(data["@type"], "CollectionPage")
         self.assertEqual(data["url"], f'https://www.pythonbyexample.dev/journeys/{journey["slug"]}')
 
@@ -846,7 +855,7 @@ class DiscoverabilityTests(unittest.TestCase):
     def test_example_pages_carry_learning_resource_json_ld(self):
         example = get_example("closures")
         page = render_example_page(example)
-        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S)
+        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.DOTALL)
         self.assertIsNotNone(match)
         data = json.loads(match.group(1))
         self.assertEqual(data["@context"], "https://schema.org")
@@ -859,7 +868,7 @@ class DiscoverabilityTests(unittest.TestCase):
 
     def test_home_page_carries_website_json_ld(self):
         page = render_home()
-        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S)
+        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.DOTALL)
         self.assertIsNotNone(match)
         data = json.loads(match.group(1))
         self.assertEqual(data["@type"], "WebSite")
@@ -900,7 +909,7 @@ class AboutPageTests(unittest.TestCase):
         self.assertIn('<meta property="og:image" content="https://www.pythonbyexample.dev/og/about.jpg">', page)
         self.assertIn('<meta name="twitter:image" content="https://www.pythonbyexample.dev/og/about.jpg">', page)
         self.assertTrue((ROOT / "public" / "og" / "about.jpg").exists())
-        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S)
+        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.DOTALL)
         self.assertIsNotNone(match)
         data = json.loads(match.group(1))
         self.assertEqual(data["@type"], "AboutPage")
@@ -981,7 +990,7 @@ class PrivacyPageTests(unittest.TestCase):
 
     def test_privacy_page_has_webpage_structured_data_without_editor_assets(self):
         page = render_privacy()
-        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.S)
+        match = re.search(r'<script type="application/ld\+json">(.+?)</script>', page, re.DOTALL)
         self.assertIsNotNone(match)
         data = json.loads(match.group(1))
         self.assertEqual(data["@type"], "WebPage")

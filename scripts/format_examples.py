@@ -17,12 +17,11 @@ def toml_value(value: Any) -> str:
         return "true" if value else "false"
     if isinstance(value, str):
         return '"' + value.replace("\\", "\\\\").replace('"', '\\"').replace("\n", "\\n") + '"'
-    if isinstance(value, list):
-        if all(isinstance(item, str) for item in value):
-            if len(value) == 0:
-                return "[]"
-            inner = "\n".join(f"  {toml_value(item)}," for item in value)
-            return "[\n" + inner + "\n]"
+    if isinstance(value, list) and all(isinstance(item, str) for item in value):
+        if len(value) == 0:
+            return "[]"
+        inner = "\n".join(f"  {toml_value(item)}," for item in value)
+        return "[\n" + inner + "\n]"
     raise TypeError(f"Unsupported TOML value: {value!r}")
 
 

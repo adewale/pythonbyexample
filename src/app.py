@@ -10,13 +10,15 @@ from pathlib import Path
 
 try:
     from .asset_manifest import ASSET_PATHS
-    from .editorial_registry import journeys as load_journeys, see_also_edge_labels as load_see_also_edge_labels
+    from .editorial_registry import journeys as load_journeys
+    from .editorial_registry import see_also_edge_labels as load_see_also_edge_labels
     from .examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
     from .marginalia import render_banner, render_for_section
     from .textfmt import render_inline
 except ImportError:  # Cloudflare Python Workers import sibling modules from main's directory.
     from asset_manifest import ASSET_PATHS
-    from editorial_registry import journeys as load_journeys, see_also_edge_labels as load_see_also_edge_labels
+    from editorial_registry import journeys as load_journeys
+    from editorial_registry import see_also_edge_labels as load_see_also_edge_labels
     from examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
     from marginalia import render_banner, render_for_section
     from textfmt import render_inline
@@ -517,11 +519,13 @@ def _walkthrough_cells(example):
         delta = ""
         try:
             with contextlib.redirect_stdout(stdout):
-                exec(compile(step["code"], "<walkthrough>", "exec", dont_inherit=True), namespace)
+                exec(  # noqa: S102 - walkthrough code is intentionally evaluated in isolation
+                    compile(step["code"], "<walkthrough>", "exec", dont_inherit=True), namespace
+                )
             current_output = stdout.getvalue()
             delta = current_output[last_output_length:]
             last_output_length = len(current_output)
-        except Exception as error:
+        except Exception as error:  # noqa: BLE001 - display failures from arbitrary examples
             delta = f"Execution reaches this point in the complete example. ({error.__class__.__name__})\n"
         if delta or index == len(steps):
             cells.append(

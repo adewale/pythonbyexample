@@ -108,7 +108,7 @@ def main() -> int:
         except urllib.error.HTTPError as exc:
             failures.append(f"{url}: HTTP {exc.code}")
             continue
-        except Exception as exc:  # pragma: no cover - diagnostic path
+        except Exception as exc:  # noqa: BLE001  # pragma: no cover - report any transport failure
             failures.append(f"{url}: {exc!r}")
             continue
         if status != 200:
@@ -126,7 +126,7 @@ def main() -> int:
             except urllib.error.HTTPError as exc:
                 failures.append(f"POST {url}: HTTP {exc.code}")
                 continue
-            except Exception as exc:  # pragma: no cover - diagnostic path
+            except Exception as exc:  # noqa: BLE001  # pragma: no cover - report any transport failure
                 failures.append(f"POST {url}: {exc!r}")
                 continue
             if status != 200:
