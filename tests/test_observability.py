@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 from types import SimpleNamespace
 
-import src.observability as observability
+from src import observability
 
 ROOT = Path(__file__).resolve().parents[1]
 

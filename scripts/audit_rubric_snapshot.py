@@ -25,7 +25,6 @@ from src.marginalia import (
     SECTION_FIGURES,
 )
 
-
 Example = dict[str, Any]
 Registry = dict[str, Any]
 
@@ -229,10 +228,10 @@ def render_report(date: str) -> str:
     lines = [
         f"# Rubric audit snapshot — {date}",
         "",
-        "This snapshot puts the catalog's quality ledgers beside each other for an "
+        ("This snapshot puts the catalog's quality ledgers beside each other for an "
         "editorial pass. Every number is computed from the live registries at "
         "generation time; rows marked CURATED are editorial judgements that the "
-        "audit pass must re-affirm by review — this report does not validate them.",
+        "audit pass must re-affirm by review — this report does not validate them."),
         "",
         "## Scoreboard",
         "",
@@ -240,9 +239,9 @@ def render_report(date: str) -> str:
         f"- Example diagrams: {score_summary(figure_scores)}",
         f"- Journey diagrams: {score_summary(journey_scores)}",
         *waiver_lines,
-        "- Graph health: "
+        ("- Graph health: "
         f"{graph['linked_sources']} linked sources, {graph['edges']} edges, "
-        f"{graph['orphaned']} orphaned examples.",
+        f"{graph['orphaned']} orphaned examples."),
         "",
         "## Example rubric dimensions",
         "",
@@ -314,9 +313,9 @@ def render_report(date: str) -> str:
     ])
     if reused_sections:
         lines.extend([
-            f"{len(reused_sections)} section figures still reuse production example paint functions. They "
+            (f"{len(reused_sections)} section figures still reuse production example paint functions. They "
             "remain above the project gate, but the journey rubric's independence "
-            "criterion should be the next visual-design frontier.",
+            "criterion should be the next visual-design frontier."),
             "",
         ])
         lines.extend(
@@ -357,12 +356,12 @@ def render_report(date: str) -> str:
             [f"- {finding}" for finding in findings]
             or ["- No gate-blocking conditions detected in the computed ledgers."]
         ),
-        f"- Weakest example diagram score: {weakest_diagram:g}; "
-        f"weakest journey diagram score: {weakest_journey:g}.",
+        (f"- Weakest example diagram score: {weakest_diagram:g}; "
+        f"weakest journey diagram score: {weakest_journey:g}."),
         "",
-        "CURATED dimensions above are not validated by this report; the audit "
+        ("CURATED dimensions above are not validated by this report; the audit "
         "pass owns re-affirming them (the marginalia gestalt page shows every "
-        "figure with its production caption for exactly that review).",
+        "figure with its production caption for exactly that review)."),
         "",
     ])
     return "\n".join(lines)
@@ -370,7 +369,7 @@ def render_report(date: str) -> str:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--date", default=datetime.date.today().isoformat())
+    parser.add_argument("--date", default=datetime.datetime.now(datetime.UTC).date().isoformat())
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
 

@@ -21,14 +21,22 @@ docs/journey-visualisation-rubric.md for the figure-quality rubric.
 
 from __future__ import annotations
 
-from typing import Callable
+from collections.abc import Callable
 
 try:
     from .editorial_registry import (
         example_figure_scores as load_example_figure_scores,
+    )
+    from .editorial_registry import (
         example_quality_scores as load_example_quality_scores,
+    )
+    from .editorial_registry import (
         figure_attachments as load_figure_attachments,
+    )
+    from .editorial_registry import (
         journey_section_figure_scores as load_journey_section_figure_scores,
+    )
+    from .editorial_registry import (
         journey_section_figures as load_journey_section_figures,
     )
     from .marginalia_grammar import Canvas
@@ -36,9 +44,17 @@ try:
 except ImportError:  # Cloudflare Workers import siblings without the package prefix.
     from editorial_registry import (  # type: ignore[no-redef]
         example_figure_scores as load_example_figure_scores,
+    )
+    from editorial_registry import (
         example_quality_scores as load_example_quality_scores,
+    )
+    from editorial_registry import (
         figure_attachments as load_figure_attachments,
+    )
+    from editorial_registry import (
         journey_section_figure_scores as load_journey_section_figure_scores,
+    )
+    from editorial_registry import (
         journey_section_figures as load_journey_section_figures,
     )
     from marginalia_grammar import Canvas

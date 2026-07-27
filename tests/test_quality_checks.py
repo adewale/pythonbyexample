@@ -21,6 +21,7 @@ def run(script: str, *args: str) -> subprocess.CompletedProcess:
         capture_output=True,
         text=True,
         cwd=ROOT,
+        check=False,
     )
 
 
@@ -126,6 +127,7 @@ class RegistryIntegrityTests(unittest.TestCase):
             capture_output=True,
             text=True,
             cwd=ROOT,
+            check=False,
         )
 
     def test_unknown_owner_in_confusable_pair_fails(self):

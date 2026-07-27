@@ -10,15 +10,26 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
-from scripts.fingerprint_assets import ASSETS, PUBLIC, html_version  # noqa: E402
-from src.app import JOURNEYS, SITE_URL, list_examples, render_about, render_example_page, render_home, render_journeys_index, render_journey_page, render_privacy, render_sitemap  # noqa: E402
-from src.asset_manifest import ASSET_PATHS, HTML_CACHE_VERSION  # noqa: E402
+from scripts.fingerprint_assets import ASSETS, PUBLIC, html_version
+from src.app import (
+    JOURNEYS,
+    SITE_URL,
+    list_examples,
+    render_about,
+    render_example_page,
+    render_home,
+    render_journey_page,
+    render_journeys_index,
+    render_privacy,
+    render_sitemap,
+)
+from src.asset_manifest import ASSET_PATHS, HTML_CACHE_VERSION
 
 META_DESCRIPTION_RE = re.compile(r'<meta name="description" content="([^"]+)">')
 CANONICAL_RE = re.compile(r'<link rel="canonical" href="([^"]+)">')
 OG_URL_RE = re.compile(r'<meta property="og:url" content="([^"]+)">')
 HASHED_ASSET_RE = re.compile(r'/(site|syntax-highlight|editor|runner|search)\.[0-9a-f]{12}\.(css|js)')
-JSON_LD_RE = re.compile(r'<script type="application/ld\+json">(.+?)</script>', re.S)
+JSON_LD_RE = re.compile(r'<script type="application/ld\+json">(.+?)</script>', re.DOTALL)
 OG_IMAGE_RE = re.compile(r'<meta property="og:image" content="([^"]+)">')
 
 

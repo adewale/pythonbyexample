@@ -7,10 +7,10 @@ behavior such as renderers and figure paint functions.
 """
 from __future__ import annotations
 
+import tomllib
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
-import tomllib
 
 ROOT = Path(__file__).resolve().parents[1]
 REGISTRY_PATH = ROOT / "docs" / "quality-registries.toml"

@@ -25,7 +25,8 @@ import argparse
 import json
 import sys
 from collections import Counter, defaultdict
-from typing import Iterable, Iterator, TextIO
+from collections.abc import Iterable, Iterator
+from typing import TextIO
 
 SERVICE = "pythonbyexample"
 

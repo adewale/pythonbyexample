@@ -20,14 +20,15 @@ from statistics import mean
 
 from _common import load_catalog, load_registry
 from src.marginalia import EXAMPLE_QUALITY_SCORES
+
 GENERIC_PHRASES = [
     "it exists to make a common boundary explicit",
     "the example is small, deterministic",
     "prefer simpler neighboring tools",
 ]
-BOUNDARY_WORDS = re.compile(r"\b(prefer|instead|boundary|when|unless|except|error|raises?|static|runtime|unsupported|footgun|warning)\b", re.I)
-RATIONALE_WORDS = re.compile(r"\b(use|prefer|reach for|when|because|useful|right tool|fit|shape)\b", re.I)
-TOY_WORDS = re.compile(r"\b(foo|bar|baz|spam|eggs)\b", re.I)
+BOUNDARY_WORDS = re.compile(r"\b(prefer|instead|boundary|when|unless|except|error|raises?|static|runtime|unsupported|footgun|warning)\b", re.IGNORECASE)
+RATIONALE_WORDS = re.compile(r"\b(use|prefer|reach for|when|because|useful|right tool|fit|shape)\b", re.IGNORECASE)
+TOY_WORDS = re.compile(r"\b(foo|bar|baz|spam|eggs)\b", re.IGNORECASE)
 
 
 def clamp(value: float) -> float:

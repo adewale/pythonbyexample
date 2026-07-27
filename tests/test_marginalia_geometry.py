@@ -19,10 +19,10 @@ from __future__ import annotations
 
 import re
 import unittest
+from typing import ClassVar
 
 from src.marginalia import ATTACHMENTS, FIGURES, SCORES
 from src.marginalia_grammar import Canvas, text_width
-
 
 # The gestalt review pages under /prototyping/* render the same paint
 # functions that ship on /examples/<slug>, so auditing FIGURES is
@@ -33,7 +33,7 @@ ATTR = re.compile(r'([\w-]+)="([^"]+)"')
 
 # Padding emitted by Canvas.to_svg(), imported so the contracts and the
 # paint code share one source of truth.
-from src.marginalia_grammar import PAD_BOTTOM, PAD_TOP, PAD_X  # noqa: E402,F401
+from src.marginalia_grammar import PAD_BOTTOM, PAD_TOP, PAD_X
 
 # Character advance and text-width estimation live in
 # src/marginalia_grammar.py (BBOX_ADVANCE / text_width) so the paint
@@ -259,7 +259,7 @@ class FigureRegistrationContract(unittest.TestCase):
     # for the /prototyping layout pages. Grepping build_prototypes.py
     # source would count a name in a comment as "used"; an explicit
     # allowlist keeps the exception visible and reviewed.
-    PROTOTYPE_ONLY_FIGURES = {"tuple-no-mutation"}
+    PROTOTYPE_ONLY_FIGURES: ClassVar = {"tuple-no-mutation"}
 
     def test_no_unused_figure_paint_functions(self):
         from src.marginalia import SECTION_FIGURES
@@ -284,7 +284,7 @@ class FigureGrammarContract(unittest.TestCase):
     """
 
     def test_every_emitted_color_is_from_the_locked_palette(self):
-        from src.marginalia_grammar import INK, INK_SOFT, EMPHASIS, SOFT_FILL
+        from src.marginalia_grammar import EMPHASIS, INK, INK_SOFT, SOFT_FILL
 
         allowed = {INK, INK_SOFT, EMPHASIS, SOFT_FILL, "none"}
         failures: list[str] = []
@@ -299,7 +299,7 @@ class FigureGrammarContract(unittest.TestCase):
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
     def test_every_emitted_font_is_from_the_locked_set(self):
-        from src.marginalia_grammar import FONT_SERIF, FONT_MONO, FONT_SANS
+        from src.marginalia_grammar import FONT_MONO, FONT_SANS, FONT_SERIF
 
         allowed = {FONT_SERIF, FONT_MONO, FONT_SANS}
         failures: list[str] = []
@@ -368,6 +368,7 @@ class SectionFigureContract(unittest.TestCase):
 
     def test_every_section_figure_caption_is_unique(self):
         from collections import defaultdict
+
         from src.marginalia import SECTION_FIGURES
 
         caption_to_titles: dict[str, list[str]] = defaultdict(list)
@@ -379,7 +380,7 @@ class SectionFigureContract(unittest.TestCase):
 
 
     def test_every_section_has_a_score(self):
-        from src.marginalia import SECTION_FIGURES, SECTION_FIGURE_SCORES
+        from src.marginalia import SECTION_FIGURE_SCORES, SECTION_FIGURES
 
         unscored = set(SECTION_FIGURES) - set(SECTION_FIGURE_SCORES)
         unattached = set(SECTION_FIGURE_SCORES) - set(SECTION_FIGURES)
@@ -498,6 +499,7 @@ class FigureAnchorContract(unittest.TestCase):
         # Imported lazily to avoid pulling the example loader for every
         # test in this file.
         import re as _re
+
         from src.example_loader import load_examples
 
         _, examples = load_examples()
@@ -703,11 +705,7 @@ class FigureEmphasisScarcityContract(unittest.TestCase):
                 # The closed_arrow primitive emits BOTH a coloured <line>
                 # and a coloured <polygon> for one arrow head; count the
                 # polygon and ignore the line to avoid double-counting.
-                if part.startswith("<polygon") and attrs.get("fill") == EMPHASIS:
-                    accents += 1
-                elif part.startswith("<circle") and attrs.get("fill") == EMPHASIS:
-                    accents += 1
-                elif part.startswith("<rect") and attrs.get("stroke") == EMPHASIS:
+                if part.startswith("<polygon") and attrs.get("fill") == EMPHASIS or part.startswith("<circle") and attrs.get("fill") == EMPHASIS or part.startswith("<rect") and attrs.get("stroke") == EMPHASIS:
                     accents += 1
             if accents > 1:
                 failures.append(f"{name}: {accents} accent marks (rubric allows at most 1)")

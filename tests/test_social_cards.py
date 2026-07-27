@@ -5,7 +5,6 @@ from io import BytesIO
 from pathlib import Path
 
 from PIL import Image
-
 from scripts import build_social_cards as cards
 
 

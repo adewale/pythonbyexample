@@ -44,8 +44,8 @@ def _import_main():
 
 main = _import_main()
 
-from fastapi import Request  # noqa: E402
-from fastapi.responses import HTMLResponse  # noqa: E402
+from fastapi import Request
+from fastapi.responses import HTMLResponse
 
 
 class _Env:
@@ -138,7 +138,7 @@ class ChallengeModeTests(unittest.TestCase):
         self.assertFalse(main._requires_turnstile(request))
 
     def test_smoke_bypass_header_disables_challenge(self):
-        env = session_env(**{"PBE_SMOKE_BYPASS_SECRET": "smoke-secret"})
+        env = session_env(PBE_SMOKE_BYPASS_SECRET="smoke-secret")
         request = make_request(headers={main.SMOKE_BYPASS_HEADER: "smoke-secret"}, env=env)
         self.assertFalse(main._requires_turnstile(request))
         wrong = make_request(headers={main.SMOKE_BYPASS_HEADER: "wrong"}, env=env)
@@ -300,7 +300,7 @@ class RunExampleFlowTests(unittest.TestCase):
 
     def test_valid_unicode_form_reaches_runner(self):
         self._stub_run(output="ok")
-        response = self._run(post_request("code=print%28%27%E2%82%AC%27%29".encode(), env=session_env(TURNSTILE_CHALLENGE_MODE="off")))
+        response = self._run(post_request(b"code=print%28%27%E2%82%AC%27%29", env=session_env(TURNSTILE_CHALLENGE_MODE="off")))
         self.assertEqual(self._ran_code, "print('€')")
         self.assertEqual(response.status_code, 200)
 
@@ -377,8 +377,8 @@ class TurnstileSiteverifyTests(unittest.TestCase):
                 class Response:
                     status = 200
 
-                    async def text(self):
-                        return payload
+                    async def text(self, response_payload=payload):
+                        return response_payload
 
                 main.js_fetch = lambda _request: _awaitable(Response())
                 ok, message, outcome = asyncio.run(main._verify_turnstile(make_request(env=session_env()), "token"))
@@ -408,7 +408,11 @@ class DynamicWorkerCodeTests(unittest.TestCase):
         self.assertIn(repr("x = '''end'''"), tricky)
 
     def test_generated_worker_enforces_utf8_output_cap(self):
-        from app import DYNAMIC_OUTPUT_LIMIT_MESSAGE, MAX_DYNAMIC_OUTPUT_BYTES, build_dynamic_worker_code
+        from app import (
+            DYNAMIC_OUTPUT_LIMIT_MESSAGE,
+            MAX_DYNAMIC_OUTPUT_BYTES,
+            build_dynamic_worker_code,
+        )
 
         saved_workers = sys.modules.get("workers")
         fake_workers = types.ModuleType("workers")
@@ -422,23 +426,31 @@ class DynamicWorkerCodeTests(unittest.TestCase):
         sys.modules["workers"] = fake_workers
         try:
             namespace = {}
-            exec(build_dynamic_worker_code(f"print('€' * {(MAX_DYNAMIC_OUTPUT_BYTES - 1) // 3})"), namespace)
+            exec(  # noqa: S102 - test executes the generated worker module
+                build_dynamic_worker_code(f"print('€' * {(MAX_DYNAMIC_OUTPUT_BYTES - 1) // 3})"),
+                namespace,
+            )
             under = asyncio.run(namespace["Default"]().fetch(None))
             self.assertEqual(under.status, 200)
             self.assertLessEqual(len(under.body.encode()), MAX_DYNAMIC_OUTPUT_BYTES)
             namespace = {}
-            exec(build_dynamic_worker_code(f"print('x' * {MAX_DYNAMIC_OUTPUT_BYTES + 1})"), namespace)
+            exec(  # noqa: S102 - test executes the generated worker module
+                build_dynamic_worker_code(f"print('x' * {MAX_DYNAMIC_OUTPUT_BYTES + 1})"), namespace
+            )
             over = asyncio.run(namespace["Default"]().fetch(None))
             self.assertEqual(over.status, 413)
             self.assertEqual(over.body, DYNAMIC_OUTPUT_LIMIT_MESSAGE)
             namespace = {}
-            exec(build_dynamic_worker_code(f"raise ValueError('x' * {MAX_DYNAMIC_OUTPUT_BYTES + 1})"), namespace)
+            exec(  # noqa: S102 - test executes the generated worker module
+                build_dynamic_worker_code(f"raise ValueError('x' * {MAX_DYNAMIC_OUTPUT_BYTES + 1})"),
+                namespace,
+            )
             huge_error = asyncio.run(namespace["Default"]().fetch(None))
             self.assertEqual(huge_error.status, 413)
             self.assertEqual(huge_error.body, DYNAMIC_OUTPUT_LIMIT_MESSAGE)
             self.assertLessEqual(len(huge_error.body.encode()), MAX_DYNAMIC_OUTPUT_BYTES)
             namespace = {}
-            exec(
+            exec(  # noqa: S102 - test executes the generated worker module
                 build_dynamic_worker_code(
                     f"import sys; sys.stdout.parts.append('x' * {MAX_DYNAMIC_OUTPUT_BYTES + 1})"
                 ),

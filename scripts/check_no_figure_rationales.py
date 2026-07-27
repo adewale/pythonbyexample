@@ -42,7 +42,7 @@ def main() -> int:
             except ValueError:
                 errors.append(f"{slug}: review_after must be an ISO date, got {review_after!r}")
             else:
-                if due <= datetime.date.today():
+                if due <= datetime.datetime.now(datetime.UTC).date():
                     errors.append(
                         f"{slug}: review_after {review_after} has passed; "
                         f"re-review the no-figure decision and move the date or draw the figure"

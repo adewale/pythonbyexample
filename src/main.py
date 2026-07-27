@@ -11,6 +11,8 @@ from fastapi.responses import HTMLResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from workers import WorkerEntrypoint, python_from_rpc
 
+import observability
+import worker_asgi_bridge as asgi
 from app import (
     DYNAMIC_OUTPUT_LIMIT_MESSAGE,
     FAVICON_SVG,
@@ -35,9 +37,6 @@ from asset_manifest import HTML_CACHE_VERSION
 from examples import PYTHON_VERSION
 from security import CONTENT_SECURITY_POLICY, STRICT_TRANSPORT_SECURITY
 
-import observability
-import worker_asgi_bridge as asgi
-
 TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 TURNSTILE_ACTION = "run-example"
 SMOKE_BYPASS_HEADER = "x-pythonbyexample-smoke-secret"
@@ -49,7 +48,9 @@ DEFAULT_TURNSTILE_CLEARANCE_SECONDS = 60 * 60 * 8
 MAX_SUBMITTED_BODY_BYTES = 100_000
 
 try:
-    from js import Object, Request as JsRequest, caches, fetch as js_fetch
+    from js import Object, caches
+    from js import Request as JsRequest
+    from js import fetch as js_fetch
     from pyodide.ffi import create_once_callable, jsnull, to_js
 except ImportError:  # Allows editor tooling outside Workers.
     Object = None
@@ -419,8 +420,8 @@ async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str, st
             raise ValueError("Turnstile Siteverify returned a non-success status")
         result = json.loads(await response.text())
         if not isinstance(result, dict):
-            raise ValueError("Turnstile Siteverify returned a non-object payload")
-    except Exception:
+            raise TypeError("Turnstile Siteverify returned a non-object payload")
+    except Exception:  # noqa: BLE001 - JS fetch failures must become a generic verification failure
         return False, "Turnstile verification failed. Please refresh the challenge and try again.", "fail"
     expected_hostname = urlparse(str(request.url)).hostname or ""
     if (
@@ -454,7 +455,7 @@ async def _read_dynamic_response_text(response) -> tuple[str, bool]:
             if total > MAX_DYNAMIC_OUTPUT_BYTES:
                 try:
                     await reader.cancel("Dynamic Worker output exceeded limit")
-                except Exception:
+                except Exception:  # noqa: BLE001, S110 - cancellation is best-effort at the JS boundary
                     pass
                 return DYNAMIC_OUTPUT_LIMIT_MESSAGE, True
             chunks.append(chunk)
@@ -546,7 +547,7 @@ async def _run_example(request: Request, slug, code):
         if code_callback is not None and not code_callback_used and hasattr(code_callback, "destroy"):
             try:
                 code_callback.destroy()
-            except Exception as exc:
+            except Exception as exc:  # noqa: BLE001 - host callback cleanup can raise JS exceptions
                 worker_event["cleanup_error"] = observability.error_dict(exc)
                 event["level"] = "error"
 
