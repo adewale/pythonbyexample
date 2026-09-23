@@ -10,6 +10,6 @@
     "node": "22.x"
   },
   "devDependencies": {
-    "wrangler": "4.127.1"
+    "wrangler": "4.136.3"
   }
 }
