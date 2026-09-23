@@ -69,6 +69,7 @@ This document records project lessons that should guide future changes to Python
 - Unit tests are good for catalog integrity, rendering contracts, Dynamic Worker code generation, and cache-policy source checks.
 - Browser tests are necessary for Shiki/CodeMirror layout behavior and visual regressions.
 - Local `uv run ...` can hide CI import assumptions. GitHub's verify job may invoke `python3 -m unittest` before runtime dependencies such as FastAPI are importable, so tests that import `src/main.py` should either install the dependency explicitly or stub FastAPI/Starlette/Workers modules with purpose-built fakes.
+- Example source files cross a TOML/Markdown grammar boundary. Generate valid TOML fields and an independent arbitrary Markdown body, then assert exact metadata, exact body preservation, and the first body line through `_split_frontmatter`. Arbitrary text alone rarely reaches the valid-frontmatter path, while properties that rebuild the parser's result can repeat its bug.
 - SEO and cache-busting deserve a dedicated linter because errors are easy to reintroduce when adding pages or assets.
 - Always run the full pre-push set before publishing. Start `pywrangler dev --port 9696`, then run:
 
