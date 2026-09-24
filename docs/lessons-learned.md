@@ -11,7 +11,8 @@ This document records project lessons that should guide future changes to Python
 - POST runs must never go through the rendered-page cache path.
 - For Cloudflare request geography, prefer `request.cf.colo` / `request.cf.country` when available. Do not assume the `cf-ray` header includes a colo suffix; `wrangler tail` has shown Ray IDs without `-SJC`-style suffixes.
 - Structured application logs can be privacy-safe while the Cloudflare log envelope is not. `wrangler tail` wraps `console.log` payloads with the raw request URL and headers, including `cf-connecting-ip`, even when invocation logs are disabled. Validate sink-level privacy separately from custom-payload privacy.
-- If `pywrangler deploy` fails fetching Pyodide packages with `invalid peer certificate: UnknownIssuer`, rerun with `UV_NATIVE_TLS=true` so `uv` uses system certificate roots.
+- If `pywrangler deploy` fails fetching Pyodide packages with `invalid peer certificate: UnknownIssuer`, rerun with `UV_SYSTEM_CERTS=true` (formerly `UV_NATIVE_TLS`, which uv 0.12 deprecates) so `uv` uses system certificate roots.
+- A lockfile only protects what installs from it. Pywrangler 1.9.3 vendored `[project] dependencies` by resolving an unpinned `fastapi` afresh at every deploy, so CI tested one FastAPI/Starlette/Pydantic set (`uv.lock`) while production shipped whatever was newest that day. Pywrangler 1.17 vendors a committed, Pyodide-targeted `pylock.toml`; keep `uv.lock` pinned to the same versions (`scripts/align_runtime_lock.py`) and let `tests/test_dependency_locks.py` fail on drift. Pyodide wheels lag PyPI, so production can legitimately run an older package (Pydantic 2.10.6) than a host-only resolve would pick.
 
 ## Cache busting and Worker Cache API
 

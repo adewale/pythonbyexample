@@ -64,7 +64,7 @@ const sourceBlocks = [...document.querySelectorAll('pre code.language-python')].
 if (sourceBlocks.length) {
   let codeToHtml = null;
   try {
-    ({ codeToHtml } = await import('https://esm.sh/shiki@1.29.2'));
+    ({ codeToHtml } = await import('https://esm.sh/shiki@4.4.3'));
   } catch (_) {
     // Plain server-rendered code remains readable when the optional CDN fails.
   }
