@@ -1,8 +1,8 @@
-import { Compartment, EditorState } from 'https://esm.sh/@codemirror/state@6.5.2';
-import { EditorView, lineNumbers } from 'https://esm.sh/@codemirror/view@6.41.1?deps=@codemirror/state@6.5.2';
-import { defaultHighlightStyle, syntaxHighlighting } from 'https://esm.sh/@codemirror/language@6.12.3?deps=@codemirror/state@6.5.2,@codemirror/view@6.41.1';
-import { python } from 'https://esm.sh/@codemirror/lang-python@6.2.1?deps=@codemirror/state@6.5.2,@codemirror/view@6.41.1,@codemirror/language@6.12.3';
-import { oneDarkHighlightStyle } from 'https://esm.sh/@codemirror/theme-one-dark@6.1.3?deps=@codemirror/state@6.5.2,@codemirror/view@6.41.1,@codemirror/language@6.12.3';
+import { Compartment, EditorState } from 'https://esm.sh/@codemirror/state@6.7.6';
+import { EditorView, lineNumbers } from 'https://esm.sh/@codemirror/view@6.43.13?deps=@codemirror/state@6.7.6';
+import { defaultHighlightStyle, syntaxHighlighting } from 'https://esm.sh/@codemirror/language@6.12.4?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.13';
+import { python } from 'https://esm.sh/@codemirror/lang-python@6.2.1?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.13,@codemirror/language@6.12.4';
+import { oneDarkHighlightStyle } from 'https://esm.sh/@codemirror/theme-one-dark@6.1.3?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.13,@codemirror/language@6.12.4';
 
 const themePreference = window.matchMedia('(prefers-color-scheme: dark)');
 const highlightStyle = () => themePreference.matches ? oneDarkHighlightStyle : defaultHighlightStyle;

@@ -112,7 +112,7 @@ try {
     await client.send('Runtime.evaluate', {
       awaitPromise: true,
       expression: `(async () => {
-        const { codeToHtml } = await import('https://esm.sh/shiki@1.29.2');
+        const { codeToHtml } = await import('https://esm.sh/shiki@4.4.3');
         for (const block of document.querySelectorAll('pre code.language-python')) {
           const highlighted = await codeToHtml(block.textContent, { lang: 'python', theme: 'github-light' });
           const wrapper = document.createElement('div');
