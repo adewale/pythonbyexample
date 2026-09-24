@@ -51,6 +51,8 @@ jobs:
           CHROME_PATH: /usr/bin/google-chrome
         run: |
           npm audit --audit-level=high
+          # pywrangler dev re-resolved pylock.toml above; production must match the commit.
+          git diff --exit-code -- pylock.toml
           make verify
           scripts/format_examples.py --check
           make verify-python-version VERSION=3.13

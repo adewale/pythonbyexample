@@ -3,7 +3,7 @@
 PY := uv run --python 3.13
 NODE_DEPS_STAMP := node_modules/.package-lock.json
 
-.PHONY: check-node-version node-deps test embed-examples embed-editorial-registry build-search-index build check-generated fingerprint prototypes browser-layout-test search-ranking-test social-cards check-social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported check-program-covers-cells check-prose-duplication check-inline-links score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes audit-example-graph quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy lint
+.PHONY: check-node-version node-deps test embed-examples embed-editorial-registry build-search-index build check-generated fingerprint prototypes browser-layout-test search-ranking-test social-cards check-social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported check-program-covers-cells check-prose-duplication check-inline-links score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes audit-example-graph quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy upgrade-runtime-deps lint
 
 check-node-version:
 	@major="$$(node -p 'process.versions.node.split(".")[0]')"; \
@@ -125,4 +125,10 @@ smoke-deployment:
 
 deploy: node-deps check-generated
 	uv run --group workers pywrangler sync --force
+	git diff --exit-code -- pylock.toml
 	uv run --group workers pywrangler deploy
+
+# Production vendors pylock.toml; tests run against uv.lock. Refresh both together.
+upgrade-runtime-deps: node-deps
+	uv run --group workers pywrangler sync --force --upgrade
+	$(PY) scripts/align_runtime_lock.py
