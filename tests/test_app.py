@@ -447,9 +447,11 @@ class AppTests(unittest.TestCase):
         self.assertIn('"preview_urls": false', wrangler_config)
         package = json.loads((ROOT / "package.json").read_text())
         lock = json.loads((ROOT / "package-lock.json").read_text())
-        self.assertEqual(package["devDependencies"]["wrangler"], "4.137.0")
+        wrangler = package["devDependencies"]["wrangler"]
+        self.assertRegex(wrangler, r"^\d+\.\d+\.\d+$")
         self.assertEqual(package["engines"]["node"], "22.x")
-        self.assertEqual(lock["packages"][""]["devDependencies"]["wrangler"], "4.137.0")
+        self.assertEqual(lock["packages"][""]["devDependencies"]["wrangler"], wrangler)
+        self.assertEqual(lock["packages"]["node_modules/wrangler"]["version"], wrangler)
         makefile = (ROOT / "Makefile").read_text()
         self.assertIn("check-node-version", makefile)
         self.assertIn("pywrangler sync --force", makefile)
