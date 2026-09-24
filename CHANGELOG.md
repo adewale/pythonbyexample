@@ -8,6 +8,7 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ### Fixed
 
+- Production Python packages are locked. Pywrangler 1.17.4 vendors a committed, hash-pinned `pylock.toml` instead of resolving an unpinned `fastapi` at deploy time, and `uv.lock` pins the same versions (FastAPI 0.141.1, Starlette 1.7.0, Pydantic 2.10.6) so the test suite runs against exactly what ships. `tests/test_dependency_locks.py` fails on drift, and CI and `make deploy` fail if a sync would change `pylock.toml`. Starlette 1.7.0 also clears the five advisories against the previously tested 1.0.0.
 - Example-page runner wiring (Run interception, Reset, the share button, and keyboard navigation) no longer waits for the CDN-backed highlighter and editor modules: `runner.js` loads `async`, so a slow or unreachable esm.sh cannot stall it — ordered module scripts otherwise execute strictly after every preceding module settles, including their top-level awaits.
 
 ### Added
@@ -32,6 +33,9 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ### Changed
 
+- Dependency refresh: Pillow 12.3.0 (from 11.3.0; 17 advisories), Pywrangler 1.17.4 (from 1.9.3; requires uv 0.12.3+), Shiki 4.4.3 (from 1.29.2; byte-identical output for every example block in both themes), and CodeMirror state 6.7.6, view 6.43.13, and language 6.12.4.
+- CI actions moved to their Node 24 releases (checkout, setup-node, and setup-python v7; setup-uv v10.2.0 pinned by commit), clearing the Node.js 20 deprecation warning; npm caching stays off.
+- Dependabot proposes weekly npm, GitHub Actions, and development-tool (Hypothesis, Pillow, Pywrangler) updates. Runtime packages refresh through `make upgrade-runtime-deps`.
 - The home header stays visible on landing: the scroll-driven entrance now animates the brand and a compositor-friendly veil layer instead of hiding the whole header (which left the page with no visible nav at first paint).
 - Body type is `100%/1.6` instead of a fixed 16px, so browser text-size settings are respected. The never-rendering brand faces (FT Kunst Grotesk, Apercu Mono Pro — installed nowhere, shipped never) are removed from the stacks, which now declare the real design: `system-ui` prose and `ui-monospace`-first code. The `/about` type specimen says so.
 - `prefers-reduced-transparency` and `prefers-contrast: more` get solid-chrome and defined-border fallbacks; cards press down on tap; header links carry full-height (~43px) tap targets via padding with cancelling negative margins.
