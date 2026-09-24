@@ -15,7 +15,7 @@ workers = [
 ]
 dev = [
     "hypothesis>=6.0",
-    "pillow>=11.3,<12",
+    "pillow>=12.3,<13",
     "ruff==0.16.0",
 ]
 
