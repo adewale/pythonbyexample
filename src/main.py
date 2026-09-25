@@ -39,6 +39,24 @@ from security import CONTENT_SECURITY_POLICY, STRICT_TRANSPORT_SECURITY
 
 TURNSTILE_VERIFY_URL = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 TURNSTILE_ACTION = "run-example"
+TURNSTILE_FAILED_MESSAGE = "Turnstile verification failed. Press Run to try again."
+# Cloudflare documents tokens as at most 2048 characters; longer values are
+# rejected without spending a Siteverify subrequest.
+MAX_TURNSTILE_TOKEN_CHARS = 2048
+SITEVERIFY_TIMEOUT_MS = 10_000
+# Siteverify's documented error codes. Only these names reach the wide event,
+# so an unexpected payload cannot widen the logged vocabulary.
+SITEVERIFY_ERROR_CODES = frozenset(
+    {
+        "missing-input-secret",
+        "invalid-input-secret",
+        "missing-input-response",
+        "invalid-input-response",
+        "bad-request",
+        "timeout-or-duplicate",
+        "internal-error",
+    }
+)
 SMOKE_BYPASS_HEADER = "x-pythonbyexample-smoke-secret"
 TURNSTILE_CLEARANCE_COOKIE = "pbe_turnstile_clearance"
 DEFAULT_TURNSTILE_CLEARANCE_SECONDS = 60 * 60 * 8
@@ -48,11 +66,12 @@ DEFAULT_TURNSTILE_CLEARANCE_SECONDS = 60 * 60 * 8
 MAX_SUBMITTED_BODY_BYTES = 100_000
 
 try:
-    from js import Object, caches
+    from js import AbortSignal, Object, caches
     from js import Request as JsRequest
     from js import fetch as js_fetch
     from pyodide.ffi import create_once_callable, jsnull, to_js
 except ImportError:  # Allows editor tooling outside Workers.
+    AbortSignal = None
     Object = None
     JsRequest = None
     jsnull = None
@@ -320,12 +339,16 @@ async def run_example(slug: str, request: Request):
     turnstile_verified = False
 
     if needs_turnstile and not turnstile_token:
-        if event := _wide_event(request):
-            event["turnstile"] = {"outcome": "fail"}
         site_key = _turnstile_site_key(request)
         message = "Verification required before running edited code."
+        # Issuing a challenge is the normal first run of a session, not a
+        # failure; keeping it apart lets reports compare issued vs rejected.
+        turnstile_event = {"outcome": "challenged"}
         if not site_key:
             message = "Turnstile verification is required, but TURNSTILE_SITE_KEY is not configured."
+            turnstile_event = {"outcome": "fail", "reason": "site_key_missing"}
+        if event := _wide_event(request):
+            event["turnstile"] = turnstile_event
         return _html(
             render_example_page(
                 example,
@@ -337,9 +360,9 @@ async def run_example(slug: str, request: Request):
         )
 
     if needs_turnstile:
-        ok, message, turnstile_outcome = await _verify_turnstile(request, turnstile_token)
+        ok, message, turnstile_event = await _verify_turnstile(request, turnstile_token)
         if event := _wide_event(request):
-            event["turnstile"] = {"outcome": turnstile_outcome}
+            event["turnstile"] = turnstile_event
         if not ok:
             return _html(
                 render_example_page(
@@ -387,50 +410,88 @@ def _turnstile_not_required_outcome(request: Request) -> str:
     return "disabled"
 
 
-async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str, str]:
+def _turnstile_failure(reason: str, error_codes: list[str] | None = None) -> tuple[bool, str, dict]:
+    turnstile_event = {"outcome": "fail", "reason": reason}
+    if error_codes:
+        turnstile_event["error_codes"] = error_codes
+    return False, TURNSTILE_FAILED_MESSAGE, turnstile_event
+
+
+def _siteverify_error_codes(result: dict) -> list[str]:
+    codes = result.get("error-codes")
+    if not isinstance(codes, list):
+        return []
+    return sorted(
+        {code if code in SITEVERIFY_ERROR_CODES else "other" for code in codes if isinstance(code, str)}
+    )
+
+
+async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str, dict]:
+    """Return (ok, learner message, wide-event turnstile fields).
+
+    Failures carry a closed-vocabulary ``reason`` and, for Siteverify
+    rejections, its documented ``error_codes``: ``invalid-input-secret``
+    means the deployment is misconfigured, not that a learner is a bot.
+    """
     secret = _turnstile_secret(request)
     if not secret:
-        return True, "", "disabled"
+        return True, "", {"outcome": "disabled"}
 
     if _smoke_bypass_ok(request):
-        return True, "", "bypass"
+        return True, "", {"outcome": "bypass"}
 
     if not token:
-        return False, "Turnstile verification is required before running edited code. Please retry.", "fail"
+        return (
+            False,
+            "Turnstile verification is required before running edited code. Please retry.",
+            {"outcome": "fail", "reason": "missing_token"},
+        )
+    if len(token) > MAX_TURNSTILE_TOKEN_CHARS:
+        return _turnstile_failure("token_too_long")
     if js_fetch is None or JsRequest is None:
-        return False, "Turnstile verification is unavailable outside the Cloudflare runtime.", "fail"
+        return (
+            False,
+            "Turnstile verification is unavailable outside the Cloudflare runtime.",
+            {"outcome": "fail", "reason": "runtime_unavailable"},
+        )
 
     payload = {"secret": secret, "response": token}
     remote_ip = request.headers.get("CF-Connecting-IP")
     if remote_ip:
         payload["remoteip"] = remote_ip
-    verify_request = JsRequest.new(
-        TURNSTILE_VERIFY_URL,
-        _to_js_object(
-            {
-                "method": "POST",
-                "body": urlencode(payload),
-                "headers": {"Content-Type": "application/x-www-form-urlencoded"},
-            }
-        ),
-    )
+    init = {
+        "method": "POST",
+        "body": urlencode(payload),
+        "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+    }
+    if AbortSignal is not None:
+        # A hung Siteverify must not hold the learner's run open indefinitely.
+        init["signal"] = AbortSignal.timeout(SITEVERIFY_TIMEOUT_MS)
+    verify_request = JsRequest.new(TURNSTILE_VERIFY_URL, _to_js_object(init))
     try:
         response = await js_fetch(verify_request)
-        if int(getattr(response, "status", 0) or 0) < 200 or int(getattr(response, "status", 0) or 0) >= 300:
-            raise ValueError("Turnstile Siteverify returned a non-success status")
+        status = int(getattr(response, "status", 0) or 0)
         result = json.loads(await response.text())
-        if not isinstance(result, dict):
-            raise TypeError("Turnstile Siteverify returned a non-object payload")
-    except Exception:  # noqa: BLE001 - JS fetch failures must become a generic verification failure
-        return False, "Turnstile verification failed. Please refresh the challenge and try again.", "fail"
-    expected_hostname = urlparse(str(request.url)).hostname or ""
-    if (
-        result.get("success") is True
-        and result.get("hostname", "").lower().rstrip(".") == expected_hostname.lower().rstrip(".")
-        and result.get("action") == TURNSTILE_ACTION
-    ):
-        return True, "", "pass"
-    return False, "Turnstile verification failed. Please refresh the challenge and try again.", "fail"
+    except Exception:  # noqa: BLE001 - JS fetch failures, timeouts, and unparseable bodies fail closed
+        return _turnstile_failure("siteverify_unavailable")
+    if not isinstance(result, dict):
+        return _turnstile_failure("siteverify_unavailable")
+    # Siteverify answers a bad or missing secret with HTTP 400 and a JSON body
+    # naming it, so read error codes before judging the status: discarding
+    # non-2xx bodies would report a misconfigured deployment as an outage.
+    status_ok = 200 <= status < 300
+    error_codes = _siteverify_error_codes(result)
+    if not status_ok and not error_codes:
+        return _turnstile_failure("siteverify_unavailable")
+    if not status_ok or result.get("success") is not True:
+        return _turnstile_failure("rejected", error_codes)
+    hostname = result.get("hostname")
+    expected_hostname = (urlparse(str(request.url)).hostname or "").lower().rstrip(".")
+    if not expected_hostname or not isinstance(hostname, str) or hostname.lower().rstrip(".") != expected_hostname:
+        return _turnstile_failure("hostname_mismatch")
+    if result.get("action") != TURNSTILE_ACTION:
+        return _turnstile_failure("action_mismatch")
+    return True, "", {"outcome": "pass"}
 
 
 async def _read_dynamic_response_text(response) -> tuple[str, bool]:
