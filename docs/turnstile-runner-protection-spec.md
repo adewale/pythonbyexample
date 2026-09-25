@@ -191,6 +191,26 @@ x-pythonbyexample-smoke-secret: <secret>
 
 This is only an app-level bypass. If Cloudflare Rate Limiting challenges smoke traffic before it reaches the Worker, either keep smoke below the threshold or add a Cloudflare-side skip/exception.
 
+Because bypassed runs never touch Siteverify, the same header also unlocks a secret probe:
+
+```text
+POST /__smoke/turnstile
+x-pythonbyexample-smoke-secret: <secret>
+```
+
+The Worker sends its `TURNSTILE_SECRET_KEY` to Siteverify with Cloudflare's documented dummy token `XXXX.DUMMY.TOKEN.XXXX` and returns JSON (`Cache-Control: no-store`). It never includes the secret itself. Cloudflare documents that production secrets reject the dummy token; how they reject it tells the configurations apart:
+
+| Siteverify reply to the dummy token | `secret` | Smoke |
+| --- | --- | --- |
+| `invalid-input-response`, HTTP 200, no testing metadata | `valid` | passes when a site key is configured |
+| `invalid-input-secret` or `missing-input-secret` (HTTP 400) | `invalid` | fails |
+| `metadata.result_with_testing_key: true`, or `success: true` | `testing_key` | fails |
+| unreachable, timeout, or unparseable | `unverified` | fails; re-run |
+| anything else | `unexpected` | fails |
+| no `TURNSTILE_SECRET_KEY` configured | `absent` | passes; Turnstile is off |
+
+The testing-metadata check matters: Cloudflare's always-fail test secret answers the dummy token with the same `invalid-input-response` as a working production secret, so without it a deployment where every learner fails would pass. Without the header, the route answers 404 and never calls Siteverify. The probe proves the secret is a working production secret. It cannot prove that the secret and site key belong to the same widget, or that the widget allows the production hostname; a browser run still covers those.
+
 ## Recommended Cloudflare layer: Rate Limiting Rules
 
 The best first production protection for Dynamic Worker cost is Cloudflare Rate Limiting, because it runs before the Worker and limits repeated runner traffic at the edge.
@@ -454,6 +474,8 @@ Deployment smoke OK
 ```
 
 The smoke script checks the rendered output panel for POST runs. This is important because a Turnstile-required response can echo submitted code in the editor textarea without executing it.
+
+With `PBE_SMOKE_BYPASS_SECRET`, smoke also calls `POST /__smoke/turnstile` and fails unless the Worker's secret is a working production secret with a configured site key (see "Smoke-test behavior"). Without the secret, it prints `SKIP` for the probe.
 
 ## Verification checklist
 

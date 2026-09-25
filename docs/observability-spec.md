@@ -572,6 +572,8 @@ Every event carries the context from `observability.py` plus a subset of the per
 | `turnstile.outcome` | string | handler | `challenged` / `pass` / `fail` / `bypass` / `disabled`. |
 | `turnstile.reason` | string | handler | Closed-vocabulary failure reason; present only when `outcome` is `fail`. |
 | `turnstile.error_codes` | array | handler | Allowlisted Siteverify `error-codes` (`other` for unknown); present only for `rejected`. |
+| `turnstile_probe.secret` | string | probe handler | `valid` / `invalid` / `testing_key` / `unverified` / `unexpected` / `absent`; only on authenticated `POST /__smoke/turnstile`. |
+| `turnstile_probe.ok` | bool | probe handler | Whether the deployed configuration can verify browsers. |
 | `execution_ms` | float | handler | Sandboxed run duration. |
 | `worker.outcome` | string | handler | Dynamic Worker outcome. |
 | `worker.status_code` | int | handler | Dynamic Worker HTTP status when fetch completes. |

@@ -26,8 +26,9 @@ time window:
   rejected), and failures break down by reason and Siteverify error code.
   A **configuration alert** (`invalid-input-secret`, `missing-input-secret`,
   or `site_key_missing`) means every challenged run is failing because of
-  the deployment, not the visitor. Deployment smoke uses the bypass header,
-  so this report is where a wrong or rotated secret shows up.
+  the deployment, not the visitor. Deployment smoke probes the secret at
+  deploy time; this report catches a secret that breaks afterwards, such as
+  a rotation in the dashboard.
 
 ## Getting events
 

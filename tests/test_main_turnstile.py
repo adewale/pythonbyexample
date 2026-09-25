@@ -8,6 +8,7 @@ cookie scope, expiry handling, or fail-open mode selection fails here.
 from __future__ import annotations
 
 import asyncio
+import json
 import sys
 import time
 import types
@@ -493,6 +494,144 @@ class TurnstileSiteverifyTests(unittest.TestCase):
         ok, _, details = self._verify()
         self.assertFalse(ok)
         self.assertEqual(details, {"outcome": "fail", "reason": "rejected", "error_codes": ["internal-error"]})
+
+
+# Replies live Siteverify gave to the dummy token, per secret.
+PRODUCTION_SECRET_REPLY = (200, '{"success": false, "error-codes": ["invalid-input-response"]}')
+BAD_SECRET_REPLY = (400, '{"error-codes":["invalid-input-secret"],"success":false,"messages":[]}')
+TEST_SECRET_REPLIES = {
+    "always-pass": (
+        200,
+        (
+            '{"challenge_ts":"2026-09-25T22:08:06.790Z","error-codes":[],"hostname":"example.com",'
+            '"metadata":{"result_with_testing_key":true},"success":true}'
+        ),
+    ),
+    "always-fail": (
+        200,
+        (
+            '{"error-codes":["invalid-input-response"],"success":false,"messages":[],'
+            '"metadata":{"result_with_testing_key":true}}'
+        ),
+    ),
+    "token-spent": (
+        200,
+        (
+            '{"error-codes":["timeout-or-duplicate"],"success":false,"messages":[],'
+            '"metadata":{"result_with_testing_key":true}}'
+        ),
+    ),
+}
+
+
+class TurnstileProbeTests(unittest.TestCase):
+    """The smoke-gated probe proves the deployed secret with the dummy token.
+
+    Response bodies are the ones live Siteverify returned for the dummy token.
+    """
+
+    def setUp(self):
+        self.saved = {name: getattr(main, name) for name in ("js_fetch", "JsRequest", "AbortSignal")}
+        main.JsRequest = type("Request", (), {"new": staticmethod(lambda url, options: (url, options))})
+        main.AbortSignal = None
+        self.sent = []
+
+    def tearDown(self):
+        for name, value in self.saved.items():
+            setattr(main, name, value)
+
+    def _respond(self, status, body):
+        async def fetch(request):
+            self.sent.append(request)
+            return _SiteverifyResponse(status, body)
+
+        main.js_fetch = fetch
+
+    def _smoke_request(self, header="smoke-secret", **env):
+        values = {"PBE_SMOKE_BYPASS_SECRET": "smoke-secret", "TURNSTILE_SITE_KEY": "site-key"}
+        values.update(env)
+        headers = {main.SMOKE_BYPASS_HEADER: header} if header else {}
+        return make_request(headers=headers, env=session_env(**values))
+
+    def _probe(self, request):
+        return asyncio.run(main._probe_turnstile(request))
+
+    def test_working_production_secret_is_ok(self):
+        self._respond(*PRODUCTION_SECRET_REPLY)
+        report = self._probe(self._smoke_request())
+        self.assertEqual(
+            report,
+            {"challenge_mode": "session", "site_key_configured": True, "secret": "valid", "ok": True},
+        )
+        _, options = self.sent[0]
+        self.assertIn(f"response={main.TURNSTILE_PROBE_TOKEN}", options["body"])
+        self.assertIn("secret=server-secret", options["body"])
+        self.assertNotIn("remoteip", options["body"])
+
+    def test_bad_secret_fails_with_its_error_code(self):
+        self._respond(*BAD_SECRET_REPLY)
+        report = self._probe(self._smoke_request())
+        self.assertEqual(report["secret"], "invalid")
+        self.assertEqual(report["error_codes"], ["invalid-input-secret"])
+        self.assertFalse(report["ok"])
+
+    def test_every_test_secret_fails_including_the_one_that_mimics_production(self):
+        for name, response in TEST_SECRET_REPLIES.items():
+            with self.subTest(secret=name):
+                self._respond(*response)
+                report = self._probe(self._smoke_request())
+                self.assertEqual(report["secret"], "testing_key")
+                self.assertFalse(report["ok"])
+
+    def test_valid_secret_without_site_key_is_not_ok(self):
+        self._respond(*PRODUCTION_SECRET_REPLY)
+        report = self._probe(self._smoke_request(TURNSTILE_SITE_KEY=""))
+        self.assertEqual(report["secret"], "valid")
+        self.assertFalse(report["site_key_configured"])
+        self.assertFalse(report["ok"])
+
+    def test_absent_secret_reports_turnstile_off_without_calling_siteverify(self):
+        self._respond(*PRODUCTION_SECRET_REPLY)
+        report = self._probe(self._smoke_request(TURNSTILE_SECRET_KEY=""))
+        self.assertEqual(report["secret"], "absent")
+        self.assertTrue(report["ok"])
+        self.assertEqual(self.sent, [])
+
+    def test_unreachable_or_unexpected_siteverify_is_not_ok(self):
+        async def failing(_request):
+            raise RuntimeError("network down")
+
+        main.js_fetch = failing
+        self.assertEqual(self._probe(self._smoke_request())["secret"], "unverified")
+        for status, body in (
+            (200, '{"success": false, "error-codes": ["internal-error"]}'),
+            (200, '{"success": false}'),
+            (503, '{"success": false, "error-codes": ["invalid-input-response"]}'),
+        ):
+            with self.subTest(status=status, body=body):
+                self._respond(status, body)
+                report = self._probe(self._smoke_request())
+                self.assertEqual(report["secret"], "unexpected")
+                self.assertFalse(report["ok"])
+
+    def test_route_requires_the_smoke_header_and_returns_json(self):
+        self._respond(*BAD_SECRET_REPLY)
+        for header in ("", "wrong-secret"):
+            with self.subTest(header=header):
+                response = asyncio.run(main.turnstile_probe(self._smoke_request(header=header)))
+                self.assertEqual(response.status_code, 404)
+                self.assertEqual(self.sent, [], "an unauthenticated probe must not reach Siteverify")
+
+        request = self._smoke_request()
+        request.state.wide_event = {"path": main.TURNSTILE_PROBE_PATH}
+        response = asyncio.run(main.turnstile_probe(request))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.media_type, "application/json")
+        report = json.loads(response.body)
+        self.assertEqual(report["secret"], "invalid")
+        self.assertFalse(report["ok"])
+        self.assertEqual(request.state.wide_event["turnstile_probe"], {"secret": "invalid", "ok": False})
+        self.assertNotIn("server-secret", response.body.decode())
 
 
 async def _awaitable(value):

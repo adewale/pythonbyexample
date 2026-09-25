@@ -58,6 +58,11 @@ SITEVERIFY_ERROR_CODES = frozenset(
     }
 )
 SMOKE_BYPASS_HEADER = "x-pythonbyexample-smoke-secret"
+TURNSTILE_PROBE_PATH = "/__smoke/turnstile"
+# Cloudflare's documented dummy token. Production secrets reject it with
+# invalid-input-response and a bad secret gets invalid-input-secret, so it
+# proves the deployed secret without solving a challenge.
+TURNSTILE_PROBE_TOKEN = "XXXX.DUMMY.TOKEN.XXXX"
 TURNSTILE_CLEARANCE_COOKIE = "pbe_turnstile_clearance"
 DEFAULT_TURNSTILE_CLEARANCE_SECONDS = 60 * 60 * 8
 # Generous ceiling for an edited example program (the largest curated
@@ -400,6 +405,61 @@ async def run_example(slug: str, request: Request):
     return response
 
 
+@app.post(TURNSTILE_PROBE_PATH)
+async def turnstile_probe(request: Request):
+    # Deployment smoke skips challenges with the bypass header, so it needs its
+    # own proof that the production secret works. The same header gates this.
+    if not _smoke_bypass_ok(request):
+        return _html(render_not_found(), 404)
+    report = await _probe_turnstile(request)
+    if event := _wide_event(request):
+        event["turnstile_probe"] = {"secret": report["secret"], "ok": report["ok"]}
+    return Response(json.dumps(report, sort_keys=True), media_type="application/json")
+
+
+async def _probe_turnstile(request: Request) -> dict:
+    """Report whether the deployed Turnstile configuration can verify browsers."""
+    site_key_configured = bool(_turnstile_site_key(request))
+    report = {
+        "challenge_mode": _turnstile_challenge_mode(request),
+        "site_key_configured": site_key_configured,
+    }
+    secret = _turnstile_secret(request)
+    if not secret:
+        report["secret"] = "absent"
+    elif js_fetch is None or JsRequest is None:
+        report["secret"] = "unverified"
+    else:
+        report["secret"], error_codes = _classify_probe_reply(
+            await _call_siteverify(secret, TURNSTILE_PROBE_TOKEN)
+        )
+        if error_codes and report["secret"] != "valid":
+            report["error_codes"] = error_codes
+    # No secret leaves Turnstile off by configuration. A configured secret must
+    # be a working production secret with a site key, or challenges cannot pass.
+    report["ok"] = report["secret"] == "absent" or (report["secret"] == "valid" and site_key_configured)
+    return report
+
+
+def _classify_probe_reply(reply: tuple[int, dict] | None) -> tuple[str, list[str]]:
+    if reply is None:
+        return "unverified", []
+    status, result = reply
+    error_codes = _siteverify_error_codes(result)
+    metadata = result.get("metadata")
+    # Only test secrets accept the dummy token, and the always-fail test secret
+    # answers exactly like a production one; this flag tells them apart.
+    if result.get("success") is True or (
+        isinstance(metadata, dict) and metadata.get("result_with_testing_key") is True
+    ):
+        return "testing_key", error_codes
+    if {"invalid-input-secret", "missing-input-secret"} & set(error_codes):
+        return "invalid", error_codes
+    if 200 <= status < 300 and error_codes == ["invalid-input-response"]:
+        return "valid", error_codes
+    return "unexpected", error_codes
+
+
 def _turnstile_not_required_outcome(request: Request) -> str:
     if not _turnstile_secret(request) or _turnstile_challenge_mode(request) == "off":
         return "disabled"
@@ -424,6 +484,29 @@ def _siteverify_error_codes(result: dict) -> list[str]:
     return sorted(
         {code if code in SITEVERIFY_ERROR_CODES else "other" for code in codes if isinstance(code, str)}
     )
+
+
+async def _call_siteverify(secret: str, token: str, remote_ip: str | None = None) -> tuple[int, dict] | None:
+    """POST one token to Siteverify; None when it is unreachable or unparseable."""
+    payload = {"secret": secret, "response": token}
+    if remote_ip:
+        payload["remoteip"] = remote_ip
+    init = {
+        "method": "POST",
+        "body": urlencode(payload),
+        "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+    }
+    if AbortSignal is not None:
+        # A hung Siteverify must not hold a learner's run or a smoke probe open.
+        init["signal"] = AbortSignal.timeout(SITEVERIFY_TIMEOUT_MS)
+    verify_request = JsRequest.new(TURNSTILE_VERIFY_URL, _to_js_object(init))
+    try:
+        response = await js_fetch(verify_request)
+        status = int(getattr(response, "status", 0) or 0)
+        result = json.loads(await response.text())
+    except Exception:  # noqa: BLE001 - JS fetch failures, timeouts, and unparseable bodies fail closed
+        return None
+    return (status, result) if isinstance(result, dict) else None
 
 
 async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str, dict]:
@@ -455,27 +538,10 @@ async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str, di
             {"outcome": "fail", "reason": "runtime_unavailable"},
         )
 
-    payload = {"secret": secret, "response": token}
-    remote_ip = request.headers.get("CF-Connecting-IP")
-    if remote_ip:
-        payload["remoteip"] = remote_ip
-    init = {
-        "method": "POST",
-        "body": urlencode(payload),
-        "headers": {"Content-Type": "application/x-www-form-urlencoded"},
-    }
-    if AbortSignal is not None:
-        # A hung Siteverify must not hold the learner's run open indefinitely.
-        init["signal"] = AbortSignal.timeout(SITEVERIFY_TIMEOUT_MS)
-    verify_request = JsRequest.new(TURNSTILE_VERIFY_URL, _to_js_object(init))
-    try:
-        response = await js_fetch(verify_request)
-        status = int(getattr(response, "status", 0) or 0)
-        result = json.loads(await response.text())
-    except Exception:  # noqa: BLE001 - JS fetch failures, timeouts, and unparseable bodies fail closed
+    reply = await _call_siteverify(secret, token, request.headers.get("CF-Connecting-IP"))
+    if reply is None:
         return _turnstile_failure("siteverify_unavailable")
-    if not isinstance(result, dict):
-        return _turnstile_failure("siteverify_unavailable")
+    status, result = reply
     # Siteverify answers a bad or missing secret with HTTP 400 and a JSON body
     # naming it, so read error codes before judging the status: discarding
     # non-2xx bodies would report a misconfigured deployment as an outage.
