@@ -21,7 +21,13 @@ time window:
   human-validated paths may suggest content candidates, but typos, scanners,
   and bots are confounders.
 - **Turnstile outcomes** — challenge and rejection counts used to monitor
-  runner availability and abuse controls, not learner quality.
+  runner availability and abuse controls, not learner quality. `challenged`
+  (a challenge was issued) is counted apart from `fail` (a token was
+  rejected), and failures break down by reason and Siteverify error code.
+  A **configuration alert** (`invalid-input-secret`, `missing-input-secret`,
+  or `site_key_missing`) means every challenged run is failing because of
+  the deployment, not the visitor. Deployment smoke uses the bypass header,
+  so this report is where a wrong or rotated secret shows up.
 
 ## Getting events
 

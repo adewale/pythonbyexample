@@ -404,7 +404,9 @@ Add:
 - `example.code_hash` — sha256 hex of submitted UTF-8 bytes, first 12 chars
 - `example.code_bytes` — `len(submitted.encode("utf-8"))`
 - `example.code_edited` — `submitted != example["code"]`
-- `turnstile.outcome` — `pass` / `fail` / `bypass` / `disabled`
+- `turnstile.outcome` — `challenged` / `pass` / `fail` / `bypass` / `disabled`. `challenged` means the request was sent a challenge; it is the normal first run of a session, not a failure.
+- `turnstile.reason` — on `fail` only: `rejected` / `hostname_mismatch` / `action_mismatch` / `siteverify_unavailable` / `token_too_long` / `site_key_missing` / `missing_token` / `runtime_unavailable`
+- `turnstile.error_codes` — on `rejected` only: Siteverify's documented `error-codes`, sorted, with anything undocumented recorded as `other`
 - `execution_ms` — duration around `_run_example`, recorded in a `finally` if execution started
 
 Example:
@@ -419,7 +421,7 @@ request.state.wide_event["example"] = {
 }
 ```
 
-Change `_verify_turnstile(...)` to return `(ok, message, outcome)` so the caller can record the outcome without re-deriving it. Do not log the token or `CF-Connecting-IP`; the latter may still be sent to Turnstile verification but must not enter the event.
+`_verify_turnstile(...)` returns `(ok, message, turnstile_fields)` so the caller records the outcome, failure reason, and error codes without re-deriving them. An `invalid-input-secret` code means the deployment is misconfigured, not that a visitor failed. Do not log the token or `CF-Connecting-IP`; the latter may still be sent to Turnstile verification but must not enter the event.
 
 #### `_run_example`
 
@@ -567,7 +569,9 @@ Every event carries the context from `observability.py` plus a subset of the per
 | `example.code_hash` | string | handler | First 12 hex chars of sha256(submitted UTF-8 bytes). |
 | `example.code_bytes` | int | handler | Byte length of submitted UTF-8 code. |
 | `example.code_edited` | bool | handler | True when submitted differs from canonical. |
-| `turnstile.outcome` | string | handler | `pass` / `fail` / `bypass` / `disabled`. |
+| `turnstile.outcome` | string | handler | `challenged` / `pass` / `fail` / `bypass` / `disabled`. |
+| `turnstile.reason` | string | handler | Closed-vocabulary failure reason; present only when `outcome` is `fail`. |
+| `turnstile.error_codes` | array | handler | Allowlisted Siteverify `error-codes` (`other` for unknown); present only for `rejected`. |
 | `execution_ms` | float | handler | Sandboxed run duration. |
 | `worker.outcome` | string | handler | Dynamic Worker outcome. |
 | `worker.status_code` | int | handler | Dynamic Worker HTTP status when fetch completes. |

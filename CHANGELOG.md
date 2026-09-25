@@ -8,6 +8,8 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ### Fixed
 
+- A Run whose Turnstile token the server rejects now ends with the server's message instead of re-challenging. The runner used to solve again every time the response carried the challenge marker, so a persistently failing Siteverify (wrong secret, hostname, or action) turned one click into an unbounded loop of solves, Worker POSTs, and Siteverify subrequests. Each Run now earns at most one challenge, and the failure message says to press Run again.
+- Siteverify calls time out after 10 seconds, tokens longer than Cloudflare's documented 2048 characters are rejected without a subrequest, and a `success: true` response with a missing or non-string `hostname` fails closed instead of raising a 500. The gaps surfaced by comparing `_verify_turnstile` with the canonical handler in Cloudflare's Turnstile Spin skill.
 - Production Python packages are locked. Pywrangler 1.17.4 vendors a committed, hash-pinned `pylock.toml` instead of resolving an unpinned `fastapi` at deploy time, and `uv.lock` pins the same versions (FastAPI 0.141.1, Starlette 1.7.0, Pydantic 2.10.6) so the test suite runs against exactly what ships. `tests/test_dependency_locks.py` fails on drift, and CI and `make deploy` fail if a sync would change `pylock.toml`. Starlette 1.7.0 also clears the five advisories against the previously tested 1.0.0.
 - Example-page runner wiring (Run interception, Reset, the share button, and keyboard navigation) no longer waits for the CDN-backed highlighter and editor modules: `runner.js` loads `async`, so a slow or unreachable esm.sh cannot stall it — ordered module scripts otherwise execute strictly after every preceding module settles, including their top-level awaits.
 
@@ -33,6 +35,7 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ### Changed
 
+- The `turnstile` wide-event field distinguishes an issued challenge (`challenged`) from a rejected token (`fail`), and failures carry a closed-vocabulary `reason` plus allowlisted Siteverify `error_codes`. `scripts/learner_report.py` breaks failures down by reason and code and raises a configuration alert for `invalid-input-secret`, `missing-input-secret`, or a missing site key, which deployment smoke cannot catch because it uses the bypass header. Siteverify reports those secret errors with HTTP 400, so error codes are now read from non-2xx bodies instead of being logged as an outage.
 - Dependency refresh: Pillow 12.3.0 (from 11.3.0; 17 advisories), Pywrangler 1.17.4 (from 1.9.3; requires uv 0.12.3+), Shiki 4.4.3 (from 1.29.2; byte-identical output for every example block in both themes), and CodeMirror state 6.7.6, view 6.43.13, and language 6.12.4.
 - CI actions moved to their Node 24 releases (checkout, setup-node, and setup-python v7; setup-uv v10.2.0 pinned by commit), clearing the Node.js 20 deprecation warning; npm caching stays off.
 - Dependabot proposes weekly npm, GitHub Actions, and development-tool (Hypothesis, Pillow, Pywrangler) updates. Runtime packages refresh through `make upgrade-runtime-deps`.
