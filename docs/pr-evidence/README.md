@@ -1,5 +1,24 @@
 # PR visual evidence
 
+## Turnstile rejection loop (2026-09-26)
+
+These captures show `/examples/values` six seconds after one Run click, with Siteverify rejecting every token. Both Workers used Cloudflare's invisible always-pass test site key (`1x00000000000000000000BB`), so the real Turnstile widget loaded and solved in the browser, and the always-fail test secret (`2x0000000000000000000000000000000AA`), so Siteverify rejected every solved token.
+
+| Evidence | Review point | Commit | SHA-256 |
+| --- | --- | --- | --- |
+| [Before](turnstile-rejection-before-runner.png) | The runner re-challenges after each rejection and stays busy on "Verification required…". Over 20 seconds, one click made 12 POSTs and 11 real widget solves, growing steadily. | `3f300af` (`origin/main`) | `5af0c28f339e6bc4d394186530c385e663046a7edf98671965d0a61ed1a3cdf3` |
+| [After](turnstile-rejection-after-runner.png) | One solve, two POSTs, then the server's message and a free Run button. Still two POSTs after 20 seconds. | `eae0dc3` | `20ca27224fff2f0413004b8e2e2f35e7b1563b45f3941714a68f3e46e837f0af` |
+
+Reproduce each capture by serving the corresponding revision with the test keys:
+
+```bash
+uv run --group workers pywrangler dev --port <port> \
+  --var TURNSTILE_SECRET_KEY:2x0000000000000000000000000000000AA \
+  --var TURNSTILE_SITE_KEY:1x00000000000000000000BB
+```
+
+Open `http://127.0.0.1:<port>/examples/values` at a 1200×900 viewport, click Run once, wait six seconds, and capture `.runner-grid`. Count `POST /examples/values` requests in DevTools to see the loop. `make browser-layout-test` covers the same contract with a stub server that always rejects.
+
 ## Audit remediation (2026-07-10)
 
 These captures isolate the dark-mode Run-button contrast correction on the same `/examples/values` runner at a 1200×900 desktop viewport.
