@@ -27,7 +27,7 @@
   </section>
   <section class="about-section">
     <h2>The design language</h2>
-    <p>Every page draws from the tokens below, and this section reads them from the same stylesheet it documents. In dark mode the warm palette inverts; <code class="syntax-inline">--figure-paper</code> stays light, so figures sit on a paper chip instead of being recoloured, and the terminal tokens keep the runner's output chip dark in both schemes.</p>
+    <p>Every page draws from the tokens below, and this section reads them from the same stylesheet it documents. In dark mode the warm palette inverts, and the figures invert with it: the drawing grammar paints only with the four <code class="syntax-inline">--fig-*</code> tokens, so every figure is recoloured by the page rather than sitting on a light chip. The terminal tokens keep the runner's output chip dark in both schemes.</p>
     <p class="cell-label">Color</p>
     <ul class="token-grid">
       <li class="token"><span class="token-swatch" style="--swatch: var(--accent)"></span><code>--accent</code></li>
@@ -46,7 +46,10 @@
       <li class="token"><span class="token-swatch" style="--swatch: var(--header-veil)"></span><code>--header-veil</code></li>
       <li class="token"><span class="token-swatch" style="--swatch: var(--header-veil-0)"></span><code>--header-veil-0</code></li>
       <li class="token"><span class="token-swatch" style="--swatch: var(--header-veil-solid)"></span><code>--header-veil-solid</code></li>
-      <li class="token"><span class="token-swatch" style="--swatch: var(--figure-paper)"></span><code>--figure-paper</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--fig-ink)"></span><code>--fig-ink</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--fig-ink-soft)"></span><code>--fig-ink-soft</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--fig-accent)"></span><code>--fig-accent</code></li>
+      <li class="token"><span class="token-swatch" style="--swatch: var(--fig-soft)"></span><code>--fig-soft</code></li>
       <li class="token"><span class="token-swatch" style="--swatch: var(--terminal-bg)"></span><code>--terminal-bg</code></li>
       <li class="token"><span class="token-swatch" style="--swatch: var(--terminal-ink)"></span><code>--terminal-ink</code></li>
     </ul>

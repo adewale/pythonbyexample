@@ -60,6 +60,10 @@ per-figure scoring.
    figure. The accent goes on the single element the cell prose
    names (the live mutation, the captured cell, the dispatch arrow).
    Three accent marks competing for attention is no emphasis at all.
+   If the caption names no single element (a selector or catalogue
+   where every branch is equal) the figure has **zero** accents. An
+   orange arrow on the third row because it is the third row is
+   decoration, and so is a soft fill on one arbitrary branch.
 8. **Restraint (0-1.0)** — no decoration that does not carry
    information. No drop shadows, gradients, ornamental rules,
    non-orthogonal tilts, or marks placed for "balance".
@@ -76,6 +80,15 @@ per-figure scoring.
     banner. The figure should summarise the move the surrounding
     cell just made, not stand alone as a generic illustration of the
     example title.
+
+    *Placement honesty.* As of September 2026, 106 of 115 attachments
+    anchor after cell 0, so almost every figure is in practice the
+    page's opening picture and this criterion is scored against the
+    first cell. That is a legitimate design (the intro figure frames
+    the lesson) but it must be scored as one: a cell-0 figure earns
+    the 0.5 by summarising the first cell's move, not by illustrating
+    the title. When a later cell holds the actual mutation, dispatch
+    or resume the figure depicts, move the anchor there.
 
 ## Topic gates (cell-shape specific)
 
@@ -107,6 +120,31 @@ the figure can merge.
 
 - **One figure per cell, at most.** Two figures on one cell signal
   the cell is doing two things; split the cell instead.
+- **Table gate.** A figure that would be no worse as a two-column
+  table in the prose is not a figure: rows of `name | role`,
+  `type | spellings` or `level | number` are reference material and
+  belong in the cell. Demote it (remove the attachment and add a
+  `[no_figure_rationales.<slug>]` entry naming the mechanism picture
+  that would earn the slot back) rather than ship it. `values`,
+  `literals`, `logging` and `collections-module` were demoted this
+  way in September 2026.
+- **The figure carries the lesson's own names.** Where one mechanism
+  serves several lessons, parametrise the paint function
+  (`_bind_figure("MAX_RETRIES", "int", "3")`) instead of choosing
+  between placeholder names and a bespoke copy.
+- **Content fidelity, enforced.** No rendered text may contain a
+  doubled backslash, and a mono label containing an escape sequence
+  must appear verbatim in the example's Markdown source. The
+  `bytes-vs-bytearray` figure shipped `b'\\x63\\x61\\x66'` for
+  months because the geometry contracts could not read it. *Contract
+  13 — FigureContentContract.*
+- **Minimum arrow length, enforced.** Every closed arrow is at least
+  `ARROW_MIN` (20) units long; below that it is mostly head. Widen
+  the gap between the boxes, never shrink the head. *Contract 14.*
+- **Both colour schemes, enforced.** Figures paint with the
+  `var(--fig-*)` tokens; `public/site.css` defines all four in the
+  light root and the dark media block with the grammar's values, so
+  no figure needs a light chip in dark mode. *Contract 15.*
 - **figcaption present and declarative.** Captions in the form
   "Two names share one mutable list — appending through one name
   changes the object visible through both." Not "this shows X" or
@@ -231,4 +269,8 @@ example reads as a coherent set rather than independently authored
 diagrams.
 
 The score is a guide, not a substitute for reading the cell beside
-its surrounding prose.
+its surrounding prose. It has also saturated: 106 of 109 attached
+figures score 9.0 and the rest 9.5, so the number no longer says which
+figure to redesign next. Use the gestalt page to rank the library
+pairwise and redesign from the bottom; the score stays the ship gate,
+not the priority list (see `docs/diagram-upgrade-plan.md`).

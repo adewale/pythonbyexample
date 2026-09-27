@@ -199,8 +199,26 @@ expires = "2026-12-01"
 [no_figure_rationales]
 # Slugs may be added here only when the page is constraint-shaped,
 # infrastructure-shaped, or aggregator-shaped and a single mechanism
-# figure would distort the lesson. Current production attaches figures
-# to every example, so this registry is intentionally empty.
+# figure would distort the lesson — or when the only figure on offer is
+# a table with borders (docs/example-figure-rubric.md, "table gate"). A
+# table is prose; it belongs in the cell, not in a banner. Each entry
+# names the mechanism picture that would earn the slot back.
+
+[no_figure_rationales.values]
+reason = "The shipped figure was four typed boxes stacked in a column: a table with borders, not a mechanism. Earn the slot back with a value → type → method-lookup picture (the behaviour lives on the type, not the name)."
+review_after = "2027-01-31"
+
+[no_figure_rationales.literals]
+reason = "Six rows of type → spellings is a reference table; the cell's prose already lists the spellings. Earn the slot back only with a mechanism, e.g. the same value written three ways converging on one int object."
+review_after = "2027-01-31"
+
+[no_figure_rationales.logging]
+reason = "Five level names beside five numbers is a lookup table. The mechanism is the threshold: a record flowing through logger → handler and being dropped below the configured level. Draw that or nothing."
+review_after = "2027-01-31"
+
+[no_figure_rationales.collections-module]
+reason = "Four container names beside four roles is a catalogue, not a picture. The page is an aggregator of four shapes; a single mechanism figure would privilege one. Revisit if the page is split per container."
+review_after = "2027-01-31"
 
 [journey_outcomes]
 
@@ -1507,7 +1525,7 @@ caption = "In the same signature, the bare `*` works the other way: parameters a
 slug = "closures"
 anchor = "cell-0"
 figure = "closure-cell"
-caption = "The inner function keeps a reference into the outer scope's cell, so the captured factor survives the outer return."
+caption = "make_multiplier(2) has returned, but the function object double names still points into that frame's cell, so the captured factor outlives the call."
 
 [[figure_attachments]]
 slug = "scope-global-nonlocal"
@@ -1518,8 +1536,8 @@ caption = "Name lookup walks LEGB — local, enclosing, global, built-in — out
 [[figure_attachments]]
 slug = "generators"
 anchor = "cell-0"
-figure = "generator-ribbon"
-caption = "A generator's body is a timeline cut by yield gates: each next() advances to the next gate; locals survive the pause."
+figure = "generator-resume"
+caption = "Three next() calls on countdown(3), one timeline each: every call resumes the body to the next yield gate, and the local n survives every pause."
 
 [[figure_attachments]]
 slug = "type-hints"
@@ -1657,7 +1675,7 @@ caption = "Early returns handle the exceptional cases first so the main work is 
 slug = "bytes-and-bytearray"
 anchor = "cell-0"
 figure = "bytes-vs-bytearray"
-caption = "bytes is a frozen sequence of integers; bytearray is the mutable counterpart with append/extend/etc."
+caption = "Both objects hold the same two bytes as integers; b\"py\" cannot change, while packet[0] = ord(\"P\") rewrites the first slot of the bytearray in place."
 
 [[figure_attachments]]
 slug = "sentinel-iteration"
@@ -1746,8 +1764,8 @@ caption = "Six type pairs bridge the JSON text boundary; each json value maps to
 [[figure_attachments]]
 slug = "regular-expressions"
 anchor = "cell-0"
-figure = "regex-anchors"
-caption = "^ and $ anchor the pattern; quantifiers like {2} bound how many times a token repeats."
+figure = "regex-groups"
+caption = "findall returns only what the parentheses capture: `([A-Za-z]+)` takes the name and `(\\d+)` the score, one (name, score) pair per record."
 
 [[figure_attachments]]
 slug = "number-parsing"
@@ -1759,7 +1777,7 @@ caption = "int() turns text into a typed number; malformed input raises ValueErr
 slug = "string-formatting"
 anchor = "cell-1"
 figure = "format-spec"
-caption = "The format spec is a railroad of named optional fields: alignment, sign, width, precision, type."
+caption = "The format spec is a railroad of optional stations in a fixed order; this cell's 05.1f visits zero-pad, width, precision and type and bypasses the rest."
 
 [[figure_attachments]]
 slug = "truthiness"
@@ -1790,12 +1808,6 @@ slug = "tuples"
 anchor = "cell-3"
 figure = "list-append"
 caption = "A list is the other intent: a variable number of similar items, growing in place with `.append`."
-
-[[figure_attachments]]
-slug = "values"
-anchor = "cell-0"
-figure = "value-types"
-caption = "Every literal is an object with a type; the type carries the behaviour, not the variable name."
 
 [[figure_attachments]]
 slug = "yield-from"
@@ -1902,7 +1914,7 @@ caption = "A function takes inputs, evaluates a body, and returns a value: `gree
 [[figure_attachments]]
 slug = "constants"
 anchor = "cell-0"
-figure = "variables-bind"
+figure = "constants-bind"
 caption = "UPPER_CASE is a naming convention, not a language constraint; the binding behaves like any other variable."
 
 [[figure_attachments]]
@@ -1924,12 +1936,6 @@ figure = "match-pattern-variants"
 caption = "Capture, alternative, guard, and class patterns each name a different way a value can match a case."
 
 [[figure_attachments]]
-slug = "literals"
-anchor = "cell-0"
-figure = "literal-forms"
-caption = "Each Python type has its own literal spellings; ints accept decimal, hex, and binary; strings accept either quote."
-
-[[figure_attachments]]
 slug = "packages"
 anchor = "cell-0"
 figure = "package-tree"
@@ -1946,12 +1952,6 @@ slug = "subprocesses"
 anchor = "cell-0"
 figure = "subprocess-spawn"
 caption = "subprocess.run spawns a child process and captures its stdout, stderr, and exit code as portable evidence."
-
-[[figure_attachments]]
-slug = "logging"
-anchor = "cell-0"
-figure = "logging-levels"
-caption = "Five severity levels; the logger's configured threshold drops everything below it."
 
 [[figure_attachments]]
 slug = "testing"
@@ -2012,12 +2012,6 @@ slug = "runtime-type-checks"
 anchor = "cell-0"
 figure = "isinstance-check"
 caption = "isinstance and issubclass ask the runtime; the answer is a bool, not a static type refinement."
-
-[[figure_attachments]]
-slug = "collections-module"
-anchor = "cell-0"
-figure = "collections-containers"
-caption = "Four specialised containers for shapes the built-in types don't cover well: deque, Counter, defaultdict, namedtuple."
 
 [[figure_attachments]]
 slug = "structured-data-shapes"
@@ -2218,7 +2212,7 @@ comment = "signature with explicit `/` separator"
 [[example_figure_scores]]
 slug = "closures"
 score = 9.0
-comment = "captured cell reference"
+comment = "environment diagram: ghosted returned frame, heap function object, one live __closure__ reference"
 
 [[example_figure_scores]]
 slug = "scope-global-nonlocal"
@@ -2258,7 +2252,7 @@ comment = "ghost annotations over runtime values"
 [[example_figure_scores]]
 slug = "generators"
 score = 9.0
-comment = "ribbon cut by yield gates"
+comment = "state over time: three next() ribbons on the cell's own countdown(3), locals shown surviving"
 
 [[example_figure_scores]]
 slug = "exceptions"
@@ -2393,12 +2387,12 @@ comment = "function literal: params / expression"
 [[example_figure_scores]]
 slug = "string-formatting"
 score = 9.0
-comment = "format-spec railroad"
+comment = "real railroad with bypass rails; the cell's 05.1f stations shaded"
 
 [[example_figure_scores]]
 slug = "regular-expressions"
 score = 9.0
-comment = "pattern ruler with anchors"
+comment = "the cell's own pattern; capture groups dropped onto the record they extract"
 
 [[example_figure_scores]]
 slug = "json"
@@ -2414,16 +2408,6 @@ comment = "extended triangle to metaclass"
 slug = "datetime"
 score = 9.0
 comment = "one instant, two clock offsets"
-
-[[example_figure_scores]]
-slug = "values"
-score = 9.0
-comment = "every literal is a typed object"
-
-[[example_figure_scores]]
-slug = "literals"
-score = 9.0
-comment = "literal spellings per type"
 
 [[example_figure_scores]]
 slug = "booleans"
@@ -2498,7 +2482,7 @@ comment = "specific call: greet('Ada') → 'Hello, Ada'"
 [[example_figure_scores]]
 slug = "constants"
 score = 9.0
-comment = "name binding; UPPER_CASE is convention"
+comment = "name binding with the cell's own MAX_RETRIES → 3; UPPER_CASE is convention"
 
 [[example_figure_scores]]
 slug = "import-aliases"
@@ -2601,11 +2585,6 @@ score = 9.0
 comment = "spawn → child → captured output"
 
 [[example_figure_scores]]
-slug = "logging"
-score = 9.0
-comment = "five thresholded levels"
-
-[[example_figure_scores]]
 slug = "testing"
 score = 9.0
 comment = "arrange-act-assert three-row pattern"
@@ -2639,11 +2618,6 @@ comment = "slot narrows to a fixed set"
 slug = "runtime-type-checks"
 score = 9.0
 comment = "isinstance returns bool"
-
-[[example_figure_scores]]
-slug = "collections-module"
-score = 9.0
-comment = "deque / Counter / defaultdict / namedtuple"
 
 [[example_figure_scores]]
 slug = "structured-data-shapes"

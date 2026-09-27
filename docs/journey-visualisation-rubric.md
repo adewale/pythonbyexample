@@ -43,7 +43,10 @@ Score each section figure on a 10-point scale.
 7. **Emphasis scarcity (0-1.0)** — at most one accent mark per
    figure. The accent goes on the single element the section names
    (the live yield, the dispatch arrow, the captured cell). If three
-   things are orange the figure has no emphasis at all.
+   things are orange the figure has no emphasis at all. If the caption
+   names no single element, as in a selector where every branch is
+   equal, the figure has zero accents: an orange arrow on one arbitrary
+   row is decoration.
 8. **Restraint (0-1.0)** — no decoration that does not carry
    information. No drop shadows, gradients, ornamental rules,
    non-orthogonal tilts, or marks placed for "balance".
@@ -95,7 +98,9 @@ Score each section figure on a 10-point scale.
   width the layout gives it (`clamp(280px, 70vw, 640px)`); design at a
   viewBox whose rendered width fits the shared 640px ceiling.
 - **Uses only the four palette constants.** `INK`, `INK_SOFT`,
-  `EMPHASIS`, `SOFT_FILL`. Anything else is grounds for redesign.
+  `EMPHASIS`, `SOFT_FILL`, which resolve to the page's `--fig-*`
+  tokens so a section figure renders in both colour schemes without a
+  chip. Anything else is grounds for redesign.
 
 ## Quality bands
 

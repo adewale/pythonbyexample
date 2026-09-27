@@ -61,7 +61,10 @@ Banner positions:
 | `after-walkthrough`| once, after the last cell             |
 
 Each position holds **one or more** figures via `cell-banner` markup.
-Captions are per-figure.
+Captions are per-figure. Each `figure` is a two-row subgrid (drawing,
+caption): in a pair of small multiples the drawings bottom-align in
+row one and both captions start on the same line in row two, even when
+one drawing is taller.
 
 ```html
 <section class="literate-program">
@@ -222,11 +225,30 @@ explicitly. Re-introducing either is a defect.
    explanation. Figures destined for promotion to the production
    registry must drop their inline prose first.
 
+3. **Figures paint with tokens, never literal colours.** `INK`,
+   `INK_SOFT`, `EMPHASIS` and `SOFT_FILL` are `var(--fig-*)`
+   references. Inline SVG inherits custom properties, so the page's
+   stylesheet decides the ink and one paint function is right in light
+   mode, dark mode, the gestalt pages and the social cards. There is
+   no paper chip. Any HTML shell that embeds a figure outside
+   `site.css` must define the tokens with
+   `figure_token_css(FIGURE_TOKENS_LIGHT)`; Contract 15 checks that
+   `site.css` carries both sets.
+
+4. **Typography follows the page and mono runs are pinned.** The
+   grammar's mono and sans stacks are the page's own (the site loads no
+   web fonts). `Canvas.mono` emits `textLength` with
+   `lengthAdjust="spacing"` so every mono run advances exactly
+   `MONO_ADVANCE` per character whatever face the platform resolves,
+   and a divider computed from the advance lands on the right glyph.
+
 ## Files
 
 - `src/marginalia_grammar.py` — palette, tokens, words, phrases, metrics.
-  Aligned with `public/site.css` design tokens; figures use the four
-  palette constants and never pick colours directly.
+  The four palette constants are `var(--fig-*)` references and
+  `FIGURE_TOKENS_LIGHT` / `FIGURE_TOKENS_DARK` hold their values;
+  figures never pick colours directly. `env` draws an environment
+  frame; `ARROW_MIN` is the shortest arrow allowed.
 - `docs/quality-registries.toml` — source of truth for attachments,
   captions, journeys, and curated editorial scores.
 - `src/editorial_registry.py` — loader for the registry (or its generated
@@ -267,6 +289,7 @@ explicitly. Re-introducing either is a defect.
 - **No contributor surface.** Contributors do not author figures or
   preview placement.
 - **No chromatic decoration.** Figures use only the locked palette
-  (`--text`, `--muted`, `--accent`, `--accent-soft`-equivalent neutral).
-  Emphasis is scarce: at most one accent mark per figure, used only for
-  the single element the prose names.
+  (`--fig-ink`, `--fig-ink-soft`, `--fig-accent`, `--fig-soft`, defined
+  in `public/site.css` for both colour schemes). Emphasis is scarce: at
+  most one accent mark per figure, used only for the single element the
+  prose names, and none when the prose names none.
