@@ -174,7 +174,7 @@ scripts/format_examples.py --check
 make deploy
 ```
 
-`make deploy` first runs `make check-generated`, which rebuilds and rejects any generated output not committed to the branch. It then syncs the ignored Python Workers dependency bundle from the committed `pylock.toml`, refusing to deploy if the sync would change that lock, before Wrangler deploys.
+`make deploy` first runs `make check-generated`, which rebuilds and rejects any generated output not committed to the branch. It then syncs the ignored Python Workers dependency bundle from the committed `pylock.toml`, refusing to deploy if the sync would change that lock, before Wrangler deploys. Finally it runs `scripts/smoke_deployment.py` against `DEPLOY_URL` (default `https://www.pythonbyexample.dev`) and exits non-zero if the deployed Worker fails any GET or POST check. Export `PBE_SMOKE_BYPASS_SECRET` when Turnstile challenges are enabled so the POST checks can run; `SMOKE_ARGS` passes extra flags such as `--skip-post` explicitly.
 
 ## Updating dependencies
 

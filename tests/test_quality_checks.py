@@ -277,6 +277,36 @@ class GateLogicCanFailTests(unittest.TestCase):
         self.assertIsNotNone(mod.check_expiry_date(None, today=today))
         self.assertIsNone(mod.check_expiry_date("2026-06-12", today=today))
 
+    def test_waiver_expiry_warns_thirty_days_ahead(self):
+        import datetime
+
+        mod = _scripts_import("check_quality_scores")
+        expires = "2026-12-01"
+        self.assertIsNone(mod.expiry_warning(expires, today=datetime.date(2026, 10, 31)))
+        warning = mod.expiry_warning(expires, today=datetime.date(2026, 11, 1))
+        self.assertIsNotNone(warning)
+        self.assertIn("30 days left", warning)
+        # Expired and malformed dates are errors from check_expiry_date, not warnings.
+        self.assertIsNone(mod.expiry_warning(expires, today=datetime.date(2026, 12, 1)))
+        self.assertIsNone(mod.expiry_warning("never", today=datetime.date(2026, 11, 1)))
+
+    def test_expiring_waiver_warns_on_prs_and_fails_the_scheduled_run(self):
+        import datetime
+
+        mod = _scripts_import("check_quality_scores")
+        waivers = {"hello-world": {"expires": "2026-12-01"}, "later": {"expires": "2027-06-01"}}
+        today = datetime.date(2026, 11, 5)
+        errors, warnings = mod.waiver_expiry_findings(waivers, today=today)
+        self.assertEqual(errors, [])
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("quality waiver hello-world: expires on 2026-12-01", warnings[0])
+        errors, warnings = mod.waiver_expiry_findings(waivers, today=today, fail_within_days=30)
+        self.assertEqual(warnings, [])
+        self.assertEqual(len(errors), 1)
+        self.assertIn("quality waiver hello-world: expires on 2026-12-01", errors[0])
+        errors, warnings = mod.waiver_expiry_findings(waivers, today=datetime.date(2026, 12, 1))
+        self.assertEqual(errors, ["quality waiver hello-world: expired on 2026-12-01; re-review and extend or fix the example"])
+
     def test_criterion_scoring_fails_on_inflated_curated_score(self):
         result = run("score_example_criteria.py", "--max-delta", "-11")
         self.assertEqual(result.returncode, 1)

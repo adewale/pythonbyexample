@@ -97,7 +97,7 @@ The single source of truth for the registries is `docs/quality-registries.toml`.
 
 ## Secrets and deploy configuration
 
-Production deployment is manual through an authenticated Wrangler session with `make deploy`; public `workers.dev` and version preview URLs are disabled. Runtime Worker secrets (`TURNSTILE_SECRET_KEY`, `TURNSTILE_CLEARANCE_SECRET`, `PBE_SMOKE_BYPASS_SECRET`) are managed with `wrangler secret put`; see `docs/turnstile-runner-protection-spec.md`.
+Production deployment is manual through an authenticated Wrangler session with `make deploy`, which smoke-tests the deployed origin afterwards and fails if the smoke fails; public `workers.dev` and version preview URLs are disabled. Runtime Worker secrets (`TURNSTILE_SECRET_KEY`, `TURNSTILE_CLEARANCE_SECRET`, `PBE_SMOKE_BYPASS_SECRET`) are managed with `wrangler secret put`; see `docs/turnstile-runner-protection-spec.md`.
 
 Generated output is prevented from drifting before merge: install the local hooks with `scripts/install-git-hooks.sh`, and keep `main` protected so pull requests require the `verify` status check to pass against the current base. CI enforces the same `make check-generated` contract for contributors without local hooks.
 
