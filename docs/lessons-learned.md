@@ -64,6 +64,7 @@ This document records project lessons that should guide future changes to Python
 - Avoid layout shifts after execution. Reserve space for metadata such as execution time before a run occurs.
 - When two columns use the orange rail, source and output need identical rail spacing. Differences in border/padding make the page feel broken even if the content is correct.
 - Use browser screenshot tests for visual bugs. Static HTML/CSS assertions are useful but can miss actual rendered layout behavior.
+- Assert what the browser computes, not what `site.css` says. Unit tests that matched literal CSS or JS text broke on harmless refactors and passed on real regressions, so `scripts/check_browser_layout.mjs` now measures the same intentions: computed transforms under a forced `:active`, touch-target heights, contrast in both themes, the reader's font size, emulated `prefers-reduced-transparency`/`prefers-contrast`, and runner behaviour driven through the page. To add a visual rule, add a measurement there that fails when the rule is removed.
 
 ## Testing and verification
 
