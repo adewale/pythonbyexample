@@ -1,5 +1,29 @@
 # PR visual evidence
 
+## Diagram upgrade (2026-09-27)
+
+Before/after contact sheet of every figure whose drawing changed on the
+`claude/diagram-upgrade` branch relative to `main`, in both colour schemes.
+The base column in the dark sheet sits on the light paper chip the site used
+to draw; the head column is recoloured through the `--fig-*` tokens.
+
+| Evidence | Review point | Base | SHA-256 |
+| --- | --- | --- | --- |
+| [Light contact sheet](diagram-upgrade-contact-sheet-light.png) | 21 changed figure rows: 7 redraws, 10 arrow or accent fixes, 4 demotions, with element counts and shipped captions. | `main` (`3f300af`) | `a189ab1a94242b392d84ade8caa9ae6a43b0cfb3852fc6bbb5f3c8aecb2167f5` |
+| [Dark contact sheet](diagram-upgrade-contact-sheet-dark.png) | The same rows under `prefers-color-scheme: dark`: paper chip before, token recolouring after. | `main` (`3f300af`) | `33f6cc23b4a1595f2626d8a34ce77343c90bf39aeb528c7482d7d14fb4e3e2b4` |
+
+Regenerate both from the branch with:
+
+```bash
+uv run --python 3.13 scripts/build_figure_contact_sheet.py --base main \
+    --output docs/pr-evidence/diagram-upgrade-contact-sheet
+```
+
+The script extracts the base revision with `git archive`, renders every attached
+figure from both trees, ignores colour, font and text-length attributes when
+deciding what changed, and captures the sheet through
+`scripts/capture_browser_screenshot.mjs`.
+
 ## Audit remediation (2026-07-10)
 
 These captures isolate the dark-mode Run-button contrast correction on the same `/examples/values` runner at a 1200×900 desktop viewport.
