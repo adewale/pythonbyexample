@@ -199,26 +199,9 @@ expires = "2026-12-01"
 [no_figure_rationales]
 # Slugs may be added here only when the page is constraint-shaped,
 # infrastructure-shaped, or aggregator-shaped and a single mechanism
-# figure would distort the lesson — or when the only figure on offer is
-# a table with borders (docs/example-figure-rubric.md, "table gate"). A
-# table is prose; it belongs in the cell, not in a banner. Each entry
-# names the mechanism picture that would earn the slot back.
-
-[no_figure_rationales.values]
-reason = "The shipped figure was four typed boxes stacked in a column: a table with borders, not a mechanism. Earn the slot back with a value → type → method-lookup picture (the behaviour lives on the type, not the name)."
-review_after = "2027-01-31"
-
-[no_figure_rationales.literals]
-reason = "Six rows of type → spellings is a reference table; the cell's prose already lists the spellings. Earn the slot back only with a mechanism, e.g. the same value written three ways converging on one int object."
-review_after = "2027-01-31"
-
-[no_figure_rationales.logging]
-reason = "Five level names beside five numbers is a lookup table. The mechanism is the threshold: a record flowing through logger → handler and being dropped below the configured level. Draw that or nothing."
-review_after = "2027-01-31"
-
-[no_figure_rationales.collections-module]
-reason = "Four container names beside four roles is a catalogue, not a picture. The page is an aggregator of four shapes; a single mechanism figure would privilege one. Revisit if the page is split per container."
-review_after = "2027-01-31"
+# figure would distort the lesson. A weak figure is redrawn, not removed:
+# a page that had a figure keeps one. Current production attaches
+# figures to every example, so this registry is intentionally empty.
 
 [journey_outcomes]
 
@@ -1673,7 +1656,7 @@ caption = "Early returns handle the exceptional cases first so the main work is 
 
 [[figure_attachments]]
 slug = "bytes-and-bytearray"
-anchor = "cell-0"
+anchor = "cell-3"
 figure = "bytes-vs-bytearray"
 caption = "Both objects hold the same two bytes as integers; b\"py\" cannot change, while packet[0] = ord(\"P\") rewrites the first slot of the bytearray in place."
 
@@ -1916,6 +1899,30 @@ slug = "constants"
 anchor = "cell-0"
 figure = "constants-bind"
 caption = "UPPER_CASE is a naming convention, not a language constraint; the binding behaves like any other variable."
+
+[[figure_attachments]]
+slug = "values"
+anchor = "cell-0"
+figure = "value-type-lookup"
+caption = "text names a str object, and type(text) is str: the type carries upper() and the rest of the behaviour, not the name."
+
+[[figure_attachments]]
+slug = "literals"
+anchor = "cell-0"
+figure = "literal-forms"
+caption = "Each Python type has its own literal spellings; ints accept decimal, hex, and binary; strings accept either quote."
+
+[[figure_attachments]]
+slug = "logging"
+anchor = "cell-0"
+figure = "logging-threshold"
+caption = "The handler's level is a gate: debug is below INFO and never reaches stdout, while info and warning pass through unchanged."
+
+[[figure_attachments]]
+slug = "collections-module"
+anchor = "cell-0"
+figure = "collections-containers"
+caption = "Four specialised containers for shapes the built-in types don't cover well: deque, Counter, defaultdict, namedtuple."
 
 [[figure_attachments]]
 slug = "while-loops"
@@ -2211,8 +2218,8 @@ comment = "signature with explicit `/` separator"
 
 [[example_figure_scores]]
 slug = "closures"
-score = 9.0
-comment = "environment diagram: ghosted returned frame, heap function object, one live __closure__ reference"
+score = 9.5
+comment = "environment diagram: ghosted returned frame, heap function object, one live __closure__ reference; 1.5/1/0.75/1/1 · 1/1/1 · 1/0.5"
 
 [[example_figure_scores]]
 slug = "scope-global-nonlocal"
@@ -2252,7 +2259,7 @@ comment = "ghost annotations over runtime values"
 [[example_figure_scores]]
 slug = "generators"
 score = 9.0
-comment = "state over time: three next() ribbons on the cell's own countdown(3), locals shown surviving"
+comment = "three next() ribbons on the cell's countdown(3), locals shown surviving; one-move 0.5 because resume and survival are two ideas; 1.5/0.75/0.5/1/1 · 1/1/1 · 1/0.5"
 
 [[example_figure_scores]]
 slug = "exceptions"
@@ -2386,13 +2393,13 @@ comment = "function literal: params / expression"
 
 [[example_figure_scores]]
 slug = "string-formatting"
-score = 9.0
-comment = "real railroad with bypass rails; the cell's 05.1f stations shaded"
+score = 9.5
+comment = "railroad tracing the cell's 05.1f, skipped stations ghosted under bypass rails; restraint 0.75 and fit 0.75 (372 wide); 1.5/1/1/1/1 · 1/1/0.75 · 0.75/0.5"
 
 [[example_figure_scores]]
 slug = "regular-expressions"
-score = 9.0
-comment = "the cell's own pattern; capture groups dropped onto the record they extract"
+score = 9.5
+comment = "the cell's pattern with both capture groups dropped onto Ada: 10; one-move 0.75 for the two rows; 1.5/1/0.75/1/1 · 1/1/1 · 1/0.5"
 
 [[example_figure_scores]]
 slug = "json"
@@ -2482,7 +2489,27 @@ comment = "specific call: greet('Ada') → 'Hello, Ada'"
 [[example_figure_scores]]
 slug = "constants"
 score = 9.0
-comment = "name binding with the cell's own MAX_RETRIES → 3; UPPER_CASE is convention"
+comment = "name binding with the cell's own MAX_RETRIES → 3; earns-place 0.5, the prose already says it is an ordinary binding; 1.5/0.5/1/1/1 · 1/1/1 · 1/0.5"
+
+[[example_figure_scores]]
+slug = "values"
+score = 9.0
+comment = "text → str binding plus the type() hop to where upper() lives; earns-place 0.75 since the cell prints type(text), one-move 0.75; 1.5/0.75/0.75/1/1 · 1/1/1 · 1/0.5"
+
+[[example_figure_scores]]
+slug = "literals"
+score = 8.5
+comment = "literal spellings per type; a reference table, kept until a mechanism figure replaces it"
+
+[[example_figure_scores]]
+slug = "logging"
+score = 9.5
+comment = "the cell's three records crossing the handler's INFO gate, debug dropped; earns-place 0.75 since the output already shows the drop; 1.5/0.75/1/1/1 · 1/1/1 · 1/0.5"
+
+[[example_figure_scores]]
+slug = "collections-module"
+score = 8.5
+comment = "deque / Counter / defaultdict / namedtuple; a catalogue, kept until the page is split"
 
 [[example_figure_scores]]
 slug = "import-aliases"
@@ -2551,8 +2578,8 @@ comment = "__bool__ → __len__ → True fallback chain"
 
 [[example_figure_scores]]
 slug = "bytes-and-bytearray"
-score = 9.0
-comment = "frozen vs mutable contrast"
+score = 9.5
+comment = "the example's two bytes as integer slots, packet[0] rewritten in place, anchored to the mutating cell; 1.5/0.75/1/1/1 · 1/1/1 · 1/0.5"
 
 [[example_figure_scores]]
 slug = "sentinel-iteration"

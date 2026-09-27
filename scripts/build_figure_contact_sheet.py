@@ -6,10 +6,14 @@ revision's ``src/`` and registry with ``git archive``, renders every
 attached example figure and journey-section figure from both trees,
 and keeps the ones whose drawing differs once colour, font and
 text-length attributes are ignored (those change for every figure when
-the palette moves, and are not what a reviewer needs to compare). Each
-row shows the base drawing beside the head drawing with its caption and
-element count, so "is the new figure busier?" is answered by a number
-as well as a picture.
+the palette moves, and are not what a reviewer needs to compare). Rows
+are grouped so the reviewer's attention goes where it is needed:
+"redrawn" rows need judgement, "adjusted" rows (an arrow lengthened, an
+accent removed) need only a glance, "removed" rows show a page that lost
+its figure. Each row shows the base drawing beside the head drawing with
+its caption and element count, so "is the new figure busier?" is
+answered by a number as well as a picture. Pass --notes to print a
+one-line reason under each row.
 
     uv run --python 3.13 scripts/build_figure_contact_sheet.py --base main \\
         --output docs/pr-evidence/diagram-upgrade-contact-sheet
@@ -87,16 +91,44 @@ def cell(figures: list[dict[str, str]], rationale: str | None) -> str:
     return f"<td><p class='eyebrow'>{names} · {elements(figures)} elements</p>{''.join(parts)}</td>"
 
 
-def render(base: str, before: dict, after: dict, rationales: dict[str, str]) -> str:
+KINDS = (
+    ("redrawn", "Redrawn: a different figure, or the same figure with a different drawing. Judge these."),
+    ("adjusted", "Adjusted: the same drawing with an arrow lengthened or an accent removed. Spot the difference."),
+    ("removed", "Removed: the page no longer carries a figure."),
+)
+
+
+def kind(before: list[dict[str, str]], after: list[dict[str, str]]) -> str:
+    if not after:
+        return "removed"
+    if not before:
+        return "redrawn"
+    same_names = [f["figure"] for f in before] == [f["figure"] for f in after]
+    if same_names and abs(elements(before) - elements(after)) <= 2:
+        return "adjusted"
+    return "redrawn"
+
+
+def render(base: str, before: dict, after: dict, rationales: dict[str, str], notes: dict[str, str]) -> str:
     from src.marginalia_grammar import FIGURE_TOKENS_DARK, FIGURE_TOKENS_LIGHT, figure_token_css
 
-    rows = []
+    grouped: dict[str, list[str]] = {name: [] for name, _ in KINDS}
     for key in list(before) + [k for k in after if k not in before]:
         b, a = before.get(key, []), after.get(key, [])
         if normalised(b) == normalised(a):
             continue
         slug = key.split(" · ", 1)[1]
-        rows.append(f"<tr><th>{html.escape(key)}</th>{cell(b, None)}{cell(a, rationales.get(slug))}</tr>")
+        note = notes.get(key) or notes.get(slug) or ""
+        label = f"{html.escape(key)}" + (f"<p class='note'>{html.escape(note)}</p>" if note else "")
+        grouped[kind(b, a)].append(f"<tr><th>{label}</th>{cell(b, None)}{cell(a, rationales.get(slug))}</tr>")
+    sections = []
+    for name, blurb in KINDS:
+        if grouped[name]:
+            sections.append(
+                f"<tbody><tr class='group'><th colspan='3'><span>{name} · {len(grouped[name])}</span> {html.escape(blurb)}</th></tr>"
+                + "".join(grouped[name]) + "</tbody>"
+            )
+    rows = "".join(sections)
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Figure contact sheet</title>
 <style>
@@ -110,6 +142,9 @@ def render(base: str, before: dict, after: dict, rationales: dict[str, str]) -> 
   th, td {{ vertical-align: top; text-align: left; padding: 16px 14px; border-top: 1px solid var(--rule); }}
   thead th {{ border-top: 0; font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }}
   tbody th {{ width: 200px; font-weight: 600; font-size: 13px; }}
+  tr.group th {{ padding-top: 28px; font-weight: 400; font-size: 13px; color: var(--muted); border-top: 2px solid var(--rule); }}
+  tr.group th span {{ font-weight: 700; color: var(--ink); text-transform: capitalize; }}
+  th .note {{ margin: 6px 0 0; font-weight: 400; font-size: 12px; color: var(--muted); }}
   td.none {{ color: var(--muted); }}
   .eyebrow {{ margin: 0 0 8px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }}
   figure {{ margin: 0 0 10px; }}
@@ -119,9 +154,9 @@ def render(base: str, before: dict, after: dict, rationales: dict[str, str]) -> 
 </style></head><body><div class="sheet">
 <h1>Figures changed since <code>{html.escape(base)}</code></h1>
 <p class="meta">Left: the figure as rendered on <code>{html.escape(base)}</code> (in dark mode, on the light chip the site used to draw). Right: this branch. Element counts are drawable SVG elements; captions are the shipped figcaptions.</p>
-<table><thead><tr><th>page</th><th>before</th><th>after</th></tr></thead><tbody>
-{''.join(rows)}
-</tbody></table></div></body></html>
+<table><thead><tr><th>page</th><th>before</th><th>after</th></tr></thead>
+{rows}
+</table></div></body></html>
 """
 
 
@@ -129,6 +164,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--base", default="main")
     parser.add_argument("--output", required=True, help="PNG path stem; writes <stem>-light.png and <stem>-dark.png")
+    parser.add_argument("--notes", help="JSON file mapping a row key (or slug) to a one-line note on what changed and why")
     args = parser.parse_args()
 
     before = dump(extract(args.base))
@@ -140,7 +176,8 @@ def main() -> int:
     stem.parent.mkdir(parents=True, exist_ok=True)
     page = ROOT / "build" / "figure-contact-sheet" / f"{stem.name}.html"
     page.parent.mkdir(parents=True, exist_ok=True)
-    page.write_text(render(args.base, before, after, rationales))
+    notes = json.loads(Path(args.notes).read_text()) if args.notes else {}
+    page.write_text(render(args.base, before, after, rationales, notes))
     changed = sum(1 for k in set(before) | set(after) if normalised(before.get(k, [])) != normalised(after.get(k, [])))
     print(f"wrote {page.relative_to(ROOT)} — {changed} changed figure rows")
     for scheme in ("light", "dark"):

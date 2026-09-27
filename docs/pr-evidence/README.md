@@ -4,25 +4,30 @@
 
 Before/after contact sheet of every figure whose drawing changed on the
 `claude/diagram-upgrade` branch relative to `main`, in both colour schemes.
+Rows are grouped: eight redrawn figures to judge, eleven adjusted figures (an
+arrow lengthened or an accent removed) to glance at. Each row carries a note
+from `diagram-upgrade-contact-sheet-notes.json` saying what changed and why.
 The base column in the dark sheet sits on the light paper chip the site used
 to draw; the head column is recoloured through the `--fig-*` tokens.
 
 | Evidence | Review point | Base | SHA-256 |
 | --- | --- | --- | --- |
-| [Light contact sheet](diagram-upgrade-contact-sheet-light.png) | 21 changed figure rows: 7 redraws, 10 arrow or accent fixes, 4 demotions, with element counts and shipped captions. | `main` (`3f300af`) | `a189ab1a94242b392d84ade8caa9ae6a43b0cfb3852fc6bbb5f3c8aecb2167f5` |
-| [Dark contact sheet](diagram-upgrade-contact-sheet-dark.png) | The same rows under `prefers-color-scheme: dark`: paper chip before, token recolouring after. | `main` (`3f300af`) | `33f6cc23b4a1595f2626d8a34ce77343c90bf39aeb528c7482d7d14fb4e3e2b4` |
+| [Light contact sheet](diagram-upgrade-contact-sheet-light.png) | 19 changed figure rows with element counts, shipped captions and per-row notes. | `main` (`3f300af`) | `2e8472286e1d1326324bb9822b93fcfe031db94e2359abc063a59d85664edf87` |
+| [Dark contact sheet](diagram-upgrade-contact-sheet-dark.png) | The same rows under `prefers-color-scheme: dark`: paper chip before, token recolouring after. | `main` (`3f300af`) | `61b728d5552d83bbbc959d495ad97a4eb65b03a04514553cacd8646b9a21b23e` |
 
 Regenerate both from the branch with:
 
 ```bash
 uv run --python 3.13 scripts/build_figure_contact_sheet.py --base main \
-    --output docs/pr-evidence/diagram-upgrade-contact-sheet
+    --output docs/pr-evidence/diagram-upgrade-contact-sheet \
+    --notes docs/pr-evidence/diagram-upgrade-contact-sheet-notes.json
 ```
 
 The script extracts the base revision with `git archive`, renders every attached
 figure from both trees, ignores colour, font and text-length attributes when
 deciding what changed, and captures the sheet through
-`scripts/capture_browser_screenshot.mjs`.
+`scripts/capture_browser_screenshot.mjs`. The per-criterion scores for the
+redrawn figures are in `docs/rubric-audit-2026-09-27.md`.
 
 ## Audit remediation (2026-07-10)
 

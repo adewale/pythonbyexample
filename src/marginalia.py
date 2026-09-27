@@ -1047,7 +1047,6 @@ def regex_groups(c: Canvas) -> None:
     c.cell(0, 56, "Ada", w=28, h=20, soft=True)
     c.cell(28, 56, ": ", w=22, h=20)
     c.cell(50, 56, "10", w=22, h=20, soft=True)
-    c.tag(80, 70, "text")
     c.dashed(38, 30, 14, 56)
     c.dashed(118, 30, 61, 56)
     c.label(14, 90, "name", anchor="middle")
@@ -1067,9 +1066,10 @@ def format_spec(c: Canvas) -> None:
     """String formatting · the format spec as a railroad: every station optional, order fixed.
 
     A railroad in the SQLite-diagram sense: the main rail runs left to
-    right through each station, and every station has a bypass rail
-    above it because every field is optional. Shaded stations are the
-    ones the cell's own spec, 05.1f, actually visits.
+    right through every station in the grammar's fixed order. Drawing a
+    bypass over all seven stations made 53 elements, so the figure
+    traces one path instead: the cell's own spec, 05.1f. Stations it
+    visits are shaded; stations it skips are ghosted under a bypass rail.
     """
     stations = [("align", 40, False), ("sign", 32, False), ("0", 20, True), ("width", 40, True),
                 (",", 20, False), (".prec", 42, True), ("type", 34, True)]
@@ -1078,13 +1078,15 @@ def format_spec(c: Canvas) -> None:
     c.hairline(0, rail_y, lead, rail_y)
     x = lead
     for text, w, visited in stations:
-        # bypass: up, across, down — the field may be skipped
-        c.hairline(x, rail_y, x, rail_y - bypass)
-        c.hairline(x, rail_y - bypass, x + w + 12, rail_y - bypass)
-        c.hairline(x + w + 12, rail_y - bypass, x + w + 12, rail_y)
+        if not visited:
+            # bypass rail: this spec skips the station, so the path
+            # goes up, across and down around it and the station ghosts
+            c.hairline(x, rail_y, x, rail_y - bypass)
+            c.hairline(x, rail_y - bypass, x + w + 12, rail_y - bypass)
+            c.hairline(x + w + 12, rail_y - bypass, x + w + 12, rail_y)
         # rail through the station
         c.hairline(x, rail_y, x + 6, rail_y)
-        c.cell(x + 6, rail_y - 9, text, w=w, h=18, soft=visited)
+        c.cell(x + 6, rail_y - 9, text, w=w, h=18, soft=visited, ghost=not visited)
         c.hairline(x + w + 6, rail_y, x + w + 12, rail_y)
         x += w + 12 + 8
     c.hairline(x - 8, rail_y, x + lead - 8, rail_y)
@@ -1473,7 +1475,72 @@ def structured_shapes(c: Canvas) -> None:
         c.cell(134, y, tradeoff, w=130, h=22, soft=(i == 2))
 
 # Registry: figure_name -> (paint_fn, viewbox_w, viewbox_h)
+def value_type_lookup(c: Canvas) -> None:
+    """Values · text names a str object; the type, not the name, carries upper().
+
+    The cell's own binding, then the lookup the cell prints:
+    type(text) is str, and str is where the behaviour lives. The dashed
+    hop is type(); the accent is the binding arrow, the move the cell
+    makes.
+    """
+    c.bind(0, 30, "text", "str", '"python"', object_w=80, gap=28)
+    c.dashed(168, 46, 204, 46)
+    c.label(186, 40, "type()", anchor="middle")
+    c.frame(206, 14, 72, 60, label="class str")
+    c.mono(242, 36, "upper()")
+    c.mono(242, 52, "encode()")
+
+
+def logging_threshold(c: Canvas) -> None:
+    """Logging · records cross the handler's level gate; below it they are dropped.
+
+    The cell's own three records: debug falls below the handler's INFO
+    level and stops at the gate (dashed, ghosted); info and warning pass
+    through to stdout. The gate is the one accent.
+    """
+    c.tag(0, 6, "records")
+    c.tag(202, 6, "stdout")
+    c.frame(96, 0, 76, 112, label="handler")
+    for y, name, passes in [(14, "debug", False), (46, "info", True), (78, "warning", True)]:
+        c.cell(0, y, name, w=64, h=22, ghost=not passes)
+        if passes:
+            c.closed_arrow(64, y + 11, 200, y + 11, emphasis=False)
+            c.cell(202, y, name, w=64, h=22, soft=True)
+        else:
+            c.dashed(64, y + 11, 130, y + 11)
+    c.gate(134, 4, 108)
+    c.label(134, 124, "level=INFO", anchor="middle")
+
+
+def literal_forms(c: Canvas) -> None:
+    """Literals · each type has its own literal spellings; the source spelling determines the value type."""
+    rows = [
+        ("int", "42  ·  0x2a  ·  0b101"),
+        ("float", "3.14  ·  1e-3"),
+        ("str", '"hi"  ·  \'hi\''),
+        ("list", "[1, 2, 3]"),
+        ("dict", "{k: v}"),
+        ("set", "{1, 2, 3}"),
+    ]
+    for i, (t, spellings) in enumerate(rows):
+        y = i * 22
+        c.cell(0, y, t, w=50, h=20, soft=True)
+        c.cell(52, y, spellings, w=200, h=20)
+
+
+def collections_containers(c: Canvas) -> None:
+    """Collections module · four specialised containers for shapes the built-in types don't cover well."""
+    rows = [("deque", "fast appends both ends"), ("Counter", "key → count"), ("defaultdict", "missing key default"), ("namedtuple", "tuple with names")]
+    for i, (name, role) in enumerate(rows):
+        c.cell(0, i * 22, name, w=110, h=20)
+        c.cell(112, i * 22, role, w=170, h=20, soft=True)
+
+
 FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
+    "value-type-lookup": (value_type_lookup, 280, 80),
+    "logging-threshold": (logging_threshold, 266, 130),
+    "literal-forms": (literal_forms, 252, 132),
+    "collections-containers": (collections_containers, 284, 92),
     "aliasing-mutation": (aliasing_mutation, 220, 175),
     "tuple-no-mutation": (tuple_no_mutation, 220, 185),
     "iterator-unroll": (iterator_unroll, 220, 130),
