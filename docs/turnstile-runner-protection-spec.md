@@ -110,6 +110,7 @@ If `TURNSTILE_CHALLENGE_MODE=session` and both site/secret keys are configured:
 7. The Worker validates the token through Siteverify.
 8. On success, the Worker sets a signed `pbe_turnstile_clearance` cookie.
 9. Later runs in that clearance window skip Turnstile and go straight to the Dynamic Worker.
+10. If Siteverify rejects the token, the client shows the server's failure message and stops. Each Run earns at most one challenge; pressing Run again earns a fresh one.
 
 Siteverify endpoint from Cloudflare docs:
 
@@ -160,6 +161,9 @@ x-pythonbyexample-smoke-secret: <secret>
 - The Turnstile widget should be configured in Cloudflare as **Invisible** mode. Client code uses explicit rendering with `execution: "execute"`; `size: "invisible"` is not a valid current Turnstile size option.
 - The widget is removed after callback success or failure.
 - Siteverify is called only when a challenge-required request retries with a token.
+- A Run that sends a token and is challenged again does not solve again. Before this rule, a persistently failing Siteverify (wrong secret, hostname, or action) turned one click into an unbounded loop of solves, Worker POSTs, and Siteverify subrequests.
+- Siteverify matches Cloudflare's reference contract (and the Turnstile Spin skill's canonical handler): `success is True`, the `run-example` action, the serving hostname, `remoteip` from `CF-Connecting-IP`, a 10-second `AbortSignal.timeout`, tokens over 2048 characters rejected before any subrequest, and every transport, status, payload, or type surprise failing closed.
+- Each result lands in the wide event as `turnstile.outcome` (`challenged`, `pass`, `fail`, `bypass`, `disabled`) with a failure `reason` and allowlisted Siteverify `error_codes`, so `scripts/learner_report.py` can separate issued challenges from rejections and flag `invalid-input-secret` as a configuration alert. Siteverify reports a bad or missing secret with HTTP 400 and a JSON body, so the Worker reads error codes from non-2xx bodies too; a non-2xx response still never passes.
 - A valid challenge creates a signed, HttpOnly, Secure, SameSite=Lax clearance cookie scoped to `/examples`.
 - Failed or missing verification does not create a Dynamic Worker.
 - POST responses are still never cached.
@@ -186,6 +190,26 @@ x-pythonbyexample-smoke-secret: <secret>
 ```
 
 This is only an app-level bypass. If Cloudflare Rate Limiting challenges smoke traffic before it reaches the Worker, either keep smoke below the threshold or add a Cloudflare-side skip/exception.
+
+Because bypassed runs never touch Siteverify, the same header also unlocks a secret probe:
+
+```text
+POST /__smoke/turnstile
+x-pythonbyexample-smoke-secret: <secret>
+```
+
+The Worker sends its `TURNSTILE_SECRET_KEY` to Siteverify with Cloudflare's documented dummy token `XXXX.DUMMY.TOKEN.XXXX` and returns JSON (`Cache-Control: no-store`). It never includes the secret itself. Cloudflare documents that production secrets reject the dummy token; how they reject it tells the configurations apart:
+
+| Siteverify reply to the dummy token | `secret` | Smoke |
+| --- | --- | --- |
+| `invalid-input-response`, HTTP 200, no testing metadata | `valid` | passes when a site key is configured |
+| `invalid-input-secret` or `missing-input-secret` (HTTP 400) | `invalid` | fails |
+| `metadata.result_with_testing_key: true`, or `success: true` | `testing_key` | fails |
+| unreachable, timeout, or unparseable | `unverified` | fails; re-run |
+| anything else | `unexpected` | fails |
+| no `TURNSTILE_SECRET_KEY` configured | `absent` | passes; Turnstile is off |
+
+The testing-metadata check matters: Cloudflare's always-fail test secret answers the dummy token with the same `invalid-input-response` as a working production secret, so without it a deployment where every learner fails would pass. Without the header, the route answers 404 and never calls Siteverify. The probe proves the secret is a working production secret. It cannot prove that the secret and site key belong to the same widget, or that the widget allows the production hostname; a browser run still covers those.
 
 ## Recommended Cloudflare layer: Rate Limiting Rules
 
@@ -450,6 +474,8 @@ Deployment smoke OK
 ```
 
 The smoke script checks the rendered output panel for POST runs. This is important because a Turnstile-required response can echo submitted code in the editor textarea without executing it.
+
+With `PBE_SMOKE_BYPASS_SECRET`, smoke also calls `POST /__smoke/turnstile` and fails unless the Worker's secret is a working production secret with a configured site key (see "Smoke-test behavior"). Without the secret, it prints `SKIP` for the probe.
 
 ## Verification checklist
 

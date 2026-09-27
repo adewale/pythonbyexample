@@ -463,6 +463,57 @@ try {
     return { scriptAttempts, fetchCount, renderAction, submittedToken, firstFailure, finalOutput };
   })()`);
 
+  // A server that keeps rejecting tokens (wrong secret, hostname, or action)
+  // must cost one challenge per Run. The capped stub stops a regressed
+  // challenge loop so this check reports it instead of hanging.
+  await client.send('Page.navigate', { url: `${new URL(target).origin}/?browser_turnstile_rejected=${Date.now()}` });
+  await waitFor("document.readyState === 'complete'", 'Turnstile rejection fixture page');
+  const turnstileRejected = await evaluateValue(`(async () => {
+    document.body.innerHTML = \`
+      <main>
+        <form class="runner-editor" action="/examples/values">
+          <textarea id="code-editor" name="code" data-original-code="print(1)">print(2)</textarea>
+          <div data-turnstile-sitekey="test-key" hidden></div>
+          <div class="playground-toolbar">
+            <button type="submit">Run</button>
+            <button type="reset" data-reset>Reset</button>
+          </div>
+        </form>
+        <section class="output-panel"><h3>Output</h3><pre><code>Ready</code></pre></section>
+      </main>\`;
+    const nativeFetch = window.fetch;
+    let solves = 0;
+    let widgetOptions = null;
+    window.turnstile = {
+      render: (_box, options) => { widgetOptions = options; return 9; },
+      execute: () => queueMicrotask(() => widgetOptions.callback('rejected-token-' + (++solves))),
+      remove: () => {},
+      reset: () => {},
+    };
+    let fetchCount = 0;
+    window.fetch = async () => {
+      fetchCount += 1;
+      const html = fetchCount < 20
+        ? '<div data-turnstile-required>Verification required</div><section class="output-panel"><h3>Output</h3><pre><code>Turnstile verification failed. Press Run to try again.</code></pre></section>'
+        : '<section class="output-panel"><h3>Output</h3><pre><code>loop cap reached</code></pre></section>';
+      return { ok: true, status: 200, text: async () => html };
+    };
+    await import(${JSON.stringify(runnerAsset)} + '?rejected=' + Date.now());
+    const form = document.querySelector('form.runner-editor');
+    const output = () => document.querySelector('.output-panel code')?.textContent || '';
+    const run = async () => {
+      form.requestSubmit();
+      for (let i = 0; i < 100 && form.hasAttribute('aria-busy'); i++) {
+        await new Promise(resolve => setTimeout(resolve, 10));
+      }
+      return { fetchCount, solves, output: output(), busy: form.hasAttribute('aria-busy') };
+    };
+    const firstRun = await run();
+    const secondRun = await run();
+    window.fetch = nativeFetch;
+    return { firstRun, secondRun };
+  })()`);
+
   const failures = [];
   if (interaction.result.value?.ariaLabel !== 'Editable Python example code') {
     failures.push('CodeMirror editor is missing its accessible name');
@@ -504,6 +555,10 @@ try {
   if (!fragmentBound.unchanged || !fragmentBound.notice?.includes('invalid or too large')) failures.push('Oversized shared-code fragment was decoded or not announced');
   if (turnstileRetry.scriptAttempts !== 2 || !turnstileRetry.firstFailure.includes('press Run to retry') || turnstileRetry.finalOutput !== 'retry succeeded') failures.push('Transient Turnstile CDN failure was cached instead of retried');
   if (turnstileRetry.renderAction !== 'run-example' || turnstileRetry.submittedToken !== 'retry-token') failures.push('Turnstile browser action/token contract failed');
+  const { firstRun: rejectedRun, secondRun: rejectedRetry } = turnstileRejected;
+  if (rejectedRun.fetchCount !== 2 || rejectedRun.solves !== 1) failures.push(`Rejected Turnstile token re-challenged in a loop (${rejectedRun.fetchCount} POSTs, ${rejectedRun.solves} solves for one Run)`);
+  if (!rejectedRun.output.includes('verification failed') || rejectedRun.busy) failures.push('Rejected Turnstile token did not end the run with the server message');
+  if (rejectedRetry.fetchCount !== 4 || rejectedRetry.solves !== 2) failures.push('A new Run after a rejected token did not earn exactly one fresh challenge');
 
   console.log(JSON.stringify({
     runnerInteraction: interaction.result.value,
@@ -519,6 +574,7 @@ try {
     offlineRunner,
     fragmentBound,
     turnstileRetry,
+    turnstileRejected,
     heldCdnRequests,
   }, null, 2));
   client.close();

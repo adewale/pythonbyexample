@@ -30,6 +30,14 @@ from typing import TextIO
 
 SERVICE = "pythonbyexample"
 
+# Turnstile signals that mean the deployment is misconfigured rather than that
+# a visitor failed: every challenged run fails until an operator fixes them.
+TURNSTILE_CONFIG_ALERTS = {
+    "reason:site_key_missing": "TURNSTILE_SITE_KEY is not configured, so challenges cannot render",
+    "code:missing-input-secret": "Siteverify received no secret",
+    "code:invalid-input-secret": "TURNSTILE_SECRET_KEY is wrong, rotated, or from another widget",
+}
+
 
 def _looks_like_wide_event(value) -> bool:
     return isinstance(value, dict) and value.get("service") == SERVICE and "path" in value
@@ -79,6 +87,8 @@ def aggregate_events(events: Iterable[dict]) -> dict:
     journey_views: Counter[str] = Counter()
     missing_example_paths: Counter[str] = Counter()
     turnstile_outcomes: Counter[str] = Counter()
+    turnstile_failure_reasons: Counter[str] = Counter()
+    turnstile_error_codes: Counter[str] = Counter()
     runs: dict[str, dict] = defaultdict(
         lambda: {"total": 0, "edited": 0, "errors": 0, "execution_ms": []}
     )
@@ -113,6 +123,11 @@ def aggregate_events(events: Iterable[dict]) -> dict:
         turnstile = event.get("turnstile")
         if isinstance(turnstile, dict) and turnstile.get("outcome"):
             turnstile_outcomes[str(turnstile["outcome"])] += 1
+            if turnstile.get("reason"):
+                turnstile_failure_reasons[str(turnstile["reason"])] += 1
+            error_codes = turnstile.get("error_codes")
+            if isinstance(error_codes, list):
+                turnstile_error_codes.update(str(code) for code in error_codes)
 
     run_summary = {}
     for slug, entry in runs.items():
@@ -130,8 +145,17 @@ def aggregate_events(events: Iterable[dict]) -> dict:
         "journey_views": dict(journey_views),
         "missing_example_paths": dict(missing_example_paths),
         "turnstile_outcomes": dict(turnstile_outcomes),
+        "turnstile_failure_reasons": dict(turnstile_failure_reasons),
+        "turnstile_error_codes": dict(turnstile_error_codes),
+        "turnstile_config_alerts": _turnstile_config_alerts(turnstile_failure_reasons, turnstile_error_codes),
         "runs": run_summary,
     }
+
+
+def _turnstile_config_alerts(reasons: Counter[str], error_codes: Counter[str]) -> dict[str, int]:
+    signals = Counter({f"reason:{key}": count for key, count in reasons.items()})
+    signals.update({f"code:{key}": count for key, count in error_codes.items()})
+    return {signal: signals[signal] for signal in TURNSTILE_CONFIG_ALERTS if signals[signal]}
 
 
 def _top(counter: dict, limit: int) -> list[tuple[str, int]]:
@@ -180,6 +204,24 @@ def render_report(report: dict, limit: int = 15) -> str:
         lines.append("Turnstile outcomes")
         for outcome, count in _top(report["turnstile_outcomes"], limit):
             lines.append(f"  {count:>6}  {outcome}")
+        lines.append("")
+
+    if report["turnstile_failure_reasons"]:
+        lines.append("Turnstile failure reasons")
+        for reason, count in _top(report["turnstile_failure_reasons"], limit):
+            lines.append(f"  {count:>6}  {reason}")
+        lines.append("")
+
+    if report["turnstile_error_codes"]:
+        lines.append("Siteverify error codes")
+        for code, count in _top(report["turnstile_error_codes"], limit):
+            lines.append(f"  {count:>6}  {code}")
+        lines.append("")
+
+    if report["turnstile_config_alerts"]:
+        lines.append("Turnstile configuration alerts (fix the deployment; these are not bot failures)")
+        for signal, count in _top(report["turnstile_config_alerts"], limit):
+            lines.append(f"  {count:>6}  {signal}: {TURNSTILE_CONFIG_ALERTS[signal]}")
         lines.append("")
 
     return "\n".join(lines)

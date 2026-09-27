@@ -3,11 +3,16 @@
 
 Usage:
     scripts/smoke_deployment.py https://www.pythonbyexample.dev
+    PBE_SMOKE_BYPASS_SECRET=... scripts/smoke_deployment.py https://www.pythonbyexample.dev
+
+With PBE_SMOKE_BYPASS_SECRET, POST runs skip Turnstile, so the script also
+asks the Worker to prove its Turnstile secret against Siteverify.
 """
 from __future__ import annotations
 
 import argparse
 import html
+import json
 import os
 import re
 import sys
@@ -35,6 +40,14 @@ POST_SMOKES = [
     ("subprocesses", "print('runtime-smoke-subprocess-boundary')\n", "runtime-smoke-subprocess-boundary"),
 ]
 ERROR_MARKERS = ["error code: 1101", "PythonError", "Traceback"]
+SMOKE_BYPASS_HEADER = "x-pythonbyexample-smoke-secret"
+TURNSTILE_PROBE_PATH = "/__smoke/turnstile"
+TURNSTILE_PROBE_PROBLEMS = {
+    "invalid": "Siteverify rejects TURNSTILE_SECRET_KEY, so every challenged run fails",
+    "testing_key": "TURNSTILE_SECRET_KEY is a Cloudflare test secret, which ignores the visitor",
+    "unverified": "the Worker could not reach Siteverify; re-run smoke before trusting the secret",
+    "unexpected": "Siteverify answered the dummy token unexpectedly",
+}
 
 
 def fetch(url: str) -> tuple[int, str]:
@@ -51,7 +64,7 @@ def post_code(url: str, code: str, smoke_bypass_secret: str = "") -> tuple[int, 
         "Content-Type": "application/x-www-form-urlencoded",
     }
     if smoke_bypass_secret:
-        headers["x-pythonbyexample-smoke-secret"] = smoke_bypass_secret
+        headers[SMOKE_BYPASS_HEADER] = smoke_bypass_secret
     request = urllib.request.Request(
         url,
         data=data,
@@ -61,6 +74,30 @@ def post_code(url: str, code: str, smoke_bypass_secret: str = "") -> tuple[int, 
     with urllib.request.urlopen(request, timeout=30) as response:
         body = response.read().decode("utf-8", errors="replace")
         return response.status, body
+
+
+def probe_turnstile(base_url: str, smoke_bypass_secret: str) -> dict:
+    request = urllib.request.Request(
+        urljoin(base_url, TURNSTILE_PROBE_PATH.lstrip("/")),
+        data=b"",
+        headers={"User-Agent": "pythonbyexample-smoke/1.0", SMOKE_BYPASS_HEADER: smoke_bypass_secret},
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=30) as response:
+        return json.loads(response.read().decode("utf-8"))
+
+
+def turnstile_probe_problem(report: dict) -> str | None:
+    """Explain why the Worker's Turnstile configuration cannot verify browsers."""
+    if report.get("ok") is True:
+        return None
+    secret = report.get("secret")
+    if secret == "valid" and not report.get("site_key_configured"):
+        return "TURNSTILE_SITE_KEY is not configured, so challenges cannot render"
+    problem = TURNSTILE_PROBE_PROBLEMS.get(secret, f"unrecognized probe report {report!r}")
+    if codes := report.get("error_codes"):
+        problem += f" ({', '.join(codes)})"
+    return problem
 
 
 def has_exception_marker(body: str) -> str | None:
@@ -138,6 +175,21 @@ def main() -> int:
             if expected not in rendered_output:
                 failures.append(f"POST {url}: missing edited-code output {expected!r}")
             print(f"POST {status} {url} -> {expected}")
+
+        url = urljoin(base, TURNSTILE_PROBE_PATH.lstrip("/"))
+        if not smoke_bypass_value:
+            print(f"SKIP {url}: set PBE_SMOKE_BYPASS_SECRET to verify the deployed Turnstile secret")
+        else:
+            try:
+                report = probe_turnstile(base, smoke_bypass_value)
+            except urllib.error.HTTPError as exc:
+                failures.append(f"POST {url}: HTTP {exc.code} (deploy the probe route, or check PBE_SMOKE_BYPASS_SECRET)")
+            except Exception as exc:  # noqa: BLE001  # pragma: no cover - report any transport failure
+                failures.append(f"POST {url}: {exc!r}")
+            else:
+                if problem := turnstile_probe_problem(report):
+                    failures.append(f"POST {url}: {problem}")
+                print(f"POST {url} -> Turnstile secret {report.get('secret')}, mode {report.get('challenge_mode')}")
 
     if failures:
         for failure in failures:

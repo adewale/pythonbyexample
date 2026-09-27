@@ -100,5 +100,58 @@ class AggregateTests(unittest.TestCase):
         self.assertIn("/examples/not-a-real-example", text)
 
 
+class TurnstileReportTests(unittest.TestCase):
+    def turnstile_run(self, turnstile):
+        event = example_run("closures")
+        event["turnstile"] = turnstile
+        return event
+
+    def build_report(self):
+        return aggregate_events(
+            [
+                self.turnstile_run({"outcome": "challenged"}),
+                self.turnstile_run({"outcome": "challenged"}),
+                self.turnstile_run({"outcome": "pass"}),
+                self.turnstile_run(
+                    {"outcome": "fail", "reason": "rejected", "error_codes": ["invalid-input-secret"]}
+                ),
+                self.turnstile_run(
+                    {"outcome": "fail", "reason": "rejected", "error_codes": ["timeout-or-duplicate"]}
+                ),
+                self.turnstile_run({"outcome": "fail", "reason": "hostname_mismatch"}),
+                self.turnstile_run({"outcome": "fail", "reason": "site_key_missing"}),
+            ]
+        )
+
+    def test_separates_issued_challenges_from_failures(self):
+        report = self.build_report()
+        self.assertEqual(report["turnstile_outcomes"], {"challenged": 2, "pass": 1, "fail": 4})
+        self.assertEqual(
+            report["turnstile_failure_reasons"],
+            {"rejected": 2, "hostname_mismatch": 1, "site_key_missing": 1},
+        )
+        self.assertEqual(
+            report["turnstile_error_codes"], {"invalid-input-secret": 1, "timeout-or-duplicate": 1}
+        )
+
+    def test_flags_misconfiguration_apart_from_visitor_failures(self):
+        report = self.build_report()
+        self.assertEqual(
+            report["turnstile_config_alerts"],
+            {"code:invalid-input-secret": 1, "reason:site_key_missing": 1},
+        )
+        text = render_report(report)
+        self.assertIn("Turnstile configuration alerts", text)
+        self.assertIn("TURNSTILE_SECRET_KEY is wrong", text)
+        self.assertIn("Siteverify error codes", text)
+
+    def test_visitor_failures_raise_no_configuration_alert(self):
+        report = aggregate_events(
+            [self.turnstile_run({"outcome": "fail", "reason": "rejected", "error_codes": ["invalid-input-response"]})]
+        )
+        self.assertEqual(report["turnstile_config_alerts"], {})
+        self.assertNotIn("configuration alerts", render_report(report))
+
+
 if __name__ == "__main__":
     unittest.main()

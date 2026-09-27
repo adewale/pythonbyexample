@@ -8,6 +8,7 @@ cookie scope, expiry handling, or fail-open mode selection fails here.
 from __future__ import annotations
 
 import asyncio
+import json
 import sys
 import time
 import types
@@ -309,82 +310,328 @@ class RunExampleFlowTests(unittest.TestCase):
         self._stub_run(output="verified-run")
 
         async def _fake_verify(request, token):
-            return True, "ok", "success"
+            return True, "", {"outcome": "pass"}
 
         main._verify_turnstile = _fake_verify
         env = session_env(TURNSTILE_SITE_KEY="site-key")
-        response = self._run(post_request(b"code=print(1)&cf-turnstile-response=tok", env=env))
+        request = post_request(b"code=print(1)&cf-turnstile-response=tok", env=env)
+        request.state.wide_event = {"path": "/examples/values"}
+        response = self._run(request)
         self.assertEqual(self._ran_code, "print(1)")
         set_cookie = response.headers.get("set-cookie", "")
         self.assertIn(f"{main.TURNSTILE_CLEARANCE_COOKIE}=", set_cookie)
+        self.assertEqual(request.state.wide_event["turnstile"], {"outcome": "pass"})
+
+    def test_issued_challenge_is_recorded_apart_from_failures(self):
+        # A challenge is the normal first run of a session; recording it as
+        # "fail" hid real rejections among ordinary first runs.
+        self._stub_run()
+        request = post_request(b"code=print(1)", env=session_env(TURNSTILE_SITE_KEY="site-key"))
+        request.state.wide_event = {"path": "/examples/values"}
+        self._run(request)
+        self.assertEqual(request.state.wide_event["turnstile"], {"outcome": "challenged"})
+
+        misconfigured = post_request(b"code=print(1)", env=session_env())
+        misconfigured.state.wide_event = {"path": "/examples/values"}
+        self._run(misconfigured)
+        self.assertEqual(
+            misconfigured.state.wide_event["turnstile"], {"outcome": "fail", "reason": "site_key_missing"}
+        )
+
+    def test_rejected_token_records_reason_and_does_not_run_code(self):
+        self._ran_code = None
+        self._stub_run()
+
+        async def _rejecting_verify(request, token):
+            return main._turnstile_failure("rejected", ["invalid-input-secret"])
+
+        main._verify_turnstile = _rejecting_verify
+        request = post_request(
+            b"code=print(1)&cf-turnstile-response=tok", env=session_env(TURNSTILE_SITE_KEY="site-key")
+        )
+        request.state.wide_event = {"path": "/examples/values"}
+        response = self._run(request)
+        body = response.body.decode()
+        self.assertIsNone(self._ran_code)
+        self.assertIn(main.TURNSTILE_FAILED_MESSAGE, body)
+        self.assertIn('data-turnstile-required="true"', body)
+        self.assertNotIn("set-cookie", response.headers)
+        self.assertEqual(
+            request.state.wide_event["turnstile"],
+            {"outcome": "fail", "reason": "rejected", "error_codes": ["invalid-input-secret"]},
+        )
+
+
+class _SiteverifyResponse:
+    def __init__(self, status, body):
+        self.status, self.body = status, body
+
+    async def text(self):
+        return self.body
 
 
 class TurnstileSiteverifyTests(unittest.TestCase):
     def setUp(self):
-        self.saved_fetch = main.js_fetch
-        self.saved_request = main.JsRequest
+        self.saved = {name: getattr(main, name) for name in ("js_fetch", "JsRequest", "AbortSignal")}
         main.JsRequest = type("Request", (), {"new": staticmethod(lambda url, options: (url, options))})
+        self.sent = []
 
     def tearDown(self):
-        main.js_fetch = self.saved_fetch
-        main.JsRequest = self.saved_request
+        for name, value in self.saved.items():
+            setattr(main, name, value)
+
+    def _respond(self, body, status=200):
+        async def fetch(request):
+            self.sent.append(request)
+            return _SiteverifyResponse(status, body)
+
+        main.js_fetch = fetch
+
+    def _verify(self, token="token"):
+        return asyncio.run(main._verify_turnstile(make_request(env=session_env()), token))
 
     def test_transport_status_and_payload_failures_fail_closed(self):
-        class Response:
-            def __init__(self, status, body):
-                self.status, self.body = status, body
-            async def text(self):
-                return self.body
-
         async def failing(_request):
             raise RuntimeError("network down")
 
-        request = make_request(env=session_env())
         for fetch in (
             failing,
-            lambda _request: _awaitable(Response(500, '{"success": true}')),
-            lambda _request: _awaitable(Response(200, "not json")),
-            lambda _request: _awaitable(Response(200, "[]")),
-            lambda _request: _awaitable(Response(200, '{"success": false}')),
+            lambda _request: _awaitable(_SiteverifyResponse(500, '{"success": true}')),
+            lambda _request: _awaitable(_SiteverifyResponse(503, "<html>upstream down</html>")),
+            lambda _request: _awaitable(_SiteverifyResponse(200, "not json")),
+            lambda _request: _awaitable(_SiteverifyResponse(200, "[]")),
         ):
             with self.subTest(fetch=fetch):
                 main.js_fetch = fetch
-                ok, message, outcome = asyncio.run(main._verify_turnstile(request, "token"))
+                ok, message, details = self._verify()
                 self.assertFalse(ok)
                 self.assertIn("verification failed", message)
-                self.assertEqual(outcome, "fail")
+                self.assertEqual(details, {"outcome": "fail", "reason": "siteverify_unavailable"})
+
+    def test_siteverify_request_carries_a_timeout_signal(self):
+        main.AbortSignal = type("AbortSignal", (), {"timeout": staticmethod(lambda ms: ("timeout", ms))})
+        self._respond('{"success": true, "hostname": "www.pythonbyexample.dev", "action": "run-example"}')
+        self._verify()
+        url, options = self.sent[0]
+        self.assertEqual(url, main.TURNSTILE_VERIFY_URL)
+        self.assertEqual(options["signal"], ("timeout", main.SITEVERIFY_TIMEOUT_MS))
+        self.assertEqual(main.SITEVERIFY_TIMEOUT_MS, 10_000)
+
+    def test_overlong_token_is_rejected_without_calling_siteverify(self):
+        self._respond('{"success": true, "hostname": "www.pythonbyexample.dev", "action": "run-example"}')
+        ok, _, details = self._verify("x" * (main.MAX_TURNSTILE_TOKEN_CHARS + 1))
+        self.assertFalse(ok)
+        self.assertEqual(details, {"outcome": "fail", "reason": "token_too_long"})
+        self.assertEqual(self.sent, [])
+
+        ok, _, _ = self._verify("x" * main.MAX_TURNSTILE_TOKEN_CHARS)
+        self.assertTrue(ok)
+        self.assertEqual(len(self.sent), 1)
 
     def test_successful_siteverify_requires_matching_hostname_and_action(self):
-        class Response:
-            status = 200
-            async def text(self):
-                return '{"success": true, "hostname": "www.pythonbyexample.dev", "action": "run-example"}'
-
-        main.js_fetch = lambda _request: _awaitable(Response())
-        ok, message, outcome = asyncio.run(main._verify_turnstile(make_request(env=session_env()), "token"))
+        self._respond('{"success": true, "hostname": "www.pythonbyexample.dev", "action": "run-example"}')
+        ok, message, details = self._verify()
         self.assertTrue(ok)
         self.assertEqual(message, "")
-        self.assertEqual(outcome, "pass")
+        self.assertEqual(details, {"outcome": "pass"})
 
-    def test_siteverify_rejects_wrong_or_missing_hostname_and_action(self):
-        payloads = [
-            '{"success": true}',
-            '{"success": true, "hostname": "other.example", "action": "run-example"}',
-            '{"success": true, "hostname": "www.pythonbyexample.dev", "action": "other-action"}',
+    def test_siteverify_rejects_wrong_missing_or_non_string_hostname_and_action(self):
+        cases = [
+            ('{"success": true}', "hostname_mismatch"),
+            ('{"success": true, "hostname": null, "action": "run-example"}', "hostname_mismatch"),
+            ('{"success": true, "hostname": 7, "action": "run-example"}', "hostname_mismatch"),
+            ('{"success": true, "hostname": "other.example", "action": "run-example"}', "hostname_mismatch"),
+            ('{"success": true, "hostname": "www.pythonbyexample.dev", "action": "other-action"}', "action_mismatch"),
+            ('{"success": true, "hostname": "www.pythonbyexample.dev"}', "action_mismatch"),
         ]
-        for payload in payloads:
+        for payload, reason in cases:
             with self.subTest(payload=payload):
-                class Response:
-                    status = 200
-
-                    async def text(self, response_payload=payload):
-                        return response_payload
-
-                main.js_fetch = lambda _request: _awaitable(Response())
-                ok, message, outcome = asyncio.run(main._verify_turnstile(make_request(env=session_env()), "token"))
+                self._respond(payload)
+                ok, message, details = self._verify()
                 self.assertFalse(ok)
                 self.assertIn("verification failed", message)
-                self.assertEqual(outcome, "fail")
+                self.assertEqual(details, {"outcome": "fail", "reason": reason})
+
+    def test_rejection_records_only_documented_error_codes(self):
+        cases = [
+            ('{"success": false}', {"outcome": "fail", "reason": "rejected"}),
+            (
+                '{"success": false, "error-codes": ["invalid-input-secret"]}',
+                {"outcome": "fail", "reason": "rejected", "error_codes": ["invalid-input-secret"]},
+            ),
+            (
+                '{"success": false, "error-codes": ["timeout-or-duplicate", "x-new-code", 5, {"a": 1}]}',
+                {"outcome": "fail", "reason": "rejected", "error_codes": ["other", "timeout-or-duplicate"]},
+            ),
+            ('{"success": "true", "error-codes": "bad-request"}', {"outcome": "fail", "reason": "rejected"}),
+        ]
+        for payload, expected in cases:
+            with self.subTest(payload=payload):
+                self._respond(payload)
+                ok, _, details = self._verify()
+                self.assertFalse(ok)
+                self.assertEqual(details, expected)
+
+    def test_http_400_secret_errors_are_configuration_codes_not_outages(self):
+        # Live Siteverify returns these exact bodies with HTTP 400. Treating
+        # every non-2xx as "unavailable" hid invalid-input-secret entirely.
+        cases = [
+            ('{"error-codes":["invalid-input-secret"],"success":false,"messages":[]}', "invalid-input-secret"),
+            ('{"error-codes":["missing-input-secret"],"success":false,"messages":[]}', "missing-input-secret"),
+        ]
+        for payload, code in cases:
+            with self.subTest(code=code):
+                self._respond(payload, status=400)
+                ok, _, details = self._verify()
+                self.assertFalse(ok)
+                self.assertEqual(details, {"outcome": "fail", "reason": "rejected", "error_codes": [code]})
+
+    def test_non_2xx_never_passes_even_when_the_body_claims_success(self):
+        self._respond(
+            '{"success": true, "hostname": "www.pythonbyexample.dev", "action": "run-example", "error-codes": ["internal-error"]}',
+            status=500,
+        )
+        ok, _, details = self._verify()
+        self.assertFalse(ok)
+        self.assertEqual(details, {"outcome": "fail", "reason": "rejected", "error_codes": ["internal-error"]})
+
+
+# Replies live Siteverify gave to the dummy token, per secret.
+PRODUCTION_SECRET_REPLY = (200, '{"success": false, "error-codes": ["invalid-input-response"]}')
+BAD_SECRET_REPLY = (400, '{"error-codes":["invalid-input-secret"],"success":false,"messages":[]}')
+TEST_SECRET_REPLIES = {
+    "always-pass": (
+        200,
+        (
+            '{"challenge_ts":"2026-09-25T22:08:06.790Z","error-codes":[],"hostname":"example.com",'
+            '"metadata":{"result_with_testing_key":true},"success":true}'
+        ),
+    ),
+    "always-fail": (
+        200,
+        (
+            '{"error-codes":["invalid-input-response"],"success":false,"messages":[],'
+            '"metadata":{"result_with_testing_key":true}}'
+        ),
+    ),
+    "token-spent": (
+        200,
+        (
+            '{"error-codes":["timeout-or-duplicate"],"success":false,"messages":[],'
+            '"metadata":{"result_with_testing_key":true}}'
+        ),
+    ),
+}
+
+
+class TurnstileProbeTests(unittest.TestCase):
+    """The smoke-gated probe proves the deployed secret with the dummy token.
+
+    Response bodies are the ones live Siteverify returned for the dummy token.
+    """
+
+    def setUp(self):
+        self.saved = {name: getattr(main, name) for name in ("js_fetch", "JsRequest", "AbortSignal")}
+        main.JsRequest = type("Request", (), {"new": staticmethod(lambda url, options: (url, options))})
+        main.AbortSignal = None
+        self.sent = []
+
+    def tearDown(self):
+        for name, value in self.saved.items():
+            setattr(main, name, value)
+
+    def _respond(self, status, body):
+        async def fetch(request):
+            self.sent.append(request)
+            return _SiteverifyResponse(status, body)
+
+        main.js_fetch = fetch
+
+    def _smoke_request(self, header="smoke-secret", **env):
+        values = {"PBE_SMOKE_BYPASS_SECRET": "smoke-secret", "TURNSTILE_SITE_KEY": "site-key"}
+        values.update(env)
+        headers = {main.SMOKE_BYPASS_HEADER: header} if header else {}
+        return make_request(headers=headers, env=session_env(**values))
+
+    def _probe(self, request):
+        return asyncio.run(main._probe_turnstile(request))
+
+    def test_working_production_secret_is_ok(self):
+        self._respond(*PRODUCTION_SECRET_REPLY)
+        report = self._probe(self._smoke_request())
+        self.assertEqual(
+            report,
+            {"challenge_mode": "session", "site_key_configured": True, "secret": "valid", "ok": True},
+        )
+        _, options = self.sent[0]
+        self.assertIn(f"response={main.TURNSTILE_PROBE_TOKEN}", options["body"])
+        self.assertIn("secret=server-secret", options["body"])
+        self.assertNotIn("remoteip", options["body"])
+
+    def test_bad_secret_fails_with_its_error_code(self):
+        self._respond(*BAD_SECRET_REPLY)
+        report = self._probe(self._smoke_request())
+        self.assertEqual(report["secret"], "invalid")
+        self.assertEqual(report["error_codes"], ["invalid-input-secret"])
+        self.assertFalse(report["ok"])
+
+    def test_every_test_secret_fails_including_the_one_that_mimics_production(self):
+        for name, response in TEST_SECRET_REPLIES.items():
+            with self.subTest(secret=name):
+                self._respond(*response)
+                report = self._probe(self._smoke_request())
+                self.assertEqual(report["secret"], "testing_key")
+                self.assertFalse(report["ok"])
+
+    def test_valid_secret_without_site_key_is_not_ok(self):
+        self._respond(*PRODUCTION_SECRET_REPLY)
+        report = self._probe(self._smoke_request(TURNSTILE_SITE_KEY=""))
+        self.assertEqual(report["secret"], "valid")
+        self.assertFalse(report["site_key_configured"])
+        self.assertFalse(report["ok"])
+
+    def test_absent_secret_reports_turnstile_off_without_calling_siteverify(self):
+        self._respond(*PRODUCTION_SECRET_REPLY)
+        report = self._probe(self._smoke_request(TURNSTILE_SECRET_KEY=""))
+        self.assertEqual(report["secret"], "absent")
+        self.assertTrue(report["ok"])
+        self.assertEqual(self.sent, [])
+
+    def test_unreachable_or_unexpected_siteverify_is_not_ok(self):
+        async def failing(_request):
+            raise RuntimeError("network down")
+
+        main.js_fetch = failing
+        self.assertEqual(self._probe(self._smoke_request())["secret"], "unverified")
+        for status, body in (
+            (200, '{"success": false, "error-codes": ["internal-error"]}'),
+            (200, '{"success": false}'),
+            (503, '{"success": false, "error-codes": ["invalid-input-response"]}'),
+        ):
+            with self.subTest(status=status, body=body):
+                self._respond(status, body)
+                report = self._probe(self._smoke_request())
+                self.assertEqual(report["secret"], "unexpected")
+                self.assertFalse(report["ok"])
+
+    def test_route_requires_the_smoke_header_and_returns_json(self):
+        self._respond(*BAD_SECRET_REPLY)
+        for header in ("", "wrong-secret"):
+            with self.subTest(header=header):
+                response = asyncio.run(main.turnstile_probe(self._smoke_request(header=header)))
+                self.assertEqual(response.status_code, 404)
+                self.assertEqual(self.sent, [], "an unauthenticated probe must not reach Siteverify")
+
+        request = self._smoke_request()
+        request.state.wide_event = {"path": main.TURNSTILE_PROBE_PATH}
+        response = asyncio.run(main.turnstile_probe(request))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.media_type, "application/json")
+        report = json.loads(response.body)
+        self.assertEqual(report["secret"], "invalid")
+        self.assertFalse(report["ok"])
+        self.assertEqual(request.state.wide_event["turnstile_probe"], {"secret": "invalid", "ok": False})
+        self.assertNotIn("server-secret", response.body.decode())
 
 
 async def _awaitable(value):
