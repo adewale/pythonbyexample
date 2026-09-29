@@ -1382,7 +1382,7 @@ caption = "Lists are mutable sequences. `.append` extends the same list object �
 slug = "dicts"
 anchor = "cell-0"
 figure = "dict-buckets"
-caption = "Each key is hashed to a bucket; collisions chain into the next slot. Lookup is constant-time on average."
+caption = "hash(key) picks the slot: \"year\" lands in an empty one, and profile[\"name\"] goes straight to its slot without scanning the other entries."
 
 [[figure_attachments]]
 slug = "unpacking"
@@ -1430,7 +1430,7 @@ caption = "@dec rebinds the name to wrapper(f₀); the original function survive
 slug = "recursion"
 anchor = "cell-1"
 figure = "call-stack"
-caption = "Each call pushes a new frame with the same name and a smaller argument; the base case unwinds back up the stack."
+caption = "At the leaf with value 4, three frames of total are stacked, each waiting on the one below; unwinding returns 4, then 3 + 4 = 7, then 1 + 2 + 7 = 10."
 
 [[figure_attachments]]
 slug = "exception-chaining"
@@ -1520,7 +1520,7 @@ caption = "Name lookup walks LEGB — local, enclosing, global, built-in — out
 slug = "generators"
 anchor = "cell-0"
 figure = "generator-resume"
-caption = "Three next() calls on countdown(3), one timeline each: every call resumes the body to the next yield gate, and the local n survives every pause."
+caption = "The cell's two next() calls on countdown(3), one timeline each: every call resumes the body to the next yield gate, and the local n survives the pause."
 
 [[figure_attachments]]
 slug = "type-hints"
@@ -1664,7 +1664,7 @@ caption = "Both objects hold the same two bytes as integers; b\"py\" cannot chan
 slug = "sentinel-iteration"
 anchor = "cell-0"
 figure = "sentinel-iteration"
-caption = "`iter(callable, sentinel)` calls the callable repeatedly, stopping when it returns the sentinel."
+caption = "iter(read_chunk, \"\") keeps calling read_chunk and yields \"py\" and \"thon\"; the empty string is the sentinel, so it stops the loop and is never yielded."
 
 [[figure_attachments]]
 slug = "partial-functions"
@@ -2229,7 +2229,7 @@ comment = "LEGB nested rings"
 [[example_figure_scores]]
 slug = "recursion"
 score = 9.0
-comment = "stacked frames with same name, different argument"
+comment = "the example's own tree at its deepest frame, return values unwinding; earns-place 0.75, the cell's output already gives 10; 1.5/0.75/1/1/1 · 1/1/1 · 1/0.5"
 
 [[example_figure_scores]]
 slug = "lists"
@@ -2239,7 +2239,7 @@ comment = "cells with append mechanism"
 [[example_figure_scores]]
 slug = "dicts"
 score = 9.0
-comment = "hash buckets with collision chain"
+comment = "the cell's own keys hashed to slots, the insert of \"year\" accented; earns-place 0.75, one-move 0.75 since insert and lookup share the caption; 1.5/0.75/0.75/1/1 · 1/1/1 · 1/0.5"
 
 [[example_figure_scores]]
 slug = "slices"
@@ -2258,8 +2258,8 @@ comment = "ghost annotations over runtime values"
 
 [[example_figure_scores]]
 slug = "generators"
-score = 9.0
-comment = "three next() ribbons on the cell's countdown(3), locals shown surviving; one-move 0.5 because resume and survival are two ideas; 1.5/0.75/0.5/1/1 · 1/1/1 · 1/0.5"
+score = 9.5
+comment = "the cell's two next() ribbons on countdown(3), local n shown surviving; earns-place 0.75, the prose says the same; 1.5/0.75/1/1/1 · 1/1/1 · 1/0.5"
 
 [[example_figure_scores]]
 slug = "exceptions"
@@ -2393,13 +2393,13 @@ comment = "function literal: params / expression"
 
 [[example_figure_scores]]
 slug = "string-formatting"
-score = 9.5
-comment = "railroad tracing the cell's 05.1f, skipped stations ghosted under bypass rails; restraint 0.75 and fit 0.75 (372 wide); 1.5/1/1/1/1 · 1/1/0.75 · 0.75/0.5"
+score = 9.0
+comment = "railroad tracing the cell's 05.1f; one-move 0.75, restraint 0.75 and fit 0.75: still the densest figure in the set at the banner ceiling; 1.5/1/0.75/1/1 · 1/1/0.75 · 0.75/0.5"
 
 [[example_figure_scores]]
 slug = "regular-expressions"
-score = 9.5
-comment = "the cell's pattern with both capture groups dropped onto Ada: 10; one-move 0.75 for the two rows; 1.5/1/0.75/1/1 · 1/1/1 · 1/0.5"
+score = 9.0
+comment = "the cell's pattern with both capture groups dropped onto Ada: 10; one-move 0.75 and restraint 0.75 for two rows plus two drops; 1.5/1/0.75/1/1 · 1/1/0.75 · 1/0.5"
 
 [[example_figure_scores]]
 slug = "json"
@@ -2584,7 +2584,7 @@ comment = "the example's two bytes as integer slots, packet[0] rewritten in plac
 [[example_figure_scores]]
 slug = "sentinel-iteration"
 score = 9.0
-comment = "iter(callable, sentinel) stop condition"
+comment = "the cell's read_chunk and chunks; the empty string ghosted as the sentinel; earns-place 0.75, the output already omits it; 1.5/0.75/1/1/1 · 1/1/1 · 1/0.5"
 
 [[example_figure_scores]]
 slug = "partial-functions"

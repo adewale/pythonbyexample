@@ -2,14 +2,14 @@
   "variables": "Same mechanism, the cell's own name and value: message → \"hi\" instead of x → 42.",
   "constants": "Same mechanism, the cell's own name and value: MAX_RETRIES → 3; the name box widens to fit.",
   "closures": "Environment diagram. The returned frame is ghosted; double names a function object whose __closure__ points back into it.",
-  "generators": "State over time: one ribbon per next() on the cell's countdown(3), with the local n beside each row.",
+  "generators": "State over time: one ribbon per next() call the cell makes on countdown(3), with the local n beside each row.",
   "string-formatting": "Railroad tracing the cell's 05.1f. Visited stations shaded; skipped stations ghosted under a bypass rail.",
   "bytes-and-bytearray": "The example's real bytes as integer slots, the in-place write shown. The old figure drew bytes the example never uses, with doubled backslashes. Anchor moved to the cell that mutates packet.",
   "regular-expressions": "The cell's own pattern; capture groups dropped onto the record they extract. The old figure drew a pattern the example never uses.",
   "values": "The cell's binding text → str plus the type() hop to the class where upper() lives, replacing four stacked typed boxes.",
   "logging": "The cell's three records crossing the handler's INFO gate; debug stops at the gate. Replaces the five-level lookup table.",
   "decorators": "Arrow in the 'before' row lengthened from 16 to 22 units.",
-  "recursion": "Return arrow lengthened from 12 to 22 units.",
+  "recursion": "The example's own tree at the deepest frame of total(tree), with the values each frame returns. The old figure drew factorial(3), which the example never computes.",
   "type-aliases": "Arrow lengthened from 16 to 22 units; the Index box moves down 6.",
   "multiple-return-values": "Both arrows lengthened from 18 to 22 units.",
   "match-statements": "First-match arrow lengthened from 14 to 20 units.",
@@ -17,5 +17,7 @@
   "container-protocols": "Accent and soft fill removed from the middle row; the caption names all three routes equally.",
   "journey section · Choose the right loop shape.": "Accent and soft fill removed from the sentinel row; the caption names no single loop.",
   "journey section · Describe realistic data shapes.": "Accent and soft fill removed from the Union row.",
-  "journey section · Make failure explicit.": "Accent and soft fill removed from the except row."
+  "journey section · Make failure explicit.": "Accent and soft fill removed from the except row.",
+  "dicts": "The cell's own keys hashed to slots, with the insert of \"year\" accented. The old figure drew keys a to d and a collision the example never shows.",
+  "sentinel-iteration": "The cell's read_chunk and its chunks \"py\", \"thon\", \"\". The old figure drew iter(read, '') with placeholder values."
 }

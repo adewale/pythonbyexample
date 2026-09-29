@@ -94,7 +94,7 @@ one drawing is taller.
   justify-items: center;
 }
 .cell-banner figure   { margin: 0; padding: 0; max-width: 360px; }
-.cell-banner svg      { width: 100%; height: auto; display: block; }
+.cell-banner svg      { max-width: 100%; height: auto; display: block; }
 .cell-banner figcaption {
   margin-top: var(--space-2);
   color: var(--muted);

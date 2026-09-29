@@ -74,6 +74,13 @@ def normalised(figures: list[dict[str, str]]) -> str:
     return "|".join(STRIP.sub("", f["svg"]).replace(" ", "") for f in figures)
 
 
+LABEL = re.compile(r"<text[^>]*>([^<]*)</text>")
+
+
+def labels(figures: list[dict[str, str]]) -> list[str]:
+    return [m for f in figures for m in LABEL.findall(f["svg"])]
+
+
 def elements(figures: list[dict[str, str]]) -> int:
     return sum(len(ELEMENT.findall(f["svg"])) for f in figures)
 
@@ -104,7 +111,8 @@ def kind(before: list[dict[str, str]], after: list[dict[str, str]]) -> str:
     if not before:
         return "redrawn"
     same_names = [f["figure"] for f in before] == [f["figure"] for f in after]
-    if same_names and abs(elements(before) - elements(after)) <= 2:
+    same_labels = labels(before) == labels(after)
+    if same_names and same_labels and abs(elements(before) - elements(after)) <= 2:
         return "adjusted"
     return "redrawn"
 

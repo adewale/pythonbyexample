@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Generate exploratory prototypes under public/prototyping/.
 
-The canonical layout is "figure between prose and code", with the cell
-dropping to single-column when a figure is attached. These prototypes
-demonstrate that layout on representative examples and journeys, plus
-keep the marginalia-gestalt and operators-comparison review pages.
+The production layout keeps every cell in its prose|code grid and places
+figures in banner rows between cells (docs/visual-explainer-spec.md).
+These prototypes demonstrate that layout with one, two and three figures
+per banner on representative examples and journeys, and build the
+gestalt review pages.
 """
 
 from __future__ import annotations

@@ -4,7 +4,7 @@
 
 Before/after contact sheet of every figure whose drawing changed on the
 `claude/diagram-upgrade` branch relative to `main`, in both colour schemes.
-Rows are grouped: eight redrawn figures to judge, eleven adjusted figures (an
+Rows are grouped: twelve redrawn figures to judge, nine adjusted figures (an
 arrow lengthened or an accent removed) to glance at. Each row carries a note
 from `diagram-upgrade-contact-sheet-notes.json` saying what changed and why.
 The base column in the dark sheet sits on the light paper chip the site used
@@ -12,8 +12,8 @@ to draw; the head column is recoloured through the `--fig-*` tokens.
 
 | Evidence | Review point | Base | SHA-256 |
 | --- | --- | --- | --- |
-| [Light contact sheet](diagram-upgrade-contact-sheet-light.png) | 19 changed figure rows with element counts, shipped captions and per-row notes. | `main` (`3f300af`) | `2e8472286e1d1326324bb9822b93fcfe031db94e2359abc063a59d85664edf87` |
-| [Dark contact sheet](diagram-upgrade-contact-sheet-dark.png) | The same rows under `prefers-color-scheme: dark`: paper chip before, token recolouring after. | `main` (`3f300af`) | `61b728d5552d83bbbc959d495ad97a4eb65b03a04514553cacd8646b9a21b23e` |
+| [Light contact sheet](diagram-upgrade-contact-sheet-light.png) | 21 changed figure rows with element counts, shipped captions and per-row notes. | `main` (`3f300af`) | `55fc7a56bc03ef2841dc0bcf099b98911f667e56b3de7799414c90d1075b8abf` |
+| [Dark contact sheet](diagram-upgrade-contact-sheet-dark.png) | The same rows under `prefers-color-scheme: dark`: paper chip before, token recolouring after. | `main` (`3f300af`) | `d407aa9aaee7e943cc48887ecf1cd25adb4463eee9eeb3e0715482a8233cd611` |
 
 Regenerate both from the branch with:
 

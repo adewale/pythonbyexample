@@ -590,13 +590,23 @@ constants_bind = _bind_figure("MAX_RETRIES", "int", "3", name_w=84)
 
 
 def call_stack(c: Canvas) -> None:
-    """Recursion · stacked frames of the same function with different arguments."""
-    chain = [3, 2, 1, 0]
-    for i, n in enumerate(chain):
-        suffix = " ← base" if n == 0 else ""
-        c.cell(0, i * 22, f"factorial({n}){suffix}", w=180, h=20)
-    c.dashed(192, 90, 192, 40)
-    c.closed_arrow(192, 40, 192, 18, emphasis=True)
+    """Recursion · the frames alive at the deepest point of total(tree), and what each returns.
+
+    The example's tree is 1 → (2, 3 → 4). When total reaches the leaf
+    with value 4, three frames of the same function are stacked, each
+    waiting on the one below; the accent is the return path that
+    unwinds them: 4, then 3 + 4 = 7, then 1 + 2 + 7 = 10.
+    """
+    frames = [("total(tree)", "value 1", "returns 10"), ("total(child)", "value 3", "returns 7"),
+              ("total(child)", "value 4 · leaf", "returns 4")]
+    for i, (call, node, ret) in enumerate(frames):
+        y = i * 26
+        c.cell(0, y, call, w=104, h=22)
+        c.cell(104, y, node, w=92, h=22, soft=True)
+        c.label(224, y + 15, ret)
+    c.closed_arrow(208, 74, 208, 12, emphasis=True)
+
+
 
 
 def decorator_rebind(c: Canvas) -> None:
@@ -692,16 +702,23 @@ def list_append(c: Canvas) -> None:
 
 
 def dict_buckets(c: Canvas) -> None:
-    """Dictionaries · hashed buckets; collisions chain into a neighbouring slot."""
-    c.tag(0, 12, "hash → bucket")
-    rows = [("0", '"a" → 1'), ("1", '"b" → 2'), ("2", '"c" → 3')]
-    for i, (idx, body) in enumerate(rows):
-        y = 18 + i * 24
-        c.label(0, y + 16, idx, anchor="start")
-        c.cell(14, y, body, w=80, h=24)
-    c.closed_arrow(96, 54, 132, 54, emphasis=True)
-    c.cell(134, 42, '"d" → 4', w=80, h=24, soft=True)
-    c.label(218, 58, "collision", anchor="start")
+    """Dictionaries · hash(key) picks the slot; the cell's insert lands in an empty one.
+
+    profile holds "name" and "language"; the cell adds "year". The hash
+    of the new key selects a slot directly, which is why neither the
+    insert nor profile["name"] scans the other entries. The accent is
+    the insert.
+    """
+    c.tag(120, 6, "slots")
+    rows = [('"name" → "Ada"', False), ('"language" → "Python"', False), ('"year" → 1843', True)]
+    for i, (body, new) in enumerate(rows):
+        y = 12 + i * 26
+        c.cell(120, y, body, w=150, h=22, soft=new)
+        c.label(278, y + 15, str(i), anchor="start")
+    c.cell(0, 64, 'hash("year")', w=78, h=22)
+    c.closed_arrow(78, 75, 118, 75, emphasis=True)
+
+
 
 
 # ─── Examples promoted from the gestalt: new paint code ──────────────
@@ -786,18 +803,18 @@ def positional_only_separator(c: Canvas) -> None:
 
 
 def generator_resume(c: Canvas) -> None:
-    """Generators · three next() calls on countdown(3), one ribbon each.
+    """Generators · the cell's two next() calls on countdown(3), one ribbon each.
 
     State over time (the iterator-unroll pattern applied to a generator):
     each row is the body's timeline after one more next(). The soft
     segment is the code that has run so far, the gates are the yields,
-    and the local n printed beside the row is the value that survived
-    the pause. The gates are the figure's single accent system.
+    and the local n beside the row is the value that survived the pause.
+    The gates are the figure's single accent system.
     """
     gates = [60, 126, 192]
     for gx in gates:
         c.label(gx, 8, "yield", anchor="middle")
-    rows = [("3", "n=3"), ("2", "n=2"), ("1", "n=1")]
+    rows = [("3", "n=3"), ("2", "n=2")]
     for i, (value, local) in enumerate(rows):
         y = 14 + i * 34
         # The ribbon runs past the last gate: after the third yield the
@@ -897,14 +914,20 @@ def bytes_vs_bytearray(c: Canvas) -> None:
 
 
 def sentinel_iteration(c: Canvas) -> None:
-    """Sentinel iteration · `iter(callable, sentinel)` calls until the sentinel returns."""
-    c.cell(0, 22, "iter(read, '')", w=120, h=24)
-    c.closed_arrow(120, 34, 152, 34, emphasis=True)
-    c.cell(154, 0, "value", w=70, h=20)
-    c.cell(154, 22, "value", w=70, h=20)
-    c.cell(154, 44, "value", w=70, h=20)
-    c.cell(154, 66, "''", w=70, h=20, ghost=True)
-    c.label(228, 80, "sentinel · stop", anchor="start")
+    """Sentinel iteration · iter(read_chunk, "") calls read_chunk until it returns the sentinel.
+
+    The cell's chunks are "py", "thon" and "": the first two are yielded,
+    the empty string is the sentinel that stops the loop and is never
+    yielded, which is why list(...) prints ['py', 'thon'].
+    """
+    c.cell(0, 22, 'iter(read_chunk, "")', w=140, h=24)
+    c.closed_arrow(140, 34, 172, 34, emphasis=True)
+    c.cell(174, 0, '"py"', w=70, h=20)
+    c.cell(174, 22, '"thon"', w=70, h=20)
+    c.cell(174, 44, '""', w=70, h=20, ghost=True)
+    c.label(250, 58, "sentinel · stop", anchor="start")
+
+
 
 
 def partial_functions(c: Canvas) -> None:
@@ -1071,10 +1094,10 @@ def format_spec(c: Canvas) -> None:
     traces one path instead: the cell's own spec, 05.1f. Stations it
     visits are shaded; stations it skips are ghosted under a bypass rail.
     """
-    stations = [("align", 40, False), ("sign", 32, False), ("0", 20, True), ("width", 40, True),
-                (",", 20, False), (".prec", 42, True), ("type", 34, True)]
+    stations = [("align", 38, False), ("sign", 32, False), ("0", 14, True), ("width", 38, True),
+                (",", 14, False), ("precision", 62, True), ("type", 32, True)]
     rail_y = 36
-    lead, bypass = 12, 18
+    lead, bypass = 10, 18
     c.hairline(0, rail_y, lead, rail_y)
     x = lead
     for text, w, visited in stations:
@@ -1088,8 +1111,8 @@ def format_spec(c: Canvas) -> None:
         c.hairline(x, rail_y, x + 6, rail_y)
         c.cell(x + 6, rail_y - 9, text, w=w, h=18, soft=visited, ghost=not visited)
         c.hairline(x + w + 6, rail_y, x + w + 12, rail_y)
-        x += w + 12 + 8
-    c.hairline(x - 8, rail_y, x + lead - 8, rail_y)
+        x += w + 12 + 6
+    c.hairline(x - 6, rail_y, x + lead - 6, rail_y)
     c.tag(0, 62, "this cell")
     c.mono(0, 76, "{score:05.1f}", anchor="start")
 
@@ -1479,16 +1502,15 @@ def value_type_lookup(c: Canvas) -> None:
     """Values · text names a str object; the type, not the name, carries upper().
 
     The cell's own binding, then the lookup the cell prints:
-    type(text) is str, and str is where the behaviour lives. The dashed
-    hop is type(); the accent is the binding arrow, the move the cell
-    makes.
+    type(text) is str, and str is where upper() (which the next cell
+    calls) lives. The dashed hop is type(). No accent: the binding and
+    the hop are equals.
     """
     c.bind(0, 30, "text", "str", '"python"', object_w=80, gap=28)
     c.dashed(168, 46, 204, 46)
     c.label(186, 40, "type()", anchor="middle")
-    c.frame(206, 14, 72, 60, label="class str")
-    c.mono(242, 36, "upper()")
-    c.mono(242, 52, "encode()")
+    c.frame(206, 22, 72, 44, label="class str")
+    c.mono(242, 48, "upper()")
 
 
 def logging_threshold(c: Canvas) -> None:
@@ -1593,7 +1615,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     # Promoted from the gestalt — wired to example pages via ATTACHMENTS
     "variables-bind": (variables_bind, 170, 44),
     "constants-bind": (constants_bind, 194, 44),
-    "call-stack": (call_stack, 200, 100),
+    "call-stack": (call_stack, 292, 80),
     "decorator-rebind": (decorator_rebind, 232, 110),
     "mro-chain": (mro_chain, 200, 152),
     "dataclass-fields": (dataclass_fields, 312, 76),
@@ -1602,7 +1624,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "unpacking-bind": (unpacking_bind, 152, 80),
     "comprehension-equivalence": (comprehension_equivalence, 280, 76),
     "list-append": (list_append, 220, 36),
-    "dict-buckets": (dict_buckets, 270, 88),
+    "dict-buckets": (dict_buckets, 288, 92),
     # Newly designed paint code for examples that lacked a figure
     "number-lines": (number_lines, 260, 78),
     "expression-tree": (expression_tree, 220, 92),
@@ -1611,7 +1633,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "sort-stability": (sort_stability, 270, 100),
     "kw-only-separator": (kw_only_separator, 200, 56),
     "positional-only-separator": (positional_only_separator, 200, 56),
-    "generator-resume": (generator_resume, 318, 106),
+    "generator-resume": (generator_resume, 318, 72),
     "truth-and-size": (truth_and_size, 232, 70),
     "descriptor-protocol": (descriptor_protocol, 222, 76),
     "bound-unbound": (bound_unbound, 296, 56),
@@ -1620,7 +1642,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "attribute-lookup": (attribute_lookup, 242, 70),
     "guard-clauses": (guard_clauses, 264, 104),
     "bytes-vs-bytearray": (bytes_vs_bytearray, 200, 90),
-    "sentinel-iteration": (sentinel_iteration, 320, 92),
+    "sentinel-iteration": (sentinel_iteration, 330, 70),
     "partial-functions": (partial_functions, 334, 36),
     # Third coverage push: 24 more figures
     "args-kwargs": (args_kwargs, 280, 68),

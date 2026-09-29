@@ -175,5 +175,5 @@ Ordered by payoff. Each item is one pull request.
   for header-plus-buffer drawings of list, bytearray and slice.
 - **Tufte, Visual Explanations, "the smallest effective difference"**
   for how little contrast emphasis needs.
-- **Maggie Appleton** and **Julia Evans** for one idea per panel.
+- **Maggie Appleton** and **Julia Evans** for mechanism drawings that stay playful without adding marks.
 - **Distill.pub** for captions that carry the claim.

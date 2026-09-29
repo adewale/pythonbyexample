@@ -1,11 +1,11 @@
-# Rubric audit snapshot — 2026-09-27
+# Rubric audit snapshot — 2026-09-29
 
 This snapshot puts the catalog's quality ledgers beside each other for an editorial pass. Every number is computed from the live registries at generation time; rows marked CURATED are editorial judgements that the audit pass must re-affirm by review — this report does not validate them.
 
 ## Scoreboard
 
 - Examples: count=109, min=7.1, avg=8.98, median=9, below9=1, distribution=7.1 × 1, 9 × 108
-- Example diagrams: count=109, min=8.5, avg=9.03, median=9, below9=2, distribution=8.5 × 2, 9 × 99, 9.5 × 8
+- Example diagrams: count=109, min=8.5, avg=9.02, median=9, below9=2, distribution=8.5 × 2, 9 × 100, 9.5 × 7
 - Journey diagrams: count=21, min=9, avg=9.02, median=9, below9=0, distribution=9 × 20, 9.5 × 1
 - Accepted waiver: `hello-world` at 7.1 (floor 7.0, expires 2026-12-01).
 - Graph health: 109 linked sources, 361 edges, 0 orphaned examples.
@@ -76,7 +76,7 @@ This snapshot puts the catalog's quality ledgers beside each other for an editor
 | object-lifecycle | 9.0 | 8.7 | 2 | 3 | 3 | object-lifecycle | cell-0 | 9.0 | alternatives_and_boundaries=0.25, rationale=0.65, concept_decomposition=0.80 |
 | strings | 9.0 | 9.5 | 3 | 5 | 4 | codepoints-bytes | cell-0 | 9.0 | alternatives_and_boundaries=0.50, practical_usefulness=0.80, conceptual_payoff=1.00 |
 | bytes-and-bytearray | 9.0 | 9.5 | 4 | 4 | 3 | bytes-vs-bytearray | cell-3 | 9.5 | alternatives_and_boundaries=0.50, practical_usefulness=0.80, conceptual_payoff=1.00 |
-| string-formatting | 9.0 | 9.2 | 3 | 3 | 4 | format-spec | cell-1 | 9.5 | alternatives_and_boundaries=0.25, conceptual_payoff=0.80, rationale=1.00 |
+| string-formatting | 9.0 | 9.2 | 3 | 3 | 4 | format-spec | cell-1 | 9.0 | alternatives_and_boundaries=0.25, conceptual_payoff=0.80, rationale=1.00 |
 | conditionals | 9.0 | 9.3 | 3 | 3 | 4 | branch-fork | cell-0 | 9.0 | alternatives_and_boundaries=0.50, practical_usefulness=0.80, conceptual_payoff=0.87 |
 | guard-clauses | 9.0 | 9.2 | 2 | 3 | 3 | guard-clauses | cell-0 | 9.0 | alternatives_and_boundaries=0.50, concept_decomposition=0.80, representative_coverage=0.80 |
 | assignment-expressions | 9.0 | 9.2 | 2 | 3 | 3 | naming-decisions | cell-0 | 9.0 | alternatives_and_boundaries=0.70, concept_decomposition=0.80, representative_coverage=0.80 |
@@ -111,7 +111,7 @@ This snapshot puts the catalog's quality ledgers beside each other for an editor
 | scope-global-nonlocal | 9.0 | 9.2 | 2 | 3 | 3 | scope-rings | cell-0 | 9.0 | alternatives_and_boundaries=0.70, concept_decomposition=0.80, representative_coverage=0.80 |
 | recursion | 9.0 | 9.0 | 2 | 3 | 3 | call-stack | cell-1 | 9.0 | alternatives_and_boundaries=0.50, representative_coverage=0.75, concept_decomposition=0.80 |
 | lambdas | 9.0 | 9.7 | 3 | 3 | 3 | lambda-expression | cell-0 | 9.0 | alternatives_and_boundaries=0.70, conceptual_payoff=0.90, rationale=1.00 |
-| generators | 9.0 | 9.6 | 4 | 4 | 3 | generator-resume | cell-0 | 9.0 | alternatives_and_boundaries=0.70, practical_usefulness=0.80, conceptual_payoff=1.00 |
+| generators | 9.0 | 9.6 | 4 | 4 | 3 | generator-resume | cell-0 | 9.5 | alternatives_and_boundaries=0.70, practical_usefulness=0.80, conceptual_payoff=1.00 |
 | yield-from | 9.0 | 9.0 | 2 | 3 | 3 | yield-delegation | cell-0 | 9.0 | alternatives_and_boundaries=0.50, representative_coverage=0.75, concept_decomposition=0.80 |
 | generator-expressions | 9.0 | 9.4 | 3 | 3 | 4 | lazy-stream | cell-1 | 9.0 | alternatives_and_boundaries=0.50, practical_usefulness=0.80, conceptual_payoff=0.90 |
 | itertools | 9.0 | 9.6 | 3 | 4 | 4 | itertools-chain | cell-0 | 9.0 | alternatives_and_boundaries=0.50, conceptual_payoff=0.93, rationale=1.00 |
@@ -157,7 +157,7 @@ This snapshot puts the catalog's quality ledgers beside each other for an editor
 | protocols | 9.0 | 9.7 | 3 | 3 | 4 | protocol-check | cell-0 | 9.0 | alternatives_and_boundaries=0.70, conceptual_payoff=0.93, rationale=1.00 |
 | abstract-base-classes | 9.0 | 9.6 | 4 | 4 | 3 | class-triangle | cell-0 | 9.0 | alternatives_and_boundaries=0.70, practical_usefulness=0.80, conceptual_payoff=1.00 |
 | enums | 9.0 | 9.2 | 2 | 4 | 3 | enum-members | cell-0 | 9.0 | alternatives_and_boundaries=0.70, concept_decomposition=0.80, representative_coverage=0.80 |
-| regular-expressions | 9.0 | 9.6 | 6 | 6 | 2 | regex-groups | cell-0 | 9.5 | alternatives_and_boundaries=0.50, conceptual_payoff=1.00, rationale=1.00 |
+| regular-expressions | 9.0 | 9.6 | 6 | 6 | 2 | regex-groups | cell-0 | 9.0 | alternatives_and_boundaries=0.50, conceptual_payoff=1.00, rationale=1.00 |
 | number-parsing | 9.0 | 9.4 | 3 | 3 | 3 | number-parse | cell-0 | 9.0 | alternatives_and_boundaries=0.50, practical_usefulness=0.80, conceptual_payoff=0.97 |
 | custom-exceptions | 9.0 | 9.1 | 3 | 3 | 4 | custom-exception-chain | cell-0 | 9.0 | alternatives_and_boundaries=0.50, rationale=0.65, practical_usefulness=0.80 |
 | json | 9.0 | 9.5 | 4 | 4 | 3 | json-python-mapping | cell-0 | 9.0 | alternatives_and_boundaries=0.50, practical_usefulness=0.80, conceptual_payoff=1.00 |
@@ -208,22 +208,27 @@ No journey section figures reuse production example paint functions.
 
 CURATED dimensions above are not validated by this report; the audit pass owns re-affirming them (the marginalia gestalt page shows every figure with its production caption for exactly that review).
 
-## Curated: figures changed by the diagram upgrade (2026-09-27)
+## Curated: figures changed by the diagram upgrade (2026-09-30)
 
 Scored by hand against `docs/example-figure-rubric.md` v2. Columns are the ten criteria in rubric order: cell fidelity (1.5), earns its place (1.0), one conceptual move (1.0), mechanism over metaphor (1.0), caption quality (1.0) · grammar (1.0), emphasis scarcity (1.0), restraint (1.0) · banner fit (1.0), pairs with cell (0.5). The registry stores the total rounded down to the nearest half point.
 
 | slug | figure | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | total | where it loses |
 |---|---|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|--:|---|
 | closures | closure-cell | 1.5 | 1.0 | 0.75 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 9.75 → 9.5 | Two frames and two arrows take a beat longer than two seconds to resolve. |
-| generators | generator-resume | 1.5 | 0.75 | 0.5 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 9.25 → 9.0 | Resume-to-next-gate and locals-survive are two ideas on one figure; the prose already says both. |
-| string-formatting | format-spec | 1.5 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.75 | 0.75 | 0.5 | 9.5 | Three bypass arches are structure, but 35 elements is the densest figure in the set; 372 units wide sits at the banner ceiling. |
+| generators | generator-resume | 1.5 | 0.75 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 9.75 → 9.5 | The prose already says next() resumes to the next yield; the rows add the surviving local. Two rows now, matching the cell's two calls. |
+| string-formatting | format-spec | 1.5 | 1.0 | 0.75 | 1.0 | 1.0 | 1.0 | 1.0 | 0.75 | 0.75 | 0.5 | 9.25 → 9.0 | Densest figure in the set at the banner ceiling; the traced path and the grammar are two things to read. Scored below the row of boxes it replaced on density, above it on fidelity. |
 | bytes-and-bytearray | bytes-vs-bytearray | 1.5 | 0.75 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 9.75 → 9.5 | The cell's prose already states frozen versus mutable; the slots add only that bytes are integers. |
-| regular-expressions | regex-groups | 1.5 | 1.0 | 0.75 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 9.75 → 9.5 | Pattern row, text row and two drops are one move read twice. |
-| values | value-type-lookup | 1.5 | 0.75 | 0.75 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 9.5 → 9.0 | The cell prints `type(text).__name__`, so the hop restates code; binding plus hop is two small moves. Rounded down for the second. |
+| regular-expressions | regex-groups | 1.5 | 1.0 | 0.75 | 1.0 | 1.0 | 1.0 | 1.0 | 0.75 | 1.0 | 0.5 | 9.5 → 9.0 | Pattern row, text row and two drops read the move twice. Rounded down for the second reading. |
+| values | value-type-lookup | 1.5 | 0.75 | 0.75 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 9.5 → 9.0 | The cell prints `type(text).__name__`, so the hop restates code; binding plus hop is two small moves. |
 | logging | logging-threshold | 1.5 | 0.75 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 9.75 → 9.5 | The cell's output already shows `debug` missing; the gate makes the reason visible. |
+| recursion | call-stack | 1.5 | 0.75 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 9.75 → 9.5 | The cell's output already gives 10; the stack shows where 7 and 4 come from. Held at 9.0 in the registry until reviewed on the page. |
+| dicts | dict-buckets | 1.5 | 0.75 | 0.75 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 9.5 → 9.0 | Insert and lookup share one caption; the figure draws the insert. |
+| sentinel-iteration | sentinel-iteration | 1.5 | 0.75 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 9.75 → 9.5 | The output already omits the sentinel. Held at 9.0 in the registry until reviewed on the page. |
 | variables | variables-bind | 1.5 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 10.0 → 9.5 | Held at the previous 9.5: the drawing is unchanged apart from the cell's own name and value. |
 | constants | constants-bind | 1.5 | 0.5 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 9.5 → 9.0 | The prose says the binding behaves like any other, which is all the figure shows. |
 | literals | literal-forms | 1.5 | 0.5 | 0.5 | 0.5 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 8.5 | A table of spellings; kept because a page with a table beats a page with a note, queued for a mechanism. |
 | collections-module | collections-containers | 1.5 | 0.5 | 0.5 | 0.5 | 1.0 | 1.0 | 1.0 | 1.0 | 1.0 | 0.5 | 8.5 | A catalogue of four containers; same reasoning as `literals`. |
 
-The ten adjusted figures (arrow lengthened or arbitrary accent removed) keep their previous scores; the drawings are otherwise unchanged, and criterion 7 now reads the zero-accent selectors as correct rather than as missing emphasis.
+The adjusted figures (arrow lengthened or arbitrary accent removed) keep their previous scores; the drawings are otherwise unchanged, and criterion 7 now reads the zero-accent selectors as correct rather than as missing emphasis.
+
+The library-wide check behind the recursion, dicts and sentinel redraws: of 115 attachments, 54 carry a code-like mono label that does not appear verbatim in the example's source. Most are formatting drift (`["python","workers"]` against `['python', 'workers']`) or placeholders the rubric allows (`[a,b,c]`, `obj.x`). The three redrawn here were the ones drawing values the example never computes; the rest are queued in `docs/diagram-upgrade-plan.md`.
