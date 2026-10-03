@@ -175,6 +175,57 @@ class MainDefaultFetchTests(MainModuleHarness):
         self.assertEqual(emitted[-1]["status_code"], 413)
         self.assertEqual(emitted[-1]["outcome"], "client_error")
 
+    def test_every_bridge_call_caps_the_request_body_at_the_submit_limit(self):
+        # Covers the three asgi.fetch call sites: cached GET miss, uncacheable
+        # GET, and POST. Each must hand the bridge the pre-ASGI body cap.
+        main = self.import_main()
+        bridge_kwargs = []
+
+        class FakeCache:
+            async def match(self, key):
+                return None
+
+            async def put(self, key, value):
+                pass
+
+        class FakeJsRequest:
+            @staticmethod
+            def new(url, init=None):
+                return url
+
+        async def asgi_fetch(*args, **kwargs):
+            bridge_kwargs.append(kwargs)
+            response = SimpleNamespace(status=200, headers=_Headers())
+            response.clone = lambda: response
+            return response
+
+        main.caches = SimpleNamespace(default=FakeCache())
+        main.JsRequest = FakeJsRequest
+        main.asgi.fetch = asgi_fetch
+        main.observability.emit = lambda value, env=None: None
+        worker = main.Default()
+        worker.env = SimpleNamespace()
+
+        for method, path, cache in [
+            ("GET", "/examples/values", "miss"),
+            ("GET", "/layout-options/a", "bypass"),
+            ("POST", "/examples/values", "bypass"),
+        ]:
+            with self.subTest(method=method, path=path):
+                event = {"cache": "bypass"}
+                main.observability.event_from_worker_request = (
+                    lambda *args, event=event, **kwargs: event
+                )
+                request = SimpleNamespace(
+                    method=method,
+                    url=f"https://www.pythonbyexample.dev{path}",
+                    js_object=SimpleNamespace(),
+                )
+                asyncio.run(worker.fetch(request))
+                self.assertEqual(event["cache"], cache)
+                self.assertEqual(bridge_kwargs[-1].get("max_body_bytes"), 100_000)
+        self.assertEqual(len(bridge_kwargs), 3)
+
     def test_dynamic_response_reader_cancels_stream_above_output_cap(self):
         main = self.import_main()
         cancelled = []
