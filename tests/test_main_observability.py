@@ -177,7 +177,8 @@ class MainDefaultFetchTests(MainModuleHarness):
 
     def test_every_bridge_call_caps_the_request_body_at_the_submit_limit(self):
         # Covers the three asgi.fetch call sites: cached GET miss, uncacheable
-        # GET, and POST. Each must hand the bridge the pre-ASGI body cap.
+        # GET, and POST. Each must hand the bridge the same cap run_example
+        # enforces, or the friendly "too large" page becomes unreachable.
         main = self.import_main()
         bridge_kwargs = []
 
@@ -206,11 +207,14 @@ class MainDefaultFetchTests(MainModuleHarness):
         worker = main.Default()
         worker.env = SimpleNamespace()
 
-        for method, path, cache in [
-            ("GET", "/examples/values", "miss"),
-            ("GET", "/layout-options/a", "bypass"),
-            ("POST", "/examples/values", "bypass"),
-        ]:
+        for calls, (method, path, cache) in enumerate(
+            [
+                ("GET", "/examples/values", "miss"),
+                ("GET", "/layout-options/a", "bypass"),
+                ("POST", "/examples/values", "bypass"),
+            ],
+            start=1,
+        ):
             with self.subTest(method=method, path=path):
                 event = {"cache": "bypass"}
                 main.observability.event_from_worker_request = (
@@ -223,8 +227,10 @@ class MainDefaultFetchTests(MainModuleHarness):
                 )
                 asyncio.run(worker.fetch(request))
                 self.assertEqual(event["cache"], cache)
-                self.assertEqual(bridge_kwargs[-1].get("max_body_bytes"), 100_000)
-        self.assertEqual(len(bridge_kwargs), 3)
+                self.assertEqual(len(bridge_kwargs), calls)
+                self.assertEqual(
+                    bridge_kwargs[-1].get("max_body_bytes"), main.MAX_SUBMITTED_BODY_BYTES
+                )
 
     def test_dynamic_response_reader_cancels_stream_above_output_cap(self):
         main = self.import_main()

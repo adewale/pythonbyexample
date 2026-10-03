@@ -240,6 +240,26 @@ class WorkerAsgiBridgeScopeTests(unittest.TestCase):
         self.assertEqual(response.status, 413)
         self.assertFalse(ran["app"], "oversize body must be rejected before the app runs")
 
+    def test_fetch_forwards_body_cap_to_request_processing(self):
+        ran = {"app": False}
+
+        async def app(scope, receive, send):  # pragma: no cover - must not run
+            ran["app"] = True
+
+        async def start_application(_app):
+            pass
+
+        self.bridge._app_lifespans.clear()
+        self.bridge.start_application = start_application
+        req = self._fake_request(
+            url="https://x.dev/examples/values",
+            headers={"content-type": "text/plain"},
+            body_chunks=[b"toolong"],
+        )
+        response = asyncio.run(self.bridge.fetch(app, req, SimpleNamespace(), max_body_bytes=3))
+        self.assertEqual(response.status, 413)
+        self.assertFalse(ran["app"], "fetch must apply the cap before the app runs")
+
     def test_request_to_scope_accepts_state_without_request_globals_or_extra_scope(self):
         class FakeRequest(self.Request):
             method = "POST"
