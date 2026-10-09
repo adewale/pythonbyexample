@@ -10,9 +10,10 @@ Waivers are time-boxed: `expires` must be an ISO date in the future,
 and a waiver whose example has recovered to target is flagged as stale
 so the registry only ever describes live editorial debt.
 
-A waiver that expires within WAIVER_WARNING_DAYS prints a warning. The
-weekly scheduled workflow runs `--fail-within-days 30`, so an approaching
-expiry turns that run red a month before it would fail every pull request.
+A waiver that expires within WAIVER_WARNING_DAYS prints a warning in every
+CI run. `make check-waiver-expiry` (manual, not in CI) runs
+`--fail-within-days 30`, so an approaching expiry fails that command a month
+before it would fail every pull request.
 """
 from __future__ import annotations
 
@@ -84,7 +85,7 @@ def main(argv: list[str] | None = None) -> int:
         "--fail-within-days",
         type=int,
         default=None,
-        help="treat waivers expiring within N days as errors (the scheduled run uses 30)",
+        help="treat waivers expiring within N days as errors (make check-waiver-expiry uses 30)",
     )
     parser.add_argument("--as-of", help="evaluate expiry as of this ISO date instead of today (UTC)")
     args = parser.parse_args(argv)

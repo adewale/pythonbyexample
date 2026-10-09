@@ -290,7 +290,7 @@ class GateLogicCanFailTests(unittest.TestCase):
         self.assertIsNone(mod.expiry_warning(expires, today=datetime.date(2026, 12, 1)))
         self.assertIsNone(mod.expiry_warning("never", today=datetime.date(2026, 11, 1)))
 
-    def test_expiring_waiver_warns_on_prs_and_fails_the_scheduled_run(self):
+    def test_expiring_waiver_warns_on_prs_and_fails_the_expiry_gate(self):
         import datetime
 
         mod = _scripts_import("check_quality_scores")

@@ -228,6 +228,10 @@ JPEGs under `public/og/` with headless Chrome (set `CHROME_PATH` if needed).
 footgun, notes, program/cell, prose-duplication, inline-link, scoring,
 figure, journey, and example-graph gates.
 
+`make check-waiver-expiry` is a manual check, not run in CI: it fails while
+any quality waiver has 30 days or fewer left. `make quality-checks` (and so CI)
+only prints a warning in that window, then fails once the waiver has expired.
+
 `src/example_sources_data.py` is generated and committed so Cloudflare Workers can load examples in production. Do not edit it by hand.
 
 For a Python version migration, update `python_version` and `docs_base_url` in `src/example_sources/manifest.toml`, then run:
