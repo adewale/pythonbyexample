@@ -66,7 +66,7 @@ make check-generated
 
 ## Quality checks
 
-These scripts enforce the catalog-level rules from `docs/example-quality-rubric.md`. Run them together with `make quality-checks`.
+These scripts enforce the catalog-level rules from `docs/example-quality-rubric.md`. Run them together with `make quality-checks`. CI does not schedule a waiver-expiry run; before a release or once a month, run `make check-waiver-expiry`, which fails while any waiver has 30 days or fewer left.
 
 | Script | What it gates |
 | --- | --- |
@@ -79,7 +79,7 @@ These scripts enforce the catalog-level rules from `docs/example-quality-rubric.
 | `scripts/check_prose_duplication.py` | No verbatim repeated paragraphs, no cell prose copied from the intro, no duplicate note bullets. |
 | `scripts/check_inline_links.py` | Inline `[text](target)` links in prose resolve to real `/examples` or `/journeys` pages. |
 | `scripts/score_example_criteria.py` | Heuristic criterion scores per example; fails when a curated score exceeds the heuristic by more than the delta bound, so the score registry cannot inflate without the page changing. |
-| `scripts/check_quality_scores.py` | Curated scores meet the 9.0 target / 8.5 hard minimum, waivers carry future expiry dates and are dropped when stale, and the journey-section average stays above its floor. |
+| `scripts/check_quality_scores.py` | Curated scores meet the 9.0 target / 8.5 hard minimum, waivers carry future expiry dates (with a warning in their last 30 days) and are dropped when stale, and the journey-section average stays above its floor. |
 | `scripts/check_no_figure_rationales.py` | No-figure opt-outs carry a reason and an unexpired `review_after` date. |
 | `scripts/check_journey_outcomes.py` | Every journey section declares learner outcomes. |
 | `scripts/audit_example_graph.py --check` | The `see_also` graph has no broken targets, self-links, over-linked pages, or orphaned examples. |
@@ -97,7 +97,7 @@ The single source of truth for the registries is `docs/quality-registries.toml`.
 
 ## Secrets and deploy configuration
 
-Production deployment is manual through an authenticated Wrangler session with `make deploy`; public `workers.dev` and version preview URLs are disabled. Runtime Worker secrets (`TURNSTILE_SECRET_KEY`, `TURNSTILE_CLEARANCE_SECRET`, `PBE_SMOKE_BYPASS_SECRET`) are managed with `wrangler secret put`; see `docs/turnstile-runner-protection-spec.md`.
+Production deployment is manual through an authenticated Wrangler session with `make deploy`, which smoke-tests the deployed origin afterwards and fails if the smoke fails; public `workers.dev` and version preview URLs are disabled. Runtime Worker secrets (`TURNSTILE_SECRET_KEY`, `TURNSTILE_CLEARANCE_SECRET`, `PBE_SMOKE_BYPASS_SECRET`) are managed with `wrangler secret put`; see `docs/turnstile-runner-protection-spec.md`.
 
 Generated output is prevented from drifting before merge: install the local hooks with `scripts/install-git-hooks.sh`, and keep `main` protected so pull requests require the `verify` status check to pass against the current base. CI enforces the same `make check-generated` contract for contributors without local hooks.
 

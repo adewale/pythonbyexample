@@ -281,14 +281,12 @@ class AppTests(unittest.TestCase):
         html = render_example_page(get_example("hello-world"), output="hello world\n")
         self.assertIn("Hello World", html)
         self.assertIn("https://docs.python.org/", html)
-        css = (ROOT / "public" / "site.css").read_text()
         self.assertIn('rel="icon" href="/favicon.svg"', html)
         self.assertRegex(html, r'rel="stylesheet" href="/site\.[0-9a-f]{12}\.css"')
         self.assertRegex(html, r'type="module" src="/syntax-highlight\.[0-9a-f]{12}\.js"')
         self.assertRegex(html, r'type="module" src="/editor\.[0-9a-f]{12}\.js"')
         self.assertNotIn('href="/site.css"', html)
         self.assertNotIn('src="/syntax-highlight.js"', html)
-        self.assertIn('textarea { box-sizing: border-box; width: 100%; height: auto;', css)
         self.assertIn('class="language-python"', html)
         self.assertIn('print(&quot;hello world&quot;)', html)
         self.assertNotIn('class="tok-', html)
@@ -311,24 +309,11 @@ class AppTests(unittest.TestCase):
         self.assertIn('class="runner-panel output-panel"', html)
         self.assertIn('Run the complete example', html)
 
-    def test_ui_polish_principles_are_applied(self):
+    def test_home_cards_are_links_and_examples_use_the_shell(self):
+        # Rendered styling (press states, touch targets, contrast, balanced
+        # headings, antialiasing, transitions) is measured in a real browser by
+        # scripts/check_browser_layout.mjs, not by matching site.css text.
         html = render_example_page(get_example("hello-world"), output="hello world\n")
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn("-webkit-font-smoothing: antialiased", css)
-        self.assertIn("text-wrap: balance", css)
-        self.assertIn("font-variant-numeric: tabular-nums", css)
-        self.assertIn("transform: scale(0.96)", css)
-        self.assertIn("nav a { color: inherit; text-decoration: underline", css)
-        self.assertNotIn("nav a { min-height: 40px; display: inline-flex; align-items: center; border-radius", css)
-        self.assertNotIn("transition: all", css)
-        self.assertIn("min-height: 40px", css)
-        self.assertIn("--accent-action: #C83800", css)
-        self.assertIn("background: var(--accent-action)", css)
-        self.assertIn("box-shadow:", css)
-        self.assertIn("background: transparent", css)
-        self.assertIn("border-left: 2px solid var(--accent)", css)
-        self.assertIn("--space-6", css)
-        self.assertIn("runner-grid", css)
         home = render_home()
         self.assertIn('class="hero"', home)
         self.assertIn('<a class="card" href="/examples/hello-world">', home)
@@ -341,15 +326,12 @@ class AppTests(unittest.TestCase):
         self.assertNotIn('<script src="https://challenges.cloudflare.com/turnstile', page)
 
         protected = render_example_page(get_example("hello-world"), turnstile_site_key="site-key-123")
-        runner = (ROOT / "public" / "runner.js").read_text()
         self.assertIn('data-turnstile-sitekey="site-key-123"', protected)
         self.assertIn(ASSET_PATHS["RUNNER_JS"], protected)
         self.assertNotIn("<script nonce=", protected)
         self.assertNotIn("onclick=", protected)
-        self.assertIn("turnstile.render", runner)
-        self.assertIn("execution: 'execute'", runner)
-        self.assertNotIn("size: 'invisible'", runner)
-        self.assertIn("turnstile.remove", runner)
+        # The widget's Invisible execute mode and its removal after each
+        # challenge are exercised in scripts/check_browser_layout.mjs.
         self.assertNotIn('class="cf-turnstile"', protected)
 
         challenged = render_example_page(
@@ -374,13 +356,11 @@ class AppTests(unittest.TestCase):
         self.assertNotIn("nonce-", CONTENT_SECURITY_POLICY)
         self.assertNotIn("script-src 'unsafe-inline'", CONTENT_SECURITY_POLICY)
 
-    def test_cf_workers_design_system_and_playground_lessons(self):
+    def test_playground_markup_is_server_rendered_and_escaped(self):
+        # Runner behaviour (reset, stale-run ordering, 413 and network errors,
+        # sharing, editor accessible name) and output wrapping are exercised in
+        # scripts/check_browser_layout.mjs.
         html = render_example_page(get_example("hello-world"))
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn("#FF4801", css)
-        self.assertIn("#F5F1EB", css)
-        self.assertIn("#521000", css)
-        self.assertIn("#EBD5C1", css)
         self.assertNotIn("corner", html)
         self.assertNotIn('border-style: dashed', html)
         self.assertIn('class="playground-toolbar"', html)
@@ -389,18 +369,8 @@ class AppTests(unittest.TestCase):
         self.assertNotIn('data-copy', html)
         self.assertNotIn('data-share', html)
         self.assertIn('output-panel', html)
-        self.assertIn(".runner-panel", css)
-        self.assertIn(".runner-panel h3", css)
-        self.assertIn("text-underline-offset", css)
         self.assertIn('aria-live="polite"', html)
-        self.assertIn('min-height: 18rem', css)
-        self.assertIn('white-space: pre-wrap', css)
-        self.assertIn('overflow-wrap: anywhere', css)
-        self.assertNotIn('max-height: 18rem', css)
         self.assertIn('data-output-placeholder', html)
-        self.assertIn('.execution-time', css)
-        self.assertIn('min-height: 1.5rem', css)
-        self.assertIn('.cm-editor', css)
         self.assertIn('data-original-code="', html)
         self.assertIn(html_lib.escape(get_example("hello-world")["code"]), html)
         hostile_example = {**get_example("hello-world"), "code": 'print("</script><script>alert(1)</script>")\n'}
@@ -412,25 +382,9 @@ class AppTests(unittest.TestCase):
         self.assertNotIn("<script nonce=", html)
         self.assertIn('class="syntax-inline">print()</code>', html)
         self.assertNotIn("navigator.clipboard", html)
-
-        editor = (ROOT / "public" / "editor.js").read_text()
-        runner = (ROOT / "public" / "runner.js").read_text()
-        self.assertIn("EditorView.contentAttributes.of", editor)
-        self.assertIn("'aria-label': textarea.getAttribute('aria-label')", editor)
-        self.assertIn("textarea.dataset.originalCode", runner)
-        self.assertIn("window.pythonByExampleEditor?.setValue(value)", runner)
-        self.assertIn("fetch(form.action", runner)
-        self.assertIn("new URLSearchParams(formData)", runner)
-        self.assertIn("application/x-www-form-urlencoded", runner)
-        self.assertIn("response.status === 413", runner)
-        self.assertIn("Submitted code is too large", runner)
-        self.assertIn("catch (error)", runner)
-        # The 2026-07 share-link work reversed the early no-clipboard
-        # lesson for client scripts: runner.js may use the clipboard,
-        # but server markup still renders only the Run and Reset
-        # buttons, with share/copy affordances JS-injected.
+        # Server markup renders only the Run and Reset buttons; share and
+        # copy affordances are injected by JavaScript.
         self.assertEqual(html.count("<button"), 2)
-        self.assertIn("copyTextToClipboard", runner)
 
     def test_generated_drift_is_blocked_before_commit_and_merge(self):
         hook = (ROOT / ".githooks" / "pre-commit").read_text()
@@ -577,21 +531,6 @@ class AppTests(unittest.TestCase):
 
 
 class DarkModeAndAccessibilityTests(unittest.TestCase):
-    def test_css_defines_a_dark_palette(self):
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn("@media (prefers-color-scheme: dark)", css)
-        self.assertIn("color-scheme: dark", css)
-        dark_block = css.split("@media (prefers-color-scheme: dark)", 1)[1]
-        for token in ["--text:", "--muted:", "--page:", "--surface:", "--hairline:"]:
-            self.assertIn(token, dark_block)
-
-    def test_dark_mode_keeps_marginalia_figures_on_light_paper(self):
-        css = (ROOT / "public" / "site.css").read_text()
-        dark_block = css.split("@media (prefers-color-scheme: dark)", 1)[1]
-        self.assertIn("--figure-paper", css)
-        self.assertIn(".cell-banner figure svg", dark_block)
-        self.assertIn(".journey-section-figure svg", dark_block)
-
     def test_optional_highlighters_retain_readable_server_fallbacks(self):
         page = render_example_page(get_example("values"))
         self.assertIn('<pre><code class="language-python">', page)
@@ -603,52 +542,17 @@ class DarkModeAndAccessibilityTests(unittest.TestCase):
         for page in [render_home(), render_example_page(get_example("hello-world"))]:
             self.assertIn('<a class="skip-link" href="#main-content">Skip to main content</a>', page)
             self.assertIn('<main id="main-content">', page)
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn(".skip-link", css)
-        self.assertIn(".skip-link:focus", css)
 
 
 class DesignFoundationsTests(unittest.TestCase):
-    def test_body_type_respects_user_text_size(self):
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn("font: 100%/1.6", css)
-        self.assertNotIn("font: 16px/1.6", css)
-
-    def test_home_header_never_hides_the_nav_on_landing(self):
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertNotIn("header { opacity: 0", css)
-        self.assertIn("body:has(.hero) header::before", css)
-        self.assertIn("header-veil-emerge", css)
-        self.assertNotIn("@keyframes header-emerge", css)
-
-    def test_non_motion_accessibility_signals_have_fallbacks(self):
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn("@media (prefers-reduced-transparency: reduce)", css)
-        self.assertIn("@media (prefers-contrast: more)", css)
-        self.assertIn("backdrop-filter: none", css)
-
-    def test_cards_press_down_and_nav_links_have_touch_targets(self):
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn(".card:active { transform: translateY(0) scale(0.99); }", css)
-        self.assertIn(".nav-links a { padding: .55rem .9rem; margin-block: -.55rem;", css)
-
-    def test_terminal_colors_are_design_tokens(self):
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn("--terminal-bg: #0b1020", css)
-        self.assertIn("--terminal-ink: #f9fafb", css)
-        self.assertIn("background: var(--terminal-bg); color: var(--terminal-ink);", css)
-        about = (ROOT / "src" / "templates" / "about.html").read_text()
-        self.assertIn("var(--terminal-bg)", about)
-        self.assertIn("var(--terminal-ink)", about)
-
+    # Type size, landing header, non-motion accessibility fallbacks, press
+    # states, touch targets and terminal contrast are measured in a real
+    # browser by scripts/check_browser_layout.mjs.
     def test_search_exposes_combobox_semantics(self):
         home = render_home()
         self.assertIn('role="combobox"', home)
         self.assertIn('aria-expanded="false"', home)
         self.assertIn('role="listbox"', home)
-        js = (ROOT / "public" / "search.js").read_text()
-        self.assertIn("aria-expanded", js)
-        self.assertIn("'option'", js)
 
 
 class BannerTests(unittest.TestCase):
@@ -743,11 +647,6 @@ class SearchTests(unittest.TestCase):
         headers = (ROOT / "public" / "_headers").read_text()
         self.assertIn("/search.*.js", headers)
         self.assertIn("/search-index.*.json", headers)
-
-    def test_search_css_styles_light_and_dark(self):
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn(".site-search", css)
-        self.assertIn(".search-results", css)
 
 
 class SocialCardTests(unittest.TestCase):
@@ -934,15 +833,6 @@ class AboutPageTests(unittest.TestCase):
         self.assertIn("width: var(--space-6)", page)
         self.assertIn('class="cell-code-stack"', page)
 
-    def test_about_page_tokens_all_exist_in_the_stylesheet(self):
-        css_root = (ROOT / "public" / "site.css").read_text().split("\n", 1)[0]
-        template = (ROOT / "src" / "templates" / "about.html").read_text()
-        tokens = set(re.findall(r"var\((--[a-z0-9-]+)\)", template))
-        self.assertGreaterEqual(len(tokens), 21)
-        for token in sorted(tokens):
-            with self.subTest(token=token):
-                self.assertIn(f"{token}:", css_root)
-
     def test_every_page_links_about_in_the_nav(self):
         for page in [render_home(), render_example_page(get_example("hello-world"))]:
             self.assertIn('<a href="/about">About</a>', page)
@@ -1001,91 +891,18 @@ class PrivacyPageTests(unittest.TestCase):
         self.assertNotIn("search-index", page)
 
 
-class CopyButtonTests(unittest.TestCase):
-    def test_syntax_script_injects_copy_buttons_on_source_cells(self):
-        js = (ROOT / "public" / "syntax-highlight.js").read_text()
-        self.assertIn("'.cell-source'", js)
-        self.assertIn("copy-button", js)
-        self.assertIn("navigator.clipboard", js)
-        self.assertIn("execCommand('copy')", js)
-        self.assertIn("aria-label", js)
-
-    def test_copy_button_styles_use_design_tokens(self):
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn(".cell-source { position: relative; }", css)
-        self.assertIn(".copy-button", css)
-        self.assertIn(".copy-button.copied", css)
-        self.assertIn(".copy-button:active { transform: scale(0.96); }", css)
-
-    def test_copy_button_renders_lucide_glyphs_as_current_color_masks(self):
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn(".copy-icon", css)
-        self.assertIn("background: currentColor", css)
-        self.assertIn("rect x='9' y='9' width='13' height='13' rx='2'", css)
-        self.assertIn("polyline points='20 6 9 17 4 12'", css)
-        self.assertIn("M18 6 6 18M6 6l12 12", css)
-        self.assertIn("-webkit-mask", css)
-        self.assertIn("mask-image", css)
-        self.assertIn(".copy-button::before", css)
-        self.assertIn("copy-pop", css)
-        self.assertIn(
-            "@media (prefers-reduced-motion: no-preference) { .copy-button.copied .copy-icon",
-            css,
-        )
-
-    def test_copy_button_announces_status_through_hidden_live_text(self):
-        js = (ROOT / "public" / "syntax-highlight.js").read_text()
-        self.assertIn("copy-status", js)
-        self.assertIn("aria-live", js)
-        self.assertIn("'copied', 'failed'", js)
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn(".copy-status { position: absolute; left: -9999px; }", css)
-
-
 class KeyboardNavTests(unittest.TestCase):
-    def test_runner_script_navigates_with_arrow_keys(self):
-        js = (ROOT / "public" / "runner.js").read_text()
-        self.assertIn("ArrowLeft", js)
-        self.assertIn("ArrowRight", js)
-        self.assertIn('.example-nav a[rel="prev"]', js)
-        self.assertIn('.example-nav a[rel="next"]', js)
-
-    def test_arrow_navigation_skips_editable_and_modified_keys(self):
-        js = (ROOT / "public" / "runner.js").read_text()
-        self.assertIn("'input, textarea, select, button, .cm-editor, [contenteditable=\"true\"]'", js)
-        self.assertIn("event.metaKey", js)
-        self.assertIn("event.defaultPrevented", js)
-
-    def test_arrow_navigation_never_discards_edited_code(self):
-        js = (ROOT / "public" / "runner.js").read_text()
-        self.assertIn("codeField.value !== (codeField.dataset.originalCode ?? codeField.defaultValue)", js)
-
+    # Arrow navigation, its guards (edited code, modifier keys, editable and
+    # button targets, catalog edges), sharing and the copy button are
+    # exercised in scripts/check_browser_layout.mjs.
     def test_nav_links_advertise_the_keyboard_shortcut(self):
         page = render_example_page(get_example("values"))
         self.assertIn('title="Previous example (left arrow key)"', page)
         self.assertIn('title="Next example (right arrow key)"', page)
 
-    def test_share_button_copies_a_code_fragment_link(self):
-        js = (ROOT / "public" / "runner.js").read_text()
-        self.assertIn("Copy link", js)
-        self.assertIn("btoa(unescape(encodeURIComponent(code)))", js)
-        self.assertIn("code === originalCode ? pageUrl : pageUrl + '#code='", js)
-        self.assertIn(".playground-toolbar", js)
-        self.assertIn("aria-live", js)
-
-    def test_shared_link_recipients_see_a_status_notice(self):
-        js = (ROOT / "public" / "runner.js").read_text()
-        self.assertIn("This link included edited code. Press Run to execute it.", js)
-
     def test_runner_module_loads_async_ahead_of_cdn_modules(self):
         page = render_example_page(get_example("values"))
         self.assertRegex(page, r'<script type="module" async src="/runner\.[0-9a-f]{12}\.js"></script>')
-
-    def test_share_button_sits_apart_from_the_run_reset_pair(self):
-        js = (ROOT / "public" / "runner.js").read_text()
-        self.assertIn("'tool-button share-button'", js)
-        css = (ROOT / "public" / "site.css").read_text()
-        self.assertIn(".share-button { margin-left: auto; }", css)
 
     def test_arrow_navigation_guards_missing_neighbors_at_catalog_edges(self):
         examples = list_examples()
@@ -1095,7 +912,6 @@ class KeyboardNavTests(unittest.TestCase):
         self.assertIn('<a class="text-link" rel="next"', first_page)
         self.assertIn('<a class="text-link" rel="prev"', last_page)
         self.assertNotIn('<a class="text-link" rel="next"', last_page)
-        self.assertIn("if (link) window.location.href = link.href;", (ROOT / "public" / "runner.js").read_text())
 
 
 if __name__ == "__main__":

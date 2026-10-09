@@ -226,6 +226,22 @@ try {
       busy: form.hasAttribute('aria-busy'),
     };
   })()`);
+  const networkFailure = await evaluateValue(`(async () => {
+    const form = document.querySelector('form.runner-editor');
+    const originalFetch = window.fetch;
+    window.fetch = () => Promise.reject(new TypeError('network down'));
+    window.pythonByExampleEditor.setValue('print("offline")');
+    form.requestSubmit();
+    for (let i = 0; i < 100 && form.hasAttribute('aria-busy'); i++) {
+      await new Promise(resolve => setTimeout(resolve, 10));
+    }
+    window.fetch = originalFetch;
+    return {
+      output: document.querySelector('.output-panel code')?.textContent,
+      busy: form.hasAttribute('aria-busy'),
+      runDisabled: form.querySelector('button[type="submit"]').disabled,
+    };
+  })()`);
   const share = await evaluateValue(`(async () => {
     const writes = [];
     window.__pbeClipboardWrites = writes;
@@ -242,7 +258,14 @@ try {
     await new Promise(resolve => requestAnimationFrame(resolve));
     document.querySelector('.share-button').click();
     await new Promise(resolve => setTimeout(resolve, 50));
-    return { code, url: writes.at(-1) || '', editorHeight: document.querySelector('.cm-editor').getBoundingClientRect().height };
+    const url = writes.at(-1) || '';
+    const editorHeight = document.querySelector('.cm-editor').getBoundingClientRect().height;
+    const textarea = document.getElementById('code-editor');
+    window.pythonByExampleEditor.setValue(textarea.dataset.originalCode ?? textarea.defaultValue);
+    await new Promise(resolve => requestAnimationFrame(resolve));
+    document.querySelector('.share-button').click();
+    await new Promise(resolve => setTimeout(resolve, 50));
+    return { code, url, editorHeight, uneditedUrl: writes.at(-1) || '', pageUrl: location.href.split('#')[0] };
   })()`);
 
   const sharedReloadUrl = new URL(share.url);
@@ -266,20 +289,66 @@ try {
     const source = document.querySelector('.cell-source');
     const expected = source.querySelector('pre').textContent;
     const button = source.querySelector('.copy-button');
+    const icon = button.querySelector('.copy-icon');
+    const statusNode = button.querySelector('.copy-status');
+    const mask = () => getComputedStyle(icon).webkitMaskImage || getComputedStyle(icon).maskImage;
+    const idleMask = mask();
+    const sourceRect = source.getBoundingClientRect();
+    const buttonRect = button.getBoundingClientRect();
     button.click();
     await new Promise(resolve => setTimeout(resolve, 50));
-    return { expected, copied: writes.at(-1) || '', state: button.className, status: button.querySelector('.copy-status')?.textContent };
+    const copiedState = {
+      copied: writes.at(-1) || '',
+      state: button.className,
+      status: statusNode?.textContent,
+      statusRight: statusNode?.getBoundingClientRect().right,
+      liveRegion: button.getAttribute('aria-live'),
+      copiedMask: mask(),
+    };
+    // Without the async Clipboard API the button must fall back to a selected
+    // off-screen textarea and execCommand('copy').
+    const fallbackWrites = [];
+    try {
+      Object.defineProperty(navigator, 'clipboard', { configurable: true, value: undefined });
+    } catch (_) {}
+    document.execCommand = command => {
+      if (command !== 'copy') return false;
+      fallbackWrites.push([...document.querySelectorAll('textarea[readonly]')].at(-1)?.value ?? '');
+      return true;
+    };
+    button.click();
+    await new Promise(resolve => setTimeout(resolve, 50));
+    return {
+      expected,
+      ...copiedState,
+      idleMask,
+      iconPaint: [getComputedStyle(icon).backgroundColor, getComputedStyle(icon).color],
+      // Anchored to its own cell's top-right corner, not to a distant ancestor.
+      buttonAnchored: Math.abs(buttonRect.right - sourceRect.right) <= 1 && Math.abs(buttonRect.top - sourceRect.top) <= 16,
+      fallbackCopied: fallbackWrites.at(-1) ?? '',
+      fallbackState: button.className,
+    };
   })()`);
   const arrow = await evaluateValue(`(async () => {
     const textarea = document.getElementById('code-editor');
-    const modifiedPath = location.pathname;
+    // Count navigation attempts with the Navigation API and cancel them, so a
+    // guard that fails is seen even though the page has not unloaded yet.
+    let attempts = 0;
+    const cancel = event => { attempts += 1; event.preventDefault(); };
+    navigation.addEventListener('navigate', cancel);
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     await new Promise(resolve => setTimeout(resolve, 50));
-    const blockedModified = location.pathname === modifiedPath;
+    const blockedModified = attempts === 0;
+    const attemptsWhileEdited = attempts;
     window.pythonByExampleEditor.setValue(textarea.dataset.originalCode || textarea.defaultValue);
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', metaKey: true, bubbles: true }));
+    document.querySelector('button[type="submit"]').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await new Promise(resolve => setTimeout(resolve, 50));
+    navigation.removeEventListener('navigate', cancel);
+    const blockedModifierAndButton = attempts === attemptsWhileEdited;
     const next = document.querySelector('.example-nav a[rel="next"]')?.href || '';
     document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
-    return { blockedModified, next };
+    return { blockedModified, blockedModifierAndButton, next };
   })()`);
   await waitFor(`location.href === ${JSON.stringify(arrow.next)} && !!window.pythonByExampleEditor && !!document.querySelector('.cm-content')`, 'clean arrow navigation');
   const editableBlocked = await evaluateValue(`(async () => {
@@ -287,6 +356,23 @@ try {
     document.querySelector('.cm-content').dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
     await new Promise(resolve => setTimeout(resolve, 50));
     return location.pathname === path;
+  })()`);
+  // ArrowLeft walks back: next -> the target page -> the first example, where
+  // there is no previous link and the key must do nothing (and throw nothing).
+  const arrowBack = [];
+  for (let step = 0; step < 2; step++) {
+    const expected = await evaluateValue(`document.querySelector('.example-nav a[rel="prev"]')?.href || ''`);
+    await evaluateValue(`document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))`);
+    await waitFor(`location.href === ${JSON.stringify(expected)} && document.readyState === 'complete' && !!document.querySelector('.example-nav')`, `ArrowLeft navigation ${step + 1}`);
+    arrowBack.push(expected);
+  }
+  const catalogEdge = await evaluateValue(`(async () => {
+    const errors = [];
+    window.addEventListener('error', event => errors.push(event.message));
+    const path = location.pathname;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+    await new Promise(resolve => setTimeout(resolve, 100));
+    return { hasPrev: !!document.querySelector('.example-nav a[rel="prev"]'), stayed: location.pathname === path, errors };
   })()`);
 
   async function searchWidthAt(label, width, height, mobile) {
@@ -321,6 +407,26 @@ try {
     window.fetch = originalFetch;
     return state;
   })()`);
+  await client.send('Page.navigate', { url: `${new URL(target).origin}/?browser_search_ok=${Date.now()}` });
+  await waitFor("document.readyState === 'complete' && !!document.getElementById('site-search-input')", 'search success page');
+  const searchSuccess = await evaluateValue(`(async () => {
+    const input = document.getElementById('site-search-input');
+    input.focus();
+    input.value = 'decorator';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    for (let i = 0; i < 100 && input.getAttribute('aria-expanded') !== 'true'; i++) {
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+    const listbox = document.getElementById(input.getAttribute('aria-controls'));
+    const options = [...(listbox?.querySelectorAll('[role="option"]') || [])];
+    return {
+      expanded: input.getAttribute('aria-expanded'),
+      listboxRole: listbox?.getAttribute('role'),
+      listboxHidden: listbox?.hidden,
+      options: options.length,
+      firstOption: options[0]?.textContent?.trim().slice(0, 60),
+    };
+  })()`);
   await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 1800, deviceScaleFactor: 2, mobile: true });
 
   // Theme changes are a live OS preference, not a reload-only setting.
@@ -330,9 +436,39 @@ try {
   });
   await client.send('Page.navigate', { url: `${target}?browser_theme=light` });
   await waitFor("document.readyState === 'complete' && !!document.querySelector('.shiki-block') && !!document.querySelector('.cm-editor')", 'light theme page');
+  // Colour helpers shared by the light and dark measurements.
+  await evaluateValue(`window.__pbeColors = () => {
+    const parse = color => color.match(/[\\d.]+/g).slice(0, 3).map(Number);
+    const luminance = color => {
+      const channels = parse(color).map(value => {
+        const normalized = value / 255;
+        return normalized <= .04045 ? normalized / 12.92 : ((normalized + .055) / 1.055) ** 2.4;
+      });
+      return .2126 * channels[0] + .7152 * channels[1] + .0722 * channels[2];
+    };
+    const contrast = (fg, bg) => {
+      const a = luminance(fg);
+      const b = luminance(bg);
+      return (Math.max(a, b) + .05) / (Math.min(a, b) + .05);
+    };
+    const body = getComputedStyle(document.body);
+    const run = getComputedStyle(document.querySelector('button[type="submit"]'));
+    const terminal = getComputedStyle(document.querySelector('.output-panel pre'));
+    const figure = document.querySelector('.cell-banner figure svg');
+    return {
+      pageBackground: body.backgroundColor,
+      pageLuminance: luminance(body.backgroundColor),
+      textContrast: contrast(body.color, body.backgroundColor),
+      runContrast: contrast(run.color, run.backgroundColor),
+      terminalContrast: contrast(terminal.color, terminal.backgroundColor),
+      figurePaperLuminance: figure ? luminance(getComputedStyle(figure).backgroundColor) : null,
+      figurePaperAlpha: figure ? getComputedStyle(figure).backgroundColor : null,
+    };
+  }; true`);
   const lightTheme = await evaluateValue(`({
     shikiColor: getComputedStyle(document.querySelector('.shiki-block span')).color,
     editorColors: [...new Set([...document.querySelectorAll('.cm-line span')].map(node => getComputedStyle(node).color))].sort(),
+    ...window.__pbeColors(),
   })`);
   await client.send('Emulation.setEmulatedMedia', {
     media: 'screen',
@@ -359,6 +495,7 @@ try {
       editorColors: [...new Set([...document.querySelectorAll('.cm-line span')].map(node => getComputedStyle(node).color))].sort(),
       runContrast: (Math.max(a, b) + .05) / (Math.min(a, b) + .05),
       editorOutlineWidth: editorStyle.outlineWidth,
+      ...window.__pbeColors(),
     };
   })()`);
 
@@ -372,10 +509,17 @@ try {
   const offlineUrl = `${target}#code=${Buffer.from(offlineCode, 'utf8').toString('base64')}`;
   await client.send('Page.navigate', { url: offlineUrl });
   await waitFor(`!!document.querySelector('.share-button') && !!document.querySelector('.copy-button') && document.getElementById('code-editor')?.value === ${JSON.stringify(offlineCode)}`, 'runner controls while CDN is pending');
-  const offlineRunner = await evaluateValue(`({
-    editorLoaded: !!window.pythonByExampleEditor,
-    fallbackHeight: document.getElementById('code-editor').getBoundingClientRect().height,
-  })`);
+  const offlineRunner = await evaluateValue(`(() => {
+    const textarea = document.getElementById('code-editor');
+    const panel = textarea.parentElement;
+    const panelStyle = getComputedStyle(panel);
+    const contentRight = panel.getBoundingClientRect().right - Number.parseFloat(panelStyle.paddingRight) - Number.parseFloat(panelStyle.borderRightWidth);
+    return {
+      editorLoaded: !!window.pythonByExampleEditor,
+      fallbackHeight: textarea.getBoundingClientRect().height,
+      fallbackOverflow: textarea.getBoundingClientRect().right - contentRight,
+    };
+  })()`);
   removePauseListener();
   await client.send('Fetch.disable');
 
@@ -412,6 +556,7 @@ try {
     let scriptAttempts = 0;
     let renderAction = '';
     let widgetOptions = null;
+    let removes = 0;
     document.head.appendChild = node => {
       if (node.tagName === 'SCRIPT' && node.src.includes('challenges.cloudflare.com/turnstile')) {
         scriptAttempts += 1;
@@ -423,7 +568,7 @@ try {
           window.turnstile = {
             render: (_box, options) => { widgetOptions = options; renderAction = options.action; return 7; },
             execute: () => queueMicrotask(() => widgetOptions.callback('retry-token')),
-            remove: () => {},
+            remove: () => { removes += 1; },
             reset: () => {},
           };
           node.onload?.(new Event('load'));
@@ -460,7 +605,13 @@ try {
     const finalOutput = output();
     document.head.appendChild = nativeAppend;
     window.fetch = nativeFetch;
-    return { scriptAttempts, fetchCount, renderAction, submittedToken, firstFailure, finalOutput };
+    return {
+      scriptAttempts, fetchCount, renderAction, submittedToken, firstFailure, finalOutput,
+      renderExecution: widgetOptions?.execution,
+      renderHasSize: !!widgetOptions && 'size' in widgetOptions,
+      removes,
+      challengeHidden: document.querySelector('[data-turnstile-sitekey]').hidden,
+    };
   })()`);
 
   // A server that keeps rejecting tokens (wrong secret, hostname, or action)
@@ -514,6 +665,135 @@ try {
     return { firstRun, secondRun };
   })()`);
 
+  // Rendered-style contracts. Unit tests used to assert literal site.css text;
+  // these measure what the browser computes for the same intentions instead.
+  const origin = new URL(target).origin;
+  await client.send('Emulation.setEmulatedMedia', { media: 'screen', features: [{ name: 'prefers-color-scheme', value: 'light' }] });
+  await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 1800, deviceScaleFactor: 2, mobile: true });
+  await client.send('Page.navigate', { url: `${target}?browser_styles=${Date.now()}` });
+  await waitFor("document.readyState === 'complete' && !!window.pythonByExampleEditor && !!document.querySelector('.copy-button') && !!document.querySelector('.share-button')", 'rendered-style page');
+  // Headless pages are not focused by default, so :focus never matches.
+  await client.send('Emulation.setFocusEmulationEnabled', { enabled: true });
+  const rendered = await evaluateValue(`(async () => {
+    const rect = element => element.getBoundingClientRect();
+    const toolbar = rect(document.querySelector('.playground-toolbar'));
+    const run = rect(document.querySelector('button[type="submit"]'));
+    const reset = rect(document.querySelector('[data-reset]'));
+    const share = rect(document.querySelector('.share-button'));
+    const skip = document.querySelector('.skip-link');
+    const skipBefore = rect(skip).right;
+    skip.focus();
+    const skipFocused = rect(skip);
+    skip.blur();
+    const allTransitions = [...document.querySelectorAll('*')].filter(element => {
+      const style = getComputedStyle(element);
+      return style.transitionProperty.split(',').some(value => value.trim() === 'all')
+        && style.transitionDuration.split(',').some(value => Number.parseFloat(value) > 0);
+    }).map(element => element.tagName.toLowerCase() + (element.className ? '.' + String(element.className).split(' ')[0] : ''));
+    const output = document.querySelector('.output-panel code');
+    const pre = document.querySelector('.output-panel pre');
+    const panel = document.querySelector('.output-panel');
+    const executionTime = document.querySelector('.execution-time');
+    const panelRight = rect(panel).right;
+    output.textContent = 'x'.repeat(600);
+    const text = document.createRange();
+    text.selectNodeContents(output);
+    const wide = {
+      textPastPanel: text.getBoundingClientRect().right - panelRight,
+      pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+    const oneLinePanelHeight = rect(panel).height;
+    output.textContent = Array.from({ length: 60 }, (_, index) => 'line ' + index).join('\\n');
+    const tall = { panelHeight: rect(panel).height, preClipped: pre.scrollHeight - pre.clientHeight };
+    return {
+      fontSmoothing: getComputedStyle(document.body).webkitFontSmoothing,
+      headingWrap: getComputedStyle(document.querySelector('h1')).textWrapStyle || getComputedStyle(document.querySelector('h1')).textWrap,
+      executionNumerals: executionTime ? getComputedStyle(executionTime).fontVariantNumeric : null,
+      navUnderline: getComputedStyle(document.querySelector('nav a')).textDecorationLine,
+      navTargetHeights: [...document.querySelectorAll('.nav-links a')].map(link => rect(link).height),
+      buttonHeights: [run.height, reset.height, share.height],
+      shareGap: share.left - reset.right,
+      shareToToolbarEnd: Math.abs(toolbar.right - share.right),
+      skipBefore,
+      skipFocused: { left: skipFocused.left, top: skipFocused.top, width: skipFocused.width },
+      allTransitions,
+      wide,
+      oneLinePanelHeight,
+      tall,
+    };
+  })()`);
+
+  // Pressed states: force :active through DevTools rather than trusting CSS text.
+  await client.send('DOM.enable');
+  await client.send('CSS.enable');
+  async function forcedActiveTransform(selector) {
+    const { root } = await client.send('DOM.getDocument', { depth: 0 });
+    const { nodeId } = await client.send('DOM.querySelector', { nodeId: root.nodeId, selector });
+    if (!nodeId) return `missing ${selector}`;
+    await client.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: ['active'] });
+    await sleep(400); // let the 150ms transform transition finish
+    const transform = await evaluateValue(`getComputedStyle(document.querySelector(${JSON.stringify(selector)})).transform`);
+    await client.send('CSS.forcePseudoState', { nodeId, forcedPseudoClasses: [] });
+    return transform;
+  }
+  const scaleOf = transform => (/^matrix\(([-\d.]+)/.exec(transform || '') || [])[1];
+  const pressed = {};
+  for (const selector of ['button[type="submit"]', '.share-button', '.copy-button']) {
+    pressed[selector] = await forcedActiveTransform(selector);
+  }
+
+  // Body text follows the reader's browser font size instead of a fixed 16px.
+  await client.send('Page.setFontSizes', { fontSizes: { standard: 20, fixed: 16 } });
+  await client.send('Page.navigate', { url: `${target}?browser_font_size=${Date.now()}` });
+  await waitFor("document.readyState === 'complete'", 'font-size page');
+  const userFontSize = await evaluateValue(`getComputedStyle(document.body).fontSize`);
+  await client.send('Page.setFontSizes', { fontSizes: { standard: 16, fixed: 13 } });
+
+  // Home page: the nav is visible on landing, cards press down, and the
+  // translucent header has solid fallbacks for two non-motion preferences.
+  await client.send('Page.navigate', { url: `${origin}/?browser_home_styles=${Date.now()}` });
+  await waitFor("document.readyState === 'complete' && !!document.querySelector('.card')", 'home style page');
+  const home = await evaluateValue(`(() => {
+    const header = document.querySelector('header');
+    const nav = document.querySelector('.nav-links');
+    const navRect = nav.getBoundingClientRect();
+    return {
+      headerOpacity: getComputedStyle(header).opacity,
+      navVisible: getComputedStyle(nav).visibility === 'visible' && getComputedStyle(nav).opacity === '1' && navRect.height > 0 && navRect.top >= 0,
+      headerBackdrop: getComputedStyle(header).backdropFilter,
+    };
+  })()`);
+  pressed['.card'] = await forcedActiveTransform('.card');
+  const headerUnder = async (name, value) => {
+    await client.send('Emulation.setEmulatedMedia', { media: 'screen', features: [{ name: 'prefers-color-scheme', value: 'light' }, { name, value }] });
+    await sleep(400); // nav colours transition over 160ms
+    return evaluateValue(`(() => {
+      const header = getComputedStyle(document.querySelector('header'));
+      return {
+        matches: matchMedia(${JSON.stringify(`(${name}: ${value})`)}).matches,
+        backdrop: header.backdropFilter,
+        background: header.backgroundColor,
+        navColor: getComputedStyle(document.querySelector('.nav-links a')).color,
+        textColor: getComputedStyle(document.body).color,
+      };
+    })()`);
+  };
+  const reducedTransparency = await headerUnder('prefers-reduced-transparency', 'reduce');
+  const moreContrast = await headerUnder('prefers-contrast', 'more');
+  await client.send('Emulation.setEmulatedMedia', { media: 'screen', features: [{ name: 'prefers-color-scheme', value: 'light' }] });
+
+  // The About page renders the design tokens live; every token it uses must exist.
+  await client.send('Page.navigate', { url: `${origin}/about?browser_tokens=${Date.now()}` });
+  await waitFor("document.readyState === 'complete' && !!document.querySelector('.token-grid')", 'about tokens page');
+  const aboutTokens = await evaluateValue(`(() => {
+    const html = document.documentElement.outerHTML;
+    const used = [...new Set([...html.matchAll(/var\\((--[a-z0-9-]+)\\)/g)].map(match => match[1]))];
+    const definedInline = new Set([...html.matchAll(/(--[a-z0-9-]+)\\s*:/g)].map(match => match[1]));
+    const root = getComputedStyle(document.documentElement);
+    const unresolved = used.filter(token => !definedInline.has(token) && !root.getPropertyValue(token).trim());
+    return { used: used.length, unresolved };
+  })()`);
+
   const failures = [];
   if (interaction.result.value?.ariaLabel !== 'Editable Python example code') {
     failures.push('CodeMirror editor is missing its accessible name');
@@ -555,6 +835,50 @@ try {
   if (!fragmentBound.unchanged || !fragmentBound.notice?.includes('invalid or too large')) failures.push('Oversized shared-code fragment was decoded or not announced');
   if (turnstileRetry.scriptAttempts !== 2 || !turnstileRetry.firstFailure.includes('press Run to retry') || turnstileRetry.finalOutput !== 'retry succeeded') failures.push('Transient Turnstile CDN failure was cached instead of retried');
   if (turnstileRetry.renderAction !== 'run-example' || turnstileRetry.submittedToken !== 'retry-token') failures.push('Turnstile browser action/token contract failed');
+  if (turnstileRetry.renderExecution !== 'execute' || turnstileRetry.renderHasSize) failures.push(`Turnstile widget is not rendered in Invisible execute mode (execution=${turnstileRetry.renderExecution}, size set=${turnstileRetry.renderHasSize})`);
+  if (turnstileRetry.removes < 1 || !turnstileRetry.challengeHidden) failures.push('Turnstile widget was not removed and hidden after the challenge');
+  if (networkFailure.output !== 'Run failed: network down' || networkFailure.busy || networkFailure.runDisabled) failures.push(`Network failure did not end the run with a message (${JSON.stringify(networkFailure)})`);
+  if (!share.uneditedUrl || share.uneditedUrl.includes('#code=') || share.uneditedUrl !== share.pageUrl) failures.push(`Copy link for unedited code should be the plain page URL (${share.uneditedUrl})`);
+  if (sourceCopy.fallbackCopied !== sourceCopy.expected || !sourceCopy.fallbackState.includes('copied')) failures.push('Source copy did not fall back to execCommand when the Clipboard API is unavailable');
+  if (!sourceCopy.buttonAnchored) failures.push('Copy button is not anchored to its source cell');
+  if (!(sourceCopy.statusRight <= 0) || sourceCopy.liveRegion !== 'polite') failures.push('Copy status is not an off-screen polite live announcement');
+  if (sourceCopy.idleMask === 'none' || sourceCopy.copiedMask === sourceCopy.idleMask) failures.push('Copy icon is not a mask glyph that changes when copied');
+  if (sourceCopy.iconPaint[0] !== sourceCopy.iconPaint[1]) failures.push('Copy icon glyph is not painted in currentColor');
+  if (!arrow.blockedModifierAndButton) failures.push('Arrow navigation fired with a modifier key or from a focused button');
+  if (arrowBack.length !== 2 || !arrowBack.every(Boolean)) failures.push('ArrowLeft did not walk back through previous examples');
+  if (catalogEdge.hasPrev || !catalogEdge.stayed || catalogEdge.errors.length) failures.push(`ArrowLeft at the first example was not a no-op (${JSON.stringify(catalogEdge)})`);
+  if (searchSuccess.expanded !== 'true' || searchSuccess.listboxRole !== 'listbox' || searchSuccess.listboxHidden || searchSuccess.options < 1) failures.push(`Search results do not expose combobox/listbox/option semantics (${JSON.stringify(searchSuccess)})`);
+  if (Math.abs(darkTheme.pageLuminance - lightTheme.pageLuminance) < 0.5) failures.push('Page background did not switch between light and dark palettes');
+  for (const [label, theme] of [['light', lightTheme], ['dark', darkTheme]]) {
+    if (theme.textContrast < 4.5) failures.push(`${label} body text contrast is ${theme.textContrast.toFixed(2)}:1`);
+    if (theme.terminalContrast < 7) failures.push(`${label} output terminal contrast is ${theme.terminalContrast.toFixed(2)}:1`);
+  }
+  if (lightTheme.runContrast < 4.5) failures.push(`Light Run-button contrast is ${lightTheme.runContrast.toFixed(2)}:1`);
+  if (!(darkTheme.figurePaperLuminance > 0.7)) failures.push(`Dark mode does not keep marginalia figures on light paper (${darkTheme.figurePaperAlpha})`);
+  if (offlineRunner.fallbackOverflow > 0.5) failures.push(`Fallback textarea overflows its panel by ${offlineRunner.fallbackOverflow.toFixed(1)}px`);
+  if (rendered.fontSmoothing !== 'antialiased') failures.push('Body text is not antialiased');
+  if (!String(rendered.headingWrap).includes('balance')) failures.push(`Headings do not balance their lines (${rendered.headingWrap})`);
+  if (rendered.executionNumerals !== 'tabular-nums') failures.push('Execution time does not use tabular numerals');
+  if (!rendered.navUnderline.includes('underline')) failures.push('Nav links are not underlined');
+  if (!rendered.navTargetHeights.length || rendered.navTargetHeights.some(height => height < 40)) failures.push(`Nav link touch targets are under 40px (${rendered.navTargetHeights})`);
+  if (rendered.buttonHeights.some(height => height < 40)) failures.push(`Runner buttons are under 40px tall (${rendered.buttonHeights})`);
+  if (rendered.shareGap < 16 || rendered.shareToToolbarEnd > 1) failures.push(`Share button does not sit apart at the end of the toolbar (gap ${rendered.shareGap}px, ${rendered.shareToToolbarEnd}px from the end)`);
+  if (rendered.skipBefore > 0) failures.push('Skip link is visible before it receives focus');
+  if (rendered.skipFocused.left < 0 || rendered.skipFocused.top < 0 || rendered.skipFocused.width <= 0) failures.push('Skip link does not appear on screen when focused');
+  if (rendered.allTransitions.length) failures.push(`Elements animate "transition: all" (${rendered.allTransitions.slice(0, 5)})`);
+  if (rendered.wide.textPastPanel > 1 || rendered.wide.pageOverflow > 1) failures.push(`Long output overflows the output panel instead of wrapping (${JSON.stringify(rendered.wide)})`);
+  if (rendered.tall.panelHeight <= rendered.oneLinePanelHeight || rendered.tall.preClipped > 1) failures.push(`Tall output is clipped instead of growing the panel (${JSON.stringify(rendered.tall)})`);
+  for (const [selector, expected] of [['button[type="submit"]', '0.96'], ['.share-button', '0.96'], ['.copy-button', '0.96'], ['.card', '0.99']]) {
+    if (scaleOf(pressed[selector]) !== expected) failures.push(`${selector} does not press down to scale(${expected}) when active (${pressed[selector]})`);
+  }
+  if (userFontSize !== '20px') failures.push(`Body text ignores the reader's browser font size (${userFontSize} at a 20px default)`);
+  if (home.headerOpacity !== '1' || !home.navVisible) failures.push('Home header hides the nav on landing');
+  for (const [label, state] of [['prefers-reduced-transparency', reducedTransparency], ['prefers-contrast: more', moreContrast]]) {
+    if (!state.matches) failures.push(`${label} could not be emulated`);
+    if (state.backdrop !== 'none' || !/^rgb\(/.test(state.background)) failures.push(`${label}: header stays translucent (${state.backdrop}, ${state.background})`);
+  }
+  if (moreContrast.navColor !== moreContrast.textColor) failures.push('prefers-contrast: more does not raise nav links to full text colour');
+  if (aboutTokens.used < 21 || aboutTokens.unresolved.length) failures.push(`About page uses undefined design tokens (${aboutTokens.unresolved}; ${aboutTokens.used} used)`);
   const { firstRun: rejectedRun, secondRun: rejectedRetry } = turnstileRejected;
   if (rejectedRun.fetchCount !== 2 || rejectedRun.solves !== 1) failures.push(`Rejected Turnstile token re-challenged in a loop (${rejectedRun.fetchCount} POSTs, ${rejectedRun.solves} solves for one Run)`);
   if (!rejectedRun.output.includes('verification failed') || rejectedRun.busy) failures.push('Rejected Turnstile token did not end the run with the server message');
@@ -576,6 +900,17 @@ try {
     turnstileRetry,
     turnstileRejected,
     heldCdnRequests,
+    networkFailure,
+    arrowBack,
+    catalogEdge,
+    searchSuccess,
+    rendered,
+    pressed,
+    userFontSize,
+    home,
+    reducedTransparency,
+    moreContrast,
+    aboutTokens,
   }, null, 2));
   client.close();
   if (failures.length) {
