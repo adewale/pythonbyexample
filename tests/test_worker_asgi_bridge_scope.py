@@ -1,14 +1,11 @@
 import asyncio
 import importlib
-import pathlib
 import sys
 import types
 import unittest
 from types import SimpleNamespace
 from typing import ClassVar
 from urllib.parse import urlparse
-
-ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
 class WorkerAsgiBridgeScopeTests(unittest.TestCase):
@@ -243,6 +240,26 @@ class WorkerAsgiBridgeScopeTests(unittest.TestCase):
         self.assertEqual(response.status, 413)
         self.assertFalse(ran["app"], "oversize body must be rejected before the app runs")
 
+    def test_fetch_forwards_body_cap_to_request_processing(self):
+        ran = {"app": False}
+
+        async def app(scope, receive, send):  # pragma: no cover - must not run
+            ran["app"] = True
+
+        async def start_application(_app):
+            pass
+
+        self.bridge._app_lifespans.clear()
+        self.bridge.start_application = start_application
+        req = self._fake_request(
+            url="https://x.dev/examples/values",
+            headers={"content-type": "text/plain"},
+            body_chunks=[b"toolong"],
+        )
+        response = asyncio.run(self.bridge.fetch(app, req, SimpleNamespace(), max_body_bytes=3))
+        self.assertEqual(response.status, 413)
+        self.assertFalse(ran["app"], "fetch must apply the cap before the app runs")
+
     def test_request_to_scope_accepts_state_without_request_globals_or_extra_scope(self):
         class FakeRequest(self.Request):
             method = "POST"
@@ -346,14 +363,6 @@ class WorkerAsgiBridgeScopeTests(unittest.TestCase):
 
         asyncio.run(scenario())
         self.assertEqual(calls, {"startup": 1, "request": 2})
-
-    def test_bridge_has_pre_asgi_body_cap_hook(self):
-        bridge_source = (ROOT / "src" / "worker_asgi_bridge.py").read_text()
-        main_source = (ROOT / "src" / "main.py").read_text()
-
-        self.assertIn("max_body_bytes", bridge_source)
-        self.assertIn("body_bytes > max_body_bytes", bridge_source)
-        self.assertIn("max_body_bytes=MAX_SUBMITTED_BODY_BYTES", main_source)
 
 
 if __name__ == "__main__":
