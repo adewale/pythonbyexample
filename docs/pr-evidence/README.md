@@ -1,5 +1,33 @@
 # PR visual evidence
 
+## Diagram upgrade (2026-09-27)
+
+Before/after contact sheet of every figure whose drawing changed on the
+`claude/diagram-upgrade` branch relative to `main`, in both colour schemes.
+Rows are grouped: twelve redrawn figures to judge, nine adjusted figures (an
+arrow lengthened or an accent removed) to glance at. Each row carries a note
+from `diagram-upgrade-contact-sheet-notes.json` saying what changed and why.
+The base column in the dark sheet sits on the light paper chip the site used
+to draw; the head column is recoloured through the `--fig-*` tokens.
+
+| Evidence | Review point | Base | SHA-256 |
+| --- | --- | --- | --- |
+| [Light contact sheet](diagram-upgrade-contact-sheet-light.png) | 21 changed figure rows with element counts, shipped captions and per-row notes. | `main` (`3f300af`) | `55fc7a56bc03ef2841dc0bcf099b98911f667e56b3de7799414c90d1075b8abf` |
+| [Dark contact sheet](diagram-upgrade-contact-sheet-dark.png) | The same rows under `prefers-color-scheme: dark`: paper chip before, token recolouring after. | `main` (`3f300af`) | `d407aa9aaee7e943cc48887ecf1cd25adb4463eee9eeb3e0715482a8233cd611` |
+
+Regenerate both from the branch with:
+
+```bash
+uv run --python 3.13 scripts/build_figure_contact_sheet.py --base main \
+    --output docs/pr-evidence/diagram-upgrade-contact-sheet \
+    --notes docs/pr-evidence/diagram-upgrade-contact-sheet-notes.json
+```
+
+The script extracts the base revision with `git archive`, renders every attached
+figure from both trees, ignores colour, font and text-length attributes when
+deciding what changed, and captures the sheet through
+`scripts/capture_browser_screenshot.mjs`. The per-criterion scores for the
+redrawn figures are in `docs/rubric-audit-2026-09-27.md`.
 ## Turnstile rejection loop (2026-09-26)
 
 These captures show `/examples/values` six seconds after one Run click, with Siteverify rejecting every token. Both Workers used Cloudflare's invisible always-pass test site key (`1x00000000000000000000BB`), so the real Turnstile widget loaded and solved in the browser, and the always-fail test secret (`2x0000000000000000000000000000000AA`), so Siteverify rejected every solved token.

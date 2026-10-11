@@ -455,14 +455,17 @@ try {
     const run = getComputedStyle(document.querySelector('button[type="submit"]'));
     const terminal = getComputedStyle(document.querySelector('.output-panel pre'));
     const figure = document.querySelector('.cell-banner figure svg');
+    const figureInkNode = figure?.querySelector('[stroke="var(--fig-ink)"]');
+    const figureInk = figureInkNode ? getComputedStyle(figureInkNode).stroke : null;
     return {
       pageBackground: body.backgroundColor,
       pageLuminance: luminance(body.backgroundColor),
       textContrast: contrast(body.color, body.backgroundColor),
       runContrast: contrast(run.color, run.backgroundColor),
       terminalContrast: contrast(terminal.color, terminal.backgroundColor),
-      figurePaperLuminance: figure ? luminance(getComputedStyle(figure).backgroundColor) : null,
-      figurePaperAlpha: figure ? getComputedStyle(figure).backgroundColor : null,
+      figureChip: figure ? getComputedStyle(figure).backgroundColor : null,
+      figureInk,
+      figureInkContrast: figureInk?.startsWith('rgb') ? contrast(figureInk, body.backgroundColor) : null,
     };
   }; true`);
   const lightTheme = await evaluateValue(`({
@@ -854,7 +857,13 @@ try {
     if (theme.terminalContrast < 7) failures.push(`${label} output terminal contrast is ${theme.terminalContrast.toFixed(2)}:1`);
   }
   if (lightTheme.runContrast < 4.5) failures.push(`Light Run-button contrast is ${lightTheme.runContrast.toFixed(2)}:1`);
-  if (!(darkTheme.figurePaperLuminance > 0.7)) failures.push(`Dark mode does not keep marginalia figures on light paper (${darkTheme.figurePaperAlpha})`);
+  // Figures paint with the --fig-* tokens, so dark mode recolours them with
+  // the page instead of setting each SVG on a light paper chip.
+  for (const [label, theme] of [['light', lightTheme], ['dark', darkTheme]]) {
+    if (!(theme.figureInkContrast >= 4.5)) failures.push(`${label} marginalia figure ink contrast is ${theme.figureInkContrast?.toFixed(2)}:1 (ink ${theme.figureInk} on ${theme.pageBackground})`);
+    if (theme.figureChip !== 'rgba(0, 0, 0, 0)') failures.push(`${label} marginalia figures sit on a painted chip (${theme.figureChip})`);
+  }
+  if (lightTheme.figureInk === darkTheme.figureInk) failures.push(`Marginalia figure ink did not recolour with the dark palette (${darkTheme.figureInk})`);
   if (offlineRunner.fallbackOverflow > 0.5) failures.push(`Fallback textarea overflows its panel by ${offlineRunner.fallbackOverflow.toFixed(1)}px`);
   if (rendered.fontSmoothing !== 'antialiased') failures.push('Body text is not antialiased');
   if (!String(rendered.headingWrap).includes('balance')) failures.push(`Headings do not balance their lines (${rendered.headingWrap})`);

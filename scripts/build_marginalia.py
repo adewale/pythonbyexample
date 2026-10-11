@@ -19,7 +19,7 @@ from __future__ import annotations
 
 from _common import ROOT, load_catalog
 from src.marginalia import ATTACHMENTS, FIGURES, SCORES
-from src.marginalia_grammar import Card
+from src.marginalia_grammar import FIGURE_TOKENS_LIGHT, Card, figure_token_css
 
 OUT = ROOT / "public" / "prototyping" / "marginalia-gestalt.html"
 
@@ -76,6 +76,7 @@ HEAD = """<!doctype html>
     --ink: #521000;
     --ink-soft: rgba(82, 16, 0, 0.7);
     --rule: #EBD5C1;
+    __FIGURE_TOKENS__
   }
   *, *::before, *::after { box-sizing: border-box; }
   html, body { background: var(--paper); color: var(--ink); margin: 0; }
@@ -131,7 +132,7 @@ HEAD = """<!doctype html>
 
 
 def render() -> str:
-    out = [HEAD]
+    out = [HEAD.replace("__FIGURE_TOKENS__", figure_token_css(FIGURE_TOKENS_LIGHT))]
     out.append('<h2 class="section">Examples</h2>\n<div class="grid">')
     for card in EXAMPLES:
         out.append(card.render_html())
