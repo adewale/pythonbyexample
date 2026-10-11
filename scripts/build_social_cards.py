@@ -22,6 +22,7 @@ sys.path.insert(0, str(ROOT))
 
 from src.app import JOURNEYS, PYTHON_VERSION, list_examples
 from src.marginalia import render_first_figure
+from src.marginalia_grammar import FIGURE_TOKENS_LIGHT, figure_token_css
 
 CARD_DIR = ROOT / "build" / "social-cards"
 OUTPUT_DIR = ROOT / "public" / "og"
@@ -31,6 +32,7 @@ CARD_HEIGHT = 630
 PROVENANCE_VERSION = 1
 
 _CARD_CSS = """
+  :root { """ + figure_token_css(FIGURE_TOKENS_LIGHT) + """ }
   * { box-sizing: border-box; margin: 0; }
   body { width: 1200px; height: 630px; overflow: hidden; display: flex; align-items: stretch; gap: 48px; padding: 64px 72px; color: #521000; font-family: -apple-system, BlinkMacSystemFont, \"Segoe UI\", \"DejaVu Sans\", sans-serif; background: radial-gradient(circle at top left, rgba(255, 72, 1, 0.12), transparent 40rem), #F5F1EB; }
   .copy { flex: 1.2; display: flex; flex-direction: column; min-width: 0; }

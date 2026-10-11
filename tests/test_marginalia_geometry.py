@@ -782,5 +782,101 @@ class FigureLineTextCollisionContract(unittest.TestCase):
         self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
 
+class FigureContentContract(unittest.TestCase):
+    """Contract 13: figure text is faithful to the page it sits on.
+
+    The bytes-and-bytearray figure shipped with doubled backslashes
+    (b'\\\\x63…') for months because every contract checked geometry and
+    none checked content. Two checks close that hole: no rendered text
+    may carry an escape artefact, and any mono label that contains a
+    backslash (an escape sequence the author typed by hand) must appear
+    verbatim in the Markdown source of an example it is attached to.
+    """
+
+    def test_no_text_carries_a_doubled_backslash(self):
+        failures: list[str] = []
+        for name, (paint, w, h) in ALL_FIGURES.items():
+            canvas = Canvas(w=w, h=h)
+            paint(canvas)
+            for kind, _attrs, content in parse_parts(canvas.parts):
+                if kind == "text" and "\\\\" in content:
+                    failures.append(f"{name}: {content!r}")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+    def test_escape_sequences_in_attached_figures_appear_in_the_example(self):
+        from html import unescape
+
+        from src.example_loader import EXAMPLES_DIR
+
+        failures: list[str] = []
+        for slug, items in ATTACHMENTS.items():
+            source = (EXAMPLES_DIR / f"{slug}.md").read_text()
+            for _anchor, name, _caption in items:
+                paint, w, h = FIGURES[name]
+                canvas = Canvas(w=w, h=h)
+                paint(canvas)
+                for kind, _attrs, content in parse_parts(canvas.parts):
+                    label = unescape(content)
+                    if kind == "text" and "\\" in label and label not in source:
+                        failures.append(f"{slug} / {name}: {label!r} is not in the example source")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
+class FigureArrowLengthContract(unittest.TestCase):
+    """Contract 14: every arrow is at least ARROW_MIN long.
+
+    closed_arrow paints a 7-unit head; an arrow shorter than ~20 units
+    is mostly head and reads as a wedge wedged between two boxes rather
+    than a relation between them. The census comes from the grammar
+    (Canvas._arrow_lengths) because the emitted shaft is already
+    shortened by the head. Fix a failure by widening the gap between the
+    boxes, never by shrinking the head.
+    """
+
+    def test_no_arrow_is_shorter_than_the_minimum(self):
+        from src.marginalia_grammar import ARROW_MIN
+
+        failures: list[str] = []
+        for name, (paint, w, h) in ALL_FIGURES.items():
+            canvas = Canvas(w=w, h=h)
+            paint(canvas)
+            for length in canvas._arrow_lengths:
+                if length < ARROW_MIN:
+                    failures.append(f"{name}: arrow of {length:.1f} units (minimum {ARROW_MIN})")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+
+class FigureThemeTokenContract(unittest.TestCase):
+    """Contract 15: the page defines the figure tokens the grammar paints with.
+
+    Figures emit var(--fig-ink) and friends instead of literal colours so
+    one paint function renders in both colour schemes. That only holds
+    if public/site.css defines every token in both the light :root and
+    the dark media block, with exactly the values the grammar documents;
+    a missing token renders as black in light mode and invisible ink in
+    dark mode, and neither is caught by the geometry contracts.
+    """
+
+    def test_site_css_defines_every_token_in_both_schemes(self):
+        from pathlib import Path
+
+        from src.marginalia_grammar import FIGURE_TOKENS_DARK, FIGURE_TOKENS_LIGHT
+
+        css = (Path(__file__).resolve().parents[1] / "public" / "site.css").read_text()
+        light, dark = css.split("@media (prefers-color-scheme: dark)", 1)
+        failures: list[str] = []
+        for scheme, block, tokens in (("light", light, FIGURE_TOKENS_LIGHT), ("dark", dark, FIGURE_TOKENS_DARK)):
+            for name, value in tokens.items():
+                if f"{name}: {value};" not in block:
+                    failures.append(f"{scheme}: expected `{name}: {value};`")
+        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
+
+    def test_every_painted_colour_is_a_token_reference(self):
+        from src.marginalia_grammar import EMPHASIS, INK, INK_SOFT, SOFT_FILL
+
+        for constant in (INK, INK_SOFT, EMPHASIS, SOFT_FILL):
+            self.assertRegex(constant, r"^var\(--fig-[a-z-]+\)$")
+
+
 if __name__ == "__main__":
     unittest.main()
