@@ -210,6 +210,10 @@ function initializeRunner() {
     const document = new DOMParser().parseFromString(html, 'text/html');
     const challengeRequired = document.querySelector('[data-turnstile-required]');
     if (challengeRequired) {
+      // Each Run earns one challenge. If the server rejected the token just
+      // sent, report why instead of solving again: a wrong secret or hostname
+      // would otherwise loop through solves and Siteverify calls unbounded.
+      if (turnstileToken) throw new Error(responseErrorMessage(response, html));
       outputPanel.querySelector('code').textContent = challengeRequired.textContent
         || 'Verification required before running edited code…';
       const token = await requestTurnstileToken(signal);
