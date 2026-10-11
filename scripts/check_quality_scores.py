@@ -9,9 +9,15 @@ tracked in the improvement backlog with a concrete next action.
 Waivers are time-boxed: `expires` must be an ISO date in the future,
 and a waiver whose example has recovered to target is flagged as stale
 so the registry only ever describes live editorial debt.
+
+A waiver that expires within WAIVER_WARNING_DAYS prints a warning in every
+CI run. `make check-waiver-expiry` (manual, not in CI) runs
+`--fail-within-days 30`, so an approaching expiry fails that command a month
+before it would fail every pull request.
 """
 from __future__ import annotations
 
+import argparse
 import datetime
 import sys
 
@@ -21,6 +27,9 @@ from src.marginalia import EXAMPLE_QUALITY_SCORES, SECTION_FIGURE_SCORES
 
 def _entry_has_text(entry: dict, *keys: str) -> bool:
     return all(isinstance(entry.get(key), str) and bool(entry[key].strip()) for key in keys)
+
+
+WAIVER_WARNING_DAYS = 30
 
 
 def check_expiry_date(value, *, today: datetime.date | None = None) -> str | None:
@@ -37,7 +46,55 @@ def check_expiry_date(value, *, today: datetime.date | None = None) -> str | Non
     return None
 
 
-def main() -> int:
+def expiry_warning(
+    value, *, today: datetime.date | None = None, within_days: int = WAIVER_WARNING_DAYS
+) -> str | None:
+    """Return a warning when a still-valid waiver expires within `within_days`."""
+    today = today or datetime.datetime.now(datetime.UTC).date()
+    if check_expiry_date(value, today=today) is not None:
+        return None  # invalid or already expired: check_expiry_date reports it
+    days_left = (datetime.date.fromisoformat(value) - today).days
+    if days_left > within_days:
+        return None
+    return f"expires on {value} ({days_left} days left); re-review and extend or fix the example"
+
+
+def waiver_expiry_findings(
+    waivers: dict, *, today: datetime.date, fail_within_days: int | None = None
+) -> tuple[list[str], list[str]]:
+    """Return (errors, warnings) for waiver expiry dates.
+
+    Expired or malformed dates are errors. Dates inside the warning window
+    are warnings, or errors when `fail_within_days` is set.
+    """
+    errors: list[str] = []
+    warnings: list[str] = []
+    window = WAIVER_WARNING_DAYS if fail_within_days is None else fail_within_days
+    for slug in sorted(waivers):
+        expires = waivers[slug].get("expires")
+        if expiry_error := check_expiry_date(expires, today=today):
+            errors.append(f"quality waiver {slug}: {expiry_error}")
+        elif warning := expiry_warning(expires, today=today, within_days=window):
+            (warnings if fail_within_days is None else errors).append(f"quality waiver {slug}: {warning}")
+    return errors, warnings
+
+
+def main(argv: list[str] | None = None) -> int:
+    parser = argparse.ArgumentParser(description=__doc__.split("\n\n", 1)[0])
+    parser.add_argument(
+        "--fail-within-days",
+        type=int,
+        default=None,
+        help="treat waivers expiring within N days as errors (make check-waiver-expiry uses 30)",
+    )
+    parser.add_argument("--as-of", help="evaluate expiry as of this ISO date instead of today (UTC)")
+    args = parser.parse_args(argv)
+    today = (
+        datetime.date.fromisoformat(args.as_of)
+        if args.as_of
+        else datetime.datetime.now(datetime.UTC).date()
+    )
+
     registry = load_registry()
     gates = registry.get("quality_gates", {})
     target = float(gates.get("example_target", 9.0))
@@ -58,6 +115,12 @@ def main() -> int:
     backlog = registry.get("quality_improvement_backlog", {})
     section_backlog = registry.get("journey_section_improvement_backlog", {})
     errors: list[str] = []
+    expiry_errors, warnings = waiver_expiry_findings(
+        {slug: entry for slug, entry in waivers.items() if slug in slugs},
+        today=today,
+        fail_within_days=args.fail_within_days,
+    )
+    errors.extend(expiry_errors)
 
     missing_scores = slugs - set(EXAMPLE_QUALITY_SCORES)
     ghost_scores = set(EXAMPLE_QUALITY_SCORES) - slugs
@@ -87,9 +150,6 @@ def main() -> int:
         entry = waivers[slug]
         if not _entry_has_text(entry, "reason") or not isinstance(entry.get("accepted_min"), (int, float)):
             errors.append(f"quality waiver {slug} must include accepted_min, reason, and expires")
-        expiry_error = check_expiry_date(entry.get("expires"))
-        if expiry_error:
-            errors.append(f"quality waiver {slug}: {expiry_error}")
         waived_score = EXAMPLE_QUALITY_SCORES.get(slug, (0.0, ""))[0]
         if waived_score >= target:
             errors.append(f"quality waiver {slug} is stale because score is now {waived_score:.1f}")
@@ -148,6 +208,8 @@ def main() -> int:
                 f"journey_average_min {float(journey_average_min):.1f}"
             )
 
+    for warning in warnings:
+        print(f"WARNING: {warning}", file=sys.stderr)
     if errors:
         for error in errors:
             print(error, file=sys.stderr)
