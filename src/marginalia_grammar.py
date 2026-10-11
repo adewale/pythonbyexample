@@ -25,19 +25,44 @@ PAD_X = 14
 PAD_BOTTOM = 14
 
 # ─── Palette ───────────────────────────────────────────────────────────
-# Aligned with public/site.css design tokens. These are the only
-# colours figures may use; cards never pick a colour directly.
-#   INK       site --text         (warm dark brown)
-#   INK_SOFT  site --muted        (--text at 70%)
-#   EMPHASIS  site --accent       (the brand orange)
-#   SOFT_FILL site --accent-soft  (--accent at ~8%)
-INK = "#521000"
-INK_SOFT = "rgba(82, 16, 0, 0.7)"
-EMPHASIS = "#FF4801"
-# A neutral warm tint built from --text at 5%. Object boxes need to read as
-# quiet containers; tinting them with --accent-soft made every box look
-# highlighted, which broke the "emphasis is scarce" rule.
-SOFT_FILL = "rgba(82, 16, 0, 0.05)"
+# Figures paint with CSS custom properties, not literal colours. Inline
+# SVG inherits custom properties from the page, so one paint function
+# renders correctly in light mode, in dark mode, and on the social
+# cards: whichever stylesheet wraps the figure decides the ink. The
+# four names below are the only colours figures may use; cards never
+# pick a colour directly.
+#   INK       --fig-ink       the page's --text
+#   INK_SOFT  --fig-ink-soft  the page's --muted
+#   EMPHASIS  --fig-accent    the page's --accent
+#   SOFT_FILL --fig-soft      a quiet 5% tint of the ink (object boxes
+#                             must read as containers, not highlights)
+INK = "var(--fig-ink)"
+INK_SOFT = "var(--fig-ink-soft)"
+EMPHASIS = "var(--fig-accent)"
+SOFT_FILL = "var(--fig-soft)"
+
+# The concrete values behind those names, one set per colour scheme.
+# public/site.css must define both (a contract checks it); the gestalt
+# review pages and the social-card shell embed the light set through
+# figure_token_css() so a figure never renders with undefined ink.
+FIGURE_TOKENS_LIGHT = {
+    "--fig-ink": "#521000",
+    "--fig-ink-soft": "rgba(82, 16, 0, 0.7)",
+    "--fig-accent": "#FF4801",
+    "--fig-soft": "rgba(82, 16, 0, 0.05)",
+}
+FIGURE_TOKENS_DARK = {
+    "--fig-ink": "#F3E7DC",
+    "--fig-ink-soft": "rgba(243, 231, 220, 0.72)",
+    "--fig-accent": "#FF6B2E",
+    "--fig-soft": "rgba(243, 231, 220, 0.07)",
+}
+
+
+def figure_token_css(tokens: dict[str, str]) -> str:
+    """CSS declarations for one token set, ready to drop inside a rule."""
+    return " ".join(f"{name}: {value};" for name, value in tokens.items())
+
 
 # ─── Stroke weights ────────────────────────────────────────────────────
 W_HAIRLINE = 0.6
@@ -54,6 +79,11 @@ DOT_R = 2.5
 TICK_LEN = 6
 NODE_R = 14
 ARROW_CLOSED = 7
+# Shortest arrow (shaft plus head) that still reads as an arrow. Below
+# this an arrow is mostly head — the naming-decisions "case" chain drew
+# 12-unit arrows that looked like stray wedges between boxes. Widen the
+# gap between the boxes instead of shrinking the arrow.
+ARROW_MIN = 20
 
 NAME_W = 60
 NAME_H = 24
@@ -63,9 +93,15 @@ CELL = 24
 WORD_W = 44
 
 # ─── Typography ────────────────────────────────────────────────────────
+# Mono and sans follow the page's own stacks (public/site.css sets body
+# text to system-ui and code to ui-monospace) so a figure's labels are
+# set in the same faces as the code cell beside it. The site loads no
+# web fonts, so asking for JetBrains Mono or Source Sans here only
+# meant "whatever the OS falls back to". The italic serif stays: it is
+# the one deliberate contrast, reserved for identifiers.
 FONT_SERIF = "'Iowan Old Style', Charter, Georgia, serif"
-FONT_MONO = "'JetBrains Mono', 'IBM Plex Mono', Menlo, monospace"
-FONT_SANS = "-apple-system, 'Source Sans Pro', sans-serif"
+FONT_MONO = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+FONT_SANS = "system-ui, -apple-system, 'Segoe UI', sans-serif"
 SIZE_BODY = 11
 SIZE_MONO = 10
 SIZE_SMALL = 9
@@ -74,12 +110,20 @@ BASELINE = 4  # add to box-center y to render text vertically centered
 
 # ─── Text metrics ──────────────────────────────────────────────────────
 # Single source of truth for character advance. Paint code uses
-# MONO_ADVANCE (the font's exact advance) to compute positions; the
-# geometry contracts use BBOX_ADVANCE (deliberately conservative
-# over-estimates) to detect clipping and collision. Keeping both here —
-# instead of one in a paint comment and one in the test file — means a
-# recalibration happens in one place and both consumers move together.
-MONO_ADVANCE = 0.6  # JetBrains Mono advances 600/1000 units per em.
+# MONO_ADVANCE to compute positions; the geometry contracts use
+# BBOX_ADVANCE (deliberately conservative over-estimates) to detect
+# clipping and collision. Keeping both here — instead of one in a paint
+# comment and one in the test file — means a recalibration happens in
+# one place and both consumers move together.
+#
+# MONO_ADVANCE is not a guess about the visitor's font: every mono run
+# is emitted with textLength = len * MONO_ADVANCE * size and
+# lengthAdjust="spacing", so the browser spaces the glyphs to exactly
+# that advance whatever face the stack resolves to. Menlo and SF Mono
+# advance 0.6em natively; Consolas advances 0.55em and gets 0.05em of
+# letter-spacing. Dividers computed from MONO_ADVANCE therefore land on
+# the right character on every platform.
+MONO_ADVANCE = 0.6
 BBOX_ADVANCE = {
     "mono": 0.62,        # JetBrains Mono / IBM Plex Mono
     "sans_upper": 0.65,  # Source Sans Pro uppercase (tag font)
@@ -128,6 +172,11 @@ class Canvas:
     # shaft+head pair and a standalone gate line are indistinguishable.
     _accents: int = 0
     _gates_painted: bool = False
+    # Length of every closed arrow painted, for the minimum-length
+    # contract (ARROW_MIN). Recorded here because the shaft is shortened
+    # by the head in the emitted SVG, so the drawn geometry understates
+    # the arrow the author asked for.
+    _arrow_lengths: list[float] = field(default_factory=list)
 
     def accent_count(self) -> int:
         """Number of accent marks on the canvas, per the scarcity rule.
@@ -186,6 +235,7 @@ class Canvas:
         weight = W_EMPHASIS if emphasis else W_STROKE
         dx, dy = x2 - x1, y2 - y1
         L = math.hypot(dx, dy) or 1
+        self._arrow_lengths.append(L)
         ux, uy = dx / L, dy / L
         end_x, end_y = x2 - ARROW_CLOSED * ux, y2 - ARROW_CLOSED * uy
         self._line(x1, y1, end_x, end_y, color=color, weight=weight)
@@ -194,17 +244,23 @@ class Canvas:
         self._add(f'<polygon points="{x2},{y2} {bx + px},{by + py} {bx - px},{by - py}" fill="{color}"/>')
 
     # ── text ──────────────────────────────────────────────────────────
-    def _text(self, x, y, s, *, family, size, anchor, color, italic=False, tracking=None):
+    def _text(self, x, y, s, *, family, size, anchor, color, italic=False, tracking=None, length=None):
         attrs = [f'x="{x}"', f'y="{y}"', f'font-family="{family}"', f'font-size="{size}"',
                  f'fill="{color}"', f'text-anchor="{anchor}"']
         if italic:
             attrs.append('font-style="italic"')
         if tracking:
             attrs.append(f'letter-spacing="{tracking}"')
+        if length:
+            attrs.append(f'textLength="{length:g}" lengthAdjust="spacing"')
         self._add(f"<text {' '.join(attrs)}>{xml_escape(s)}</text>")
 
     def mono(self, x, y, s, *, anchor="middle", size=SIZE_MONO, color=INK):
-        self._text(x, y, s, family=FONT_MONO, size=size, anchor=anchor, color=color)
+        # Pin the run to MONO_ADVANCE per character so positions computed
+        # from it (mono_divider, register ticks under a literal) hold on
+        # every platform's monospace face.
+        length = len(s) * MONO_ADVANCE * size if s else None
+        self._text(x, y, s, family=FONT_MONO, size=size, anchor=anchor, color=color, length=length)
 
     def ident(self, x, y, s, *, anchor="middle", color=INK):
         self._text(x, y, s, family=FONT_SERIF, size=SIZE_BODY, anchor=anchor, color=color, italic=True)
@@ -217,14 +273,19 @@ class Canvas:
                    anchor=anchor, color=INK_SOFT, tracking="0.5")
 
     # ── words ─────────────────────────────────────────────────────────
-    def name_box(self, x, y, name):
-        """Open rect with italic identifier. Returns right-edge midpoint."""
+    def name_box(self, x, y, name, *, w=NAME_W):
+        """Open rect with italic identifier. Returns right-edge midpoint.
+
+        Pass a wider `w` when the running example's name is longer than
+        the default box (MAX_RETRIES needs ~84); the figure should carry
+        the lesson's own names, not placeholders chosen to fit the box.
+        """
         self._add(
-            f'<rect x="{x}" y="{y}" width="{NAME_W}" height="{NAME_H}" fill="none" '
+            f'<rect x="{x}" y="{y}" width="{w}" height="{NAME_H}" fill="none" '
             f'stroke="{INK}" stroke-width="{W_STROKE}"/>'
         )
-        self.ident(x + NAME_W / 2, y + NAME_H / 2 + BASELINE, name)
-        return (x + NAME_W, y + NAME_H / 2)
+        self.ident(x + w / 2, y + NAME_H / 2 + BASELINE, name)
+        return (x + w, y + NAME_H / 2)
 
     def object_box(self, x, y, type_tag, value, *, w=OBJECT_W, h=OBJECT_H, soft=True, tag_position="above"):
         """Filled rect with type tag and value centered. Returns left-edge midpoint.
@@ -345,12 +406,39 @@ class Canvas:
             self.tag(x0 - 6, y + 3, label, anchor="end")
 
     # ── phrases ───────────────────────────────────────────────────────
-    def bind(self, x, y, name, type_tag, value, *, object_w=OBJECT_W, gap=40):
-        """name → object. The foundational picture."""
-        nx, ny = self.name_box(x, y + (OBJECT_H - NAME_H) / 2, name)
+    def bind(self, x, y, name, type_tag, value, *, object_w=OBJECT_W, gap=40, name_w=NAME_W):
+        """name → object. The foundational picture.
+
+        `gap` is the space between the two boxes; the arrow inside it is
+        gap - 4 long, so keep gap >= ARROW_MIN + 4.
+        """
+        nx, ny = self.name_box(x, y + (OBJECT_H - NAME_H) / 2, name, w=name_w)
         ox, oy = self.object_box(nx + gap, y, type_tag, value, w=object_w)
         self.closed_arrow(nx + 2, ny, ox - 2, oy)
         return (x, y, nx + gap + object_w, y + OBJECT_H)
+
+    def env(self, x, y, label, bindings, *, name_w=52, value_w=44, row_h=20, gap=6, pad=8, ghost=False):
+        """An environment frame with its bindings — the Python Tutor picture.
+
+        Each binding is (name, value): the name is an italic identifier,
+        the value sits in a mono cell beside it. Pass value "" to leave
+        the cell empty so the caller can arrow from it to a heap object.
+        Draw the frame ghost when the call has returned; the cells stay
+        solid because bindings can outlive their frame (that is what a
+        closure is). Returns (right_x, bottom_y, anchors) where
+        anchors[i] is the right-edge midpoint of binding i's value cell.
+        """
+        w = pad + name_w + value_w + pad
+        h = pad + len(bindings) * (row_h + gap) - gap + pad
+        self.frame(x, y, w, h, label=label, ghost=ghost)
+        anchors = []
+        for i, (name, value) in enumerate(bindings):
+            ry = y + pad + i * (row_h + gap)
+            self.ident(x + pad + name_w / 2, ry + row_h / 2 + BASELINE, name)
+            vx = x + pad + name_w
+            self.cell(vx, ry, value, w=value_w, h=row_h)
+            anchors.append((vx + value_w, ry + row_h / 2))
+        return (x + w, y + h, anchors)
 
     def two_names_one_object(self, x, y, tag_text, name_a, name_b, value, *, object_w=OBJECT_W):
         """Two names bound to one shared object — the aliasing picture.

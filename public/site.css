@@ -1,4 +1,4 @@
-:root { color-scheme: light; --accent: #FF4801; --accent-text: #C83800; --accent-action: #C83800; --accent-hover: #FF7038; --accent-soft: rgba(255, 72, 1, 0.08); --text: #521000; --muted: rgba(82, 16, 0, 0.7); --page: #F5F1EB; --surface: #FFFBF5; --surface-2: #FFFDFB; --surface-3: #FEF7ED; --hairline: #EBD5C1; --hairline-soft: rgba(235, 213, 193, 0.5); --header-veil: rgba(245, 241, 235, 0.82); --header-veil-0: rgba(245, 241, 235, 0); --header-veil-solid: rgba(245, 241, 235, 0.95); --figure-paper: #F5F1EB; --terminal-bg: #0b1020; --terminal-ink: #f9fafb; --space-1: .5rem; --space-2: .75rem; --space-3: 1rem; --space-4: 1.5rem; --space-5: 2rem; --space-6: 3rem; }
+:root { color-scheme: light; --accent: #FF4801; --accent-text: #C83800; --accent-action: #C83800; --accent-hover: #FF7038; --accent-soft: rgba(255, 72, 1, 0.08); --text: #521000; --muted: rgba(82, 16, 0, 0.7); --page: #F5F1EB; --surface: #FFFBF5; --surface-2: #FFFDFB; --surface-3: #FEF7ED; --hairline: #EBD5C1; --hairline-soft: rgba(235, 213, 193, 0.5); --header-veil: rgba(245, 241, 235, 0.82); --header-veil-0: rgba(245, 241, 235, 0); --header-veil-solid: rgba(245, 241, 235, 0.95); --fig-ink: #521000; --fig-ink-soft: rgba(82, 16, 0, 0.7); --fig-accent: #FF4801; --fig-soft: rgba(82, 16, 0, 0.05); --terminal-bg: #0b1020; --terminal-ink: #f9fafb; --space-1: .5rem; --space-2: .75rem; --space-3: 1rem; --space-4: 1.5rem; --space-5: 2rem; --space-6: 3rem; }
     * { box-sizing: border-box; }
     html { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
     :where(a, button, input, textarea, [tabindex]):focus-visible { outline: 3px solid var(--accent-text); outline-offset: 3px; }
@@ -216,17 +216,23 @@
        keep their prose|code 2-column grid; banners between cells hold
        one or many figures (small multiples). See docs/visual-explainer-spec.md. */
     .cell-banner { margin: var(--space-5) 0; padding: var(--space-4) 0; border-block: 1px dashed var(--hairline-soft); display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); justify-items: center; }
-    .cell-banner figure { margin: 0; padding: 0; width: 100%; max-width: clamp(240px, 45vw, 480px); }
-    .cell-banner svg { max-width: 100%; height: auto; display: block; }
-    .cell-banner figcaption { margin-top: var(--space-2); color: var(--muted); font-size: .92rem; font-style: italic; max-width: 44ch; }
+    /* Each figure is a two-row subgrid (drawing, caption) so a pair of
+       small multiples shares one baseline: drawings bottom-align in row
+       one and both captions start on the same line in row two, even
+       when one drawing is taller. */
+    .cell-banner figure { display: grid; grid-template-rows: subgrid; grid-row: span 2; justify-items: center; margin: 0; padding: 0; width: 100%; max-width: clamp(240px, 45vw, 480px); }
+    .cell-banner svg { max-width: 100%; height: auto; display: block; align-self: end; }
+    .cell-banner figcaption { align-self: start; margin-top: var(--space-2); color: var(--muted); font-size: .92rem; font-style: italic; max-width: 44ch; }
     .cell-banner--1 { margin-block: var(--space-6); }
     .cell-banner--1 figure { width: 100%; max-width: clamp(280px, 65vw, 640px); }
     .cell-banner--1 figcaption { max-width: 42ch; }
     /* Dark palette: same warm hue family as the light theme, inverted.
-       Marginalia figures keep their locked light palette, so in dark
-       mode each SVG sits on a light "paper" chip instead of being
-       recoloured — the grammar stays untouched. Shiki emits dual-theme
-       CSS variables; the swap below activates the dark set. */
+       Marginalia figures paint with the --fig-* tokens, so redefining
+       them here recolours every figure with the page: no light chip, no
+       second palette in the grammar. The values mirror
+       FIGURE_TOKENS_DARK in src/marginalia_grammar.py (a contract keeps
+       them equal). Shiki emits dual-theme CSS variables; the swap below
+       activates the dark set. */
     @media (prefers-color-scheme: dark) {
       :root {
         color-scheme: dark;
@@ -237,6 +243,10 @@
         --accent-soft: rgba(255, 107, 46, 0.14);
         --text: #F3E7DC;
         --muted: rgba(243, 231, 220, 0.72);
+        --fig-ink: #F3E7DC;
+        --fig-ink-soft: rgba(243, 231, 220, 0.72);
+        --fig-accent: #FF6B2E;
+        --fig-soft: rgba(243, 231, 220, 0.07);
         --page: #1B120B;
         --surface: #241810;
         --surface-2: #281B12;
@@ -247,7 +257,6 @@
         --header-veil-0: rgba(27, 18, 11, 0);
         --header-veil-solid: rgba(27, 18, 11, 0.95);
       }
-      .cell-banner figure svg, .journey-section-figure svg { padding: var(--space-2); border-radius: .5rem; background: var(--figure-paper); }
       .button { color: #2A0B00; }
     }
     /* Non-motion accessibility signals. Reduced motion is handled by
