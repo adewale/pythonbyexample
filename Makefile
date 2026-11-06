@@ -3,7 +3,7 @@
 PY := uv run --python 3.13
 NODE_DEPS_STAMP := node_modules/.package-lock.json
 
-.PHONY: check-node-version node-deps test embed-examples embed-editorial-registry build-search-index build check-generated fingerprint prototypes browser-layout-test search-ranking-test social-cards check-social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported check-program-covers-cells check-prose-duplication check-inline-links score-example-criteria check-quality-scores check-no-figure-rationales check-journey-outcomes audit-example-graph quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment dev deploy upgrade-runtime-deps lint
+.PHONY: check-node-version node-deps test embed-examples embed-editorial-registry build-search-index build check-generated fingerprint prototypes browser-layout-test search-ranking-test social-cards check-social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported check-program-covers-cells check-prose-duplication check-inline-links score-example-criteria check-quality-scores check-waiver-expiry check-no-figure-rationales check-journey-outcomes audit-example-graph quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment post-deploy-smoke dev deploy upgrade-runtime-deps lint
 
 check-node-version:
 	@major="$$(node -p 'process.versions.node.split(".")[0]')"; \
@@ -92,6 +92,12 @@ score-example-criteria:
 check-quality-scores:
 	$(PY) scripts/check_quality_scores.py
 
+# Manual gate, not run in CI: fail while a quality waiver has 30 days or fewer
+# left, so an expiry can be caught before it turns every pull request red.
+# `make verify` (CI) already prints a warning inside the same 30-day window.
+check-waiver-expiry:
+	$(PY) scripts/check_quality_scores.py --fail-within-days 30
+
 check-no-figure-rationales:
 	$(PY) scripts/check_no_figure_rationales.py
 
@@ -121,12 +127,24 @@ dev: node-deps
 	uv run --group workers pywrangler dev --port 9696
 
 smoke-deployment:
-	$(PY) scripts/smoke_deployment.py $(URL)
+	$(PY) scripts/smoke_deployment.py $(URL) $(SMOKE_ARGS)
+
+# Origin that `make deploy` smoke-tests once Wrangler has deployed. With
+# Turnstile challenges enabled, export PBE_SMOKE_BYPASS_SECRET so the POST
+# checks can run; SMOKE_ARGS passes extra flags (e.g. --skip-post) explicitly.
+DEPLOY_URL ?= https://www.pythonbyexample.dev
+
+post-deploy-smoke:
+	@$(MAKE) --no-print-directory smoke-deployment URL=$(DEPLOY_URL) || { \
+		echo "Deployment smoke FAILED for $(DEPLOY_URL). The new version is already live: investigate now, or roll back with 'uv run --group workers pywrangler rollback'." >&2; \
+		exit 1; \
+	}
 
 deploy: node-deps check-generated
 	uv run --group workers pywrangler sync --force
 	git diff --exit-code -- pylock.toml
 	uv run --group workers pywrangler deploy
+	@$(MAKE) --no-print-directory post-deploy-smoke
 
 # Production vendors pylock.toml; tests run against uv.lock. Refresh both together.
 upgrade-runtime-deps: node-deps

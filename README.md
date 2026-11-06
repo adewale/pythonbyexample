@@ -125,7 +125,7 @@ git diff --check
 - Worker Cache API keys include the HTML version
 - prototype layout pages are not cached
 
-`make browser-layout-test` launches headless Chrome and checks the rendered Shiki code-block layout so generated line markup does not create visual blank rows.
+`make browser-layout-test` launches headless Chrome against the local Worker. It checks the rendered Shiki code-block layout so generated line markup does not create visual blank rows, drives the runner, sharing, copy, search and keyboard navigation through the page, and measures computed styles (pressed states, touch targets, contrast in both themes, the reader's font size, reduced-transparency and more-contrast fallbacks) in place of unit tests that matched CSS text.
 
 ## Asset fingerprinting and cache busting
 
@@ -174,7 +174,7 @@ scripts/format_examples.py --check
 make deploy
 ```
 
-`make deploy` first runs `make check-generated`, which rebuilds and rejects any generated output not committed to the branch. It then syncs the ignored Python Workers dependency bundle from the committed `pylock.toml`, refusing to deploy if the sync would change that lock, before Wrangler deploys.
+`make deploy` first runs `make check-generated`, which rebuilds and rejects any generated output not committed to the branch. It then syncs the ignored Python Workers dependency bundle from the committed `pylock.toml`, refusing to deploy if the sync would change that lock, before Wrangler deploys. Finally it runs `scripts/smoke_deployment.py` against `DEPLOY_URL` (default `https://www.pythonbyexample.dev`) and exits non-zero if the deployed Worker fails any GET or POST check. Export `PBE_SMOKE_BYPASS_SECRET` when Turnstile challenges are enabled so the POST checks can run; `SMOKE_ARGS` passes extra flags such as `--skip-post` explicitly.
 
 ## Updating dependencies
 
@@ -227,6 +227,10 @@ JPEGs under `public/og/` with headless Chrome (set `CHROME_PATH` if needed).
 `make quality-checks` runs the registry, confusable-pair, broad-tour,
 footgun, notes, program/cell, prose-duplication, inline-link, scoring,
 figure, journey, and example-graph gates.
+
+`make check-waiver-expiry` is a manual check, not run in CI: it fails while
+any quality waiver has 30 days or fewer left. `make quality-checks` (and so CI)
+only prints a warning in that window, then fails once the waiver has expired.
 
 `src/example_sources_data.py` is generated and committed so Cloudflare Workers can load examples in production. Do not edit it by hand.
 
