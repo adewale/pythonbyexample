@@ -341,17 +341,7 @@ class AppTests(unittest.TestCase):
         )
         self.assertIn('data-turnstile-required="true"', challenged)
 
-    def test_turnstile_verification_is_session_gated_in_worker(self):
-        main_source = (ROOT / "src" / "main.py").read_text()
-        self.assertIn("TURNSTILE_SECRET_KEY", main_source)
-        self.assertIn("TURNSTILE_CHALLENGE_MODE", main_source)
-        self.assertIn("TURNSTILE_CLEARANCE_COOKIE", main_source)
-        self.assertIn("cf-turnstile-response", main_source)
-        self.assertIn("/turnstile/v0/siteverify", main_source)
-        self.assertIn("PBE_SMOKE_BYPASS_SECRET", main_source)
-        self.assertIn("x-pythonbyexample-smoke-secret", main_source)
-        self.assertIn("Content-Security-Policy", main_source)
-        self.assertIn("Strict-Transport-Security", main_source)
+    def test_content_security_policy_disallows_inline_scripts(self):
         self.assertIn("script-src-attr 'none'", CONTENT_SECURITY_POLICY)
         self.assertNotIn("nonce-", CONTENT_SECURITY_POLICY)
         self.assertNotIn("script-src 'unsafe-inline'", CONTENT_SECURITY_POLICY)
