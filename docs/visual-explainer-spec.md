@@ -232,8 +232,9 @@ explicitly. Re-introducing either is a defect.
    mode, dark mode, the gestalt pages and the social cards. There is
    no paper chip. Any HTML shell that embeds a figure outside
    `site.css` must define the tokens with
-   `figure_token_css(FIGURE_TOKENS_LIGHT)`; Contract 15 checks that
-   `site.css` carries both sets.
+   `figure_token_css(FIGURE_TOKENS_LIGHT)`; the browser check
+   (`scripts/figure_theme_contract.mjs`) measures that the rendered
+   page resolves both sets.
 
 4. **Typography follows the page and mono runs are pinned.** The
    grammar's mono and sans stacks are the page's own (the site loads no

@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
+import { documentedFigureTokens, figureThemeExpression, figureThemeFailures } from './figure_theme_contract.mjs';
 
 const chromePath = process.env.CHROME_PATH || (process.platform === 'darwin'
   ? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
@@ -10,6 +11,7 @@ const chromePath = process.env.CHROME_PATH || (process.platform === 'darwin'
 const target = process.argv[2] || 'http://127.0.0.1:9696/examples/values';
 const url = `${target}${target.includes('?') ? '&' : '?'}browser_layout_check=${Date.now()}`;
 const port = 9333 + Math.floor(Math.random() * 1000);
+const figureTokens = documentedFigureTokens();
 const profile = await mkdtemp(path.join(tmpdir(), 'pythonbyexample-chrome-'));
 
 const chrome = spawn(chromePath, [
@@ -454,18 +456,12 @@ try {
     const body = getComputedStyle(document.body);
     const run = getComputedStyle(document.querySelector('button[type="submit"]'));
     const terminal = getComputedStyle(document.querySelector('.output-panel pre'));
-    const figure = document.querySelector('.cell-banner figure svg');
-    const figureInkNode = figure?.querySelector('[stroke="var(--fig-ink)"]');
-    const figureInk = figureInkNode ? getComputedStyle(figureInkNode).stroke : null;
     return {
       pageBackground: body.backgroundColor,
       pageLuminance: luminance(body.backgroundColor),
       textContrast: contrast(body.color, body.backgroundColor),
       runContrast: contrast(run.color, run.backgroundColor),
       terminalContrast: contrast(terminal.color, terminal.backgroundColor),
-      figureChip: figure ? getComputedStyle(figure).backgroundColor : null,
-      figureInk,
-      figureInkContrast: figureInk?.startsWith('rgb') ? contrast(figureInk, body.backgroundColor) : null,
     };
   }; true`);
   const lightTheme = await evaluateValue(`({
@@ -473,6 +469,7 @@ try {
     editorColors: [...new Set([...document.querySelectorAll('.cm-line span')].map(node => getComputedStyle(node).color))].sort(),
     ...window.__pbeColors(),
   })`);
+  const lightFigures = await evaluateValue(figureThemeExpression(figureTokens.light));
   await client.send('Emulation.setEmulatedMedia', {
     media: 'screen',
     features: [{ name: 'prefers-color-scheme', value: 'dark' }],
@@ -501,6 +498,7 @@ try {
       ...window.__pbeColors(),
     };
   })()`);
+  const darkFigures = await evaluateValue(figureThemeExpression(figureTokens.dark));
 
   // Keep esm.sh import requests pending. The runner has no imports and is
   // emitted after its markup, so its controls must attach before the editor's
@@ -859,11 +857,7 @@ try {
   if (lightTheme.runContrast < 4.5) failures.push(`Light Run-button contrast is ${lightTheme.runContrast.toFixed(2)}:1`);
   // Figures paint with the --fig-* tokens, so dark mode recolours them with
   // the page instead of setting each SVG on a light paper chip.
-  for (const [label, theme] of [['light', lightTheme], ['dark', darkTheme]]) {
-    if (!(theme.figureInkContrast >= 4.5)) failures.push(`${label} marginalia figure ink contrast is ${theme.figureInkContrast?.toFixed(2)}:1 (ink ${theme.figureInk} on ${theme.pageBackground})`);
-    if (theme.figureChip !== 'rgba(0, 0, 0, 0)') failures.push(`${label} marginalia figures sit on a painted chip (${theme.figureChip})`);
-  }
-  if (lightTheme.figureInk === darkTheme.figureInk) failures.push(`Marginalia figure ink did not recolour with the dark palette (${darkTheme.figureInk})`);
+  failures.push(...figureThemeFailures({ light: lightFigures, dark: darkFigures }));
   if (offlineRunner.fallbackOverflow > 0.5) failures.push(`Fallback textarea overflows its panel by ${offlineRunner.fallbackOverflow.toFixed(1)}px`);
   if (rendered.fontSmoothing !== 'antialiased') failures.push('Body text is not antialiased');
   if (!String(rendered.headingWrap).includes('balance')) failures.push(`Headings do not balance their lines (${rendered.headingWrap})`);
@@ -904,6 +898,8 @@ try {
     searchFailure,
     lightTheme,
     darkTheme,
+    lightFigures,
+    darkFigures,
     offlineRunner,
     fragmentBound,
     turnstileRetry,
