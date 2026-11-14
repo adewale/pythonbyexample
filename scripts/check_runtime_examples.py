@@ -40,7 +40,7 @@ def run_in_worker(base_url: str, slug: str, code: str) -> str:
     # a rebuild; wait that out instead of failing the whole catalog.
     for attempt in range(RELOAD_RETRIES + 1):
         try:
-            with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310 - fixed local/HTTPS origin
+            with urllib.request.urlopen(request, timeout=120) as response:
                 page = response.read().decode("utf-8")
             break
         except urllib.error.HTTPError as error:
