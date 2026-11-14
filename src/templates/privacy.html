@@ -16,7 +16,7 @@
   </section>
   <section class="about-section" id="turnstile-privacy-addendum">
     <h2>Cloudflare Turnstile Privacy Addendum</h2>
-    <p>To protect the runner from abuse, an Invisible-mode Cloudflare Turnstile check may run when a browser session first submits edited code. Turnstile may process browser, device, network, and IP signals to distinguish people from automated abuse. See Cloudflare's <a class="text-link" href="https://www.cloudflare.com/privacypolicy/">Privacy Policy</a> and <a class="text-link" href="https://developers.cloudflare.com/turnstile/">Turnstile documentation</a>.</p>
+    <p>To protect the runner from abuse, an Invisible-mode Cloudflare Turnstile check may run when a browser session first presses Run. Turnstile may process browser, device, network, and IP signals to distinguish people from automated abuse. See Cloudflare's <a class="text-link" href="https://www.cloudflare.com/privacypolicy/">Privacy Policy</a> and <a class="text-link" href="https://developers.cloudflare.com/turnstile/">Turnstile documentation</a>.</p>
     <p>After successful verification, the site sets <code class="syntax-inline">pbe_turnstile_clearance</code>, an HttpOnly, Secure, SameSite=Lax cookie scoped to <code class="syntax-inline">/examples</code>. It normally expires after eight hours and prevents repeated verification during the same learning session. Its signature is tied to the IP address that passed the check, so the cookie is not accepted from a different address; the address itself is not stored in the cookie.</p>
   </section>
   <section class="about-section">
@@ -25,7 +25,7 @@
   </section>
   <section class="about-section">
     <h2>Retention and choices</h2>
-    <p>Operational logs are retained according to the configured Cloudflare Workers Logs retention settings and are used for reliability, abuse prevention, and aggregate interaction reporting. You can read all examples without an account. Disabling cookies may cause Turnstile verification to repeat when you run edited code.</p>
+    <p>Operational logs are retained according to the configured Cloudflare Workers Logs retention settings and are used for reliability, abuse prevention, and aggregate interaction reporting. You can read all examples without an account. Disabling cookies may cause Turnstile verification to repeat each time you press Run.</p>
     <p>Questions or requests about this notice can be opened in the project's <a class="text-link" href="https://github.com/adewale/pythonbyexample/issues">public issue tracker</a>. Do not include private or sensitive information in a public issue.</p>
   </section>
   <section class="about-section">
