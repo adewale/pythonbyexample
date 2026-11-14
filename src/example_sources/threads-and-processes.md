@@ -4,13 +4,13 @@ title = "Threads and Processes"
 section = "Standard Library"
 summary = "Threads share memory, while processes run in separate interpreters."
 doc_path = "/library/concurrent.futures.html"
-sandbox_limit = "threads and processes"
 see_also = [
   "async-await",
   "subprocesses",
   "networking",
 ]
 expected_output = "[1, 4, 9]\nProcessPoolExecutor\n"
+sandbox_limit = "threads and processes"
 +++
 
 Threads and processes are two ways to run work outside the current control path. Threads are useful for overlapping I/O-shaped waits, while processes are useful when CPU-bound work needs separate interpreter processes.

@@ -39,7 +39,10 @@ def main() -> int:
         for cell in example["cells"]:
             surfaces += [(cell.get("line", 1), paragraph) for paragraph in cell.get("prose", [])]
         for line, text in surfaces:
-            for match in LINK_RE.finditer(text):
+            # render_inline splits prose on backticks first, so `first[T](items)`
+            # inside a code span is code, never a link. Check only the prose.
+            prose_only = " ".join(text.split("`")[::2])
+            for match in LINK_RE.finditer(prose_only):
                 label, target = match.group(1), match.group(2)
                 internal = INTERNAL_RE.match(target)
                 if not internal:

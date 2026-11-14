@@ -9,6 +9,8 @@ see_also = [
   "logging",
   "testing",
 ]
+min_python = "3.13"
+version_notes = "The warnings.deprecated decorator was added in Python 3.13."
 +++
 
 A warning reports a problem that callers should know about, but it does not have to stop the current operation. Deprecations are the classic case: the old API can still return a value while telling users to migrate.
@@ -38,6 +40,17 @@ with warnings.catch_warnings():
         old_name()
     except DeprecationWarning:
         print("warning became error")
+
+
+@warnings.deprecated("use new_name() instead")
+def older_name():
+    return "result"
+
+with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter("always", DeprecationWarning)
+    print(older_name())
+    print(str(caught[0].message))
+print(older_name.__deprecated__)
 ```
 :::
 
@@ -83,8 +96,31 @@ warning became error
 ```
 :::
 
+:::cell
+Python 3.13 adds the `@warnings.deprecated` decorator, which states the deprecation once at the definition. Calling the function emits a `DeprecationWarning` aimed at the caller, the message is kept on `__deprecated__`, and type checkers flag uses of the function before the program runs.
+
+```python
+@warnings.deprecated("use new_name() instead")
+def older_name():
+    return "result"
+
+with warnings.catch_warnings(record=True) as caught:
+    warnings.simplefilter("always", DeprecationWarning)
+    print(older_name())
+    print(str(caught[0].message))
+print(older_name.__deprecated__)
+```
+
+```output
+result
+use new_name() instead
+use new_name() instead
+```
+:::
+
 :::note
 - Use warnings for soft problems callers can act on later.
 - Use exceptions when the current operation cannot continue.
 - `stacklevel` should point the warning at the caller rather than inside the helper.
+- On Python 3.13 and later, prefer `@warnings.deprecated(...)` for whole functions and classes; call `warnings.warn()` directly for narrower cases such as one deprecated argument.
 :::

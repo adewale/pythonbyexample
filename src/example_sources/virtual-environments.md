@@ -4,13 +4,13 @@ title = "Virtual Environments"
 section = "Modules"
 summary = "Virtual environments isolate a project's Python packages."
 doc_path = "/library/venv.html"
-sandbox_limit = "the venv module"
 see_also = [
   "packages",
   "modules",
   "import-aliases",
 ]
 expected_output = ".venv\nTrue\n"
+sandbox_limit = "the venv module"
 +++
 
 Virtual environments isolate a project's installed packages from the global Python installation and from other projects. The usual workflow is a command-line one: create `.venv`, activate it, then install project dependencies there.

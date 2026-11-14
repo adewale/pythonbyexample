@@ -4,13 +4,13 @@ title = "Subprocesses"
 section = "Standard Library"
 summary = "subprocess runs external commands with explicit arguments and captured outputs."
 doc_path = "/library/subprocess.html"
-sandbox_limit = "child processes"
 see_also = [
   "virtual-environments",
   "networking",
   "threads-and-processes",
 ]
 expected_output = "child process\n0\n"
+sandbox_limit = "child processes"
 +++
 
 `subprocess` is the standard boundary for running external commands. It starts another program, waits for it, and gives you a result object with the exit code and captured output.
