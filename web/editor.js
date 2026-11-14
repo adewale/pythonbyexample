@@ -1,8 +1,11 @@
-import { Compartment, EditorState } from 'https://esm.sh/@codemirror/state@6.7.6';
-import { EditorView, lineNumbers } from 'https://esm.sh/@codemirror/view@6.43.13?deps=@codemirror/state@6.7.6';
-import { defaultHighlightStyle, syntaxHighlighting } from 'https://esm.sh/@codemirror/language@6.12.4?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.13';
-import { python } from 'https://esm.sh/@codemirror/lang-python@6.2.1?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.13,@codemirror/language@6.12.4';
-import { oneDarkHighlightStyle } from 'https://esm.sh/@codemirror/theme-one-dark@6.1.3?deps=@codemirror/state@6.7.6,@codemirror/view@6.43.13,@codemirror/language@6.12.4';
+// Source for public/editor.js, bundled by scripts/build_browser_bundles.mjs.
+import { closeBrackets, closeBracketsKeymap } from '@codemirror/autocomplete';
+import { defaultKeymap, history, historyKeymap, indentWithTab } from '@codemirror/commands';
+import { python } from '@codemirror/lang-python';
+import { bracketMatching, defaultHighlightStyle, indentOnInput, indentUnit, syntaxHighlighting } from '@codemirror/language';
+import { Compartment, EditorState } from '@codemirror/state';
+import { oneDarkHighlightStyle } from '@codemirror/theme-one-dark';
+import { EditorView, keymap, lineNumbers } from '@codemirror/view';
 
 const themePreference = window.matchMedia('(prefers-color-scheme: dark)');
 const highlightStyle = () => themePreference.matches ? oneDarkHighlightStyle : defaultHighlightStyle;
@@ -14,16 +17,38 @@ const form = document.querySelector('form.runner-editor');
 if (textarea && form) {
   textarea.classList.add('textarea-fallback');
 
+  const runKeymap = [{
+    key: 'Mod-Enter',
+    preventDefault: true,
+    run: () => {
+      form.requestSubmit();
+      return true;
+    },
+  }];
+
   const view = new EditorView({
     state: EditorState.create({
       doc: textarea.value,
       extensions: [
+        // Run first so Mod-Enter is not taken by the default "insert blank line".
+        keymap.of(runKeymap),
+        history(),
         python(),
+        indentUnit.of('    '),
+        EditorState.tabSize.of(4),
+        indentOnInput(),
+        bracketMatching(),
+        closeBrackets(),
         highlightCompartment.of(syntaxHighlighting(highlightStyle())),
         lineNumbers(),
         EditorView.lineWrapping,
+        // Tab indents, as Python learners expect. CodeMirror keeps keyboard
+        // users from being trapped: Escape then Tab moves focus onward, and
+        // the hint under the editor says so.
+        keymap.of([...closeBracketsKeymap, ...defaultKeymap, ...historyKeymap, indentWithTab]),
         EditorView.contentAttributes.of({
           'aria-label': textarea.getAttribute('aria-label') || 'Editable Python example code',
+          'aria-describedby': 'editor-keys-hint',
         }),
         EditorView.updateListener.of((update) => {
           if (update.docChanged) textarea.value = update.state.doc.toString();
@@ -34,6 +59,8 @@ if (textarea && form) {
 
   textarea.insertAdjacentElement('afterend', view.dom);
   textarea.hidden = true;
+  const hint = document.getElementById('editor-keys-hint');
+  if (hint) hint.hidden = false;
   themePreference.addEventListener?.('change', () => {
     view.dispatch({ effects: highlightCompartment.reconfigure(syntaxHighlighting(highlightStyle())) });
   });

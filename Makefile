@@ -3,7 +3,7 @@
 PY := uv run --python 3.13
 NODE_DEPS_STAMP := node_modules/.package-lock.json
 
-.PHONY: check-node-version node-deps test embed-examples embed-editorial-registry build-search-index build check-generated fingerprint prototypes browser-layout-test search-ranking-test social-cards check-social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported check-program-covers-cells check-prose-duplication check-inline-links score-example-criteria check-quality-scores check-waiver-expiry check-no-figure-rationales check-journey-outcomes audit-example-graph quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment post-deploy-smoke dev deploy upgrade-runtime-deps lint
+.PHONY: check-node-version node-deps test embed-examples embed-editorial-registry build-search-index build check-generated fingerprint prototypes browser-bundles browser-layout-test runtime-examples-test search-ranking-test social-cards check-social-cards seo-cache-lint verify-examples check-registry-integrity check-confusable-pairs check-broad-surface-tours check-footgun-coverage check-notes-supported check-program-covers-cells check-prose-duplication check-inline-links score-example-criteria check-quality-scores check-waiver-expiry check-no-figure-rationales check-journey-outcomes audit-example-graph quality-checks rubric-audit format-examples verify-python-version verify smoke-deployment post-deploy-smoke dev deploy upgrade-runtime-deps lint
 
 check-node-version:
 	@major="$$(node -p 'process.versions.node.split(".")[0]')"; \
@@ -32,11 +32,16 @@ build-search-index: embed-examples
 build: embed-examples embed-editorial-registry build-search-index fingerprint prototypes
 
 check-generated: build check-social-cards
-	git diff --exit-code src/example_sources_data.py src/editorial_registry_data.py src/asset_manifest.py public/_headers public/prototyping public/search-index.json
+	git diff --exit-code src/example_sources_data.py src/editorial_registry_data.py src/asset_manifest.py public/_headers public/prototyping public/search-index.json public/editor.js public/highlighter.js
 	# Tracked generated changes may be staged for commit; reject only untracked output here because git diff above already catches unstaged tracked drift.
 	test -z "$$(git ls-files --others --exclude-standard -- public/prototyping public/*.css public/*.js public/*.json)"
 
-fingerprint: embed-examples embed-editorial-registry build-search-index
+# public/editor.js and public/highlighter.js are bundles of web/*.js plus the
+# npm packages pinned in package-lock.json. Edit the sources in web/.
+browser-bundles: node-deps
+	node scripts/build_browser_bundles.mjs
+
+fingerprint: embed-examples embed-editorial-registry build-search-index browser-bundles
 	$(PY) scripts/fingerprint_assets.py
 
 prototypes: embed-examples
@@ -45,6 +50,11 @@ prototypes: embed-examples
 
 browser-layout-test:
 	scripts/check_browser_layout.mjs
+
+# Run every example's complete program in the real sandbox (the local dev
+# Worker) and compare with its expected output.
+runtime-examples-test:
+	$(PY) scripts/check_runtime_examples.py
 
 search-ranking-test:
 	scripts/check_search_ranking.mjs
@@ -121,7 +131,7 @@ verify-python-version: build
 lint:
 	uv run ruff check src tests scripts
 
-verify: build test seo-cache-lint verify-examples quality-checks browser-layout-test search-ranking-test lint check-generated
+verify: build test seo-cache-lint verify-examples quality-checks browser-layout-test runtime-examples-test search-ranking-test lint check-generated
 
 dev: node-deps
 	uv run --group workers pywrangler dev --port 9696

@@ -99,6 +99,10 @@
     .text-link:hover { color: var(--accent-text); }
     .example-shell { padding: clamp(var(--space-3), 3vw, var(--space-5)) 0; }
     .example-intro { max-width: 68ch; margin-bottom: var(--space-5); }
+    .example-explanation { margin-top: var(--space-3); }
+    .example-explanation p { margin: 0 0 var(--space-2); }
+    .example-explanation p:last-child { margin-bottom: 0; }
+    .editor-keys-hint { margin: .6rem 0 0; font-size: .85rem; }
     .literate-program { margin: var(--space-5) 0; border-block: 1px solid var(--hairline); }
     .lesson-step { display: grid; grid-template-columns: minmax(18rem, .9fr) minmax(0, 1.35fr); gap: clamp(var(--space-4), 4vw, var(--space-6)); align-items: start; padding: var(--space-4) 0; border-top: 1px dashed var(--hairline-soft); }
     .lesson-step:first-child { border-top: 0; }
@@ -226,6 +230,16 @@
     .cell-banner--1 { margin-block: var(--space-6); }
     .cell-banner--1 figure { width: 100%; max-width: clamp(280px, 65vw, 640px); }
     .cell-banner--1 figcaption { max-width: 42ch; }
+    /* Narrow screens: a figure may not shrink below the scale at which its
+       smallest labels stay readable. Each SVG carries its intrinsic width as
+       --fig-w; it fills the banner up to that width, and a figure too wide
+       for the phone keeps 72% of it and scrolls sideways inside its own box
+       instead of shrinking its text to a few pixels. */
+    @media (max-width: 700px) {
+      .cell-banner { grid-template-columns: minmax(0, 1fr); }
+      .cell-banner figure, .cell-banner--1 figure, .journey-section-figure { max-width: 100%; min-width: 0; justify-items: start; overflow-x: auto; overscroll-behavior-x: contain; scrollbar-width: thin; }
+      .cell-banner svg, .journey-section-figure svg { max-width: none; width: min(var(--fig-w, 100%), max(100%, calc(var(--fig-w, 100%) * 0.72))); }
+    }
     /* Dark palette: same warm hue family as the light theme, inverted.
        Marginalia figures paint with the --fig-* tokens, so redefining
        them here recolours every figure with the page: no light chip, no

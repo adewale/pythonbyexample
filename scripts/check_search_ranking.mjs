@@ -41,6 +41,16 @@ expect(
 const multiToken = rankExamples('for loop', entries);
 expect(multiToken.some((entry) => entry.slug === 'for-loops'), '"for loop" should surface for-loops');
 
+// Everyday words for a page's subject, and names a page uses without
+// putting them in a heading, must find that page.
+for (const [query, slug] of [['dictionary', 'dicts'], ['mutable', 'mutability'], ['regex', 'regular-expressions'], ['null', 'none']]) {
+  const top = rankExamples(query, entries)[0]?.slug;
+  expect(top === slug, `"${query}" should rank ${slug} first, got ${top}`);
+}
+for (const query of ['zip', 'join', 'random', 'docstring', 'enumerate']) {
+  expect(rankExamples(query, entries).length > 0, `"${query}" should return at least one example`);
+}
+
 expect(rankExamples('zzzznonexistent', entries).length === 0, 'nonsense query should return nothing');
 expect(rankExamples('', entries).length === 0, 'empty query should return nothing');
 expect(rankExamples('closures', entries, 3).length <= 3, 'limit should cap results');

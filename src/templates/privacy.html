@@ -3,7 +3,7 @@
   <section class="example-intro" aria-labelledby="privacy-heading">
     <p class="eyebrow">Privacy</p>
     <h1 id="privacy-heading">Privacy and data use</h1>
-    <p class="meta">Effective 11 July 2026. Python By Example has no accounts or advertising, and we do not sell personal information.</p>
+    <p class="meta">Effective 14 November 2026. Python By Example has no accounts or advertising, and we do not sell personal information.</p>
   </section>
   <section class="about-section">
     <h2>Requests and operational logs</h2>
@@ -17,11 +17,11 @@
   <section class="about-section" id="turnstile-privacy-addendum">
     <h2>Cloudflare Turnstile Privacy Addendum</h2>
     <p>To protect the runner from abuse, an Invisible-mode Cloudflare Turnstile check may run when a browser session first submits edited code. Turnstile may process browser, device, network, and IP signals to distinguish people from automated abuse. See Cloudflare's <a class="text-link" href="https://www.cloudflare.com/privacypolicy/">Privacy Policy</a> and <a class="text-link" href="https://developers.cloudflare.com/turnstile/">Turnstile documentation</a>.</p>
-    <p>After successful verification, the site sets <code class="syntax-inline">pbe_turnstile_clearance</code>, an HttpOnly, Secure, SameSite=Lax cookie scoped to <code class="syntax-inline">/examples</code>. It normally expires after eight hours and prevents repeated verification during the same learning session.</p>
+    <p>After successful verification, the site sets <code class="syntax-inline">pbe_turnstile_clearance</code>, an HttpOnly, Secure, SameSite=Lax cookie scoped to <code class="syntax-inline">/examples</code>. It normally expires after eight hours and prevents repeated verification during the same learning session. Its signature is tied to the IP address that passed the check, so the cookie is not accepted from a different address; the address itself is not stored in the cookie.</p>
   </section>
   <section class="about-section">
     <h2>Code editor and syntax highlighting</h2>
-    <p>Example pages can load the CodeMirror editor and Shiki syntax highlighter from <code class="syntax-inline">esm.sh</code>. When those optional modules load, the CDN receives ordinary network request information such as your IP address and browser headers. If the CDN is unavailable, the page retains a plain-text editor and readable server-rendered code.</p>
+    <p>The CodeMirror editor and Shiki syntax highlighter are served from this site, not from a third-party CDN, so reading an example sends requests only to Python By Example. If those scripts fail to load, the page retains a plain-text editor and readable server-rendered code.</p>
   </section>
   <section class="about-section">
     <h2>Retention and choices</h2>

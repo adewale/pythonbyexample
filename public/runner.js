@@ -215,7 +215,7 @@ function initializeRunner() {
       // would otherwise loop through solves and Siteverify calls unbounded.
       if (turnstileToken) throw new Error(responseErrorMessage(response, html));
       outputPanel.querySelector('code').textContent = challengeRequired.textContent
-        || 'Verification required before running edited code…';
+        || 'Verification required before running code…';
       const token = await requestTurnstileToken(signal);
       if (runId !== latestRunId) return;
       return submitRun(runId, signal, token);

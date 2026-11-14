@@ -22,7 +22,7 @@ Production: <https://www.pythonbyexample.dev> (`workers.dev` is disabled so the 
 - Learner-behavior reporting from Worker wide events (`docs/learner-analytics.md`)
 - A quality-gate suite for registries, rubric scores, coverage, and teaching structure that fails builds when content regresses
 - `/about` page describing the verification pipeline, runner sandbox, figure grammar, and live design tokens
-- `/privacy` notice covering runner submissions, operational logs, Invisible Turnstile, cookies, and optional browser CDNs
+- `/privacy` notice covering runner submissions, operational logs, Invisible Turnstile, cookies, and the self-hosted editor scripts
 - Copy buttons on read-only source cells
 - Keyboard prev/next navigation (`←`/`→`) on example pages
 - "Copy link" sharing of the runner's current code via `#code=` URLs
@@ -185,7 +185,7 @@ make upgrade-runtime-deps
 make verify
 ```
 
-Dependabot proposes npm, GitHub Actions, and development-tool updates weekly. It skips runtime packages (their versions depend on which Pyodide wheels exist) and Ruff (upgrades are deliberate because they change lint rules). The browser libraries loaded from esm.sh are pinned in `public/editor.js` and `public/syntax-highlight.js` and are updated by hand.
+Dependabot proposes npm, GitHub Actions, and development-tool updates weekly. It skips runtime packages (their versions depend on which Pyodide wheels exist) and Ruff (upgrades are deliberate because they change lint rules). The browser libraries (CodeMirror and Shiki) are npm dev dependencies pinned in `package-lock.json`; `make browser-bundles` bundles `web/editor.js` and `web/highlighter.js` into `public/`, so pages load no third-party CDN and Dependabot proposes their updates.
 
 ## Contributing
 

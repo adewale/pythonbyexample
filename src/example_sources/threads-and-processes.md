@@ -4,6 +4,7 @@ title = "Threads and Processes"
 section = "Standard Library"
 summary = "Threads share memory, while processes run in separate interpreters."
 doc_path = "/library/concurrent.futures.html"
+sandbox_limit = "threads and processes"
 see_also = [
   "async-await",
   "subprocesses",

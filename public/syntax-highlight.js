@@ -54,8 +54,9 @@ for (const source of document.querySelectorAll('.cell-source')) {
   source.append(button);
 }
 
-// Read-only Python cells are the only pages that need Shiki. Avoid even
-// requesting the CDN module on the home, About, and other code-free pages.
+// Read-only Python cells are the only pages that need the highlighter. Avoid
+// even requesting its bundle on the home, About, and other code-free pages.
+// layout.html names the fingerprinted bundle on this module's script tag.
 const sourceBlocks = [...document.querySelectorAll('pre code.language-python')].map((code) => ({
   source: code.textContent,
   pre: code.closest('pre'),
@@ -64,9 +65,10 @@ const sourceBlocks = [...document.querySelectorAll('pre code.language-python')].
 if (sourceBlocks.length) {
   let codeToHtml = null;
   try {
-    ({ codeToHtml } = await import('https://esm.sh/shiki@4.4.3'));
+    const bundle = document.querySelector('script[data-highlighter]')?.dataset.highlighter;
+    if (bundle) ({ codeToHtml } = await import(bundle));
   } catch (_) {
-    // Plain server-rendered code remains readable when the optional CDN fails.
+    // Plain server-rendered code remains readable when the bundle fails to load.
   }
 
   if (codeToHtml) {
@@ -75,7 +77,7 @@ if (sourceBlocks.length) {
       const theme = themePreference.matches ? 'github-dark' : 'github-light';
       for (const block of sourceBlocks) {
         try {
-          const highlighted = await codeToHtml(block.source, { lang: 'python', theme });
+          const highlighted = await codeToHtml(block.source, { theme });
           const wrapper = document.createElement('div');
           wrapper.innerHTML = highlighted;
           const shikiPre = wrapper.firstElementChild;

@@ -167,6 +167,9 @@ def example_to_dict(filename: str, catalog: ExampleCatalog) -> dict[str, Any]:
         "min_python": frontmatter.get("min_python"),
         "version_sensitive": bool(frontmatter.get("version_sensitive", False)),
         "version_notes": frontmatter.get("version_notes"),
+        # Names what the in-browser sandbox lacks on pages that teach it
+        # anyway (child processes, threads, sockets); Run explains the limit.
+        "sandbox_limit": frontmatter.get("sandbox_limit"),
     }
 
 

@@ -4,6 +4,7 @@ title = "Subprocesses"
 section = "Standard Library"
 summary = "subprocess runs external commands with explicit arguments and captured outputs."
 doc_path = "/library/subprocess.html"
+sandbox_limit = "child processes"
 see_also = [
   "virtual-environments",
   "networking",

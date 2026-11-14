@@ -4,6 +4,7 @@ title = "Networking"
 section = "Standard Library"
 summary = "Networking code exchanges bytes across explicit protocol boundaries."
 doc_path = "/library/socket.html"
+sandbox_limit = "sockets"
 see_also = [
   "bytes-and-bytearray",
   "subprocesses",

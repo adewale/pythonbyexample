@@ -4,6 +4,7 @@ title = "Virtual Environments"
 section = "Modules"
 summary = "Virtual environments isolate a project's Python packages."
 doc_path = "/library/venv.html"
+sandbox_limit = "the venv module"
 see_also = [
   "packages",
   "modules",
