@@ -847,29 +847,16 @@ class FigureArrowLengthContract(unittest.TestCase):
 
 
 class FigureThemeTokenContract(unittest.TestCase):
-    """Contract 15: the page defines the figure tokens the grammar paints with.
+    """Contract 15: figures paint only through the --fig-* theme tokens.
 
     Figures emit var(--fig-ink) and friends instead of literal colours so
-    one paint function renders in both colour schemes. That only holds
-    if public/site.css defines every token in both the light :root and
-    the dark media block, with exactly the values the grammar documents;
-    a missing token renders as black in light mode and invisible ink in
-    dark mode, and neither is caught by the geometry contracts.
+    one paint function renders in both colour schemes. The other half of
+    the contract is measured on the rendered page, in light and dark, by
+    scripts/figure_theme_contract.mjs (run from check_browser_layout.mjs):
+    every token resolves to the colour FIGURE_TOKENS_LIGHT/DARK document,
+    and every stroke and fill paints it. A missing token leaves strokes
+    unpainted and fills black, which no geometry contract can see.
     """
-
-    def test_site_css_defines_every_token_in_both_schemes(self):
-        from pathlib import Path
-
-        from src.marginalia_grammar import FIGURE_TOKENS_DARK, FIGURE_TOKENS_LIGHT
-
-        css = (Path(__file__).resolve().parents[1] / "public" / "site.css").read_text()
-        light, dark = css.split("@media (prefers-color-scheme: dark)", 1)
-        failures: list[str] = []
-        for scheme, block, tokens in (("light", light, FIGURE_TOKENS_LIGHT), ("dark", dark, FIGURE_TOKENS_DARK)):
-            for name, value in tokens.items():
-                if f"{name}: {value};" not in block:
-                    failures.append(f"{scheme}: expected `{name}: {value};`")
-        self.assertEqual(failures, [], "\n  " + "\n  ".join(failures))
 
     def test_every_painted_colour_is_a_token_reference(self):
         from src.marginalia_grammar import EMPHASIS, INK, INK_SOFT, SOFT_FILL

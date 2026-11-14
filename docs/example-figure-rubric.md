@@ -145,7 +145,8 @@ the figure can merge.
 - **Both colour schemes, enforced.** Figures paint with the
   `var(--fig-*)` tokens; `public/site.css` defines all four in the
   light root and the dark media block with the grammar's values, so
-  no figure needs a light chip in dark mode. *Contract 15.*
+  no figure needs a light chip in dark mode. *Contract 15, measured on
+  the rendered page by `scripts/figure_theme_contract.mjs`.*
 - **figcaption present and declarative.** Captions in the form
   "Two names share one mutable list — appending through one name
   changes the object visible through both." Not "this shows X" or
