@@ -101,6 +101,7 @@ order = [
   "regular-expressions",
   "number-parsing",
   "custom-exceptions",
+  "files-and-pathlib",
   "json",
   "logging",
   "testing",

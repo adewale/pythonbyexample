@@ -1055,6 +1055,31 @@ def json_python_mapping(c: Canvas) -> None:
         c.mono(132, y, b, anchor="start", size=10)
 
 
+def path_tree(c: Canvas) -> None:
+    """Files and pathlib · the page's own directory tree; each Path names one place in it.
+
+    The temporary directory holds notes.txt and a reports directory with
+    summary.csv inside. Hairlines are the containment edges; the dashed
+    link shows that `root / "reports" / "summary.csv"` is the walk down
+    those edges, one name per `/`.
+    """
+    c.tag(0, 4, "directory tree")
+    c.mono(0, 22, "root/", anchor="start")
+    c.hairline(4, 28, 4, 64)
+    c.hairline(4, 40, 16, 40)
+    c.mono(20, 43, "notes.txt", anchor="start")
+    c.hairline(4, 64, 16, 64)
+    c.mono(20, 67, "reports/", anchor="start")
+    c.hairline(24, 73, 24, 88)
+    c.hairline(24, 88, 36, 88)
+    c.mono(40, 91, "summary.csv", anchor="start")
+    c.tag(150, 4, "a path names one place")
+    c.mono(150, 43, 'root / "notes.txt"', anchor="start", size=9)
+    c.mono(150, 91, 'reports / "summary.csv"', anchor="start", size=9)
+    c.dashed(80, 40, 144, 40)
+    c.dashed(112, 88, 144, 88)
+
+
 def regex_groups(c: Canvas) -> None:
     """Regular expressions · the cell's own pattern, its two capture groups landing on one record.
 
@@ -1656,6 +1681,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "enum-members": (enum_members, 280, 60),
     "datetime-instant": (datetime_instant, 280, 88),
     "json-python-mapping": (json_python_mapping, 220, 116),
+    "path-tree": (path_tree, 290, 100),
     "regex-groups": (regex_groups, 140, 96),
     "number-parse": (number_parse, 204, 64),
     "format-spec": (format_spec, 372, 82),

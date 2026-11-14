@@ -389,6 +389,7 @@ journey = "shapes"
 section = "Cross text and data boundaries."
 support = [
   "number-parsing",
+  "files-and-pathlib",
   "json",
   "regular-expressions",
   "datetime",
@@ -907,6 +908,11 @@ summary = "Programs often receive text and produce structured data, so parsing a
 kind = "example"
 value = "number-parsing"
 description = "turn text into numbers safely"
+
+[[journeys.sections.items]]
+kind = "example"
+value = "files-and-pathlib"
+description = "read and write text files through `Path` objects"
 
 [[journeys.sections.items]]
 kind = "example"
@@ -1741,6 +1747,12 @@ figure = "datetime-instant"
 caption = "An aware datetime carries a UTC offset; one instant in time reads differently on two clocks."
 
 [[figure_attachments]]
+slug = "files-and-pathlib"
+anchor = "cell-0"
+figure = "path-tree"
+caption = "Each `Path` names one place in the directory tree; `/` steps down one level per name."
+
+[[figure_attachments]]
 slug = "json"
 anchor = "cell-0"
 figure = "json-python-mapping"
@@ -2402,6 +2414,11 @@ comment = "railroad tracing the cell's 05.1f; one-move 0.75, restraint 0.75 and 
 slug = "regular-expressions"
 score = 9.0
 comment = "the cell's pattern with both capture groups dropped onto Ada: 10; one-move 0.75 and restraint 0.75 for two rows plus two drops; 1.5/1/0.75/1/1 · 1/1/0.75 · 1/0.5"
+
+[[example_figure_scores]]
+slug = "files-and-pathlib"
+score = 9.0
+comment = "the page's own tree with the two paths the cells build; containment hairlines, dashed path-to-place links, no accent"
 
 [[example_figure_scores]]
 slug = "json"
@@ -3299,6 +3316,11 @@ comment = "decimal, explicit base, and recoverable ValueError boundary"
 slug = "custom-exceptions"
 score = 9.0
 comment = "domain error naming, raise point, recovery boundary"
+
+[[example_quality_scores]]
+slug = "files-and-pathlib"
+score = 9.0
+comment = "path vs file distinction, whole-file and line-by-line reading, directory listing, missing-file boundary; all cells run in the sandbox"
 
 [[example_quality_scores]]
 slug = "json"
