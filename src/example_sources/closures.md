@@ -75,7 +75,7 @@ print(triple(5))
 :::
 
 :::cell
-Closures bind names, not values. Lambdas defined in a loop all reference the same loop variable, so calling them later sees its final value. Capture the value at definition time by binding it as a default argument — `lambda i=i: i` — so each closure remembers its own `i`.
+Closures bind names, not values. [Lambdas](/examples/lambdas) (one-expression functions) defined in a loop all reference the same loop variable, so calling them later sees its final value. Capture the value at definition time by binding it as a default argument — `lambda i=i: i` — so each closure remembers its own `i`.
 
 ```python
 late = []

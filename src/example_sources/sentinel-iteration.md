@@ -15,22 +15,20 @@ see_also = [
 
 This shape is useful for repeated reads: file blocks until `b""`, socket chunks until an empty response, queue items until a stop marker. It removes the common `while True` plus `break` scaffolding when the loop body is otherwise just "read, then process".
 
-The callable must take no arguments. Wrap a parameterized reader in a `lambda`, `functools.partial`, or object method when the underlying API needs parameters.
+The callable must take no arguments. A method taken from an object, such as `queue.popleft`, already fits. Wrap a parameterized reader in a `lambda` or `functools.partial` when the underlying API needs parameters.
 
 :::program
 ```python
-chunks = iter(["py", "thon", ""])
+from collections import deque
 
+queue = deque(["py", "thon", "", "ignored"])
+print(list(iter(queue.popleft, "")))
+print(queue)
 
-def read_chunk():
-    return next(chunks)
-
-print(list(iter(read_chunk, "")))
-
-chunks = iter(["py", "thon", ""])
+queue = deque(["py", "thon", "", "ignored"])
 word = ""
 while True:
-    chunk = next(chunks)
+    chunk = queue.popleft()
     if chunk == "":
         break
     word += chunk
@@ -39,20 +37,19 @@ print(word)
 :::
 
 :::cell
-The two-argument form turns a polling callable into an iterator. The empty string stops the loop without appearing in the result.
+The two-argument form turns a polling callable into an iterator. `queue.popleft` (no parentheses) is a zero-argument callable that removes and returns the next queued item each time it is called. The empty string stops the loop without appearing in the result, and anything queued after the sentinel is left unread.
 
 ```python
-chunks = iter(["py", "thon", ""])
+from collections import deque
 
-
-def read_chunk():
-    return next(chunks)
-
-print(list(iter(read_chunk, "")))
+queue = deque(["py", "thon", "", "ignored"])
+print(list(iter(queue.popleft, "")))
+print(queue)
 ```
 
 ```output
 ['py', 'thon']
+deque(['ignored'])
 ```
 :::
 
@@ -60,10 +57,10 @@ print(list(iter(read_chunk, "")))
 The equivalent manual loop needs an explicit read, comparison, and `break`. Use this shape when the stop condition is more complicated than a single sentinel value.
 
 ```python
-chunks = iter(["py", "thon", ""])
+queue = deque(["py", "thon", "", "ignored"])
 word = ""
 while True:
-    chunk = next(chunks)
+    chunk = queue.popleft()
     if chunk == "":
         break
     word += chunk

@@ -206,7 +206,7 @@ class AppTests(unittest.TestCase):
             "data = b\"py\"",
             "number = 2 + 3j",
             "class Greeter(Protocol):",
-            "print(Scale(2) @ Scale(3))",
+            "print(Vector(2, 3) @ Vector(4, 5))",
             "print(...)",
         ]
         for snippet in required_snippets:
