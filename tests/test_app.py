@@ -531,15 +531,9 @@ class AppTests(unittest.TestCase):
 
 
 class DarkModeAndAccessibilityTests(unittest.TestCase):
-    def test_dark_mode_recolours_marginalia_figures_through_tokens(self):
-        css = (ROOT / "public" / "site.css").read_text()
-        dark_block = css.split("@media (prefers-color-scheme: dark)", 1)[1]
-        for token in ("--fig-ink", "--fig-ink-soft", "--fig-accent", "--fig-soft"):
-            self.assertIn(token, dark_block)
-        # No light "paper chip" behind figures: the tokens do the work.
-        self.assertNotIn("--figure-paper", css)
-        self.assertNotIn(".cell-banner figure svg", dark_block)
-
+    # Figure colours in both themes (every --fig-* token defined, no paper
+    # chip) are measured on the rendered page by
+    # scripts/figure_theme_contract.mjs, run from check_browser_layout.mjs.
     def test_optional_highlighters_retain_readable_server_fallbacks(self):
         page = render_example_page(get_example("values"))
         self.assertIn('<pre><code class="language-python">', page)
