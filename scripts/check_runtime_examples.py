@@ -16,12 +16,16 @@ import argparse
 import html
 import re
 import sys
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
 from _common import load_catalog
 
+RELOAD_RETRIES = 30
+RELOAD_RETRY_SECONDS = 2
 OUTPUT_RE = re.compile(r'<section class="runner-panel output-panel"[^>]*>.*?<pre><code>(.*?)</code></pre>', re.DOTALL)
 
 
@@ -32,8 +36,20 @@ def run_in_worker(base_url: str, slug: str, code: str) -> str:
         headers={"Content-Type": "application/x-www-form-urlencoded"},
         method="POST",
     )
-    with urllib.request.urlopen(request, timeout=120) as response:
-        page = response.read().decode("utf-8")
+    # The dev Worker answers 503 or refuses connections while it reloads after
+    # a rebuild; wait that out instead of failing the whole catalog.
+    for attempt in range(RELOAD_RETRIES + 1):
+        try:
+            with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310 - fixed local/HTTPS origin
+                page = response.read().decode("utf-8")
+            break
+        except urllib.error.HTTPError as error:
+            if error.code != 503 or attempt == RELOAD_RETRIES:
+                raise
+        except urllib.error.URLError:
+            if attempt == RELOAD_RETRIES:
+                raise
+        time.sleep(RELOAD_RETRY_SECONDS)
     match = OUTPUT_RE.search(page)
     if match is None:
         raise RuntimeError("response has no output panel")
