@@ -191,10 +191,12 @@ example_hard_min = 8.5
 journey_section_min = 8.5
 journey_average_min = 8.8
 
+# A waiver is time-boxed with `expires = "YYYY-MM-DD"`. Use `permanent = true`
+# (and no `expires`) only when the reason can never stop being true.
 [quality_waivers.hello-world]
 accepted_min = 7.0
 reason = "Traditional first example is intentionally tiny: program -> output is the goal, not a full concept tour."
-expires = "2026-12-01"
+permanent = true
 
 [no_figure_rationales]
 # Slugs may be added here only when the page is constraint-shaped,
