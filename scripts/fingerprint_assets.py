@@ -13,6 +13,7 @@ MANIFEST = ROOT / "src" / "asset_manifest.py"
 ASSETS = {
     "SITE_CSS": "site.css",
     "SYNTAX_JS": "syntax-highlight.js",
+    "HIGHLIGHTER_JS": "highlighter.js",
     "EDITOR_JS": "editor.js",
     "RUNNER_JS": "runner.js",
     "SEARCH_JS": "search.js",
@@ -80,6 +81,8 @@ def main() -> None:
         "/site.*.css\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/syntax-highlight.*.js\n"
+        "  Cache-Control: public, max-age=31536000, immutable\n\n"
+        "/highlighter.*.js\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"
         "/editor.*.js\n"
         "  Cache-Control: public, max-age=31536000, immutable\n\n"

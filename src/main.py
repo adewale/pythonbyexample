@@ -19,6 +19,7 @@ from app import (
     JOURNEYS_BY_SLUG,
     MAX_DYNAMIC_OUTPUT_BYTES,
     build_dynamic_worker_code,
+    example_markdown,
     get_example,
     render_about,
     render_cell_output_flow_option,
@@ -28,10 +29,12 @@ from app import (
     render_journey_not_found,
     render_journey_page,
     render_journeys_index,
+    render_llms_txt,
     render_mobile_run_first_option,
     render_not_found,
     render_privacy,
     render_sitemap,
+    sandbox_limit_note,
 )
 from asset_manifest import HTML_CACHE_VERSION
 from examples import PYTHON_VERSION
@@ -73,12 +76,14 @@ MAX_SUBMITTED_BODY_BYTES = 100_000
 try:
     from js import AbortSignal, Object, caches
     from js import Request as JsRequest
+    from js import Response as JsResponse
     from js import fetch as js_fetch
     from pyodide.ffi import create_once_callable, jsnull, to_js
 except ImportError:  # Allows editor tooling outside Workers.
     AbortSignal = None
     Object = None
     JsRequest = None
+    JsResponse = None
     jsnull = None
     create_once_callable = None
     to_js = None
@@ -208,10 +213,17 @@ def _smoke_bypass_ok(request: Request) -> bool:
     return bool(bypass_secret) and hmac.compare_digest(supplied, bypass_secret)
 
 
-def _sign_clearance(secret: str, expires: int) -> str:
-    payload = str(expires)
-    signature = hmac.new(secret.encode("utf-8"), payload.encode("utf-8"), hashlib.sha256).hexdigest()
-    return f"{payload}.{signature}"
+def _clearance_client(request: Request) -> str:
+    # Cloudflare sets CF-Connecting-IP on every production request. Binding
+    # the clearance to it means a cookie copied to another client is not
+    # accepted there; a learner whose address changes simply solves again.
+    return request.headers.get("CF-Connecting-IP", "")
+
+
+def _sign_clearance(secret: str, expires: int, client: str = "") -> str:
+    signed = f"{expires}|{client}" if client else str(expires)
+    signature = hmac.new(secret.encode("utf-8"), signed.encode("utf-8"), hashlib.sha256).hexdigest()
+    return f"{expires}.{signature}"
 
 
 def _clearance_valid(request: Request) -> bool:
@@ -226,7 +238,7 @@ def _clearance_valid(request: Request) -> bool:
         return False
     if expires <= int(time.time()):
         return False
-    expected = _sign_clearance(secret, expires).split(".", 1)[1]
+    expected = _sign_clearance(secret, expires, _clearance_client(request)).split(".", 1)[1]
     return hmac.compare_digest(signature, expected)
 
 
@@ -249,7 +261,7 @@ def _set_turnstile_clearance(response: HTMLResponse, request: Request) -> None:
     expires = int(time.time()) + max_age
     response.set_cookie(
         TURNSTILE_CLEARANCE_COOKIE,
-        _sign_clearance(secret, expires),
+        _sign_clearance(secret, expires, _clearance_client(request)),
         max_age=max_age,
         path="/examples",
         secure=True,
@@ -291,8 +303,20 @@ async def journey_page(slug: str):
     return _html(render_journey_page(journey))
 
 
+@app.get("/llms.txt")
+async def llms_txt():
+    return Response(render_llms_txt(), media_type="text/plain; charset=utf-8")
+
+
 @app.get("/examples/{slug}", response_class=HTMLResponse)
 async def example_page(slug: str, request: Request):
+    if slug.endswith(".md"):
+        # The authored source of a page, for readers and tools that prefer
+        # Markdown; /llms.txt links here.
+        markdown = example_markdown(slug.removesuffix(".md"))
+        if markdown is None:
+            return _html(render_example_not_found(slug.removesuffix(".md")), 404)
+        return Response(markdown, media_type="text/markdown; charset=utf-8")
     example = get_example(slug)
     if example is None:
         return _html(render_example_not_found(slug), 404)
@@ -345,7 +369,7 @@ async def run_example(slug: str, request: Request):
 
     if needs_turnstile and not turnstile_token:
         site_key = _turnstile_site_key(request)
-        message = "Verification required before running edited code."
+        message = "Verification required before running code."
         # Issuing a challenge is the normal first run of a session, not a
         # failure; keeping it apart lets reports compare issued vs rejected.
         turnstile_event = {"outcome": "challenged"}
@@ -390,6 +414,8 @@ async def run_example(slug: str, request: Request):
         elapsed_ms = (time.perf_counter() - started) * 1000
         if event := _wide_event(request):
             event["execution_ms"] = round(elapsed_ms, 2)
+    if request.state.dynamic_worker_status >= 500:
+        output = sandbox_limit_note(example) + output
     response = _html(
         render_example_page(
             example,
@@ -526,7 +552,7 @@ async def _verify_turnstile(request: Request, token: str) -> tuple[bool, str, di
     if not token:
         return (
             False,
-            "Turnstile verification is required before running edited code. Please retry.",
+            "Turnstile verification is required before running code. Please retry.",
             {"outcome": "fail", "reason": "missing_token"},
         )
     if len(token) > MAX_TURNSTILE_TOKEN_CHARS:
@@ -683,6 +709,13 @@ async def _run_example(request: Request, slug, code):
 async def not_found(path: str, request: Request):
     # FastAPI dispatches the explicit routes above in production. Keep these
     # fallbacks for direct Worker calls to the catch-all as well.
+    if path.endswith("/"):
+        # /examples/values/ is the same page as /examples/values; send
+        # inbound links and crawlers to the canonical spelling.
+        target = "/" + path.strip("/")
+        if request.url.query:
+            target += f"?{request.url.query}"
+        return Response(status_code=308, headers={"Location": target})
     if path == "sitemap.xml":
         return Response(
             render_sitemap(),
@@ -702,6 +735,32 @@ async def not_found(path: str, request: Request):
     return _html(render_not_found(), 404)
 
 
+HTML_CACHE_CONTROL = "public, max-age=300, stale-while-revalidate=86400"
+
+
+def _with_cache_control(response, value: str):
+    """Return a response whose Cache-Control is exactly ``value``.
+
+    A response read back from the Workers cache can carry a different browser
+    lifetime than the one stored, so cache hits are re-stamped before they
+    leave the Worker; the stored copy's headers are immutable.
+    """
+    if JsResponse is not None:
+        response = JsResponse.new(response.body, response)
+    response.headers.set("Cache-Control", value)
+    return response
+
+
+def _without_body(response):
+    """The HEAD form of a GET response: same status and headers, no body."""
+    if JsResponse is None:
+        return response
+    return JsResponse.new(
+        jsnull,
+        _to_js_object({"status": response.status, "headers": response.headers}),
+    )
+
+
 class Default(WorkerEntrypoint):
     async def fetch(self, request):
         started = time.perf_counter()
@@ -711,67 +770,17 @@ class Default(WorkerEntrypoint):
             html_cache_version=HTML_CACHE_VERSION,
         )
         asgi_request = getattr(request, "js_object", request)
+        method = getattr(request, "method", None)
+        # HEAD is answered from the GET representation (and the GET cache), so
+        # link checkers and crawlers see the same status and headers as a GET.
+        is_head = method == "HEAD" and JsRequest is not None
+        if is_head:
+            asgi_request = JsRequest.new(asgi_request, _to_js_object({"method": "GET"}))
+            method = "GET"
 
         try:
-            # Cache static GET responses at the Worker edge. Edited example runs are
-            # POST requests and are intentionally never cached.
-            if getattr(request, "method", None) == "GET" and caches is not None:
-                if should_cache_get_url(getattr(request, "url", "")):
-                    event["cache"] = "miss"
-                    turnstile_site_key = getattr(self.env, "TURNSTILE_SITE_KEY", "")
-                    cache_key = JsRequest.new(
-                        html_cache_key_url(getattr(request, "url", ""), turnstile_site_key),
-                        _to_js_object({"method": "GET"}),
-                    )
-                    cached = await caches.default.match(cache_key)
-                    if cached:
-                        event["cache"] = "hit"
-                        observability.record_status(event, cached.status)
-                        return cached
-                    response = await asgi.fetch(
-                        app,
-                        asgi_request,
-                        self.env,
-                        state={"wide_event": event},
-                        max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
-                    )
-                    _apply_security_headers(response)
-                    observability.record_status(event, getattr(response, "status", 200))
-                    if getattr(response, "status", 200) == 200:
-                        response.headers.set(
-                            "Cache-Control",
-                            "public, max-age=300, stale-while-revalidate=86400",
-                        )
-                        await caches.default.put(cache_key, response.clone())
-                    else:
-                        # Error pages must not linger in browser heuristic caches.
-                        response.headers.set("Cache-Control", "no-store")
-                    return response
-                event["cache"] = "bypass"
-                response = await asgi.fetch(
-                    app,
-                    asgi_request,
-                    self.env,
-                    state={"wide_event": event},
-                    max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
-                )
-                _apply_security_headers(response)
-                observability.record_status(event, getattr(response, "status", 200))
-                response.headers.set("Cache-Control", "no-store")
-                return response
-
-            event["cache"] = "bypass"
-            response = await asgi.fetch(
-                app,
-                asgi_request,
-                self.env,
-                state={"wide_event": event},
-                max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
-            )
-            _apply_security_headers(response)
-            observability.record_status(event, getattr(response, "status", 200))
-            response.headers.set("Cache-Control", "no-store")
-            return response
+            response = await self._respond(request, asgi_request, method, event)
+            return _without_body(response) if is_head else response
         except Exception as exc:
             event["status_code"] = 500
             event["outcome"] = "error"
@@ -781,3 +790,45 @@ class Default(WorkerEntrypoint):
         finally:
             event["duration_ms"] = round((time.perf_counter() - started) * 1000, 2)
             observability.emit(event, env=self.env)
+
+    async def _dispatch(self, asgi_request, event):
+        response = await asgi.fetch(
+            app,
+            asgi_request,
+            self.env,
+            state={"wide_event": event},
+            max_body_bytes=MAX_SUBMITTED_BODY_BYTES,
+        )
+        _apply_security_headers(response)
+        observability.record_status(event, getattr(response, "status", 200))
+        return response
+
+    async def _respond(self, request, asgi_request, method, event):
+        # Cache static GET responses at the Worker edge. Edited example runs are
+        # POST requests and are intentionally never cached.
+        url = getattr(request, "url", "")
+        if method == "GET" and caches is not None and should_cache_get_url(url):
+            event["cache"] = "miss"
+            turnstile_site_key = getattr(self.env, "TURNSTILE_SITE_KEY", "")
+            cache_key = JsRequest.new(
+                html_cache_key_url(url, turnstile_site_key),
+                _to_js_object({"method": "GET"}),
+            )
+            cached = await caches.default.match(cache_key)
+            if cached:
+                event["cache"] = "hit"
+                observability.record_status(event, cached.status)
+                return _with_cache_control(cached, HTML_CACHE_CONTROL)
+            response = await self._dispatch(asgi_request, event)
+            if getattr(response, "status", 200) == 200:
+                response.headers.set("Cache-Control", HTML_CACHE_CONTROL)
+                await caches.default.put(cache_key, response.clone())
+            else:
+                # Error pages must not linger in browser heuristic caches.
+                response.headers.set("Cache-Control", "no-store")
+            return response
+
+        event["cache"] = "bypass"
+        response = await self._dispatch(asgi_request, event)
+        response.headers.set("Cache-Control", "no-store")
+        return response

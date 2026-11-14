@@ -10,6 +10,7 @@ see_also = [
   "async-await",
 ]
 expected_output = "b'ping'\nping\n"
+sandbox_limit = "sockets"
 +++
 
 Networking code sends and receives bytes across protocol boundaries. Higher-level HTTP clients hide many details, but the core rule remains: text is encoded before it leaves the process and decoded after bytes come back.

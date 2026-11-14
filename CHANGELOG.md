@@ -8,6 +8,18 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ### Fixed
 
+- Example pages now show their intro paragraphs. Every source file opens with two or three paragraphs of explanation that the loader parsed and the page template then dropped, so the definition and the "when to use this" of most pages never reached a reader. They render under the summary and are part of the search index.
+- Runner output reads like Python, not like the harness: tracebacks show only the learner's frames with their source lines (`File "example.py", line 3`), `exit()` and `sys.exit()` end the program instead of returning "Internal Server Error", stderr is shown in program order, and `input()` explains that the sandbox has no terminal. Pages that teach something the sandbox lacks (`sandbox_limit` in frontmatter: the venv module, child processes, threads, sockets) say so when Run fails.
+- The editor has undo history, auto-indent after a block opener, Tab indentation (Esc then Tab leaves the editor), bracket matching, and Ctrl/⌘+Enter to run. Ctrl+Z used to fall through to the browser and corrupt the document.
+- Figures stay readable on phones. A figure now fills the banner up to its intrinsic width and, when wider than the screen, keeps 72% of that width and scrolls sideways inside its own box; labels that shrank to under 6px now render at 9px or more.
+- Journey pages render inline code; section titles and outcomes used to show literal backticks.
+- `HEAD` requests are answered for every rendered page and `/sitemap.xml` (they returned 405), and trailing-slash URLs such as `/examples/values/` redirect to the canonical path (they returned 404).
+- Cache hits leave the Worker with the intended `max-age=300`; a response read back from the Workers cache was reaching browsers with a four-hour lifetime.
+- The Turnstile clearance cookie is bound to the client address that passed the check, so a copied cookie is not accepted elsewhere.
+- Search finds pages by everyday words ("dictionary", "mutable", "regex") and by names a page uses in its prose or code (`zip`, `join`, `docstring`).
+- The `hello-world` quality waiver is permanent; it would have expired on 2026-12-01 and failed `make verify` on every pull request.
+- Early pages no longer depend on `def`, `class` or `try` before those are taught; `operators` no longer defines a class to demonstrate `@`.
+
 - Deployment smoke now proves the production Turnstile secret. Its bypass header skips Siteverify, so a wrong, rotated, or test secret used to pass smoke while every new session's first run failed. With `PBE_SMOKE_BYPASS_SECRET`, `scripts/smoke_deployment.py` calls the header-gated `POST /__smoke/turnstile`. The Worker sends its secret with Cloudflare's dummy token and reports `valid`, `invalid`, `testing_key`, `unverified`, `unexpected`, or `absent`. Smoke fails unless the secret is a working production secret with a site key, or Turnstile is off.
 
 - A Run whose Turnstile token the server rejects now ends with the server's message instead of re-challenging. The runner used to solve again every time the response carried the challenge marker, so a persistently failing Siteverify (wrong secret, hostname, or action) turned one click into an unbounded loop of solves, Worker POSTs, and Siteverify subrequests. Each Run now earns at most one challenge, and the failure message says to press Run again.
@@ -18,11 +30,21 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/en/1.1.0
 
 ### Changed
 
+- CodeMirror and Shiki are bundled from npm packages pinned in `package-lock.json` (`make browser-bundles`, sources in `web/`) instead of being imported from esm.sh at page load. An example page went from about 100 requests and 617 KB of third-party script to two first-party bundles, the CSP no longer allows esm.sh or `wasm-unsafe-eval`, and the code visitors run can only change with a commit. The privacy notice is updated.
+- `generics-and-typevar` leads with PEP 695 type parameter syntax and shows `TypeVar` as the legacy spelling; `dataclasses`, `typed-dicts`, `warnings` and generics now use features introduced in Python 3.13 (`copy.replace()`, `ReadOnly`, `warnings.deprecated`, type parameter defaults).
+- The scoring heuristic no longer credits a page for containing `print(` or particular name strings.
+- The home page hero, About and privacy pages describe what the site does today.
+
 - Figures now paint with `--fig-ink`, `--fig-ink-soft`, `--fig-accent` and `--fig-soft` tokens instead of literal colours, and `site.css` defines the tokens for both colour schemes. Dark mode recolours every figure with the page; the light "paper chip" behind figures is gone. Figure mono and sans faces follow the page's own font stacks, and mono runs are pinned to the grammar's character advance with `textLength` so divider positions hold on every platform. Paired figures in a banner share a baseline (a two-row subgrid). Five figures lost an accent that marked an arbitrary row (`naming-decisions`, `iteration-loop-selector`, `type-shape-catalog`, `reliability-signal-map`, `container-methods`); nine arrows that were mostly arrowhead were lengthened to the new 20-unit minimum.
 - Ten figures redrawn as mechanisms carrying the lesson's own values: closures is an environment diagram with the returned frame ghosted and one live `__closure__` reference; generators shows the cell's two `next()` calls on `countdown(3)` with the surviving local beside each; recursion shows the example's tree at the deepest frame of `total(tree)` with the values each frame returns; dicts shows the cell's keys hashed to slots with the insert of `"year"`; sentinel iteration shows `read_chunk` yielding `"py"` and `"thon"` and stopping on the empty string; string formatting's format spec is a railroad tracing the cell's `05.1f`, skipped stations ghosted under a bypass rail; bytes-and-bytearray draws the example's bytes as integer slots with the in-place write and moves to the cell that performs it; regular expressions shows the cell's two capture groups landing on `Ada: 10`; values shows `text` bound to a `str` object and the `type()` hop to where `upper()` lives; logging shows the cell's three records crossing the handler's INFO gate. The binding figure is a parametrised factory, so `variables` shows `message → "hi"` and `constants` shows `MAX_RETRIES → 3`.
 - The rubric states that table-shaped figures are redrawn rather than removed, that a figure whose caption names no single element carries no accent, and how cell-0 anchors are scored. The review, principles and queue are in `docs/diagram-upgrade-plan.md`.
 
 ### Added
+
+- `files-and-pathlib` example: `Path` joining, whole-file and line-by-line text I/O, directory listing, and the missing-file boundary.
+- `/llms.txt`, and every example's authored Markdown at `/examples/<slug>.md`.
+- `make runtime-examples-test` (part of `make verify`): posts every example's complete program to the local dev Worker and compares the sandbox output with the expected output. `verify-examples` only ever ran the catalog under host CPython.
+- The browser gate now checks editor keys, the smallest figure label on a 390px phone, and that an example page makes no third-party request before Run.
 
 - `/about` page describing how the site is made — the verified-output pipeline, the runner sandbox, the figure grammar, and the quality gates — with a design-language section that renders the live CSS tokens (color swatches, spacing scale, type specimens, and a real walkthrough cell as a specimen). Linked from the nav on every page and listed in the sitemap.
 - Copy buttons on read-only source cells: injected client-side onto `.cell-source` wrappers (so no-JS pages render no dead buttons), clipboard API with a hidden-textarea fallback, and a quiet icon-in-pill treatment — the Lucide copy glyph drawn as a `currentColor` CSS mask (checkmark on success, x on failure), a visually hidden live region announcing the result, and a ~44px tap target around the small pill. These are the site's first and only UI icons; every other action stays text.

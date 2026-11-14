@@ -12,6 +12,7 @@ try:
     from .asset_manifest import ASSET_PATHS
     from .editorial_registry import journeys as load_journeys
     from .editorial_registry import see_also_edge_labels as load_see_also_edge_labels
+    from .example_loader import _source_text as _example_source_text
     from .examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
     from .marginalia import render_banner, render_for_section
     from .textfmt import render_inline
@@ -19,6 +20,7 @@ except ImportError:  # Cloudflare Python Workers import sibling modules from mai
     from asset_manifest import ASSET_PATHS
     from editorial_registry import journeys as load_journeys
     from editorial_registry import see_also_edge_labels as load_see_also_edge_labels
+    from example_loader import _source_text as _example_source_text
     from examples import EXAMPLES, EXAMPLES_BY_SLUG, PYTHON_VERSION, REFERENCE_URL
     from marginalia import render_banner, render_for_section
     from textfmt import render_inline
@@ -71,6 +73,12 @@ def _recommended_examples(slug, limit=4):
 
 MAX_DYNAMIC_OUTPUT_BYTES = 64 * 1024
 DYNAMIC_OUTPUT_LIMIT_MESSAGE = "Program output exceeded the 64 kB limit. Reduce output and try again."
+# Learner tracebacks name this file instead of the harness module.
+EXAMPLE_FILENAME = "example.py"
+INPUT_UNAVAILABLE_MESSAGE = (
+    "input() is not available here: the sandbox runs your program without a terminal. "
+    "Assign the value directly instead, for example name = \"Ada\"."
+)
 
 
 def build_dynamic_worker_code(example_code: str) -> str:
@@ -78,11 +86,15 @@ def build_dynamic_worker_code(example_code: str) -> str:
     return f'''from workers import WorkerEntrypoint, Response
 import contextlib
 import io
+import linecache
 import traceback
 
 EXAMPLE_CODE = {example_code!r}
+EXAMPLE_FILENAME = {EXAMPLE_FILENAME!r}
 MAX_OUTPUT_BYTES = {MAX_DYNAMIC_OUTPUT_BYTES}
 OUTPUT_LIMIT_MESSAGE = {DYNAMIC_OUTPUT_LIMIT_MESSAGE!r}
+INPUT_UNAVAILABLE_MESSAGE = {INPUT_UNAVAILABLE_MESSAGE!r}
+TEXT_HEADERS = {{"Content-Type": "text/plain; charset=utf-8"}}
 
 
 class OutputLimitExceeded(Exception):
@@ -129,23 +141,74 @@ class BoundedStdout(io.TextIOBase):
         return "".join(checked)
 
 
+def _no_input(prompt=""):
+    raise EOFError(INPUT_UNAVAILABLE_MESSAGE)
+
+
+# The file this module was loaded from, however the loader named it.
+HARNESS_FILENAME = _no_input.__code__.co_filename
+
+
+def _drop_harness_frames(summary, seen):
+    # Chained exceptions (raise ... from, or errors while handling another)
+    # each carry their own stack.
+    if summary is None or id(summary) in seen:
+        return
+    seen.add(id(summary))
+    summary.stack = traceback.StackSummary.from_list(
+        [frame for frame in summary.stack if frame.filename != HARNESS_FILENAME]
+    )
+    _drop_harness_frames(summary.__cause__, seen)
+    _drop_harness_frames(summary.__context__, seen)
+
+
+def _learner_traceback(error):
+    # Show the learner their own frames only: register the source so each
+    # frame prints its line, and drop the frames that belong to this harness
+    # (the exec() call and the input() stand-in).
+    linecache.cache[EXAMPLE_FILENAME] = (
+        len(EXAMPLE_CODE), None, EXAMPLE_CODE.splitlines(True), EXAMPLE_FILENAME
+    )
+    summary = traceback.TracebackException.from_exception(error)
+    _drop_harness_frames(summary, set())
+    return "".join(summary.format())
+
+
+def _exit_note(error):
+    # exit() and sys.exit() end the program; they are not failures. A
+    # message or non-zero status is reported the way a shell would show it.
+    code = error.code
+    if code is None or code == 0:
+        return ""
+    if isinstance(code, int):
+        return f"[exited with status {{code}}]\\n"
+    return f"{{code}}\\n"
+
+
 class Default(WorkerEntrypoint):
     async def fetch(self, request):
-        stdout = BoundedStdout()
-        namespace = {{"__name__": "__main__"}}
+        # stdout and stderr share one bounded sink, so warnings, logging and
+        # print(..., file=sys.stderr) appear in program order.
+        output = BoundedStdout()
+        namespace = {{"__name__": "__main__", "input": _no_input}}
+        status = 200
         try:
-            with contextlib.redirect_stdout(stdout):
-                exec(EXAMPLE_CODE, namespace)
-            return Response(BoundedStdout.getvalue(stdout), headers={{"Content-Type": "text/plain; charset=utf-8"}})
-        except OutputLimitExceeded:
-            return Response(OUTPUT_LIMIT_MESSAGE, status=413, headers={{"Content-Type": "text/plain; charset=utf-8"}})
-        except Exception:
-            error_output = BoundedStdout()
             try:
-                traceback.print_exc(file=error_output)
+                with contextlib.redirect_stdout(output), contextlib.redirect_stderr(output):
+                    exec(compile(EXAMPLE_CODE, EXAMPLE_FILENAME, "exec", dont_inherit=True), namespace)
             except OutputLimitExceeded:
-                return Response(OUTPUT_LIMIT_MESSAGE, status=413, headers={{"Content-Type": "text/plain; charset=utf-8"}})
-            return Response(error_output.getvalue(), status=500, headers={{"Content-Type": "text/plain; charset=utf-8"}})
+                raise
+            except SystemExit as error:
+                output.write(_exit_note(error))
+            except KeyboardInterrupt as error:
+                status = 500
+                output.write(_learner_traceback(error))
+            except Exception as error:
+                status = 500
+                output.write(_learner_traceback(error))
+            return Response(BoundedStdout.getvalue(output), status=status, headers=TEXT_HEADERS)
+        except OutputLimitExceeded:
+            return Response(OUTPUT_LIMIT_MESSAGE, status=413, headers=TEXT_HEADERS)
 '''
 
 
@@ -221,10 +284,10 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
     og_url_tag = f'<meta property="og:url" content="{html.escape(canonical_url)}">' if canonical_url else ""
     robots_meta = "" if canonical_url else '<meta name="robots" content="noindex">'
     page_title = title if title == "Python By Example" else f"{title} · Python By Example"
-    # The CDN-backed editor stays in the head, but the dependency-free runner
+    # The editor bundle stays in the head, but the small dependency-free runner
     # is emitted after page content. Its async module can then attach Run,
-    # Reset, share, and navigation without waiting for the editor's esm.sh
-    # graph or for DOMContentLoaded (which that graph delays).
+    # Reset, share, and navigation without waiting for the much larger editor
+    # bundle or for DOMContentLoaded (which that download delays).
     editor_scripts = f'<script type="module" src="{html.escape(ASSET_PATHS["EDITOR_JS"])}"></script>' if include_editor else ""
     runner_script = f'<script type="module" async src="{html.escape(ASSET_PATHS["RUNNER_JS"])}"></script>' if include_editor else ""
     if include_search:
@@ -245,6 +308,7 @@ def _layout(title: str, content: str, description: str | None = None, path: str 
             "OG_TYPE": html.escape(og_type),
             "SITE_CSS": html.escape(ASSET_PATHS["SITE_CSS"]),
             "SYNTAX_JS": html.escape(ASSET_PATHS["SYNTAX_JS"]),
+            "HIGHLIGHTER_JS": html.escape(ASSET_PATHS["HIGHLIGHTER_JS"]),
             "EDITOR_SCRIPTS": editor_scripts,
             "RUNNER_SCRIPT": runner_script,
             "CONTENT": content,
@@ -313,13 +377,13 @@ def render_journeys_index():
     description = "Curated Python By Example journeys that compose individual examples into larger mental maps with per-section learner outcomes."
     cards = []
     for journey in JOURNEYS:
-        section_titles = "".join(f'<li>{html.escape(section["title"])}</li>' for section in journey["sections"])
+        section_titles = "".join(f'<li>{render_inline(section["title"])}</li>' for section in journey["sections"])
         cards.append(
             f'''
 <a class="card journey-card" href="/journeys/{html.escape(journey["slug"])}">
   <p class="eyebrow">Journey</p>
   <h2>{html.escape(journey["title"])}</h2>
-  <p class="meta">{html.escape(journey["summary"])}</p>
+  <p class="meta">{render_inline(journey["summary"])}</p>
   <ul>{section_titles}</ul>
 </a>'''
         )
@@ -350,7 +414,7 @@ def render_journeys_index():
 
 
 def render_journey_page(journey):
-    overview = "".join(f'<li>{html.escape(section["title"])}</li>' for section in journey["sections"])
+    overview = "".join(f'<li>{render_inline(section["title"])}</li>' for section in journey["sections"])
     sections = []
     for section in journey["sections"]:
         rows = []
@@ -363,19 +427,19 @@ def render_journey_page(journey):
                     target = f'<span class="journey-gap">Missing example: {label}</span>'
                 else:
                     target = f'<a class="text-link journey-item-title" href="/examples/{html.escape(example["slug"])}">{html.escape(example["title"])}</a>'
-                rows.append(f'<li>{target}<p class="meta">{html.escape(sentence)}</p></li>')
+                rows.append(f'<li>{target}<p class="meta">{render_inline(sentence)}</p></li>')
             else:
                 sentence = f"This gap should {description}."
-                rows.append(f'<li><p class="journey-gap-label">Gap · {html.escape(value)}</p><p class="meta">{html.escape(sentence)}</p></li>')
+                rows.append(f'<li><p class="journey-gap-label">Gap · {render_inline(value)}</p><p class="meta">{render_inline(sentence)}</p></li>')
         figure_html = render_for_section(section["title"])
-        sections.append(f'<section class="journey-section"><h2>{html.escape(section["title"])}</h2><p class="meta">{html.escape(section["summary"])}</p>{figure_html}<ul class="journey-list">{"".join(rows)}</ul></section>')
+        sections.append(f'<section class="journey-section"><h2>{render_inline(section["title"])}</h2><p class="meta">{render_inline(section["summary"])}</p>{figure_html}<ul class="journey-list">{"".join(rows)}</ul></section>')
     content = f'''
 <article class="example-shell journey-page">
   <div class="example-top"><a class="text-link" href="/">↑ All examples</a><a class="text-link" href="{html.escape(REFERENCE_URL)}">Python docs reference</a></div>
   <section class="example-intro">
     <p class="eyebrow">Journey</p>
     <h1>{html.escape(journey["title"])}</h1>
-    <p class="meta">{html.escape(journey["summary"])}</p>
+    <p class="meta">{render_inline(journey["summary"])}</p>
     <div class="journey-overview"><p class="cell-label">In this journey</p><ul>{overview}</ul></div>
   </section>
   {"".join(sections)}
@@ -429,7 +493,7 @@ def render_privacy() -> str:
     return _layout(
         "Privacy",
         _template("privacy.html"),
-        description="How Python By Example handles runner submissions, operational logs, Cloudflare Turnstile verification, cookies, and optional code-editor CDN requests.",
+        description="How Python By Example handles runner submissions, operational logs, Cloudflare Turnstile verification, cookies, and the self-hosted code editor.",
         path="/privacy",
         og_image=f"{SITE_URL}/og/privacy.jpg",
         structured_data={
@@ -454,6 +518,39 @@ def render_sitemap() -> str:
         f"{entries}"
         "</urlset>\n"
     )
+
+
+def example_markdown(slug: str) -> str | None:
+    """The authored Markdown source of an example, or None for unknown slugs."""
+    if get_example(slug) is None:
+        return None
+    return _example_source_text(f"{slug}.md")
+
+
+def render_llms_txt() -> str:
+    """A plain-text map of the site for language models and other tools."""
+    lines = [
+        "# Python By Example",
+        "",
+        (
+            f"> Python {PYTHON_VERSION} taught through {len(list_examples())} small, runnable examples. "
+            "Each page explains one concept with annotated source, verified output, and a link to the official documentation."
+        ),
+        "",
+        "Each example is also available as Markdown by adding `.md` to its URL.",
+    ]
+    by_section: dict[str, list[dict]] = {}
+    for example in list_examples():
+        by_section.setdefault(example["section"], []).append(example)
+    for section, examples in by_section.items():
+        lines += ["", f"## {section}", ""]
+        lines += [
+            f'- [{example["title"]}]({SITE_URL}/examples/{example["slug"]}.md): {example["summary"]}'
+            for example in examples
+        ]
+    lines += ["", "## Journeys", ""]
+    lines += [f'- [{journey["title"]}]({SITE_URL}/journeys/{journey["slug"]}): {journey["summary"]}' for journey in JOURNEYS]
+    return "\n".join(lines) + "\n"
 
 
 def render_example_not_found(slug: str) -> str:
@@ -631,6 +728,18 @@ def _render_walkthrough(slug: str, walkthrough: list[dict]) -> str:
     return "".join(parts)
 
 
+def sandbox_limit_note(example) -> str:
+    """What Run says first on a page that teaches something the sandbox lacks."""
+    limit = example.get("sandbox_limit")
+    if not limit:
+        return ""
+    return (
+        f"This page uses {limit}, which the in-browser sandbox does not provide, "
+        "so Run ends with the error below. The expected output shown on this page "
+        "came from standard CPython.\n\n"
+    )
+
+
 def _turnstile_challenge_container(site_key: str | None) -> str:
     if not site_key:
         return ""
@@ -641,7 +750,7 @@ def _turnstile_challenge_container(site_key: str | None) -> str:
 def _turnstile_required_marker(required: bool) -> str:
     if not required:
         return ""
-    return '<div data-turnstile-required="true" hidden>Verification required before running edited code…</div>'
+    return '<div data-turnstile-required="true" hidden>Verification required before running code…</div>'
 
 
 def render_example_page(
@@ -653,6 +762,9 @@ def render_example_page(
     turnstile_required=False,
 ):
     notes = [render_inline(note) for note in example.get("notes", [])]
+    intro_html = "".join(f"<p>{render_inline(paragraph)}</p>" for paragraph in example.get("explanation", []))
+    if intro_html:
+        intro_html = f'<div class="example-explanation">{intro_html}</div>'
     walkthrough = _walkthrough_cells(example)
     shown_output = output if output is not None else example.get("expected_output", "Run this example to see output here.")
     output_heading = "Output" if output is not None else "Expected output"
@@ -685,6 +797,7 @@ def render_example_page(
             "SECTION": html.escape(example["section"]),
             "TITLE": html.escape(example["title"]),
             "SUMMARY": html.escape(example["summary"]),
+            "INTRO": intro_html,
             "WALKTHROUGH": walkthrough_html,
             "NOTES": notes_html,
             "SEE_ALSO": see_also_html,

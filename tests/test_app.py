@@ -206,7 +206,7 @@ class AppTests(unittest.TestCase):
             "data = b\"py\"",
             "number = 2 + 3j",
             "class Greeter(Protocol):",
-            "print(Scale(2) @ Scale(3))",
+            "print(Vector(2, 3) @ Vector(4, 5))",
             "print(...)",
         ]
         for snippet in required_snippets:
@@ -867,7 +867,7 @@ class PrivacyPageTests(unittest.TestCase):
         for rendered in (render_home(), render_example_page(get_example("hello-world")), page):
             self.assertIn('<a class="text-link" href="/privacy">Privacy</a>', rendered)
 
-    def test_privacy_notice_discloses_runner_turnstile_logs_cdn_and_cookie(self):
+    def test_privacy_notice_discloses_runner_turnstile_logs_self_hosting_and_cookie(self):
         page = render_privacy()
         for required in (
             "Cloudflare Turnstile Privacy Addendum",
@@ -875,7 +875,7 @@ class PrivacyPageTests(unittest.TestCase):
             "pbe_turnstile_clearance",
             "eight hours",
             "submitted Python source",
-            "esm.sh",
+            "not from a third-party CDN",
             "IP address",
             "raw submitted code",
         ):

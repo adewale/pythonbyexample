@@ -10,6 +10,7 @@ see_also = [
   "import-aliases",
 ]
 expected_output = ".venv\nTrue\n"
+sandbox_limit = "the venv module"
 +++
 
 Virtual environments isolate a project's installed packages from the global Python installation and from other projects. The usual workflow is a command-line one: create `.venv`, activate it, then install project dependencies there.

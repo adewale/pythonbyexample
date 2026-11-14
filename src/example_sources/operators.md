@@ -37,26 +37,14 @@ print(flags | 0b0100)
 print(flags ^ 0b0101)
 print(flags << 1)
 
-class Scale:
-    def __init__(self, value):
-        self.value = value
-
-    def __matmul__(self, other):
-        return self.value * other.value
-
-print(Scale(2) @ Scale(3))
-
 items = ["a", "b"]
-if (size := len(items)) > 0:
-    print(size)
+print((size := len(items)) > 0)
+print(size)
 
-def loud():
-    print("ran")
-    return True
-
-print(False and loud())
-print(True or loud())
-print(True and loud())
+count = 0
+print(count != 0 and 10 / count)
+print(count == 0 or 10 / count)
+print(count == 0 and "empty")
 ```
 :::
 
@@ -116,56 +104,34 @@ print(flags << 1)
 :::
 
 :::cell
-The `@` operator is reserved for matrix-like multiplication and custom types that define `__matmul__`.
-
-```python
-class Scale:
-    def __init__(self, value):
-        self.value = value
-
-    def __matmul__(self, other):
-        return self.value * other.value
-
-print(Scale(2) @ Scale(3))
-```
-
-```output
-6
-```
-:::
-
-:::cell
-The walrus operator `:=` assigns inside an expression. Use it when naming a value avoids repeating work in a condition.
+The walrus operator `:=` assigns inside an expression: the parenthesized part both names the length and passes it on to the comparison. [Assignment expressions](/examples/assignment-expressions) shows where that earns its place.
 
 ```python
 items = ["a", "b"]
-if (size := len(items)) > 0:
-    print(size)
+print((size := len(items)) > 0)
+print(size)
 ```
 
 ```output
+True
 2
 ```
 :::
 
 :::cell
-`and` and `or` short-circuit: the right side runs only when the left side cannot already determine the result. That makes them safe for guard expressions like `obj and obj.value` where the right side would fail on `None`.
+`and` and `or` short-circuit: the right side runs only when the left side cannot already determine the result. Here `10 / count` would fail with a division-by-zero error if it ran, but the left side settles both answers first. The result is the last operand evaluated, so `count == 0 and "empty"` produces `"empty"`.
 
 ```python
-def loud():
-    print("ran")
-    return True
-
-print(False and loud())
-print(True or loud())
-print(True and loud())
+count = 0
+print(count != 0 and 10 / count)
+print(count == 0 or 10 / count)
+print(count == 0 and "empty")
 ```
 
 ```output
 False
 True
-ran
-True
+empty
 ```
 :::
 
@@ -173,5 +139,5 @@ True
 - Use the clearest operator for the question: arithmetic, comparison, boolean logic, membership, identity, or bitwise manipulation.
 - `and` and `or` short-circuit, so the right side may not run.
 - Operators have precedence; use parentheses when grouping would otherwise be hard to read.
-- Custom operator behavior should make an object feel more natural, not more clever.
+- `@` is the matrix-multiplication operator. No built-in type implements it; [operator overloading](/examples/operator-overloading) shows how a class gives `@`, `+`, or `==` its own meaning.
 :::

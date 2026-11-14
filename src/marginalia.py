@@ -914,18 +914,18 @@ def bytes_vs_bytearray(c: Canvas) -> None:
 
 
 def sentinel_iteration(c: Canvas) -> None:
-    """Sentinel iteration · iter(read_chunk, "") calls read_chunk until it returns the sentinel.
+    """Sentinel iteration · iter(queue.popleft, "") calls popleft until it returns the sentinel.
 
-    The cell's chunks are "py", "thon" and "": the first two are yielded,
+    The cell's queue holds "py", "thon" and "": the first two are yielded,
     the empty string is the sentinel that stops the loop and is never
     yielded, which is why list(...) prints ['py', 'thon'].
     """
-    c.cell(0, 22, 'iter(read_chunk, "")', w=140, h=24)
-    c.closed_arrow(140, 34, 172, 34, emphasis=True)
-    c.cell(174, 0, '"py"', w=70, h=20)
-    c.cell(174, 22, '"thon"', w=70, h=20)
-    c.cell(174, 44, '""', w=70, h=20, ghost=True)
-    c.label(250, 58, "sentinel · stop", anchor="start")
+    c.cell(0, 22, 'iter(queue.popleft, "")', w=164, h=24)
+    c.closed_arrow(164, 34, 196, 34, emphasis=True)
+    c.cell(198, 0, '"py"', w=70, h=20)
+    c.cell(198, 22, '"thon"', w=70, h=20)
+    c.cell(198, 44, '""', w=70, h=20, ghost=True)
+    c.label(274, 58, "sentinel · stop", anchor="start")
 
 
 
@@ -1053,6 +1053,31 @@ def json_python_mapping(c: Canvas) -> None:
         y = 24 + i * 14
         c.mono(0, y, a, anchor="start", size=10)
         c.mono(132, y, b, anchor="start", size=10)
+
+
+def path_tree(c: Canvas) -> None:
+    """Files and pathlib · the page's own directory tree; each Path names one place in it.
+
+    The temporary directory holds notes.txt and a reports directory with
+    summary.csv inside. Hairlines are the containment edges; the dashed
+    link shows that `root / "reports" / "summary.csv"` is the walk down
+    those edges, one name per `/`.
+    """
+    c.tag(0, 4, "directory tree")
+    c.mono(0, 22, "root/", anchor="start")
+    c.hairline(4, 28, 4, 64)
+    c.hairline(4, 40, 16, 40)
+    c.mono(20, 43, "notes.txt", anchor="start")
+    c.hairline(4, 64, 16, 64)
+    c.mono(20, 67, "reports/", anchor="start")
+    c.hairline(24, 73, 24, 88)
+    c.hairline(24, 88, 36, 88)
+    c.mono(40, 91, "summary.csv", anchor="start")
+    c.tag(150, 4, "a path names one place")
+    c.mono(150, 43, 'root / "notes.txt"', anchor="start", size=9)
+    c.mono(150, 91, 'reports / "summary.csv"', anchor="start", size=9)
+    c.dashed(80, 40, 144, 40)
+    c.dashed(112, 88, 144, 88)
 
 
 def regex_groups(c: Canvas) -> None:
@@ -1419,7 +1444,7 @@ def object_lifecycle(c: Canvas) -> None:
     c.name_box(0, 48, "alias")
     c.closed_arrow(54, 26, 118, 44, emphasis=False)
     c.closed_arrow(54, 60, 118, 44, emphasis=False)
-    c.object_box(120, 28, "Box", "label='draft'", w=112, h=32, soft=True)
+    c.object_box(120, 28, "list", "['draft']", w=112, h=32, soft=True)
     c.closed_arrow(232, 44, 276, 44, emphasis=True)
     c.cell(278, 32, "last ref?", w=88, h=34)
 
@@ -1642,7 +1667,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "attribute-lookup": (attribute_lookup, 242, 70),
     "guard-clauses": (guard_clauses, 264, 104),
     "bytes-vs-bytearray": (bytes_vs_bytearray, 200, 90),
-    "sentinel-iteration": (sentinel_iteration, 330, 70),
+    "sentinel-iteration": (sentinel_iteration, 354, 70),
     "partial-functions": (partial_functions, 334, 36),
     # Third coverage push: 24 more figures
     "args-kwargs": (args_kwargs, 280, 68),
@@ -1656,6 +1681,7 @@ FIGURES: dict[str, tuple[Callable[[Canvas], None], int, int]] = {
     "enum-members": (enum_members, 280, 60),
     "datetime-instant": (datetime_instant, 280, 88),
     "json-python-mapping": (json_python_mapping, 220, 116),
+    "path-tree": (path_tree, 290, 100),
     "regex-groups": (regex_groups, 140, 96),
     "number-parse": (number_parse, 204, 64),
     "format-spec": (format_spec, 372, 82),

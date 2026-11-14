@@ -545,7 +545,7 @@ class Canvas:
         # reaching the caption.
         return (
             f'<svg viewBox="-{pad_x} -{pad_top} {vb_w} {vb_h}" '
-            f'width="{out_w}" height="{out_h}" '
+            f'width="{out_w}" height="{out_h}" style="--fig-w: {out_w}px" '
             f'aria-hidden="true" focusable="false" '
             f'xmlns="http://www.w3.org/2000/svg">'
             + "".join(self.parts)

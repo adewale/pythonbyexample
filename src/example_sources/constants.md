@@ -24,8 +24,10 @@ from typing import Final
 MAX_RETRIES: Final = 3
 API_VERSION = "2026-05"
 
-for attempt in range(1, MAX_RETRIES + 1):
-    print(f"attempt {attempt} of {MAX_RETRIES}")
+attempts = 2
+print(attempts < MAX_RETRIES)
+attempts = 3
+print(attempts < MAX_RETRIES)
 
 print(API_VERSION)
 
@@ -35,19 +37,20 @@ print(MAX_RETRIES)
 :::
 
 :::cell
-All-caps names communicate design intent: this value is configuration that callers should treat as fixed.
+All-caps names communicate design intent: this value is configuration that callers should treat as fixed. Comparing against `MAX_RETRIES` instead of a bare `3` keeps the meaning beside the check, and gives the limit one place to change.
 
 ```python
 MAX_RETRIES = 3
 
-for attempt in range(1, MAX_RETRIES + 1):
-    print(f"attempt {attempt} of {MAX_RETRIES}")
+attempts = 2
+print(attempts < MAX_RETRIES)
+attempts = 3
+print(attempts < MAX_RETRIES)
 ```
 
 ```output
-attempt 1 of 3
-attempt 2 of 3
-attempt 3 of 3
+True
+False
 ```
 :::
 

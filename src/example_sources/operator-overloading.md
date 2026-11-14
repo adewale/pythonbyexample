@@ -34,12 +34,18 @@ class Vector:
             return NotImplemented
         return (self.x, self.y) == (other.x, other.y)
 
+    def __matmul__(self, other):
+        if not isinstance(other, Vector):
+            return NotImplemented
+        return self.x * other.x + self.y * other.y
+
     def __repr__(self):
         return f"Vector({self.x}, {self.y})"
 
 print(Vector(2, 3) + Vector(4, 5))
 print(Vector(1, 1) == Vector(1, 1))
 print(Vector(1, 1) == 5)
+print(Vector(2, 3) @ Vector(4, 5))
 ```
 :::
 
@@ -89,6 +95,28 @@ print(Vector(1, 1) == 5)
 ```output
 True
 False
+```
+:::
+
+:::cell
+`__matmul__` defines the `@` operator, which Python reserves for matrix-style multiplication. No built-in type implements it, so it only works on classes that opt in — here as the dot product of two vectors.
+
+```python
+class Vector:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def __matmul__(self, other):
+        if not isinstance(other, Vector):
+            return NotImplemented
+        return self.x * other.x + self.y * other.y
+
+print(Vector(2, 3) @ Vector(4, 5))
+```
+
+```output
+23
 ```
 :::
 

@@ -22,7 +22,7 @@ Production: <https://www.pythonbyexample.dev> (`workers.dev` is disabled so the 
 - Learner-behavior reporting from Worker wide events (`docs/learner-analytics.md`)
 - A quality-gate suite for registries, rubric scores, coverage, and teaching structure that fails builds when content regresses
 - `/about` page describing the verification pipeline, runner sandbox, figure grammar, and live design tokens
-- `/privacy` notice covering runner submissions, operational logs, Invisible Turnstile, cookies, and optional browser CDNs
+- `/privacy` notice covering runner submissions, operational logs, Invisible Turnstile, cookies, and the self-hosted editor scripts
 - Copy buttons on read-only source cells
 - Keyboard prev/next navigation (`←`/`→`) on example pages
 - "Copy link" sharing of the runner's current code via `#code=` URLs
@@ -125,6 +125,8 @@ git diff --check
 - Worker Cache API keys include the HTML version
 - prototype layout pages are not cached
 
+`make runtime-examples-test` posts every example's complete program to the local Worker and compares what the sandbox prints with the expected output.
+
 `make browser-layout-test` launches headless Chrome against the local Worker. It checks the rendered Shiki code-block layout so generated line markup does not create visual blank rows, drives the runner, sharing, copy, search and keyboard navigation through the page, and measures computed styles (pressed states, touch targets, contrast in both themes, marginalia figure colours against the grammar's `--fig-*` tokens, the reader's font size, reduced-transparency and more-contrast fallbacks) in place of unit tests that matched CSS text.
 
 ## Asset fingerprinting and cache busting
@@ -137,6 +139,8 @@ public/syntax-highlight.js
 public/editor.js
 public/runner.js
 ```
+
+`public/editor.js` and `public/highlighter.js` are bundles: their sources are `web/editor.js` and `web/highlighter.js`, built with the npm packages pinned in `package-lock.json`.
 
 Before tests/deploy, regenerate embedded example data, fingerprinted asset copies, and Python manifests:
 
@@ -185,7 +189,7 @@ make upgrade-runtime-deps
 make verify
 ```
 
-Dependabot proposes npm, GitHub Actions, and development-tool updates weekly. It skips runtime packages (their versions depend on which Pyodide wheels exist) and Ruff (upgrades are deliberate because they change lint rules). The browser libraries loaded from esm.sh are pinned in `public/editor.js` and `public/syntax-highlight.js` and are updated by hand.
+Dependabot proposes npm, GitHub Actions, and development-tool updates weekly. It skips runtime packages (their versions depend on which Pyodide wheels exist) and Ruff (upgrades are deliberate because they change lint rules). The browser libraries (CodeMirror and Shiki) are npm dev dependencies pinned in `package-lock.json`; `make browser-bundles` bundles `web/editor.js` and `web/highlighter.js` into `public/`, so pages load no third-party CDN and Dependabot proposes their updates.
 
 ## Contributing
 
@@ -229,8 +233,10 @@ footgun, notes, program/cell, prose-duplication, inline-link, scoring,
 figure, journey, and example-graph gates.
 
 `make check-waiver-expiry` is a manual check, not run in CI: it fails while
-any quality waiver has 30 days or fewer left. `make quality-checks` (and so CI)
-only prints a warning in that window, then fails once the waiver has expired.
+any time-boxed quality waiver has 30 days or fewer left. `make quality-checks`
+(and so CI) only prints a warning in that window, then fails once the waiver
+has expired. A waiver whose reason is permanent sets `permanent = true`
+instead of `expires` and is never date-checked; Hello World is the only one.
 
 `src/example_sources_data.py` is generated and committed so Cloudflare Workers can load examples in production. Do not edit it by hand.
 

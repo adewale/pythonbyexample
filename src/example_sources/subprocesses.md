@@ -10,6 +10,7 @@ see_also = [
   "threads-and-processes",
 ]
 expected_output = "child process\n0\n"
+sandbox_limit = "child processes"
 +++
 
 `subprocess` is the standard boundary for running external commands. It starts another program, waits for it, and gives you a result object with the exit code and captured output.

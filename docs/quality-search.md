@@ -5,7 +5,7 @@ Python By Example now has two complementary scoring loops:
 1. `scripts/check_quality_scores.py` is the editorial gate. It enforces the curated score registry, hard-minimum waivers, stale backlog cleanup, weak journey-section tracking, and the 10-point rubric weight model.
 2. `scripts/score_example_criteria.py` is the search aid. It breaks each page into rubric criteria so rewrite work can target the weakest axis instead of treating the score as one opaque number.
 
-The criterion report is deliberately heuristic. It should suggest candidates, not replace editorial review.
+The criterion report is deliberately heuristic. It should suggest candidates, not replace editorial review. Accuracy and practical usefulness are not observable from page text, so those two criteria only penalise metasyntactic names (`foo`, `spam`) and are capped below full marks; they award nothing for surface tokens such as `print(` or domain-sounding identifiers.
 
 ## Hill-climbing move types
 

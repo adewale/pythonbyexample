@@ -24,11 +24,12 @@ english = "hello"
 french = "café"
 thai = "สวัสดี"
 
-for label, word in [("English", english), ("French", french), ("Thai", thai)]:
-    print(label, word, len(word), len(word.encode("utf-8")))
+print("English", english, len(english), len(english.encode("utf-8")))
+print("French", french, len(french), len(french.encode("utf-8")))
+print("Thai", thai, len(thai), len(thai.encode("utf-8")))
 
 print(thai[0])
-print([hex(ord(char)) for char in thai[:2]])
+print(hex(ord(thai[0])), hex(ord(thai[1])))
 
 text = "  café  "
 clean = text.strip()
@@ -46,8 +47,9 @@ english = "hello"
 french = "café"
 thai = "สวัสดี"
 
-for label, word in [("English", english), ("French", french), ("Thai", thai)]:
-    print(label, word, len(word), len(word.encode("utf-8")))
+print("English", english, len(english), len(english.encode("utf-8")))
+print("French", french, len(french), len(french.encode("utf-8")))
+print("Thai", thai, len(thai), len(thai.encode("utf-8")))
 ```
 
 ```output
@@ -58,16 +60,16 @@ Thai สวัสดี 6 18
 :::
 
 :::cell
-Indexing and iteration work with Unicode code points, not encoded bytes. `ord()` returns the integer code point, which is often displayed in hexadecimal when teaching text encoding.
+Indexing works with Unicode code points, not encoded bytes: `thai[0]` is the first character, not its first byte. `ord()` returns the integer code point, which is often displayed in hexadecimal when teaching text encoding.
 
 ```python
 print(thai[0])
-print([hex(ord(char)) for char in thai[:2]])
+print(hex(ord(thai[0])), hex(ord(thai[1])))
 ```
 
 ```output
 ส
-['0xe2a', '0xe27']
+0xe2a 0xe27
 ```
 :::
 

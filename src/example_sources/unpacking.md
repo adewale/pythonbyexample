@@ -16,7 +16,7 @@ Unpacking binds multiple names from one iterable or mapping. It makes the struct
 
 Starred unpacking handles variable-length sequences by collecting the middle or remaining values. This keeps common head-tail patterns readable.
 
-Dictionary unpacking with ** connects structured data to function calls. It is widely used in configuration, adapters, and code that bridges APIs.
+In a call, `*` spreads a sequence into positional arguments and `**` spreads a dictionary into keyword arguments, connecting structured data to function calls. It is widely used in configuration, adapters, and code that bridges APIs.
 
 :::program
 ```python
@@ -27,11 +27,11 @@ print(x, y)
 first, *middle, last = [1, 2, 3, 4]
 print(first, middle, last)
 
-def describe(name, language):
-    print(name, language)
+print(*point)
+print(*point, sep=", ")
 
 data = {"name": "Ada", "language": "Python"}
-describe(**data)
+print("{name} writes {language}".format(**data))
 ```
 :::
 
@@ -63,18 +63,20 @@ print(first, middle, last)
 :::
 
 :::cell
-`describe(**data)` spreads the dictionary's keys as keyword arguments, so the call site never repeats `name=` and `language=` by hand. This is the bridge between dict-shaped data (configuration, parsed JSON) and function signatures.
+The same stars work in a call. `print(*point)` spreads the tuple into separate positional arguments, and `format(**data)` spreads the dictionary's keys as keyword arguments, so the call site never repeats `name=` and `language=` by hand. This is the bridge between collection-shaped data (configuration, parsed JSON) and call signatures; [args and kwargs](/examples/args-and-kwargs) shows the receiving side.
 
 ```python
-def describe(name, language):
-    print(name, language)
+print(*point)
+print(*point, sep=", ")
 
 data = {"name": "Ada", "language": "Python"}
-describe(**data)
+print("{name} writes {language}".format(**data))
 ```
 
 ```output
-Ada Python
+3 4
+3, 4
+Ada writes Python
 ```
 :::
 

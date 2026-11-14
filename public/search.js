@@ -10,6 +10,8 @@ export function rankExamples(query, entries, limit = 8) {
     const slug = entry.slug.toLowerCase();
     const section = entry.section.toLowerCase();
     const summary = entry.summary.toLowerCase();
+    const keywords = (entry.keywords || '').split(' ');
+    const words = entry.text.split(' ');
     let score = 0;
     let matched = true;
     for (const token of tokens) {
@@ -17,10 +19,14 @@ export function rankExamples(query, entries, limit = 8) {
       if (title === token) tokenScore = 100;
       else if (title.startsWith(token)) tokenScore = 80;
       else if (new RegExp(`\\b${token.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`).test(title)) tokenScore = 60;
+      else if (keywords.includes(token)) tokenScore = 55;
       else if (slug.includes(token)) tokenScore = 50;
+      else if (keywords.some((keyword) => keyword.startsWith(token))) tokenScore = 40;
       else if (section.startsWith(token)) tokenScore = 30;
       else if (summary.includes(token)) tokenScore = 25;
-      else if (entry.text.includes(token)) tokenScore = 15;
+      // A whole word on the page outranks a fragment of a longer word.
+      else if (words.includes(token)) tokenScore = 15;
+      else if (token.length >= 3 && words.some((word) => word.startsWith(token))) tokenScore = 8;
       if (!tokenScore) { matched = false; break; }
       score += tokenScore;
     }

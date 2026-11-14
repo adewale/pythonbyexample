@@ -15,23 +15,19 @@ Python objects live independently from the names that refer to them. Assignment 
 
 Most programs do not manually destroy objects. They control lifetime by controlling which containers, local variables, and object attributes still hold references.
 
-This example uses a small class so the object has visible state. The important evidence is that deleting one name does not destroy the object while another name still refers to it.
+This example uses a one-item list so the object has visible state. The important evidence is that rebinding or deleting one name does not destroy the object while another name still refers to it.
 
 :::program
 ```python
-class Box:
-    def __init__(self, label):
-        self.label = label
-
-box = Box("draft")
+box = ["draft"]
 alias = box
 
 print(box is alias)
-print(alias.label)
+print(alias)
 
-box = Box("published")
-print(alias.label)
-print(box.label)
+box = ["published"]
+print(alias)
+print(box)
 
 del alias
 print("old object unreachable")
@@ -42,38 +38,34 @@ print("old object unreachable")
 Two names can refer to the same object. Mutating through one name would affect the object seen through the other.
 
 ```python
-class Box:
-    def __init__(self, label):
-        self.label = label
-
-box = Box("draft")
+box = ["draft"]
 alias = box
 
 print(box is alias)
-print(alias.label)
+print(alias)
 ```
 
 ```output
 True
-draft
+['draft']
 ```
 :::
 
 :::cell
-Rebinding `box` does not change the original object. `alias` still reaches the first `Box` until that reference is removed too.
+Rebinding `box` does not change the original object. `alias` still reaches the first list until that reference is removed too.
 
 ```python
-box = Box("published")
-print(alias.label)
-print(box.label)
+box = ["published"]
+print(alias)
+print(box)
 
 del alias
 print("old object unreachable")
 ```
 
 ```output
-draft
-published
+['draft']
+['published']
 old object unreachable
 ```
 :::

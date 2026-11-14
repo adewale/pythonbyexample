@@ -213,6 +213,11 @@ Frontmatter fields beyond the navigation basics:
 - `expected_output` overrides the generated program output for
   environment-shaped pages whose real output the build environment cannot
   reproduce deterministically; the verifier still executes the program.
+- `sandbox_limit` names what the in-browser sandbox lacks on a page that
+  teaches it anyway (for example `"child processes"` or `"sockets"`). When
+  Run fails on such a page the output starts by naming the limit, and
+  `make runtime-examples-test` expects that explanation instead of the
+  CPython output.
 - `standalone_cells = true` opts a page out of the program-covers-cells gate
   when it deliberately demonstrates code the editable program does not
   contain; the opt-out is reported on every run so it stays a visible

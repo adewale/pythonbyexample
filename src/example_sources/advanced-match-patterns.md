@@ -19,21 +19,23 @@ The wildcard `_` catches everything not matched earlier.
 
 :::program
 ```python
-def describe(command):
+commands = [
+    ["move", 2, 3],
+    ["exit"],
+    ["echo", "hello", "python"],
+    ["move", -1, 3],
+]
+
+for command in commands:
     match command:
         case ["move", x, y] if x >= 0 and y >= 0:
-            return f"move to {x},{y}"
+            print(f"move to {x},{y}")
         case ["quit" | "exit"]:
-            return "stop"
+            print("stop")
         case ["echo", *words]:
-            return " ".join(words)
+            print(" ".join(words))
         case _:
-            return "unknown"
-
-print(describe(["move", 2, 3]))
-print(describe(["exit"]))
-print(describe(["echo", "hello", "python"]))
-print(describe(["move", -1, 3]))
+            print("unknown")
 ```
 :::
 
@@ -41,18 +43,13 @@ print(describe(["move", -1, 3]))
 Sequence patterns match by position. A guard after `if` adds a condition that must also be true.
 
 ```python
-def describe(command):
-    match command:
-        case ["move", x, y] if x >= 0 and y >= 0:
-            return f"move to {x},{y}"
-        case ["quit" | "exit"]:
-            return "stop"
-        case ["echo", *words]:
-            return " ".join(words)
-        case _:
-            return "unknown"
+command = ["move", 2, 3]
 
-print(describe(["move", 2, 3]))
+match command:
+    case ["move", x, y] if x >= 0 and y >= 0:
+        print(f"move to {x},{y}")
+    case _:
+        print("unknown")
 ```
 
 ```output
@@ -64,8 +61,12 @@ move to 2,3
 An OR pattern accepts several alternatives in one case. A star pattern captures the rest of a sequence.
 
 ```python
-print(describe(["exit"]))
-print(describe(["echo", "hello", "python"]))
+for command in [["exit"], ["echo", "hello", "python"]]:
+    match command:
+        case ["quit" | "exit"]:
+            print("stop")
+        case ["echo", *words]:
+            print(" ".join(words))
 ```
 
 ```output
@@ -75,10 +76,16 @@ hello python
 :::
 
 :::cell
-The wildcard `_` catches values that did not match earlier cases. Here the guard rejects the negative coordinate.
+The wildcard `_` catches values that did not match earlier cases. Here the guard rejects the negative coordinate, so the same `match` that accepted `["move", 2, 3]` falls through to the fallback.
 
 ```python
-print(describe(["move", -1, 3]))
+command = ["move", -1, 3]
+
+match command:
+    case ["move", x, y] if x >= 0 and y >= 0:
+        print(f"move to {x},{y}")
+    case _:
+        print("unknown")
 ```
 
 ```output

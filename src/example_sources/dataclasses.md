@@ -9,6 +9,8 @@ see_also = [
   "classes",
   "type-hints",
 ]
+min_python = "3.13"
+version_notes = "copy.replace() was added in Python 3.13; dataclasses.replace() is the earlier equivalent."
 +++
 
 `dataclass` is a standard-library decorator for classes that mainly store data. It generates methods such as `__init__` and `__repr__` from type-annotated fields.
@@ -19,6 +21,7 @@ Type annotations define fields. Defaults work like normal class attributes and a
 
 :::program
 ```python
+import copy
 from dataclasses import dataclass
 
 @dataclass
@@ -33,6 +36,10 @@ print(user.name)
 inactive = User("Guido", active=False)
 print(inactive)
 print(inactive.active)
+
+paused = copy.replace(user, active=False)
+print(paused)
+print(user)
 ```
 :::
 
@@ -83,8 +90,26 @@ False
 ```
 :::
 
+:::cell
+`copy.replace()` builds a new instance with some fields changed and leaves the original alone. It was added in Python 3.13 as the general form of `dataclasses.replace()`, and it also works on named tuples and dates.
+
+```python
+import copy
+
+paused = copy.replace(user, active=False)
+print(paused)
+print(user)
+```
+
+```output
+User(name='Ada', active=False)
+User(name='Ada', active=True)
+```
+:::
+
 :::note
 - Type annotations define dataclass fields.
+- `copy.replace(obj, field=value)` copies with changes; before Python 3.13, use `dataclasses.replace()`.
 - Dataclasses generate methods but remain normal Python classes.
 - Use `field()` for advanced defaults such as per-instance lists or dictionaries.
 :::

@@ -91,6 +91,7 @@ try {
     if (name.endsWith('.jpg') && !expected.has(name)) await unlink(path.join(outputDir, name));
   }
   let written = 0;
+  const unfit = [];
   for (const [name, file] of Object.entries(manifest)) {
     await client.send('Page.navigate', { url: `file://${path.join(cardDir, file)}` });
     for (let i = 0; i < 50; i++) {
@@ -101,6 +102,8 @@ try {
       if (ready.result.value) break;
       await sleep(50);
     }
+    const fit = await client.send('Runtime.evaluate', { expression: 'document.body.dataset.fit', returnByValue: true });
+    if (fit.result.value !== 'ok') unfit.push(`${name}: ${fit.result.value ?? 'fit script did not run'}`);
     const shot = await client.send('Page.captureScreenshot', {
       format: 'jpeg', quality: 90,
       clip: { x: 0, y: 0, width, height, scale: 1 },
@@ -109,6 +112,10 @@ try {
     written += 1;
   }
   client.close();
+  if (unfit.length) {
+    console.error(`Social cards whose text does not fit:\n  ${unfit.join('\n  ')}`);
+    process.exitCode = 1;
+  }
   console.log(`Rasterized ${written} social cards to public/og/.`);
 } finally {
   chrome.kill('SIGTERM');

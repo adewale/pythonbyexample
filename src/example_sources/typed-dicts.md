@@ -10,6 +10,8 @@ see_also = [
   "dataclasses",
   "structured-data-shapes",
 ]
+min_python = "3.13"
+version_notes = "typing.ReadOnly and __readonly_keys__ were added in Python 3.13."
 +++
 
 `TypedDict` describes dictionary records with known keys. It is useful for JSON-like data that should remain a dictionary instead of becoming a class instance.
@@ -20,12 +22,17 @@ Use `TypedDict` for external records and `dataclass` when your own program wants
 
 :::program
 ```python
-from typing import NotRequired, TypedDict
+from typing import NotRequired, ReadOnly, TypedDict
 
 class User(TypedDict):
     name: str
     score: int
     nickname: NotRequired[str]
+
+
+class Account(TypedDict):
+    id: ReadOnly[int]
+    name: str
 
 
 def describe(user: User) -> str:
@@ -35,6 +42,11 @@ record: User = {"name": "Ada", "score": 98}
 print(describe(record))
 print(isinstance(record, dict))
 print(record.get("nickname", "none"))
+
+account: Account = {"id": 7, "name": "Ada"}
+account["name"] = "Grace"
+print(account)
+print(sorted(Account.__readonly_keys__))
 ```
 :::
 
@@ -95,8 +107,31 @@ none
 ```
 :::
 
+:::cell
+`ReadOnly`, added in Python 3.13, marks a key that type checkers should not allow code to reassign. Here a checker accepts the update to `name` and would reject `account["id"] = 8`. It is the same static-only boundary: the class records which keys are read-only, but the dictionary itself would still accept the write.
+
+```python
+from typing import ReadOnly
+
+class Account(TypedDict):
+    id: ReadOnly[int]
+    name: str
+
+account: Account = {"id": 7, "name": "Ada"}
+account["name"] = "Grace"
+print(account)
+print(sorted(Account.__readonly_keys__))
+```
+
+```output
+{'id': 7, 'name': 'Grace'}
+['id']
+```
+:::
+
 :::note
 - Use `TypedDict` for dictionary records from JSON or APIs.
+- `ReadOnly[...]` (Python 3.13) tells type checkers a key must not be reassigned; it does not freeze the dictionary.
 - Type checkers understand required and optional keys.
 - Runtime behavior is still ordinary dictionary behavior.
 :::

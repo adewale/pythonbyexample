@@ -4,6 +4,7 @@
     <p class="eyebrow">__SECTION__</p>
     <h1 id="example-heading">__TITLE__</h1>
     <p class="meta">__SUMMARY__</p>
+    __INTRO__
   </section>
   <section class="literate-program" aria-label="Annotated code walkthrough">__WALKTHROUGH__</section>
   <p class="eyebrow">Notes</p>
@@ -16,6 +17,7 @@
       <form class="runner-panel runner-editor" method="post" action="/examples/__SLUG__">
         <h3>Example code</h3>
         <textarea name="code" id="code-editor" data-original-code="__ORIGINAL_CODE__" aria-label="Editable Python example code" spellcheck="false" rows="__EDITOR_ROWS__">__EDITABLE_CODE__</textarea>
+        <p class="meta editor-keys-hint" id="editor-keys-hint" hidden>Ctrl/⌘ + Enter runs the program. Tab indents; press Esc then Tab to leave the editor.</p>
         __TURNSTILE_CHALLENGE__
         <div class="playground-toolbar">
           <button class="button" type="submit">Run</button>
