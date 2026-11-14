@@ -402,7 +402,7 @@ try {
     const state = {
       status: document.getElementById('site-search-status')?.textContent,
       outlineWidth: getComputedStyle(input).outlineWidth,
-      shikiRequests: performance.getEntriesByType('resource').filter(entry => entry.name.includes('esm.sh/shiki')).length,
+      shikiRequests: performance.getEntriesByType('resource').filter(entry => entry.name.includes('/highlighter.')).length,
     };
     window.fetch = originalFetch;
     return state;
@@ -502,16 +502,16 @@ try {
     };
   })()`);
 
-  // Keep esm.sh import requests pending. The runner has no imports and is
-  // emitted after its markup, so its controls must attach before the editor's
-  // CDN graph can let DOMContentLoaded fire.
+  // Keep the editor and highlighter bundles pending. The runner has no
+  // imports and is emitted after its markup, so its controls must attach
+  // before those much larger downloads can let DOMContentLoaded fire.
   let heldCdnRequests = 0;
   const removePauseListener = client.on('Fetch.requestPaused', () => { heldCdnRequests += 1; });
-  await client.send('Fetch.enable', { patterns: [{ urlPattern: 'https://esm.sh/*' }] });
+  await client.send('Fetch.enable', { patterns: [{ urlPattern: '*/editor.*.js' }, { urlPattern: '*/highlighter.*.js' }] });
   const offlineCode = Array.from({ length: 80 }, (_, index) => `print(${index})`).join('\n');
   const offlineUrl = `${target}#code=${Buffer.from(offlineCode, 'utf8').toString('base64')}`;
   await client.send('Page.navigate', { url: offlineUrl });
-  await waitFor(`!!document.querySelector('.share-button') && !!document.querySelector('.copy-button') && document.getElementById('code-editor')?.value === ${JSON.stringify(offlineCode)}`, 'runner controls while CDN is pending');
+  await waitFor(`!!document.querySelector('.share-button') && !!document.querySelector('.copy-button') && document.getElementById('code-editor')?.value === ${JSON.stringify(offlineCode)}`, 'runner controls while the editor bundle is pending');
   const offlineRunner = await evaluateValue(`(() => {
     const textarea = document.getElementById('code-editor');
     const panel = textarea.parentElement;
@@ -832,8 +832,8 @@ try {
   if (JSON.stringify(lightTheme.editorColors) === JSON.stringify(darkTheme.editorColors)) failures.push('CodeMirror did not react to the OS theme change');
   if (darkTheme.runContrast < 4.5) failures.push(`Dark Run-button contrast is ${darkTheme.runContrast.toFixed(2)}:1`);
   if (Number.parseFloat(darkTheme.editorOutlineWidth) < 3) failures.push('CodeMirror focus indicator is too weak');
-  if (heldCdnRequests === 0) failures.push('CDN-pending runner test did not hold an esm.sh request');
-  if (offlineRunner.editorLoaded) failures.push('CDN-pending test unexpectedly loaded CodeMirror');
+  if (heldCdnRequests === 0) failures.push('Pending-bundle runner test did not hold an editor or highlighter request');
+  if (offlineRunner.editorLoaded) failures.push('Pending-bundle test unexpectedly loaded CodeMirror');
   if (offlineRunner.fallbackHeight < 1000) failures.push(`Shared fallback textarea did not resize (${offlineRunner.fallbackHeight}px)`);
   if (!fragmentBound.unchanged || !fragmentBound.notice?.includes('invalid or too large')) failures.push('Oversized shared-code fragment was decoded or not announced');
   if (turnstileRetry.scriptAttempts !== 2 || !turnstileRetry.firstFailure.includes('press Run to retry') || turnstileRetry.finalOutput !== 'retry succeeded') failures.push('Transient Turnstile CDN failure was cached instead of retried');
@@ -893,7 +893,65 @@ try {
   if (!rejectedRun.output.includes('verification failed') || rejectedRun.busy) failures.push('Rejected Turnstile token did not end the run with the server message');
   if (rejectedRetry.fetchCount !== 4 || rejectedRetry.solves !== 2) failures.push('A new Run after a rejected token did not earn exactly one fresh challenge');
 
+  // The editor must behave like a code editor: Enter after a block opener
+  // indents, Tab indents rather than leaving the field, undo restores the
+  // document, and Ctrl+Enter runs. Keys go through the real input pipeline.
+  await client.send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 1400, deviceScaleFactor: 1, mobile: false });
+  await client.send('Page.navigate', { url: `${target}${target.includes('?') ? '&' : '?'}browser_editor_keys=${Date.now()}` });
+  await waitFor("document.readyState === 'complete' && !!window.pythonByExampleEditor && !!document.querySelector('.cm-content')", 'editor keys page');
+  const pageOrigin = new URL(target).origin;
+  const thirdPartyRequests = await evaluateValue(`performance.getEntriesByType('resource').map(entry => entry.name).filter(name => !name.startsWith(${JSON.stringify(pageOrigin)}))`);
+  const editorValue = "document.getElementById('code-editor').value";
+  async function pressKey(key, code, keyCode, modifiers = 0) {
+    for (const type of ['rawKeyDown', 'keyUp']) {
+      await client.send('Input.dispatchKeyEvent', { type, key, code, windowsVirtualKeyCode: keyCode, modifiers });
+    }
+  }
+  await evaluateValue("(window.pythonByExampleEditor.setValue(''), window.pythonByExampleEditor.focus(), true)");
+  await client.send('Input.insertText', { text: 'def f():' });
+  await pressKey('Enter', 'Enter', 13);
+  await client.send('Input.insertText', { text: 'return 1' });
+  await sleep(100);
+  const afterEnter = await evaluateValue(editorValue);
+  await pressKey('Enter', 'Enter', 13);
+  await pressKey('Tab', 'Tab', 9);
+  await sleep(100);
+  const afterTab = await evaluateValue(`({ value: ${editorValue}, focusInEditor: !!document.activeElement?.closest('.cm-editor') })`);
+  await pressKey('z', 'KeyZ', 90, 2);
+  await pressKey('z', 'KeyZ', 90, 2);
+  await sleep(100);
+  const afterUndo = await evaluateValue(editorValue);
+  await evaluateValue("(window.pythonByExampleEditor.setValue('print(6 * 7)'), window.pythonByExampleEditor.focus(), true)");
+  await pressKey('Enter', 'Enter', 13, 2);
+  await waitFor("document.querySelector('.output-panel code')?.textContent.trim() === '42'", 'Ctrl+Enter run');
+  const editorKeys = { afterEnter, afterTab, afterUndo, hintVisible: await evaluateValue("!document.getElementById('editor-keys-hint')?.hidden") };
+  if (thirdPartyRequests.length) failures.push(`Example page requested third-party resources before Run: ${thirdPartyRequests.slice(0, 3).join(', ')}`);
+  if (afterEnter !== 'def f():\n    return 1') failures.push(`Enter after a block opener did not indent (${JSON.stringify(afterEnter)})`);
+  if (!afterTab.focusInEditor || !afterTab.value.endsWith('\n        ')) failures.push(`Tab did not indent inside the editor (${JSON.stringify(afterTab)})`);
+  if (!afterUndo.startsWith('def f():') || afterUndo === afterTab.value) failures.push(`Undo did not restore the document (${JSON.stringify(afterUndo)})`);
+  if (!editorKeys.hintVisible) failures.push('The editor keyboard hint stayed hidden');
+
+  // Figures on a phone: the smallest label on the widest figures must stay
+  // readable, and a figure wider than the screen scrolls inside its own box
+  // instead of widening the page.
+  await client.send('Emulation.setDeviceMetricsOverride', { width: 390, height: 1800, deviceScaleFactor: 2, mobile: true });
+  const phoneFigures = [];
+  for (const slug of ['string-formatting', 'object-lifecycle', 'networking', 'metaclasses', 'values']) {
+    await client.send('Page.navigate', { url: `${pageOrigin}/examples/${slug}?browser_phone_figures=${Date.now()}` });
+    await waitFor(`location.pathname === '/examples/${slug}' && document.readyState === 'complete' && !!document.querySelector('.cell-banner svg')`, `phone figure page ${slug}`);
+    phoneFigures.push(await evaluateValue(`(() => {
+      const sizes = [...document.querySelectorAll('.cell-banner svg text')].map(text => text.getBoundingClientRect().height && Number.parseFloat(getComputedStyle(text).fontSize) * (text.ownerSVGElement.getBoundingClientRect().width / text.ownerSVGElement.viewBox.baseVal.width));
+      return { slug: ${JSON.stringify(slug)}, minLabelPx: Math.min(...sizes.filter(Boolean)), pageOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth };
+    })()`));
+  }
+  for (const figure of phoneFigures) {
+    if (!(figure.minLabelPx >= 8.5)) failures.push(`${figure.slug}: smallest figure label is ${figure.minLabelPx?.toFixed(1)}px on a 390px phone`);
+    if (figure.pageOverflow > 0) failures.push(`${figure.slug}: figures widen the phone page by ${figure.pageOverflow}px`);
+  }
+
   console.log(JSON.stringify({
+    editorKeys,
+    phoneFigures,
     runnerInteraction: interaction.result.value,
     runnerOrdering,
     share: { codeLength: share.code.length, urlLength: share.url.length, editorHeight: share.editorHeight },
