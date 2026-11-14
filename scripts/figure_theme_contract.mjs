@@ -97,13 +97,17 @@ export function figureThemeFailures({ light, dark }) {
       if (!token.value) failures.push(`${scheme} figure token ${name} does not resolve to a colour`);
       else if (token.value !== token.documented) failures.push(`${scheme} figure token ${name} is ${token.value}, not the ${token.documented} src/marginalia_grammar.py documents`);
     }
-    const offToken = theme.paints.filter(paint => !paint.tokenColour || paint.painted !== paint.tokenColour);
+    // Against the grammar's colour as well as the node's own token, so a
+    // token redefined on the figure or inside it cannot pass by agreeing with itself.
+    const offToken = theme.paints.filter(paint => !paint.tokenColour || paint.painted !== paint.tokenColour
+      || paint.painted !== theme.tokens[paint.token]?.documented);
     if (offToken.length) failures.push(`${scheme}: ${offToken.length} figure strokes/fills do not paint their token's colour (${offToken.slice(0, 3).map(paint => `${paint.attr}=var(${paint.token}) painted ${paint.painted}`).join('; ')})`);
   }
   // Dark mode recolours figures through the tokens, not with a second palette.
+  if (!light.figures || !dark.figures) return failures;
   const kept = light.paints.filter((paint, index) => paint.painted === dark.paints[index]?.painted);
-  if (!light.paints.length || light.paints.length !== dark.paints.length || kept.length) {
-    failures.push(`Marginalia figures did not recolour with the dark palette (${kept.length} of ${light.paints.length} strokes/fills kept their light colour: ${[...new Set(kept.map(paint => paint.token))].join(', ')})`);
-  }
+  if (!light.paints.length) failures.push('Marginalia figures paint no stroke or fill through a --fig-* token');
+  else if (light.paints.length !== dark.paints.length) failures.push(`Marginalia figures paint ${light.paints.length} token strokes/fills in light but ${dark.paints.length} in dark`);
+  else if (kept.length) failures.push(`Marginalia figures did not recolour with the dark palette (${kept.length} of ${light.paints.length} strokes/fills kept their light colour: ${[...new Set(kept.map(paint => paint.token))].join(', ')})`);
   return failures;
 }
