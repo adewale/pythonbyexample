@@ -171,9 +171,6 @@ all aimed at the scorecard's engagement and return lines:
   assistants are now a first-class referrer of learners; being the
   cleanest citable source for "Python by example" queries is cheap and
   fully on-essence.
-- **Feeds.** An Atom feed of new and substantially revised examples so
-  newsletters and aggregators can pick up changes without watching the
-  repo.
 - **Edit this page on GitHub.** A per-example source link converts
   readers into contributors (CONTRIBUTING and issue templates already
   exist) and is a further trust signal.
@@ -210,7 +207,10 @@ all aimed at the scorecard's engagement and return lines:
    *(Both shipped 2026-07-10.)*
 2. `/about` page + edit-on-GitHub links.
    *(`/about` shipped 2026-07-10; edit-on-GitHub links are still open.)*
-3. `/llms.txt`, per-example Markdown endpoints, Atom feed.
+3. `/llms.txt`, per-example Markdown endpoints.
+   *(Both shipped 2026-11-14. An Atom feed was dropped 2026-11-14: the
+   catalogue changes rarely, no source records per-example dates, and
+   reference pages are found by search, not subscribed to.)*
 4. Search-console registration + the first weekly learner-report
    ritual. *(Google Search Console ownership verified 2026-07-10;
    sitemap submission waits on the next deploy.)*

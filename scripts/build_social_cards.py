@@ -50,8 +50,38 @@ _CARD_CSS = """
 """
 
 
+# Cards are rasterised with whatever fonts the building machine has, so their
+# text cannot be sized for one font. This script fits the text to the card in
+# the browser that renders it: the eyebrow onto one line, the title within its
+# column, and the summary above the brand line, shrinking each in small steps
+# down to a floor. It then records on <body data-fit> whether everything fits;
+# scripts/build_social_cards.mjs refuses to write a card that does not.
+_FIT_SCRIPT = """
+(() => {
+  const q = (s) => document.querySelector(s);
+  const copy = q('.copy'), eyebrow = q('.eyebrow'), title = q('h1'), summary = q('.summary'), brand = q('.brand');
+  const px = (el) => parseFloat(getComputedStyle(el).fontSize);
+  const shrink = (el, floor, bad) => { while (bad() && px(el) > floor) el.style.fontSize = (px(el) - 1) + 'px'; };
+  const lines = (el) => Math.round(el.getBoundingClientRect().height / parseFloat(getComputedStyle(el).lineHeight));
+  eyebrow.style.whiteSpace = 'nowrap';
+  shrink(eyebrow, 18, () => eyebrow.scrollWidth > copy.clientWidth);
+  shrink(title, 44, () => title.scrollWidth > title.clientWidth + 1 || lines(title) > 2);
+  shrink(summary, 20, () => summary.getBoundingClientRect().bottom > brand.getBoundingClientRect().top - 20);
+  const problems = [];
+  if (eyebrow.scrollWidth > copy.clientWidth) problems.push('eyebrow wider than its column');
+  if (title.scrollWidth > title.clientWidth + 1) problems.push('title wider than its column');
+  if (summary.getBoundingClientRect().bottom > brand.getBoundingClientRect().top - 20) problems.push('summary runs into the brand line');
+  if (copy.scrollHeight > copy.clientHeight + 1) problems.push('text column taller than the card');
+  document.body.dataset.fit = problems.length ? problems.join('; ') : 'ok';
+})();
+"""
+
+
 def _card_shell(body: str) -> str:
-    return "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">" f"<style>{_CARD_CSS}</style></head><body>{body}</body></html>\n"
+    return (
+        "<!doctype html>\n<html lang=\"en\"><head><meta charset=\"utf-8\">"
+        f"<style>{_CARD_CSS}</style></head><body>{body}<script>{_FIT_SCRIPT}</script></body></html>\n"
+    )
 
 
 def _card_body(*, eyebrow: str, title: str, summary: str, figure_svg: str = "") -> str:
