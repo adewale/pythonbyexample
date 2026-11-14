@@ -29,7 +29,10 @@ Do not edit generated files by hand:
 src/example_sources_data.py
 src/asset_manifest.py
 public/*.css/js fingerprinted copies
+public/editor.js and public/highlighter.js (bundled from web/*.js)
 ```
+
+The editor and syntax highlighter live in `web/`; their npm dependencies are pinned in `package-lock.json` and bundled into `public/` by `make browser-bundles`, which `make build` runs.
 
 Regenerate them with:
 

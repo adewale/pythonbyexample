@@ -125,6 +125,8 @@ git diff --check
 - Worker Cache API keys include the HTML version
 - prototype layout pages are not cached
 
+`make runtime-examples-test` posts every example's complete program to the local Worker and compares what the sandbox prints with the expected output.
+
 `make browser-layout-test` launches headless Chrome against the local Worker. It checks the rendered Shiki code-block layout so generated line markup does not create visual blank rows, drives the runner, sharing, copy, search and keyboard navigation through the page, and measures computed styles (pressed states, touch targets, contrast in both themes, the reader's font size, reduced-transparency and more-contrast fallbacks) in place of unit tests that matched CSS text.
 
 ## Asset fingerprinting and cache busting
@@ -137,6 +139,8 @@ public/syntax-highlight.js
 public/editor.js
 public/runner.js
 ```
+
+`public/editor.js` and `public/highlighter.js` are bundles: their sources are `web/editor.js` and `web/highlighter.js`, built with the npm packages pinned in `package-lock.json`.
 
 Before tests/deploy, regenerate embedded example data, fingerprinted asset copies, and Python manifests:
 
