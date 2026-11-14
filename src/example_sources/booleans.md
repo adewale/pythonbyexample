@@ -33,11 +33,13 @@ print(isinstance(True, int))
 print(True + True)
 print(sum([True, True, False, True]))
 
-def is_strict_int(value):
-    return isinstance(value, int) and not isinstance(value, bool)
+value = True
+is_strict_int = isinstance(value, int) and not isinstance(value, bool)
+print(is_strict_int)
 
-print(is_strict_int(True))
-print(is_strict_int(1))
+value = 1
+is_strict_int = isinstance(value, int) and not isinstance(value, bool)
+print(is_strict_int)
 ```
 :::
 
@@ -76,18 +78,20 @@ True
 :::
 
 :::cell
-`bool` is a subclass of `int`, which is occasionally a footgun. `True` behaves as `1` and `False` as `0` in arithmetic, and `isinstance(True, int)` is `True`. When a function must reject booleans, exclude them explicitly with `isinstance(value, int) and not isinstance(value, bool)`.
+`bool` is a subclass of `int`, which is occasionally a footgun. `True` behaves as `1` and `False` as `0` in arithmetic, and `isinstance(True, int)` is `True`. When a check must reject booleans, exclude them explicitly with `isinstance(value, int) and not isinstance(value, bool)`: the combined test is false for `True` and true for `1`.
 
 ```python
 print(isinstance(True, int))
 print(True + True)
 print(sum([True, True, False, True]))
 
-def is_strict_int(value):
-    return isinstance(value, int) and not isinstance(value, bool)
+value = True
+is_strict_int = isinstance(value, int) and not isinstance(value, bool)
+print(is_strict_int)
 
-print(is_strict_int(True))
-print(is_strict_int(1))
+value = 1
+is_strict_int = isinstance(value, int) and not isinstance(value, bool)
+print(is_strict_int)
 ```
 
 ```output

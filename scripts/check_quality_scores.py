@@ -6,9 +6,12 @@ pretend to grade prose automatically; it makes the gate explicit:
 examples below the hard minimum must either have a narrow waiver or be
 tracked in the improvement backlog with a concrete next action.
 
-Waivers are time-boxed: `expires` must be an ISO date in the future,
-and a waiver whose example has recovered to target is flagged as stale
-so the registry only ever describes live editorial debt.
+Waivers are time-boxed by default: `expires` must be an ISO date in the
+future. A waiver whose reason will never stop being true (Hello World is
+tiny on purpose) sets `permanent = true` instead of `expires`; setting both
+is an error, so a permanent waiver stays a deliberate, visible choice. Either
+way, a waiver whose example has recovered to target is flagged as stale so
+the registry only ever describes live editorial debt.
 
 A waiver that expires within WAIVER_WARNING_DAYS prints a warning in every
 CI run. `make check-waiver-expiry` (manual, not in CI) runs
@@ -65,13 +68,22 @@ def waiver_expiry_findings(
     """Return (errors, warnings) for waiver expiry dates.
 
     Expired or malformed dates are errors. Dates inside the warning window
-    are warnings, or errors when `fail_within_days` is set.
+    are warnings, or errors when `fail_within_days` is set. A waiver with
+    `permanent = true` has no date to check; it must not also carry `expires`,
+    and `permanent` must be the boolean true, not a truthy string.
     """
     errors: list[str] = []
     warnings: list[str] = []
     window = WAIVER_WARNING_DAYS if fail_within_days is None else fail_within_days
     for slug in sorted(waivers):
-        expires = waivers[slug].get("expires")
+        entry = waivers[slug]
+        expires = entry.get("expires")
+        if "permanent" in entry:
+            if entry["permanent"] is not True:
+                errors.append(f"quality waiver {slug}: permanent must be true or omitted, got {entry['permanent']!r}")
+            elif expires is not None:
+                errors.append(f"quality waiver {slug}: set either permanent = true or expires, not both")
+            continue
         if expiry_error := check_expiry_date(expires, today=today):
             errors.append(f"quality waiver {slug}: {expiry_error}")
         elif warning := expiry_warning(expires, today=today, within_days=window):
@@ -149,7 +161,7 @@ def main(argv: list[str] | None = None) -> int:
             continue
         entry = waivers[slug]
         if not _entry_has_text(entry, "reason") or not isinstance(entry.get("accepted_min"), (int, float)):
-            errors.append(f"quality waiver {slug} must include accepted_min, reason, and expires")
+            errors.append(f"quality waiver {slug} must include accepted_min, reason, and expires (or permanent = true)")
         waived_score = EXAMPLE_QUALITY_SCORES.get(slug, (0.0, ""))[0]
         if waived_score >= target:
             errors.append(f"quality waiver {slug} is stale because score is now {waived_score:.1f}")
@@ -219,7 +231,8 @@ def main(argv: list[str] | None = None) -> int:
         "Quality score gate OK "
         f"(target={target:.1f}, hard_min={hard_min:.1f}, "
         f"below_target={len(below_target)}, tracked_below_min={len(below_hard_min)}, "
-        f"tracked_weak_sections={len(weak_sections)}, waivers={len(waivers)})."
+        f"tracked_weak_sections={len(weak_sections)}, waivers={len(waivers)}, "
+        f"permanent_waivers={sum(1 for entry in waivers.values() if entry.get('permanent') is True)})."
     )
     return 0
 

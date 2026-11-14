@@ -50,7 +50,7 @@ python 6
 :::
 
 :::cell
-The same idea works in loops that read state until a sentinel appears. The assignment and comparison stay together.
+The same idea works in [while loops](/examples/while-loops) that read state until a sentinel appears. The assignment and comparison stay together.
 
 ```python
 queue = ["retry", "ok"]

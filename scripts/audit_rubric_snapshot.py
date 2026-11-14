@@ -221,7 +221,7 @@ def render_report(date: str) -> str:
     waiver_lines = [
         f"- Accepted waiver: `{slug}` at "
         f"{EXAMPLE_QUALITY_SCORES.get(slug, (0.0, ''))[0]:g} "
-        f"(floor {entry.get('accepted_min', '?')}, expires {entry.get('expires', '?')})."
+        f"(floor {entry.get('accepted_min', '?')}, {'permanent' if entry.get('permanent') is True else 'expires ' + str(entry.get('expires', '?'))})."
         for slug, entry in sorted(waivers.items())
     ] or ["- Accepted waivers: none."]
 

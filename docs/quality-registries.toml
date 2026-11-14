@@ -191,10 +191,12 @@ example_hard_min = 8.5
 journey_section_min = 8.5
 journey_average_min = 8.8
 
+# A waiver is time-boxed with `expires = "YYYY-MM-DD"`. Use `permanent = true`
+# (and no `expires`) only when the reason can never stop being true.
 [quality_waivers.hello-world]
 accepted_min = 7.0
 reason = "Traditional first example is intentionally tiny: program -> output is the goal, not a full concept tour."
-expires = "2026-12-01"
+permanent = true
 
 [no_figure_rationales]
 # Slugs may be added here only when the page is constraint-shaped,
@@ -1664,7 +1666,7 @@ caption = "Both objects hold the same two bytes as integers; b\"py\" cannot chan
 slug = "sentinel-iteration"
 anchor = "cell-0"
 figure = "sentinel-iteration"
-caption = "iter(read_chunk, \"\") keeps calling read_chunk and yields \"py\" and \"thon\"; the empty string is the sentinel, so it stops the loop and is never yielded."
+caption = "iter(queue.popleft, \"\") keeps calling queue.popleft and yields \"py\" and \"thon\"; the empty string is the sentinel, so it stops the loop and is never yielded."
 
 [[figure_attachments]]
 slug = "partial-functions"
@@ -2584,7 +2586,7 @@ comment = "the example's two bytes as integer slots, packet[0] rewritten in plac
 [[example_figure_scores]]
 slug = "sentinel-iteration"
 score = 9.0
-comment = "the cell's read_chunk and chunks; the empty string ghosted as the sentinel; earns-place 0.75, the output already omits it; 1.5/0.75/1/1/1 · 1/1/1 · 1/0.5"
+comment = "the cell's queue.popleft call and queued chunks; the empty string ghosted as the sentinel; earns-place 0.75, the output already omits it; 1.5/0.75/1/1/1 · 1/1/1 · 1/0.5"
 
 [[example_figure_scores]]
 slug = "partial-functions"

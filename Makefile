@@ -102,9 +102,10 @@ score-example-criteria:
 check-quality-scores:
 	$(PY) scripts/check_quality_scores.py
 
-# Manual gate, not run in CI: fail while a quality waiver has 30 days or fewer
-# left, so an expiry can be caught before it turns every pull request red.
-# `make verify` (CI) already prints a warning inside the same 30-day window.
+# Manual gate, not run in CI: fail while a time-boxed quality waiver has 30
+# days or fewer left, so an expiry can be caught before it turns every pull
+# request red. `make verify` (CI) already prints a warning inside the same
+# 30-day window. Waivers marked `permanent = true` have no date and are skipped.
 check-waiver-expiry:
 	$(PY) scripts/check_quality_scores.py --fail-within-days 30
 

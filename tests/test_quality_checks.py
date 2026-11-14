@@ -307,6 +307,54 @@ class GateLogicCanFailTests(unittest.TestCase):
         errors, warnings = mod.waiver_expiry_findings(waivers, today=datetime.date(2026, 12, 1))
         self.assertEqual(errors, ["quality waiver hello-world: expired on 2026-12-01; re-review and extend or fix the example"])
 
+    def test_permanent_waiver_has_no_expiry_and_cannot_also_expire(self):
+        import datetime
+
+        mod = _scripts_import("check_quality_scores")
+        far_future = datetime.date(2099, 1, 1)
+        errors, warnings = mod.waiver_expiry_findings(
+            {"hello-world": {"permanent": True}}, today=far_future, fail_within_days=30
+        )
+        self.assertEqual((errors, warnings), ([], []))
+        errors, _ = mod.waiver_expiry_findings(
+            {"hello-world": {"permanent": True, "expires": "2099-06-01"}}, today=far_future
+        )
+        self.assertEqual(errors, ["quality waiver hello-world: set either permanent = true or expires, not both"])
+        # Only the boolean true opts out of expiry; anything else is rejected
+        # rather than silently treated as time-boxed or permanent.
+        for value in (False, "true", "never", 1):
+            errors, _ = mod.waiver_expiry_findings({"hello-world": {"permanent": value}}, today=far_future)
+            self.assertEqual(len(errors), 1, value)
+            self.assertIn("permanent must be true or omitted", errors[0])
+        # A waiver with neither field is still an error.
+        errors, _ = mod.waiver_expiry_findings({"hello-world": {}}, today=far_future)
+        self.assertEqual(len(errors), 1)
+
+    def test_hello_world_waiver_never_expires(self):
+        result = run("check_quality_scores.py", "--as-of", "2099-01-01", "--fail-within-days", "30")
+        self.assertEqual(result.returncode, 0, result.stderr)
+
+    def test_criterion_scoring_ignores_proxy_tokens(self):
+        mod = _scripts_import("score_example_criteria")
+        base = {
+            "summary": "Example.",
+            "explanation": ["Prose."],
+            "notes": [],
+            "doc_url": "https://docs.python.org/3.13/",
+            "cells": [],
+            "see_also": [],
+        }
+        plain = mod.criterion_scores({**base, "code": "total = 1 + 2\n"})
+        dressed = mod.criterion_scores(
+            {**base, "code": "price = 1 + 2\nprint('Ada', price)  # config file path\n"}
+        )
+        for name in ("python_idiom_and_accuracy", "practical_usefulness"):
+            self.assertEqual(plain[name], dressed[name], name)
+            # The heuristic cannot observe these criteria, so it never awards full marks.
+            self.assertLess(plain[name], 1.0, name)
+        toy = mod.criterion_scores({**base, "code": "foo = 1\n"})
+        self.assertLess(toy["practical_usefulness"], plain["practical_usefulness"])
+
     def test_criterion_scoring_fails_on_inflated_curated_score(self):
         result = run("score_example_criteria.py", "--max-delta", "-11")
         self.assertEqual(result.returncode, 1)

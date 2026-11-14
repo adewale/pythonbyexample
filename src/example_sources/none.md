@@ -12,32 +12,26 @@ see_also = [
 ]
 +++
 
-`None` represents the absence of a value. It is the usual sentinel when a function has no result to return but the absence itself is meaningful.
+`None` represents the absence of a value. It is the usual result when a call has nothing to hand back but the absence itself is meaningful.
 
 Because `None` is a singleton, idiomatic Python checks it with `is None` or `is not None`. This avoids confusing identity with value equality.
 
-Absence has several nearby shapes in Python. A function can return `None`, a dictionary lookup can supply a default for a missing key, and an invalid operation can raise an exception.
+Absence has several nearby shapes in Python. A call can return `None`, a dictionary lookup can supply a default for a missing key, and an invalid operation can raise an exception instead of returning anything.
 
 :::program
 ```python
 result = None
 print(result is None)
 
-def find_score(name):
-    if name == "Ada":
-        return 10
-    return None
-
-score = find_score("Grace")
-print(score is None)
+names = ["Grace", "Ada"]
+result = names.sort()
+print(result is None)
+print(names)
 
 profile = {"name": "Ada"}
+timezone = profile.get("timezone")
+print(timezone is None)
 print(profile.get("timezone", "UTC"))
-
-try:
-    int("python")
-except ValueError:
-    print("invalid number")
 ```
 :::
 
@@ -55,44 +49,40 @@ True
 :::
 
 :::cell
-Functions often return `None` when absence is expected and callers can continue. The function name and surrounding code should make that possibility clear.
+A call that does its work without producing a result returns `None`. `list.sort()` reorders the list in place, so the value it hands back is `None` and the sorted data is in `names`. Assigning that result to a name is a common slip; the same rule applies to every [function](/examples/functions) that finishes without a `return` value.
 
 ```python
-def find_score(name):
-    if name == "Ada":
-        return 10
-    return None
-
-score = find_score("Grace")
-print(score is None)
+names = ["Grace", "Ada"]
+result = names.sort()
+print(result is None)
+print(names)
 ```
 
 ```output
 True
+['Ada', 'Grace']
 ```
 :::
 
 :::cell
-A missing dictionary key is another absence boundary. Use `get()` when the mapping can supply a default, and use exceptions for invalid operations that cannot produce a value.
+A missing dictionary key is another absence boundary. `get()` returns `None` when the key is missing, or a default when the mapping can supply one. Indexing with `profile["timezone"]` would not return `None`: it raises `KeyError`, because Python reports invalid operations with [exceptions](/examples/exceptions) rather than with a value.
 
 ```python
 profile = {"name": "Ada"}
+timezone = profile.get("timezone")
+print(timezone is None)
 print(profile.get("timezone", "UTC"))
-
-try:
-    int("python")
-except ValueError:
-    print("invalid number")
 ```
 
 ```output
+True
 UTC
-invalid number
 ```
 :::
 
 :::note
 - Use `is None` rather than `== None`; `None` is a singleton identity value.
 - Use `None` for expected absence that callers can test.
+- Calls that only change something in place, such as `list.sort()`, return `None`.
 - Use dictionary defaults for missing mapping keys and exceptions for invalid operations.
 :::

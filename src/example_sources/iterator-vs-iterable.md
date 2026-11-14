@@ -13,7 +13,7 @@ see_also = [
 
 An iterable can produce values when asked. An iterator is the object that remembers where the production currently is. The distinction matters because iterables can be traversed many times, while many iterators can be traversed only once.
 
-`iter(iterable)` returns a fresh iterator each call. `iter(iterator)` returns the iterator itself. That self-iteration property is how `for` loops can accept either kind, and it is also why a function that loops over its argument twice silently breaks when called with a generator instead of a list.
+`iter(iterable)` returns a fresh iterator each call. `iter(iterator)` returns the iterator itself. That self-iteration property is how `for` loops can accept either kind, and it is also why code that loops over its input twice silently breaks when handed an iterator instead of a list.
 
 The takeaway for API design: receive iterables when the caller may want a second pass, and materialize once at the boundary if you must.
 
@@ -33,22 +33,14 @@ second = iter(names)
 print(first is second)
 print(iter(first) is first)
 
-def total_and_count(numbers):
-    total = sum(numbers)
-    count = sum(1 for _ in numbers)
-    return total, count
+numbers = [10, 9, 8]
+print(sum(numbers), len(list(numbers)))
 
-def values():
-    yield from [10, 9, 8]
+stream = iter([10, 9, 8])
+print(sum(stream), len(list(stream)))
 
-print(total_and_count([10, 9, 8]))
-print(total_and_count(values()))
-
-def total_and_count_safe(numbers):
-    items = list(numbers)
-    return sum(items), len(items)
-
-print(total_and_count_safe(values()))
+items = list(iter([10, 9, 8]))
+print(sum(items), len(items))
 ```
 :::
 
@@ -99,36 +91,28 @@ True
 :::
 
 :::cell
-The distinction shows up at API boundaries. A function that loops over its argument twice works for an iterable but silently produces wrong answers for an iterator, because the second pass finds the iterator already exhausted. Materialize once at the boundary when both passes matter.
+The distinction shows up whenever code makes two passes over the same input. Summing and then counting works for an iterable, but silently produces a wrong answer for an iterator, because the second pass finds the iterator already exhausted. Materialize once with `list()` when both passes matter.
 
 ```python
-def total_and_count(numbers):
-    total = sum(numbers)
-    count = sum(1 for _ in numbers)
-    return total, count
+numbers = [10, 9, 8]
+print(sum(numbers), len(list(numbers)))
 
-def values():
-    yield from [10, 9, 8]
+stream = iter([10, 9, 8])
+print(sum(stream), len(list(stream)))
 
-print(total_and_count([10, 9, 8]))
-print(total_and_count(values()))
-
-def total_and_count_safe(numbers):
-    items = list(numbers)
-    return sum(items), len(items)
-
-print(total_and_count_safe(values()))
+items = list(iter([10, 9, 8]))
+print(sum(items), len(items))
 ```
 
 ```output
-(27, 3)
-(27, 0)
-(27, 3)
+27 3
+27 0
+27 3
 ```
 :::
 
 :::note
 - An iterable produces an iterator each time `iter()` is called on it; an iterator produces values until it is exhausted.
 - `iter(iterable)` returns a fresh iterator; `iter(iterator)` returns the same iterator.
-- Functions that traverse their input more than once must accept an iterable or materialize the input at the boundary.
+- Code that traverses its input more than once must receive an iterable or materialize the input first; this matters most for [functions](/examples/functions) that cannot know what callers will pass.
 :::

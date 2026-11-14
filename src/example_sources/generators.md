@@ -128,7 +128,7 @@ print(list(stream))
 :::
 
 :::cell
-Every generator is an iterator. The same countdown written by hand needs `__iter__` and `__next__` and an explicit `StopIteration`. The generator function expresses the same protocol with one `yield`.
+Every generator is an iterator. The same countdown written by hand is a [class](/examples/classes) that needs `__iter__` and `__next__` and an explicit `StopIteration`. The generator function expresses the same protocol with one `yield`.
 
 ```python
 class Countdown:

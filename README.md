@@ -229,8 +229,10 @@ footgun, notes, program/cell, prose-duplication, inline-link, scoring,
 figure, journey, and example-graph gates.
 
 `make check-waiver-expiry` is a manual check, not run in CI: it fails while
-any quality waiver has 30 days or fewer left. `make quality-checks` (and so CI)
-only prints a warning in that window, then fails once the waiver has expired.
+any time-boxed quality waiver has 30 days or fewer left. `make quality-checks`
+(and so CI) only prints a warning in that window, then fails once the waiver
+has expired. A waiver whose reason is permanent sets `permanent = true`
+instead of `expires` and is never date-checked; Hello World is the only one.
 
 `src/example_sources_data.py` is generated and committed so Cloudflare Workers can load examples in production. Do not edit it by hand.
 

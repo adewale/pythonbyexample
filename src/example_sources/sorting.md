@@ -52,7 +52,7 @@ print(names)
 :::
 
 :::cell
-A key function computes the value to compare. Here the records are sorted by score, highest first, and the output shows the resulting order.
+A key function computes the value to compare. The `lambda user: user["score"]` expression is a small unnamed function that takes one record and returns its score ([lambdas](/examples/lambdas) covers the form). Here the records are sorted by score, highest first, and the output shows the resulting order.
 
 ```python
 users = [

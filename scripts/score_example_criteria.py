@@ -56,18 +56,23 @@ def criterion_scores(example: dict) -> dict[str, float]:
     overlap = len(code_tokens & prose_tokens)
     generic_penalty = 0.2 * sum(phrase in all_text.lower() for phrase in GENERIC_PHRASES)
 
+    # Accuracy and practical usefulness cannot be observed from the page text,
+    # so these two criteria only penalise metasyntactic names and never reach
+    # 1.0. They used to award credit for containing `print(` and for names
+    # such as "Ada" or "price"; those were proxies a page could satisfy
+    # without being accurate or useful, so the credit is withheld instead.
     return {
         "conceptual_payoff": clamp(0.45 + min(len(prose) / 900, 0.35) + min(overlap / 30, 0.2) - generic_penalty),
         "rationale": clamp(0.35 + 0.35 * bool(RATIONALE_WORDS.search(all_text)) + min(len(example.get("notes", [])) / 6, 0.3) - generic_penalty),
         "alternatives_and_boundaries": clamp(0.25 + 0.25 * bool(BOUNDARY_WORDS.search(all_text)) + 0.2 * bool(unsupported_cells) + min(notes.lower().count("prefer") / 2, 0.2)),
         "executable_determinism": clamp(0.75 + 0.25 * bool(example.get("expected_output")) - 0.25 * bool(example.get("version_sensitive"))),
-        "python_idiom_and_accuracy": clamp(0.75 + 0.15 * bool(example.get("doc_url")) + 0.1 * ("print(" in code) - 0.25 * bool(TOY_WORDS.search(code))),
+        "python_idiom_and_accuracy": clamp(0.75 + 0.15 * bool(example.get("doc_url")) - 0.25 * bool(TOY_WORDS.search(code))),
         "literate_fit": clamp(0.35 + min(len(normal_cells) / 4, 0.35) + 0.3 * all(cell.get("prose") for cell in normal_cells)),
         "source_result_pairing": clamp(0.35 + 0.45 * all(outputs) + min(output_lines / 8, 0.2)),
         "concept_decomposition": clamp(0.25 + min(len(normal_cells) / 3, 0.55) + 0.2 * (len(normal_cells) >= 3)),
         "progressive_walkthrough": clamp(0.35 + min(distinct_cell_starts / max(len(normal_cells), 1), 0.45) + 0.2 * (len(normal_cells) >= 2)),
         "representative_coverage": clamp(0.3 + min(output_lines / 10, 0.25) + min(len(example.get("see_also", [])) / 4, 0.25) + 0.2 * (len(normal_cells) >= 3)),
-        "practical_usefulness": clamp(0.55 + 0.25 * (not bool(TOY_WORDS.search(code))) + 0.2 * bool(re.search(r"Ada|Grace|project|config|score|price|request|path|file|service|team", code))),
+        "practical_usefulness": clamp(0.55 + 0.25 * (not bool(TOY_WORDS.search(code)))),
         "editorial_progression": clamp(0.35 + min(len(example.get("explanation", [])) / 3, 0.25) + min(len(example.get("notes", [])) / 4, 0.25) + 0.15 * bool(example.get("see_also"))),
     }
 
