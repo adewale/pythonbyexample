@@ -334,6 +334,27 @@ class GateLogicCanFailTests(unittest.TestCase):
         result = run("check_quality_scores.py", "--as-of", "2099-01-01", "--fail-within-days", "30")
         self.assertEqual(result.returncode, 0, result.stderr)
 
+    def test_criterion_scoring_ignores_proxy_tokens(self):
+        mod = _scripts_import("score_example_criteria")
+        base = {
+            "summary": "Example.",
+            "explanation": ["Prose."],
+            "notes": [],
+            "doc_url": "https://docs.python.org/3.13/",
+            "cells": [],
+            "see_also": [],
+        }
+        plain = mod.criterion_scores({**base, "code": "total = 1 + 2\n"})
+        dressed = mod.criterion_scores(
+            {**base, "code": "price = 1 + 2\nprint('Ada', price)  # config file path\n"}
+        )
+        for name in ("python_idiom_and_accuracy", "practical_usefulness"):
+            self.assertEqual(plain[name], dressed[name], name)
+            # The heuristic cannot observe these criteria, so it never awards full marks.
+            self.assertLess(plain[name], 1.0, name)
+        toy = mod.criterion_scores({**base, "code": "foo = 1\n"})
+        self.assertLess(toy["practical_usefulness"], plain["practical_usefulness"])
+
     def test_criterion_scoring_fails_on_inflated_curated_score(self):
         result = run("score_example_criteria.py", "--max-delta", "-11")
         self.assertEqual(result.returncode, 1)
